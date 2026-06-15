@@ -1,0 +1,270 @@
+<%= content_for :title, "Quality Manager Dashboard" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-[#0D1120] mb-2">Quality Manager Dashboard</h1>
+      <p class="text-[#797C81]">Review and approve auditor-approved assignments</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <!-- Pending Review -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-[#797C81]">Pending Review</span>
+          <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-[#0D1120]"><%= @total_pending %></div>
+      </div>
+
+      <!-- Approved Today -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-[#797C81]">Approved Today</span>
+          <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-[#0D1120]"><%= @total_approved_today %></div>
+      </div>
+
+      <!-- Approved This Week -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-6">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-[#797C81]">Approved This Week</span>
+          <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="text-3xl font-bold text-[#0D1120]"><%= @total_approved_this_week %></div>
+      </div>
+    </div>
+
+    <!-- Pending Assignments -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-8">
+      <div class="p-4 border-b border-[#E3E3E3]">
+        <h2 class="text-lg font-semibold text-[#0D1120]">Pending Quality Manager Review</h2>
+        <p class="text-sm text-[#797C81] mt-1">Assignments approved by auditors awaiting your final review</p>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+            <tr>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Standard & Clause</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Tool & Attribute</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Contributor</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Auditor Approval</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Score</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Action</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @pending_assignments.any? %>
+              <% @pending_assignments.each do |assignment| %>
+                <% clause = assignment.tool_clause.clause %>
+                <% standard = clause.standard_version.standard %>
+                <% tool = assignment.tool_clause.tool %>
+                <% subcheckpoint = nil # subcheckpoint not applicable at assessment level %>
+                <% checkpoint = subcheckpoint.tool_checkpoint %>
+                <% auditor_evaluation = assignment.assignment_evaluations.order(created_at: :desc).first %>
+                
+                <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                  <td class="p-4">
+                    <div class="text-sm font-medium text-[#0D1120]"><%= standard.display_name %></div>
+                    <div class="text-xs text-[#797C81]"><%= clause.code %> - <%= clause.title('en') %></div>
+                  </td>
+                  <td class="p-4">
+                    <div class="text-sm font-medium text-[#0D1120]"><%= tool.name_in(I18n.locale.to_s) %></div>
+                    <div class="text-xs text-[#797C81]"><%= checkpoint.name_in(I18n.locale.to_s) %> - <%= subcheckpoint.name_in(I18n.locale.to_s) %></div>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center overflow-hidden">
+                        <% if assignment.last_edited_by_user || assignment.assessment_users.first&.user.profile_image.attached? %>
+                          <%= image_tag user_profile_image_url(assignment.last_edited_by_user || assignment.assessment_users.first&.user), class: "w-full h-full object-cover" %>
+                        <% else %>
+                          <span class="text-xs font-medium text-purple-700"><%= assignment.last_edited_by_user || assignment.assessment_users.first&.user.name[0].upcase %></span>
+                        <% end %>
+                      </div>
+                      <span class="text-sm text-[#0D1120]"><%= assignment.last_edited_by_user || assignment.assessment_users.first&.user.name %></span>
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <% if auditor_evaluation %>
+                      <div class="flex items-center gap-2">
+                        <div class="w-6 h-6 rounded-full bg-blue-200 flex items-center justify-center overflow-hidden">
+                          <% if auditor_evaluation.evaluator.profile_image.attached? %>
+                            <%= image_tag user_profile_image_url(auditor_evaluation.evaluator), class: "w-full h-full object-cover" %>
+                          <% else %>
+                            <span class="text-xs font-medium text-blue-700"><%= auditor_evaluation.evaluator.name[0].upcase %></span>
+                          <% end %>
+                        </div>
+                        <div>
+                          <div class="text-xs text-[#797C81]"><%= auditor_evaluation.evaluator.name %></div>
+                          <div class="text-xs text-[#797C81]"><%= auditor_evaluation.created_at.strftime("%b %d, %Y") %></div>
+                        </div>
+                      </div>
+                    <% else %>
+                      <span class="text-sm text-[#797C81]">-</span>
+                    <% end %>
+                  </td>
+                  <td class="p-4">
+                    <% if assignment.assessment_scores.where.not(percentage_score: nil).first&.percentage_score.present? %>
+                      <div class="flex flex-col gap-1">
+                        <span class="text-sm font-medium text-blue-600"><%= assignment.assessment_scores.where.not(percentage_score: nil).first&.percentage_score.round(1) %>%</span>
+                      </div>
+                    <% else %>
+                      <span class="text-sm text-[#797C81]">Not scored</span>
+                    <% end %>
+                  </td>
+                  <td class="p-4">
+                    <%= link_to clause_assessment_path(assignment.tool_clause&.clause), 
+                        class: "px-3 py-1.5 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors inline-flex items-center gap-2" do %>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                      Review
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="6" class="p-8 text-center text-sm text-[#797C81]">
+                  <div class="flex flex-col items-center gap-3">
+                    <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                      <div class="font-medium text-gray-700">No pending reviews</div>
+                      <div class="text-sm text-gray-500">All auditor-approved assignments have been reviewed</div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recently Approved -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
+      <div class="p-4 border-b border-[#E3E3E3]">
+        <h2 class="text-lg font-semibold text-[#0D1120]">Recently Approved (Last 10)</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+            <tr>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Standard & Clause</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Tool & Attribute</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Contributor</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Score</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Approved Date</span>
+              </th>
+              <th class="text-left p-4">
+                <span class="text-xs font-semibold text-[#797C81]">Action</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @recently_approved.any? %>
+              <% @recently_approved.each do |assignment| %>
+                <% clause = assignment.tool_clause.clause %>
+                <% standard = clause.standard_version.standard %>
+                <% tool = assignment.tool_clause.tool %>
+                <% subcheckpoint = nil # subcheckpoint not applicable at assessment level %>
+                <% checkpoint = subcheckpoint.tool_checkpoint %>
+                
+                <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                  <td class="p-4">
+                    <div class="text-sm font-medium text-[#0D1120]"><%= standard.display_name %></div>
+                    <div class="text-xs text-[#797C81]"><%= clause.code %> - <%= clause.title('en') %></div>
+                  </td>
+                  <td class="p-4">
+                    <div class="text-sm font-medium text-[#0D1120]"><%= tool.name_in(I18n.locale.to_s) %></div>
+                    <div class="text-xs text-[#797C81]"><%= checkpoint.name_in(I18n.locale.to_s) %> - <%= subcheckpoint.name_in(I18n.locale.to_s) %></div>
+                  </td>
+                  <td class="p-4">
+                    <div class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center overflow-hidden">
+                        <% if assignment.last_edited_by_user || assignment.assessment_users.first&.user.profile_image.attached? %>
+                          <%= image_tag user_profile_image_url(assignment.last_edited_by_user || assignment.assessment_users.first&.user), class: "w-full h-full object-cover" %>
+                        <% else %>
+                          <span class="text-xs font-medium text-purple-700"><%= assignment.last_edited_by_user || assignment.assessment_users.first&.user.name[0].upcase %></span>
+                        <% end %>
+                      </div>
+                      <span class="text-sm text-[#0D1120]"><%= assignment.last_edited_by_user || assignment.assessment_users.first&.user.name %></span>
+                    </div>
+                  </td>
+                  <td class="p-4">
+                    <% if assignment.assessment_scores.where.not(percentage_score: nil).first&.percentage_score.present? %>
+                      <div class="flex flex-col gap-1">
+                        <span class="text-sm font-medium text-blue-600"><%= assignment.assessment_scores.where.not(percentage_score: nil).first&.percentage_score.round(1) %>%</span>
+                      </div>
+                    <% else %>
+                      <span class="text-sm text-[#797C81]">-</span>
+                    <% end %>
+                  </td>
+                  <td class="p-4">
+                    <span class="text-sm text-[#797C81]"><%= assignment.updated_at.strftime("%b %d, %Y") %></span>
+                  </td>
+                  <td class="p-4">
+                    <%= link_to clause_assessment_path(assignment.tool_clause&.clause), 
+                        class: "text-blue-500 hover:text-blue-700 transition-colors inline-flex items-center" do %>
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                      </svg>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="6" class="p-8 text-center text-sm text-[#797C81]">
+                  No recently approved assignments
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+

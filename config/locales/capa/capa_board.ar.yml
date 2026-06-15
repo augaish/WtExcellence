@@ -1,0 +1,43 @@
+---
+ar:
+  capa_management_ui:
+    confirmations:
+      default_title: تأكيد الإجراء
+      confirm_button: تأكيد
+      delete_title: تأكيد الحذف
+      delete_button: حذف
+      unlink_title: تأكيد إلغاء الربط
+      unlink_button: إلغاء الربط
+      remove_title: تأكيد الإزالة
+      remove_button: إزالة
+    modals:
+      archive_confirmation:
+        title: أرشفة CAPA
+        message: هل أنت متأكد أنك تريد أرشفة هذه CAPA؟
+        archive: أرشفة
+        unarchive_title: إلغاء أرشفة CAPA
+        unarchive: إلغاء الأرشفة
+    board:
+      no_capas: لا توجد CAPA
+      progress_label: 'مدى التقدم:'
+      more_assignees: و%{count} أخرى
+      actions:
+        view: عرض
+    board_page:
+      confirmations:
+        default_title: تأكيد الإجراء
+        confirm_button: تأكيد
+        delete_title: تأكيد الحذف
+        delete_button: حذف
+        unlink_title: تأكيد إلغاء الربط
+        unlink_button: إلغاء الربط
+        remove_title: تأكيد الإزالة
+        remove_button: إزالة
+        archive_title: أرشفة CAPA
+        archive_button: أرشفة
+        archive_single: هل أنت متأكد أنك تريد أرشفة هذه CAPA؟
+        delete_single: هل أنت متأكد أنك تريد حذف هذه CAPA؟ لا يمكن التراجع عن هذا
+          الإجراء.
+      errors:
+        archive_single: حدث خطأ أثناء أرشفة CAPA
+        delete_single: حدث خطأ أثناء حذف CAPA

@@ -1,0 +1,10 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# one:
+#   code: ISO9001
+#   is_primary: true
+#
+# two:
+#   code: ISO14001
+#   is_primary: false
+

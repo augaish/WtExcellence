@@ -1,0 +1,91 @@
+<div class="bg-white rounded-xl border border-[#E3E3E3] shadow-sm">
+  <div class="border-b border-[#E3E3E3] px-4 sm:px-6 py-3 sm:py-4 flex flex-col gap-3 sm:gap-4">
+    <div>
+      <h2 class="text-sm sm:text-base font-semibold text-[#0D1120] break-words"><%= t('credit_assignments') %></h2>
+      <p class="text-xs sm:text-sm text-[#797C81] break-words"><%= t('credit_assignments_subtitle') %></p>
+    </div>
+    <div class="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-3">
+      <%= button_to t('split_credits_equally'),
+                    split_equally_dashboard_credit_assignments_path,
+                    method: :post,
+                    data: { turbo: false, turbo_confirm: t('split_credits_equally_confirm') },
+                    class: "bg-[#5C3984] hover:bg-[#4a0c9f] text-white px-4 py-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center justify-center" %>
+      <%= button_to t('reset_credits'),
+                    reset_assignments_dashboard_credit_assignments_path,
+                    method: :post,
+                    data: { turbo: false, turbo_confirm: t('reset_credits_confirm') },
+                    class: "bg-white border border-[#E3E3E3] text-[#0D1120] hover:bg-[#F7F7FD] px-4 py-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center justify-center" %>
+      <div class="grid grid-cols-3 gap-2 w-full sm:w-auto sm:flex sm:flex-wrap sm:items-stretch">
+        <div class="bg-[#F7F7FD] rounded-lg px-2 sm:px-3 py-2 text-right">
+          <p class="text-[10px] sm:text-[11px] text-[#797C81] break-words"><%= t('company_credits_available') %></p>
+          <p class="text-base sm:text-lg font-bold text-[#5C3984] leading-tight"><%= @company_credit_pool || 0 %></p>
+        </div>
+        <div class="bg-[#F7F7FD] rounded-lg px-2 sm:px-3 py-2 text-right">
+          <p class="text-[10px] sm:text-[11px] text-[#797C81] break-words"><%= t('assigned_credits') %></p>
+          <p class="text-base sm:text-lg font-bold text-[#5C3984] leading-tight"><%= @company_assigned_credits || 0 %></p>
+        </div>
+        <div class="bg-[#F7F7FD] rounded-lg px-2 sm:px-3 py-2 text-right">
+          <p class="text-[10px] sm:text-[11px] text-[#797C81] break-words"><%= t('total_credits') %></p>
+          <p class="text-base sm:text-lg font-bold text-[#5C3984] leading-tight"><%= @company_total_credits || 0 %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @company_users.present? %>
+    <div class="overflow-x-auto -mx-4 sm:mx-0">
+      <table class="min-w-full min-w-[700px] divide-y divide-[#E3E3E3]">
+        <thead class="bg-[#F7F7FD]">
+          <tr>
+            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('users') %></th>
+            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('role') %></th>
+            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('assigned_credits') %></th>
+            <th class="px-4 sm:px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-[#E3E3E3]">
+          <% @company_users.each do |company_user| %>
+            <tr>
+              <td class="px-4 sm:px-6 py-3 sm:py-4 min-w-[200px]">
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#F7F7FD] flex items-center justify-center text-[#5C3984] font-semibold flex-shrink-0">
+                    <%= company_user.user&.name&.first&.upcase || company_user.user&.email&.first&.upcase || "?" %>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-[#0D1120] truncate"><%= company_user.user&.name || t('unknown_user') %></p>
+                    <p class="text-[10px] sm:text-xs text-[#797C81] truncate"><%= company_user.user&.email %></p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-[#0D1120]">
+                <%= company_user.role.to_s.humanize %>
+              </td>
+              <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-[#0D1120]">
+                <%= company_user.assigned_credits %>
+              </td>
+              <td class="px-4 sm:px-6 py-3 sm:py-4 min-w-[200px]">
+                <%= form_with model: company_user,
+                              url: dashboard_credit_assignment_path(company_user),
+                              method: :patch,
+                              data: { turbo: false },
+                              class: "flex flex-col sm:flex-row items-stretch sm:items-center gap-2" do |f| %>
+                  <%= f.number_field :assigned_credits,
+                                      value: company_user.assigned_credits,
+                                      min: 0,
+                                      class: "w-full sm:w-24 border border-[#E3E3E3] rounded-lg px-3 py-3 sm:py-2 focus:outline-none focus:ring-2 focus:ring-[#5C3984] text-[16px] sm:text-sm min-h-[44px] sm:min-h-auto" %>
+                  <%= f.submit t('update'),
+                                class: "bg-[#5C3984] hover:bg-[#4a0c9f] text-white px-4 py-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition min-h-[44px] sm:min-h-auto" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="px-4 sm:px-6 py-8 sm:py-10 text-center text-[#797C81] text-xs sm:text-sm">
+      <p><%= t('no_company_users_available') %></p>
+    </div>
+  <% end %>
+</div>
+

@@ -1,0 +1,115 @@
+<!-- Link Clauses Modal -->
+<dialog id="link_clauses_dialog" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-4xl w-full mx-4" data-controller="modal dialog-no-backdrop-close" data-capa-id="<%= @capa.id %>" dir="<%= text_direction %>" lang="<%= current_locale %>">
+  <div class="p-4 sm:p-6">
+    <!-- Header -->
+    <div class="mb-4 sm:mb-6 relative">
+      <button data-action="click->modal#close" class="absolute <%= rtl? ? 'left-0' : 'right-0' %> top-0 p-2 min-w-[44px] min-h-[44px] sm:min-w-auto sm:min-h-auto flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      
+      <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-[#0D1120] mb-2 break-words pr-12">
+        <%= t('link_clauses_to') %> <%= @capa.title %>
+      </h2>
+      <p class="text-xs sm:text-sm text-gray-600 break-words pr-12">
+        <%= t('select_clauses_to_link') %>
+      </p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="space-y-3 sm:space-y-4">
+      <!-- Search Instructions -->
+      <div class="text-xs sm:text-sm text-[#0D1120] break-words">
+        <%= t('search_for') %> 
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B] underline font-medium min-h-[44px] sm:min-h-auto inline-flex items-center" data-filter="clauses"><%= t('clauses') %></button> 
+        <%= t('or') %> 
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B] underline font-medium min-h-[44px] sm:min-h-auto inline-flex items-center" data-filter="sub_clauses"><%= t('sub_clauses') %></button>.
+      </div>
+
+      <!-- Search Bar -->
+      <div class="relative" data-controller="capa-link-clauses-search"
+           data-search-loading-text="<%= t('capa_management_ui.modals.link_clauses.searching') %>"
+           data-search-coming-soon-text="<%= t('capa_management_ui.modals.link_clauses.search_coming_soon') %>"
+           data-smart-suggest-label-text="<%= t('capa_management_ui.modals.link_clauses.smart_suggest_label') %>"
+           data-smart-suggest-loading-text="<%= t('capa_management_ui.modals.link_clauses.smart_suggest_loading') %>"
+           data-smart-suggest-analyzing-text="<%= t('capa_management_ui.modals.link_clauses.smart_suggest_analyzing') %>"
+           data-smart-suggest-error-text="<%= t('capa_management_ui.modals.link_clauses.smart_suggest_error') %>"
+           data-no-results-text="<%= t('capa_management_ui.modals.link_clauses.no_results') %>"
+           data-add-label-text="<%= t('capa_management_ui.modals.link_clauses.add') %>"
+           data-added-label-text="<%= t('capa_management_ui.modals.link_clauses.added') %>"
+           data-clause-added-text="<%= t('capa_management_ui.modals.link_clauses.clause_added') %>"
+           data-select-at-least-one-text="<%= t('capa_management_ui.modals.link_clauses.select_at_least_one') %>"
+           data-capa-id-missing-text="<%= t('capa_management_ui.modals.link_clauses.capa_id_missing') %>"
+           data-linking-text="<%= t('capa_management_ui.modals.link_clauses.linking') %>"
+           data-link-success-template="<%= t('capa_management_ui.modals.link_clauses.link_success', count: '%{count}') %>"
+           data-link-failed-text="<%= t('capa_management_ui.modals.link_clauses.link_failed') %>"
+           data-generic-error-text="<%= t('capa_management_ui.modals.link_clauses.generic_error') %>"
+           data-search-error-text="<%= t('capa_management_ui.modals.link_clauses.search_error') %>"
+           data-standard-fallback-text="<%= t('capa_management_ui.modals.link_clauses.standard_fallback') %>"
+           data-type-clause-text="<%= t('capa_management_ui.modals.link_clauses.type_labels.clause') %>"
+           data-type-sub-clause-text="<%= t('capa_management_ui.modals.link_clauses.type_labels.sub_clause') %>">
+        <div class="absolute inset-y-0 <%= rtl? ? 'right-0 pr-4' : 'left-0 pl-4' %> flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="link_clauses_search" 
+          placeholder="<%= t('start_searching') %>" 
+          class="w-full <%= rtl? ? 'pr-10 sm:pr-12 pl-4' : 'pl-10 sm:pl-12 pr-4' %> py-3 sm:py-4 text-[16px] sm:text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984] transition-colors duration-200 min-h-[44px]"
+          data-action="input->capa-link-clauses-search#handleSearch"
+        />
+      </div>
+
+      <!-- Instructions -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <p class="text-xs sm:text-sm text-[#5C3984] break-words">
+          <%= t('smart_search_instruction') %>
+        </p>
+        <% suggest_clauses_cost = CreditService.get_cost("SUGGEST_CAPA_CLAUSES") %>
+        <button 
+          type="button" 
+          id="smart_suggest_button"
+          class="w-full sm:w-auto px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] rounded-xl text-xs sm:text-sm font-medium text-white hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px] whitespace-nowrap"
+          data-action="click->capa-link-clauses-search#smartSuggest"
+          data-capa-id="<%= @capa.id %>">
+          <svg data-smart-suggest-spinner class="hidden w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#FFFFFF] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-smart-suggest-icon>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+          </svg>
+          <span data-smart-suggest-text>Smart Suggest</span>
+          <% if suggest_clauses_cost.to_i > 0 %>
+            <span class="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px] sm:text-xs font-normal"><%= suggest_clauses_cost %> credits</span>
+          <% end %>
+        </button>
+      </div>
+
+      <!-- Search Results Area (will be populated via JavaScript) -->
+      <div id="link_clauses_results" class="mt-4 space-y-2 max-h-96 overflow-y-auto hidden">
+        <!-- Results will be added here dynamically -->
+      </div>
+
+      <!-- Selected Items (will show selected items as table) -->
+      <div id="link_clauses_selected" class="mt-4 hidden">
+        <div id="selected_clauses_list">
+          <!-- Selected clauses table will be added here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= rtl? ? 'justify-start sm:flex-row-reverse' : 'justify-end' %> gap-2 sm:gap-3 pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-gray-200">
+      <button type="button" data-action="click->modal#close" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+        <%= t('cancel') %>
+      </button>
+      <button type="button" id="link_clauses_submit" class="w-full sm:w-auto px-6 py-3 sm:py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-[16px] sm:text-sm" disabled>
+        <%= t('link_clauses') %>
+      </button>
+    </div>
+  </div>
+</dialog>
+

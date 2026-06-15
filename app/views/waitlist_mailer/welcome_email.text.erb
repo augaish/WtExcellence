@@ -1,0 +1,20 @@
+You're on the list!
+
+Hello <%= @user.name %>,
+
+Thank you for registering your interest in Way to Excellence. We'll notify you as soon as early access becomes available.
+<% if @company.users.count > 1 %>
+
+Note: <%= @company.users.count - 1 %> other <%= 'person'.pluralize(@company.users.count - 1) %> from your company <%= @company.users.count > 2 ? 'have' : 'has' %> also joined the waitlist.
+<% end %>
+
+Registration Details:
+---------------------
+Company: <%= @company.name %>
+Company Size: <%= @company.company_size %>
+Your Role: <%= @user.desired_role&.humanize || 'Not specified' %>
+Email: <%= @user.email %>
+
+If you have any questions, feel free to reach out to our support team.
+
+© <%= Time.current.year %> Way to Excellence. All rights reserved.

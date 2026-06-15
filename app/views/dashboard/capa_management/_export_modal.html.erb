@@ -1,0 +1,167 @@
+<!-- Export CAPAs Modal -->
+<dialog id="export_capas_dialog" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 w-full max-w-4xl mx-4" data-controller="modal dialog-no-backdrop-close" dir="<%= defined?(text_direction) ? text_direction : 'ltr' %>" lang="<%= defined?(current_locale) ? current_locale : 'en' %>">
+  <div class="p-4 sm:p-6">
+    <!-- Header -->
+    <div class="mb-4 sm:mb-6 relative">
+      <button data-action="click->modal#close" class="absolute <%= defined?(rtl?) && rtl? ? 'left-0' : 'right-0' %> top-0 p-2 min-w-[44px] min-h-[44px] sm:min-w-auto sm:min-h-auto flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      
+      <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-[#0D1120] mb-2 break-words pr-12">
+        <%= t("capa_management_ui.export_modal.title") %>
+      </h2>
+      <p class="text-xs sm:text-sm text-gray-600 break-words pr-12">
+        <%= t("capa_management_ui.export_modal.description") %>
+      </p>
+    </div>
+
+    <!-- Export Options -->
+    <form id="export_capas_form" method="get" action="<%= dashboard_export_capas_path %>" class="space-y-4 sm:space-y-6 relative z-10" data-action="submit->modal#handleExport">
+      <!-- File Type Selection -->
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-[#0D1120]"><%= t("capa_management_ui.export_modal.file_type_label") %></label>
+        <div class="flex items-center gap-3 p-3 border border-[#E3E3E3] rounded-lg bg-gray-50 min-h-[44px]">
+          <input type="radio" name="file_type" value="csv" id="file_type_csv" checked class="w-5 h-5 sm:w-4 sm:h-4 text-[#5C3984] border-gray-300 focus:ring-[#5C3984] flex-shrink-0">
+          <label for="file_type_csv" class="text-xs sm:text-sm text-[#0D1120] cursor-pointer"><%= t("capa_management_ui.export_modal.csv_label") %></label>
+        </div>
+      </div>
+
+      <!-- Language Selection -->
+      <div class="space-y-2">
+        <label class="text-sm font-medium text-[#0D1120]"><%= t("language") %></label>
+        <div class="space-y-2">
+          <div class="flex items-center gap-3 p-3 border border-[#E3E3E3] rounded-lg hover:bg-gray-50 cursor-pointer min-h-[44px]">
+            <input type="radio" name="language" value="en" id="language_en" checked class="w-5 h-5 sm:w-4 sm:h-4 text-[#5C3984] border-gray-300 focus:ring-[#5C3984] flex-shrink-0">
+            <label for="language_en" class="text-xs sm:text-sm text-[#0D1120] cursor-pointer flex-1"><%= t("english") %></label>
+          </div>
+          <div class="flex items-center gap-3 p-3 border border-[#E3E3E3] rounded-lg hover:bg-gray-50 cursor-pointer min-h-[44px]">
+            <input type="radio" name="language" value="ar" id="language_ar" class="w-5 h-5 sm:w-4 sm:h-4 text-[#5C3984] border-gray-300 focus:ring-[#5C3984] flex-shrink-0">
+            <label for="language_ar" class="text-xs sm:text-sm text-[#0D1120] cursor-pointer flex-1"><%= t("arabic") %></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="space-y-3 sm:space-y-4 border border-dashed border-[#E3E3E3] rounded-lg p-3 sm:p-4 bg-[#F9FAFC] choices-overflow-visible relative z-10">
+        <div>
+          <h3 class="text-sm sm:text-base font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.export_modal.filters.title") %></h3>
+          <p class="text-xs sm:text-sm text-[#797C81] break-words"><%= t("capa_management_ui.export_modal.filters.subtitle") %></p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+          <!-- Status -->
+          <div class="space-y-2" data-controller="choices-select">
+            <label for="export_status" class="text-sm font-medium text-[#0D1120]"><%= t("capa_management_ui.export_modal.filters.status_label") %></label>
+            <select 
+              id="export_status"
+              name="status"
+              data-choices-select-target="select"
+              class="w-full">
+              <% current_status = params[:status].presence || 'all' %>
+              <option value="all" <%= "selected" if current_status == "all" %>><%= t("capa_management_ui.export_modal.filters.status_options.all") %></option>
+              <option value="open" <%= "selected" if current_status == "open" %>><%= t("capa_management_ui.statuses.open") %></option>
+              <option value="assigned" <%= "selected" if current_status == "assigned" %>><%= t("capa_management_ui.statuses.assigned") %></option>
+              <option value="in_progress" <%= "selected" if current_status == "in_progress" %>><%= t("capa_management_ui.statuses.in_progress") %></option>
+              <option value="closed" <%= "selected" if current_status == "closed" %>><%= t("capa_management_ui.statuses.closed") %></option>
+            </select>
+          </div>
+
+          <!-- Priority -->
+          <div class="space-y-2" data-controller="choices-select">
+            <label for="export_priority" class="text-sm font-medium text-[#0D1120]"><%= t("capa_management_ui.export_modal.filters.priority_label") %></label>
+            <select
+              id="export_priority"
+              name="priority"
+              data-choices-select-target="select"
+              class="w-full">
+              <option value="" <%= "selected" if params[:priority].blank? %>><%= t("capa_management_ui.export_modal.filters.priority_placeholder") %></option>
+              <option value="high" <%= "selected" if params[:priority] == "high" %>><%= t("priority_levels.high") %></option>
+              <option value="medium" <%= "selected" if params[:priority] == "medium" %>><%= t("priority_levels.medium") %></option>
+              <option value="low" <%= "selected" if params[:priority] == "low" %>><%= t("priority_levels.low") %></option>
+            </select>
+          </div>
+
+          <!-- Due Date From -->
+          <div class="space-y-2">
+            <label for="export_due_date_from" class="text-sm font-medium text-[#0D1120]"><%= t("capa_management_ui.export_modal.filters.due_date_from_label") %></label>
+            <input
+              type="date"
+              id="export_due_date_from"
+              name="due_date_from"
+              value="<%= params[:due_date_from] %>"
+              class="w-full border border-[#E3E3E3] rounded-lg px-3 py-3 sm:py-2 text-[16px] sm:text-sm text-[#0D1120] bg-white min-h-[44px]">
+          </div>
+
+          <!-- Due Date To -->
+          <div class="space-y-2">
+            <label for="export_due_date_to" class="text-sm font-medium text-[#0D1120]"><%= t("capa_management_ui.export_modal.filters.due_date_to_label") %></label>
+            <input
+              type="date"
+              id="export_due_date_to"
+              name="due_date_to"
+              value="<%= params[:due_date_to] %>"
+              class="w-full border border-[#E3E3E3] rounded-lg px-3 py-3 sm:py-2 text-[16px] sm:text-sm text-[#0D1120] bg-white min-h-[44px]">
+          </div>
+
+          <% unless current_user&.company_user&.company_contributor? %>
+          <!-- Assignees -->
+          <div class="space-y-2 md:col-span-2 relative z-50">
+            <% selected_assignees = Array(params[:assignee_ids]).map(&:to_s) %>
+            <div data-controller="choices-select" data-choices-select-search-value="true" class="choices-overflow-visible relative z-50">
+              <label for="export_assignees" class="sr-only"><%= t("capa_management_ui.export_modal.filters.assignees_label") %></label>
+              <select
+                id="export_assignees"
+                name="assignee_ids[]"
+                multiple
+                data-choices-select-target="select"
+                class="w-full"
+                data-placeholder="<%= t('capa_management_ui.export_modal.filters.assignees_placeholder', default: 'Select users...') %>">
+                <% @company_users.each do |company_user| %>
+                  <option value="<%= company_user.id %>" <%= "selected" if selected_assignees.include?(company_user.id.to_s) %>>
+                    <%= company_user.user&.name || "Deleted User" %>
+                  </option>
+                <% end %>
+              </select>
+              <p class="text-xs text-[#797C81] mt-1 break-words"><%= t("capa_management_ui.export_modal.filters.assignees_hint") %></p>
+            </div>
+          </div>
+          <% end %>
+        </div>
+
+        <!-- Archived State -->
+        <div class="space-y-2">
+          <span class="text-sm font-medium text-[#0D1120]"><%= t("capa_management_ui.export_modal.filters.archived_label") %></span>
+          <% archived_state = params[:archived_state].presence || "active" %>
+          <div class="flex flex-wrap gap-3">
+            <label class="flex items-center gap-2 text-xs sm:text-sm text-[#0D1120] cursor-pointer min-h-[44px] sm:min-h-auto">
+              <input type="radio" name="archived_state" value="active" <%= "checked" if archived_state == "active" %> class="w-5 h-5 sm:w-4 sm:h-4 text-[#5C3984] focus:ring-[#5C3984] flex-shrink-0">
+              <span><%= t("capa_management_ui.export_modal.filters.archived_options.active") %></span>
+            </label>
+            <label class="flex items-center gap-2 text-xs sm:text-sm text-[#0D1120] cursor-pointer min-h-[44px] sm:min-h-auto">
+              <input type="radio" name="archived_state" value="archived" <%= "checked" if archived_state == "archived" %> class="w-5 h-5 sm:w-4 sm:h-4 text-[#5C3984] focus:ring-[#5C3984] flex-shrink-0">
+              <span><%= t("capa_management_ui.export_modal.filters.archived_options.archived") %></span>
+            </label>
+            <label class="flex items-center gap-2 text-xs sm:text-sm text-[#0D1120] cursor-pointer min-h-[44px] sm:min-h-auto">
+              <input type="radio" name="archived_state" value="all" <%= "checked" if archived_state == "all" %> class="w-5 h-5 sm:w-4 sm:h-4 text-[#5C3984] focus:ring-[#5C3984] flex-shrink-0">
+              <span><%= t("capa_management_ui.export_modal.filters.archived_options.all") %></span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Buttons -->
+      <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= defined?(rtl?) && rtl? ? 'justify-start sm:flex-row-reverse' : 'justify-end' %> gap-2 sm:gap-3 border-t border-gray-200">
+        <button type="button" data-action="click->modal#close" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+          <%= t("cancel") %>
+        </button>
+        <button type="submit" class="w-full sm:w-auto px-6 py-3 sm:py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+          <%= t("capa_management_ui.export_modal.export_button") %>
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>
+

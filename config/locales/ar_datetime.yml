@@ -1,0 +1,82 @@
+---
+ar:
+  datetime:
+    distance_in_words:
+      half_a_minute: نصف دقيقة
+      less_than_x_seconds:
+        zero: أقل من ثانية
+        one: أقل من ثانية
+        two: أقل من ثانيتين
+        few: أقل من %{count} ثوان
+        many: أقل من %{count} ثانية
+        other: أقل من %{count} ثانية
+      x_seconds:
+        zero: "0 ثوان"
+        one: ثانية واحدة
+        two: ثانيتان
+        few: "%{count} ثوان"
+        many: "%{count} ثانية"
+        other: "%{count} ثانية"
+      less_than_x_minutes:
+        zero: أقل من دقيقة
+        one: أقل من دقيقة
+        two: أقل من دقيقتين
+        few: أقل من %{count} دقائق
+        many: أقل من %{count} دقيقة
+        other: أقل من %{count} دقيقة
+      x_minutes:
+        zero: "0 دقائق"
+        one: دقيقة واحدة
+        two: دقيقتان
+        few: "%{count} دقائق"
+        many: "%{count} دقيقة"
+        other: "%{count} دقيقة"
+      about_x_hours:
+        zero: حوالي 0 ساعات
+        one: حوالي ساعة واحدة
+        two: حوالي ساعتين
+        few: حوالي %{count} ساعات
+        many: حوالي %{count} ساعة
+        other: حوالي %{count} ساعة
+      x_days:
+        zero: "0 أيام"
+        one: يوم واحد
+        two: يومان
+        few: "%{count} أيام"
+        many: "%{count} يوم"
+        other: "%{count} يوم"
+      about_x_months:
+        zero: حوالي 0 أشهر
+        one: حوالي شهر واحد
+        two: حوالي شهرين
+        few: حوالي %{count} أشهر
+        many: حوالي %{count} شهر
+        other: حوالي %{count} شهر
+      x_months:
+        zero: "0 أشهر"
+        one: شهر واحد
+        two: شهران
+        few: "%{count} أشهر"
+        many: "%{count} شهر"
+        other: "%{count} شهر"
+      about_x_years:
+        zero: حوالي 0 سنوات
+        one: حوالي سنة
+        two: حوالي سنتين
+        few: حوالي %{count} سنوات
+        many: حوالي %{count} سنة
+        other: حوالي %{count} سنة
+      almost_x_years:
+        zero: ما يقرب من 0 سنوات
+        one: تقريباً سنة واحدة
+        two: ما يقرب من سنتين
+        few: ما يقرب من %{count} سنوات
+        many: ما يقرب من %{count} سنة
+        other: ما يقرب من %{count} سنة
+      over_x_years:
+        zero: أكثر من 0 سنوات
+        one: أكثر من سنة
+        two: أكثر من سنتين
+        few: أكثر من %{count} سنوات
+        many: أكثر من %{count} سنة
+        other: أكثر من %{count} سنة

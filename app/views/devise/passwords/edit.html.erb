@@ -1,0 +1,145 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-md">
+    <!-- Logo and Heading -->
+    <div class="text-center mb-8">
+      <div class="flex justify-center mb-6">
+        <%= image_tag asset_path('logo.png'), alt: "Way To Excellence", class: "h-16 w-auto rounded-full" %>
+      </div>
+      <h2 class="text-2xl font-semibold text-[#0D1120] mb-2">Change your password</h2>
+      <p class="text-sm text-gray-600">Enter your new password below</p>
+    </div>
+
+    <!-- Card Container -->
+    <div class="bg-[#FFFFFF] border border-[#E3E3E3] rounded-lg shadow-lg p-8">
+      <%= form_with model: resource, scope: resource_name, url: user_password_path, html: { method: :put, class: "space-y-6" }, local: true do |f| %>
+        <%= f.hidden_field :reset_password_token %>
+        
+        <!-- Error Messages -->
+        <% if resource.errors.any? %>
+          <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <div class="flex-1">
+                <h3 class="text-sm font-medium text-red-800 mb-2">
+                  <%= pluralize(resource.errors.count, "error") %> prohibited this password change:
+                </h3>
+                <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                  <% resource.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Alert Messages (Flash) -->
+        <% if alert %>
+          <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+              </svg>
+              <p class="text-sm text-red-800 font-medium"><%= alert %></p>
+            </div>
+          </div>
+        <% end %>
+
+        <!-- Password Field -->
+        <div data-controller="password-visibility">
+          <%= f.label :password, "New password", class: "block text-sm font-medium text-gray-700 mb-2" do %>
+            New password
+            <% if @minimum_password_length %>
+              <span class="text-gray-500 font-normal">(<%= @minimum_password_length %> characters minimum)</span>
+            <% end %>
+          <% end %>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 <%= resource.errors[:password].any? ? 'text-red-400' : 'text-gray-400' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+            </div>
+            <%= f.password_field :password, 
+                autofocus: true,
+                autocomplete: "new-password",
+                data: { password_visibility_target: "input" },
+                class: "w-full pl-10 pr-12 py-3 border #{resource.errors[:password].any? ? 'border-red-300 focus:ring-red-500 focus:border-red-300' : 'border-gray-300 focus:ring-[#5C3984] focus:border-transparent'} rounded-lg focus:outline-none focus:ring-2 transition-colors duration-200",
+                placeholder: "Enter your new password" %>
+            <button 
+              type="button"
+              data-action="click->password-visibility#toggle"
+              data-password-visibility-target="toggle"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Toggle password visibility"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+            </button>
+          </div>
+          <% if resource.errors[:password].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:password].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Password Confirmation Field -->
+        <div data-controller="password-visibility">
+          <%= f.label :password_confirmation, "Confirm new password", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 <%= resource.errors[:password_confirmation].any? ? 'text-red-400' : 'text-gray-400' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+            </div>
+            <%= f.password_field :password_confirmation, 
+                autocomplete: "new-password",
+                data: { password_visibility_target: "input" },
+                class: "w-full pl-10 pr-12 py-3 border #{resource.errors[:password_confirmation].any? ? 'border-red-300 focus:ring-red-500 focus:border-red-300' : 'border-gray-300 focus:ring-[#5C3984] focus:border-transparent'} rounded-lg focus:outline-none focus:ring-2 transition-colors duration-200",
+                placeholder: "Confirm your new password" %>
+            <button 
+              type="button"
+              data-action="click->password-visibility#toggle"
+              data-password-visibility-target="toggle"
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Toggle password visibility"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+              </svg>
+            </button>
+          </div>
+          <% if resource.errors[:password_confirmation].any? %>
+            <p class="mt-1 text-sm text-red-600"><%= resource.errors[:password_confirmation].first %></p>
+          <% end %>
+        </div>
+
+        <!-- Submit Button -->
+        <div>
+          <%= f.submit "Change my password", 
+              class: "w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#5C3984] hover:bg-[#4A2F6B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5C3984] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+              data: { 
+                disable_with: "Changing password..." 
+              } %>
+        </div>
+      <% end %>
+
+      <!-- Back to Login Link -->
+      <div class="mt-6 text-center">
+        <p class="text-sm text-gray-600">
+          <%= link_to "Back to sign in", new_user_session_path, class: "font-medium text-[#5C3984] hover:text-[#4A2F6B] transition-colors duration-200" %>
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center">
+      <p class="text-xs text-gray-500">
+        © <%= Date.current.year %> Way To Excellence. All rights reserved.
+      </p>
+    </div>
+  </div>
+</div>

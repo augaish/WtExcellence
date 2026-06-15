@@ -1,0 +1,1493 @@
+---
+ar:
+  home:
+    meta:
+      title: WTE Excellence - إدارة الجودة المدعومة بالذكاء الاصطناعي
+      description: أتمتة الامتثال لـ EFQM و ISO 9001 و KAQA من خلال سير العمل الذكي
+        الذي يتتبع التقدم ويدير CAPA ويكشف فرص التحسين — كل ذلك في منصة واحدة.
+    header:
+      brand: Way to Excellence
+      nav:
+        home: الرئيسية
+        resources: الموارد
+        contact_us: اتصل بنا
+      switch_to_ar: العربية
+      switch_to_en: English
+      notify_me: أعلمني
+    hero:
+      badges:
+        coming_soon: قريباً
+        built_for_quality: مصمم لمحترفي الجودة
+      title: مستقبل إدارة الجودة
+      title_accent: قريباً
+      subtitle: أتمتة الامتثال لـ EFQM و ISO 9001 و KAQA من خلال سير العمل الذكي الذي
+        يتتبع التقدم ويدير CAPA ويكشف فرص التحسين — كل ذلك في منصة واحدة.
+      features:
+        iso_clarity: تطبيق معايير ISO والمعايير التنظيمية بوضوح
+        track_evidence: تتبع الأدلة والتدقيقات والإجراءات التصحيحية في مكان واحد
+        audit_ready: البقاء جاهزاً للتدقيق مع رؤى في الوقت الفعلي
+        designed_for_roles: مصمم لمديري الجودة والمدققين والفرق
+      cta_note: احصل على إشعار عند الإطلاق
+      dashboard_alt: لوحة تحكم إدارة CAPA - عرض اللوحة يظهر الأعمدة المفتوحة وقيد
+        التنفيذ والمراجعة مع بطاقات المهام
+    stats:
+      capa_efficiency: كفاءة CAPA
+      compliance_rate: معدل الامتثال
+      ai_monitoring: مراقبة الذكاء الاصطناعي
+      reduction_manual_effort: تقليل الجهد اليدوي
+    features:
+      title: كل ما تحتاجه لإدارة الجودة بثقة
+      subtitle: منصة واحدة لإدارة المعايير والتقييمات والأدلة والإجراءات التصحيحية
+        — مصممة لفرق الجودة والمدققين والقيادة.
+      cards:
+        compliance_automation:
+          title: أتمتة الامتثال المدعومة بالذكاء الاصطناعي
+          body: أتمتة المعايير المعقدة وهياكل البنود بينما يساعد الذكاء الاصطناعي
+            في التخطيط والملخصات واقتراحات الأدلة — مما يقلل الجهد اليدوي والأخطاء.
+        performance_scoring:
+          title: أدوات الأداء والتقييم في الوقت الفعلي
+          body: تقييم البنود باستخدام RADAR أو نماذج التقييم المخصصة أو معايير نعم/لا
+            البسيطة، مع لوحات معلومات واضحة تظهر التقدم والامتثال على كل مستوى.
+        capa_management:
+          title: إدارة CAPA والإجراءات التصحيحية
+          body: تسجيل عدم المطابقة وتتبع الإجراءات التصحيحية والوقائية ومراقبة التقدم
+            من تحديد المشكلة إلى الإغلاق — مع إمكانية التتبع الكامل للتدقيق.
+        evidence_library:
+          title: مكتبة الأدلة والوثائق المركزية
+          body: تخزين وتصنيف وإعادة استخدام الأدلة عبر المعايير والبنود و CAPAs، مما
+            يضمن أن الوثائق متاحة دائماً وجاهزة للتدقيق.
+        role_workflows:
+          title: سير العمل والصلاحيات حسب الدور
+          body: تجارب مخصصة لمديري الجودة والمدققين والمكلفين — لضمان رؤية وتحرير
+            واعتماد المعلومات الصحيحة من قبل الأشخاص المناسبين.
+        multi_standard_versions:
+          title: إدارة المعايير المتعددة والإصدارات
+          body: دعم ISO و EFQM و KAQA والمعايير المخصصة في وقت واحد، مع مقارنة الإصدارات
+            والنشر المتحكم به عبر المؤسسات.
+        ai_continuous_improvement:
+          title: رؤى الذكاء الاصطناعي والتحسين المستمر
+          body: تلقي رؤى مولدة بالذكاء الاصطناعي تسلط الضوء على الفجوات وفرص التحسين
+            واتجاهات الأداء بمجرد اكتمال التقييمات.
+        executive_visibility:
+          title: لوحات المعلومات والرؤية التنفيذية
+          body: مقاييس عالية المستوى وملخصات مرئية تساعد القيادة على فهم حالة الامتثال
+            والمخاطر والتقدم في لمحة.
+    ai_insights:
+      title: رؤى الذكاء الاصطناعي، وليس مجرد الامتثال
+      subtitle: يحلل ذكاؤنا الاصطناعي أنماط التقييم ونقاط التحقق غير المكتملة ونتائج
+        CAPA لتسليط الضوء على أماكن التحسينات التي سيكون لها أكبر تأثير.
+      features:
+        improvement_insights: رؤى تحسين مولدة بالذكاء الاصطناعي
+        performance_trends: اتجاهات الأداء عبر المعايير
+        risk_gap_visibility: رؤية المخاطر والفجوات قبل التدقيق
+      dashboard:
+        title: الاستبيان
+        auditor_name: محمد أحمد
+        auditor_label: 'المدقق: %{name}'
+        analyze: تحليل بالذكاء الاصطناعي
+        table:
+          question: السؤال
+          answer: الإجابة
+      five_whys:
+        q1:
+          q: لماذا كانت شهادات المطابقة مفقودة من الشحنة؟
+          a: لم يقم المورد بتضمين الشهادات عند التسليم
+        q2:
+          q: لماذا لم يقم المورد بتضمين الشهادات؟
+          a: عملية التوثيق الداخلية للمورد لا تتطلب الشهادات بشكل افتراضي
+        q3:
+          q: لماذا لا تفرض عملية المورد التوثيق؟
+          a: لم يتم إبلاغ المورد بالتحديث الأخير لمراقبة الجودة الذي يتطلب شهادات
+            إلزامية
+        q4:
+          q: لماذا لم يتم إبلاغ المورد بالمتطلبات المحدثة؟
+          a: لم يرسل فريق المشتريات إشعاراً رسمياً بعد التغيير
+        q5:
+          q: لماذا لم يتم اتباع خطة الاتصال؟
+          a: لا يوجد نظام سير عمل آلي أو تذكير لإخطار تحديثات السياسات
+      root_cause:
+        title: ملخص السبب الجذري
+        body: السبب الجذري هو غياب نظام سير عمل آلي لضمان إبلاغ تحديثات سياسة المشتريات
+          للموردين بشكل صحيح. أدى هذا إلى سلسلة من الإخفاقات نتج عنها فقدان شهادات
+          المطابقة.
+    standards:
+      title: معايير الجودة المدعومة
+      subtitle: دعم شامل لأطر الجودة والتميز الرائدة
+      cards:
+        efqm:
+          description: نموذج التميز للمؤسسة الأوروبية لإدارة الجودة
+          tags:
+            self_assessment: التقييم الذاتي
+            radar_logic: منطق RADAR
+            stakeholder_value: قيمة أصحاب المصلحة
+        iso9001:
+          description: المعيار الدولي لنظام إدارة الجودة
+        kaqa:
+          description: إطار التميز لجائزة الملك عبدالله للجودة
+          tags:
+            systems_perspective: منظور الأنظمة
+            leadership: القيادة
+            organizational_learning: التعلم المؤسسي
+        iso27001:
+          description: معيار نظام إدارة أمن المعلومات
+      common_tags:
+        process_approach: نهج العمليات
+        risk_based_thinking: التفكير القائم على المخاطر
+        customer_focus: التركيز على العميل
+        continuous_improvement: التحسين المستمر
+      more:
+        value: 50+
+        label: معيار إضافي
+    testimonials:
+      title: موثوق به من محترفي الجودة
+      subtitle: شاهد كيف يحقق مديرو الجودة التميز مع رؤى مدعومة بالذكاء الاصطناعي
+      quotes:
+        q1: '"لقد غيّر تحليل السبب الجذري المدعوم بالذكاء الاصطناعي طريقة تعاملنا
+          مع عدم المطابقة. قللنا وقت دورة CAPA بنسبة 40%."'
+        q2: '"أخيراً، منصة تفهم امتثال ISO 9001. وفر لنا تحليل الفجوات الآلي أسابيع
+          من العمل اليدوي."'
+        q3: '"ساعدتنا الرؤى التنبؤية في تحديد نتائج التدقيق المحتملة قبل أن يفعل ذلك
+          جهة الاعتماد. تغيير جذري."'
+        q4: '"كان التكامل مع أنظمتنا الحالية سلساً. كان الفريق جاهزاً للعمل خلال أسبوع
+          مع الحد الأدنى من التدريب."'
+      authors:
+        a1: سارة أحمد، مديرة الجودة، شركة التقنية الطبية
+        a2: محمد الرشيد، مدير نظام إدارة الجودة، شركة قطع الغيار
+        a3: د. ليلى حسن، نائب رئيس الجودة، شركة الأدوية
+        a4: خالد العمري، مدير تقنية المعلومات، شركة الفضاء
+    faq:
+      title: الأسئلة الشائعة
+      toggle:
+        expand: توسيع
+        collapse: طي
+      items:
+        q1:
+          q: ما هي معايير الجودة التي يدعمها WTE Excellence؟
+          a: يدعم WTE Excellence معايير EFQM و ISO 9001 و KAQA و Malcolm Baldrige
+            وأكثر من 20 إطار جودة آخر. يتكيف ذكاؤنا الاصطناعي مع متطلبات المعايير
+            المحددة ومعايير التقييم .
+        q2:
+          q: كيف يعمل نظام CAPA المدعوم بالذكاء الاصطناعي؟
+          a: يحلل ذكاؤنا الاصطناعي بيانات الجودة ، ويحدد الأسباب الجذرية، ويقترح إجراءات
+            تصحيحية بناءً على أفضل الممارسات والبيانات التاريخية لمؤسستك.
+        q3:
+          q: هل يمكن للنظام التعامل مع تحليل المستندات للامتثال؟
+          a: نعم، يمكن لذكائنا الاصطناعي تحليل المستندات واستخراج معلومات الامتثال
+            الرئيسية وتحديد الفجوات مقارنة بمعايير الجودة التي اخترتها.
+        q4:
+          q: ما نوع فرص التحسين التي يقترحها الذكاء الاصطناعي؟
+          a: يحدد الذكاء الاصطناعي الأنماط في بياناتك، ويقترح تحسينات العمليات، ويسلط
+            الضوء على احتياجات التدريب، ويوصي بإجراءات وقائية بناءً على معايير الصناعة.
+    cta_banner:
+      title: من الامتثال إلى التميز المستمر
+      subtitle: انضم للوصول المبكر وكن أول من يحصل على تحديثات الإطلاق.
+      button: انضم إلى قائمة الانتظار
+    footer:
+      brand: Way to Excellence
+      nav:
+        features: الميزات
+        pricing: الأسعار
+        contact: اتصل بنا
+        terms_policy: الشروط والسياسات
+      legal:
+        privacy: سياسة الخصوصية
+        terms: شروط الخدمة
+        cookies: سياسة ملفات تعريف الارتباط
+      copyright: "©2026 WTE Excellence. جميع الحقوق محفوظة."
+  user_notifications:
+    capa_assigned_title: قام %{actor_name} بتعيينك في CAPA %{capa_code}
+    capa_unassigned_title: قام %{actor_name} بإلغاء تعيينك من CAPA %{capa_code}
+    capa_action_assigned_title: قام %{actor_name} بتعيينك في إجراء "%{action_title}"
+      على CAPA %{capa_code}
+    capa_action_unassigned_title: قام %{actor_name} بإلغاء تعيينك من إجراء "%{action_title}"
+      على CAPA %{capa_code}
+    capa_evidence_attached_title: قام %{actor_name} بإرفاق %{document_name} بـ CAPA
+      %{capa_code}
+    capa_evidence_attached_count_title: قام %{actor_name} بإرفاق %{count} مستند(ات)
+      بـ CAPA %{capa_code}
+    capa_evidence_attached_auditor_title: "تمت إضافة أدلة إلى CAPA %{capa_code}: %{document_name}"
+    capa_evidence_attached_auditor_count_title: "تمت إضافة أدلة إلى CAPA %{capa_code}: %{count} مستندات"
+    document: مستند
+    tool_assigned_title: قام %{actor_name} بتعيينك في الأداة "%{tool_name}"
+    tool_unassigned_title: قام %{actor_name} بإلغاء تعيينك من الأداة "%{tool_name}"
+    assignment_evaluated_title: قام %{actor_name} بـ %{status} تعيينًا لأداة "%{tool_name}"
+    evaluation_approved: اعتماد
+    evaluation_rejected: رفض
+  language: اللغة
+  english: الإنجليزية
+  arabic: العربية
+  role: الدور
+  super_admin: مدير عام
+  menu: القائمة
+  logout: تسجيل الخروج
+  notifications: الإشعارات
+  no_notifications: لا توجد إشعارات بعد
+  view_all_notifications: عرض كل الإشعارات
+  mark_all_read: تعليم الكل كمقروء
+  all_notifications_marked_read: تم تعليم جميع الإشعارات كمقروءة.
+  ago: منذ
+  toggle_sidebar: إظهار/إخفاء الشريط الجانبي
+  main_menu: القائمة الرئيسية
+  settings: الإعدادات
+  overview: لوحة البيانات
+  total_active_standards: إجمالي المعايير النشطة
+  total_companies: إجمالي الشركات
+  total_users: إجمالي المستخدمين
+  avg_compliance: متوسط الامتثال (جميع المعايير)
+  credits_used: الأرصدة المستخدمة
+  used_this_week: مستخدم هذا الأسبوع
+  used_in_period: في الفترة المحددة
+  this_week: هذا الأسبوع
+  in_period: في الفترة المحددة
+  total_capas_logged: إجمالي CAPAs المسجلة
+  open_capas: الحالات المفتوحة
+  high_priority_capa: CAPA ذات أولوية عالية
+  overdue_capa: CAPA متأخرة
+  created_this_week: تم إنشاؤها هذا الأسبوع
+  created_in_period: تم إنشاؤها في الفترة المحددة
+  resolved_capa_over_time: CAPA المحلولة بمرور الوقت
+  closed_capa_vs_total: CAPA المغلقة مقابل إجمالي CAPA
+  closed_capa: CAPA المغلقة
+  total_capa: إجمالي CAPA
+  capas_by_status_breakdown: توزيع الحالات حسب الحالة
+  ai_usage_overview: نظرة عامة على استخدام الذكاء الاصطناعي
+  tokens_used_over_time: الرموز المستخدمة بمرور الوقت
+  average_compliance_by_standard: متوسط الامتثال حسب المعيار
+  total_vers: إجمالي الإصدارات
+  compliance_percent: نسبة الامتثال
+  days_overdue: أيام التأخير
+  view_list: عرض القائمة
+  view_last_7_days: عرض آخر 7 أيام
+  view_last_30_days: عرض آخر 30 يوماً
+  view_last_90_days: عرض آخر 90 يوماً
+  clear: مسح
+  no_standards_available: لا توجد معايير متاحة
+  no_overdue_capas: لا توجد CAPAs متأخرة
+  day: يوم
+  days: أيام
+  standards: المعايير
+  capa_management: إدارة حالات عدم الالتزام
+  library: المكتبة
+  companies: شركات
+  tool_setup: أدوات قياس المعايير
+  ai_insights: تحليلات الذكاء الاصطناعي
+  ai_usage: استخدام الذكاء الاصطناعي
+  credits: الرصيد
+  credit_assignments: تخصيص الأرصدة
+  my_overview: نظرتي العامة
+  my_credits: رصيد حسابي
+  role_permissions: أذونات الأدوار
+  account_management: إدارة الحساب
+  account_management_description: نظرة عامة على الشركات والحسابات والتراخيص والأرصدة
+    في مساحة العمل .
+  site_users: مستخدمو الموقع
+  add_new_user: إضافة مستخدم جديد
+  add_new_company: إضافة شركة جديدة
+  create_company_description: إنشاء حساب شركة جديد.
+  add_company: إضافة شركة
+  add_account: إضافة حساب
+  full_name: الاسم الكامل
+  email_address: عنوان البريد الإلكتروني
+  enter_full_name_placeholder: أدخل الاسم الكامل
+  enter_email_address_placeholder: أدخل عنوان البريد الإلكتروني
+  enter_company_name_placeholder: أدخل اسم الشركة
+  enter_license_seats_placeholder: أدخل عدد مقاعد الترخيص
+  initial_credits: الأرصدة الأولية
+  enter_initial_credits_placeholder: أدخل الأرصدة الأولية
+  invite_user_description: دعوة مستخدم جديد للانضمام إلى مؤسستك.
+  select_company: اختر الشركة
+  select_role: اختر الدور
+  global_role_optional: الدور العام (اختياري)
+  no_global_role: لا يوجد دور عام
+  delegated_admin: مدير مفوض
+  permissions_label: الأذونات
+  select_permissions_description: 'اختر الأذونات الممنوحة لهذا المدير المفوض:'
+  manage_permissions: إدارة الأذونات
+  save_permissions: حفظ الأذونات
+  change_password: تغيير كلمة المرور
+  new_password: كلمة المرور الجديدة
+  confirm_password: تأكيد كلمة المرور
+  enter_new_password: أدخل كلمة المرور الجديدة
+  confirm_new_password: تأكيد كلمة المرور الجديدة
+  password_requirements: يجب أن تكون كلمة المرور 8 أحرف على الأقل
+  change_role: تغيير الدور
+  current_role: الدور الحالي
+  current_global_role: الدور العام الحالي
+  current_company_role: دور الشركة الحالي
+  new_role: الدور الجديد
+  new_global_role: الدور العام الجديد
+  new_company_role: دور الشركة الجديد
+  role_change_warning: تغيير دور المستخدم سيؤثر على صلاحياته ووصوله. يتم تسجيل هذا
+    الإجراء.
+  viewer: عارض
+  company_admin: مدير الشركة
+  company_quality_manager: مدير الجودة
+  company_auditor: مدقق
+  company_contributor: مساهم
+  company_viewer: عارض الشركة
+  used: مستخدم
+  available: متاح
+  total_seats: إجمالي المقاعد
+  users_currently_assigned: المستخدمون المعينون حالياً
+  accounts_belong_to_company: الحسابات التابعة لهذه الشركة.
+  legal_documents: الوثائق القانونية والخاصة
+  no_documents_linked: لا توجد وثائق مرتبطة بهذه الشركة بعد.
+  credits_available_description: رصيد متاح.
+  adjust_credits_description: تعديل أرصدة الشركة والمستخدمين من قسم إعدادات الأرصدة.
+  review_license_seats_description: مراجعة وتعديل مقاعد الترخيص لكل شركة في صفحة ملفها
+    الشخصي.
+  recently_created_companies_description: الشركات التي تم إنشاؤها مؤخراً مع حالة الترخيص
+    والحساب.
+  full_list_companies_description: القائمة الكاملة للشركات مع مقاعد الترخيص والمعايير
+    والإجراءات المجمعة.
+  invite_filter_manage_description: دعوة وتصفية وإدارة وصول المستخدمين الفرديين.
+  view_profile: فتح الملف الشخصي
+  open_company_profile: فتح ملف الشركة الشخصي
+  manage: إدارة
+  activate: تنشيط
+  are_you_sure: هل أنت متأكد؟
+  are_you_sure_deactivate: هل أنت متأكد أنك تريد إلغاء تنشيط %{name}؟
+  are_you_sure_activate: هل أنت متأكد أنك تريد تنشيط %{name}؟
+  are_you_sure_activate_company: هل أنت متأكد أنك تريد تنشيط الشركة '%{name}'؟ سيسمح
+    هذا للمستخدمين في هذه الشركة بالتنشيط.
+  are_you_sure_deactivate_company: هل أنت متأكد أنك تريد إلغاء تنشيط الشركة '%{name}'؟
+    سيحول هذا دون تنشيط المستخدمين في هذه الشركة.
+  are_you_sure_delete_company: هل أنت متأكد أنك تريد حذف '%{name}'؟ لا يمكن التراجع
+    عن هذا الإجراء.
+  delete_company: حذف الشركة
+  are_you_sure_delete_user: هل أنت متأكد أنك تريد حذف %{name} نهائياً؟ سيتم إزالة
+    المستخدم وجميع تعييناته. لا يمكن التراجع عن هذا الإجراء.
+  delete_account: حذف الحساب
+  pending: قيد الانتظار
+  part_of_company: جزء من الشركة
+  joined_on: تاريخ الانضمام
+  access_expiry_date: تاريخ انتهاء الصلاحية
+  filter_by_role: تصفية حسب الدور
+  filter_by_status: تصفية حسب الحالة
+  apply_filters: تطبيق المرشحات
+  no_users_found: لم يتم العثور على مستخدمين
+  no_companies_found: لم يتم العثور على شركات
+  deactivate: إلغاء التنشيط
+  view_users: عرض المستخدمين
+  expired: منتهي الصلاحية
+  general_settings: الإعدادات العامة
+  admin_user: مستخدم إداري
+  way_to_excellence: الطريق إلى التميز
+  save: حفظ
+  cancel: إلغاء
+  delete: حذف
+  edit: تعديل
+  create: إنشاء
+  update: تحديث
+  confirm: تأكيد
+  back: رجوع
+  next: التالي
+  previous: السابق
+  name: الاسم
+  description: الوصف
+  submit: إرسال
+  search: بحث
+  success: نجح
+  error: خطأ
+  notice: إشعار
+  alert: تنبيه
+  not_authorized: غير مصرح لك بالوصول.
+  company: شركة
+  company_name: اسم الشركة
+  license_seats: مقاعد الترخيص
+  users: المستخدمون
+  assigned_standards: المعايير المعينة
+  status_label: الحالة
+  created_at: تاريخ الإنشاء
+  sort: ترتيب
+  sort_name_asc: الاسم (أ-ي)
+  sort_name_desc: الاسم (ي-أ)
+  sort_newest_first: الأحدث أولاً
+  sort_oldest_first: الأقدم أولاً
+  sort_email_asc: البريد الإلكتروني أ-ي
+  sort_email_desc: البريد الإلكتروني ي-أ
+  credit_changes: إدارة رصيد استخدام AI
+  credit_changes_management_description: إدارة تكاليف الائتمانات لإجراءات الذكاء الاصطناعي
+  ai_action: إجراءات الذكاء الاصطناعي
+  credit_cost: تكلفة الائتمان
+  update_credit_cost: تحديث تكلفة الائتمان
+  credit_cost_updated_successfully: تم تحديث تكلفة الائتمان بنجاح
+  credit_cost_update_failed: فشل في تحديث تكلفة الائتمان
+  credit_changes_tabs:
+    ai_actions: أرصدة إجراءات الذكاء الاصطناعي
+    company_credits: أرصدة الشركات
+  company_credits_management_description: التحكم في الأرصدة المتاحة لكل شركة.
+  company_credits_updated_successfully: تم تحديث أرصدة الشركة بنجاح.
+  invalid_ai_credit_amount: يرجى إدخال تكلفة ائتمان صالحة (0 أو أكثر).
+  invalid_company_credit_amount: يرجى إدخال قيمة ائتمان صالحة (0 أو أكثر).
+  invalid_user_credit_amount: يرجى إدخال قيمة ائتمان مخصصة صالحة (0 أو أكثر).
+  user_credits_updated_successfully: تم تحديث أرصدة المستخدم بنجاح.
+  company_users_loading: جاري تحميل مستخدمي الشركة...
+  company_users_empty: لا يوجد مستخدمون متاحون لهذه الشركة بعد.
+  company_users_error: فشل في تحميل مستخدمي الشركة. يرجى المحاولة مرة أخرى.
+  company_users_label: المستخدم
+  manage_users: إدارة المستخدمين
+  company_users_collapsed_hint: قم بالتوسيع لإدارة تخصيصات أرصدة المستخدمين الفردية.
+  company_users_loaded: تم تحميل مستخدمي الشركة.
+  saving_label: جاري الحفظ...
+  no_ai_actions_found: لم يتم العثور على إجراءات ذكاء اصطناعي
+  no_ai_actions_configured: لا توجد إجراءات ذكاء اصطناعي مهيأة بعد.
+  company_not_found: الشركة غير موجودة.
+  actions: الإجراءات
+  add_new_standard: إضافة معيار جديد
+  search_standards: بحث عن المعايير...
+  all: الكل
+  active: نشط
+  inactive: غير نشط
+  drafts: المسودات
+  archived: المؤرشفة
+  no_standards_found: لم يتم العثور على معايير
+  get_started_message: ابدأ برفع وثيقة المعيار الأولى.
+  upload_first_standard: رفع المعيار الأول
+  version: الإصدار
+  previous_versions: الإصدارات السابقة
+  processing: قيد المعالجة...
+  last_modified: آخر تعديل
+  uploaded: تم الرفع
+  compliance: الامتثال
+  clauses: البنود
+  sub_clauses: البنود الفرعية
+  checkpoints: نقاط التحقق
+  view_details: عرض التفاصيل
+  delete_standard: حذف المعيار
+  delete_standard_confirm: هل أنت متأكد أنك تريد حذف '%{name}'؟ سيتم حذف المعيار وجميع
+    إصداراته وبنوده ونقاط التحقق نهائياً.
+  status: الحالة
+  version_statuses:
+    published: منشور
+    draft: مسودة
+    archived: مؤرشف
+    processing: قيد المعالجة
+    not_started: لم يبدأ
+    in_drafts: في المسودات
+    under_review: قيد المراجعة
+    auditor_approved: تمت الموافقة من المدقق
+    approved: تمت الموافقة
+    needs_changes: يحتاج تعديلات
+  standard_not_found: المعيار غير موجود
+  standard_not_found_message: المعيار الذي تبحث عنه غير موجود أو تم حذفه.
+  go_back_to_standards: العودة إلى المعايير
+  go_back: رجوع
+  versions: الإصدارات
+  latest_version: أحدث إصدار
+  assigned_companies: الشركات المعينة
+  average_company_compliance: متوسط امتثال الشركة
+  average_across_all_companies: المتوسط عبر جميع الشركات المعينة %{count} (بما في
+    ذلك 0% إذا لم يتم التقييم)
+  assign: تعيين
+  assign_standard: تعيين المعيار
+  assign_standard_message: اختر إصدارًا وقم بتعيينه لشركة واحدة أو أكثر.
+  loading: جاري التحميل
+  no_published_versions_available: لا توجد إصدارات منشورة متاحة
+  no_published_versions_available_for_standard: لا توجد إصدارات منشورة متاحة لهذا
+    المعيار.
+  error_could_not_find_standard_id: 'خطأ: تعذر العثور على معرف المعيار'
+  error_loading_versions: خطأ في تحميل الإصدارات
+  loading_companies: جاري تحميل الشركات
+  no_available_companies: لا توجد شركات متاحة
+  error_loading_companies: خطأ في تحميل الشركات
+  active_version: الإصدار النشط
+  assigned_at: تاريخ التعيين
+  no_companies_assigned: لا توجد شركات معينة
+  no_companies_assigned_message: لم يتم تعيين هذا المعيار لأي شركة بعد.
+  add_new_version: إضافة إصدار جديد
+  clause_tree: شجرة البنود
+  compare_versions_message: يمكنك مقارنة ومعاينة جميع الإصدارات السابقة التي أضفتها.
+  published: تاريخ النشر
+  total_clauses: إجمالي البنود
+  subclauses: البنود الفرعية
+  no_versions_available: لا توجد إصدارات متاحة
+  clause_tree_description: تسلسل هرمي قابل للطي يعرض البنود والبنود الفرعية ونقاط
+    التحقق.
+  select_version: اختر الإصدار
+  edit_selected_version: تعديل الإصدار المحدد
+  processing_pdf: معالجة PDF... قد يستغرق هذا بضع دقائق.
+  no_clauses_found: لم يتم العثور على بنود
+  no_clauses_message: هذا المعيار لا يحتوي على أي بنود حتى الآن.
+  save_changes_to_draft: حفظ التغييرات كمسودة
+  publish_new_version: نشر إصدار جديد
+  edit_clause_tree: تعديل شجرة البنود
+  edit_clause_tree_description: إضافة أو تعديل أو حذف البنود ونقاط التحقق
+  discard_changes: تجاهل
+  discard_changes_modal_title: تجاهل التغييرات
+  discard_changes_modal_message: تجاهل جميع التغييرات غير المحفوظة؟ لا يمكن التراجع
+    عن هذا الإجراء.
+  no_clauses_found_version: لم يتم العثور على بنود لهذا الإصدار
+  compare_with_previous_version: مقارنة مع الإصدار السابق
+  compare_with_latest_version: مقارنة مع أحدث إصدار
+  compare: مقارنة
+  back_to_standard: العودة إلى المعيار
+  compare_with: مقارنة مع
+  exit_compare_mode: الخروج من وضع المقارنة
+  not_in_this_version: غير موجود في هذا الإصدار
+  added: مضاف
+  removed: محذوف
+  deleted: محذوف
+  modified: معدل
+  unchanged: بدون تغيير
+  new: جديد
+  add_sub_clause: إضافة بند فرعي
+  add_checkpoint: إضافة نقطة تحقق
+  drop_checkpoints_here: إسقاط نقاط التحقق هنا
+  expanded: موسع
+  collapsed: منطوي
+  collapse_all: طي الكل
+  expand_all: توسيع الكل
+  standard_name: اسم المعيار
+  enter_standard_name: أدخل اسم المعيار...
+  standard_type: نوع المعيار
+  standard_type_efqm: كاكا / EFQM
+  standard_type_iso9001: أيزو 9001
+  standard_type_qiyas: قياس
+  standard_type_generic: أخرى
+  standard_type_hint: يحدد مسار الاستخراج المستخدم عند معالجة الوثيقة.
+  upload_pdf: رفع PDF
+  only_pdf_allowed: يُسمح بملفات PDF فقط
+  add_standard: إضافة المعيار
+  standard_upload_code_taken: الرمز مستخدم مسبقاً
+  create_new_version: إنشاء إصدار جديد
+  version_label: تسمية الإصدار
+  version_label_placeholder: 'مثال: v2.0، 2023'
+  notes: ملاحظات
+  notes_placeholder: ملاحظات اختيارية حول هذا الإصدار
+  create_version: إنشاء الإصدار
+  publish_new_version_assign: نشر إصدار جديد وتعيينه للشركات
+  publish_version_description: انشر الإصدار الجديد من معيارك. الشركات التي تستخدم
+    إصدارات أقدم لن يتم إجبارها على الترقية، ولكن يمكنك مشاركته معهم.
+  creating_new_version_for: 'أنت تقوم بإنشاء إصدار جديد لـ:'
+  new_version_underway: إصدار جديد قيد التنفيذ
+  assign_to_companies: تعيين هذا الإصدار للشركات
+  choose_company: اختر شركة
+  add: إضافة
+  skip_assigning: تخطي التعيين الآن
+  close: إغلاق
+  publish_version: نشر الإصدار
+  document_library: مكتبة الوثائق
+  start_searching: ابدأ البحث
+  search_users_placeholder: البحث عن مستخدمين...
+  search_companies_placeholder: البحث عن شركات...
+  upload_document: رفع وثيقة
+  my_folders: مجلداتي
+  create_new_folder: إنشاء مجلد جديد
+  sort_last_modified: آخر تعديل
+  open_folder: فتح المجلد
+  view_all: عرض الكل
+  files: ملف
+  updated: محدث
+  folder_name: اسم المجلد
+  enter_folder_name: أدخل اسم المجلد...
+  folder_description: وصف المجلد
+  enter_folder_description: أدخل وصف المجلد (اختياري)...
+  optional: اختياري
+  create_folder: إنشاء المجلد
+  folder_created_successfully: تم إنشاء المجلد بنجاح!
+  delete_folder: حذف المجلد
+  delete_folder_confirmation_message: هل أنت متأكد أنك تريد حذف هذا المجلد؟ لا يمكن
+    التراجع عن هذا الإجراء.
+  delete_file: حذف الملف
+  delete_file_confirmation_message: هل أنت متأكد أنك تريد حذف هذا الملف؟ لا يمكن التراجع
+    عن هذا الإجراء.
+  folder_deleted_successfully: تم حذف المجلد '%{folder_name}' بنجاح.
+  folder_delete_failed: فشل في حذف المجلد. يرجى المحاولة مرة أخرى.
+  folder_color: لون المجلد
+  folder_color_updated: تم تحديث لون المجلد بنجاح!
+  no_folders_found: لم يتم العثور على مجلدات تطابق بحثك.
+  create_subfolder: إنشاء مجلد فرعي
+  creating_subfolder_in: إنشاء مجلد فرعي في
+  subfolders: المجلدات الفرعية
+  all_uploaded_documents: جميع الوثائق المرفوعة
+  all_uploaded_documents_desc: يمكنك عرض جميع الوثائق المرفوعة هنا، مما يتيح لك الفرز
+    عبر جميع وثائقك.
+  legal_documents_desc: وثائق قانونية وخاصة يمكن الوصول إليها فقط من قبل المشرفين
+    العامين ومديري الشركة.
+  internal_audits_2025: تدقيقات داخلية 2024
+  internal_audits_2025_desc: جميع خطط التدقيق وقوائم التحقق والتقارير لمراجعات Q1-Q4
+    الداخلية.
+  training_competence_records: سجلات التدريب والكفاءة
+  training_competence_records_desc: الشهادات وجداول الحضور وأدلة إتمام التدريب للموظفين.
+  supplier_documentation: وثائق الموردين
+  supplier_documentation_desc: يحتوي على نماذج تأهيل الموردين والعقود وشهادات مطابقة
+    المواد.
+  quality_manuals_policies: دلائل الجودة والسياسات
+  quality_manuals_policies_desc: الإصدارات المعتمدة من دلائل الجودة للشركة ومستندات
+    السياسات والتحديثات.
+  non_conformance_reports: تقارير عدم المطابقة (NCRs)
+  non_conformance_reports_desc: نماذج NCR المسجلة والأدلة الداعمة ونتائج التحقيق.
+  customer_feedback_complaints: ردود الفعل والشكاوى من العملاء
+  customer_feedback_complaints_desc: نماذج الشكاوى وملخصات الاستطلاعات وإجراءات المتابعة.
+  hse: الصحة والسلامة والبيئة (HSE)
+  hse_desc: تقارير تدقيق HSE وقوائم فحص السلامة وأدلة الامتثال البيئي.
+  view_all_files: عرض جميع الملفات
+  list_view: عرض القائمة
+  grid_view: عرض الشبكة
+  select_capa: اختر CAPA
+  all_capas: جميع CAPAs
+  select_standard: اختر المعيار
+  all_standards: جميع المعايير
+  select_folder: اختر المجلد
+  clear_filters: مسح الفلاتر
+  name_description: الاسم والوصف
+  type: النوع
+  in_folder: في المجلد
+  uploaded_by: رفع بواسطة
+  linked_to: مرتبط بـ
+  download: تحميل
+  share: مشاركة
+  folder_not_found: المجلد غير موجود
+  no_folder: لا يوجد مجلد
+  unknown_user: مستخدم غير معروف
+  no_files: لا توجد ملفات في هذا المجلد
+  no_files_message: هذا المجلد فارغ. قم بتحميل المستندات للبدء.
+  document:
+    upload_title: تحميل مستند
+    upload_subtitle: قم بتحميل مرفق جديد يمكنك ربطه بالمعايير والإجراءات.
+    document_name: 'اسم المستند:'
+    name_placeholder: اكتب اسماً
+    notes: 'ملاحظات:'
+    notes_placeholder: اوصف ما يتضمنه هذا المرفق.
+    select_folder: اختر المجلد
+    select_folder_placeholder: اختر مجلداً...
+    add_attachment: إضافة مرفق
+    upload_new: تحميل جديد
+    upload_save: تحميل وحفظ
+    upload_success: تم تحميل المستند بنجاح!
+    file_selected: تم اختيار الملف
+    make_private: تحويل إلى خاص
+    make_public: تحويل إلى عام
+    upload_to_legal_documents_notice: سيتم حفظ هذا المستند ضمن قسم المستندات القانونية
+      والخاصة.
+    visibility: 'مستوى الظهور:'
+    visibility_help: الملفات العامة متاحة للجميع، بينما الملفات الخاصة متاحة لك ولمسؤولي
+      الشركة فقط.
+    visibility_private: خاص (متاح لك ولمسؤولي الشركة فقط)
+    visibility_public: عام (متاح للجميع)
+  file_size: حجم الملف
+  linked_items: العناصر المرتبطة
+  link_more: ربط المزيد
+  standard: معيار
+  linked_on: تم الربط في
+  checkpoint: نقطة التحقق
+  sub_clause: بند فرعي
+  clause: بند
+  capa: CAPA
+  open_attachment: فتح المرفق
+  confirm_delete_upload: هل أنت متأكد أنك تريد حذف '%{name}'؟ لا يمكن التراجع عن هذا
+    الإجراء.
+  confirm_unlink_attachment: هل أنت متأكد أنك تريد إلغاء ربط هذا المرفق؟
+  no_linked_items: لم يتم العثور على عناصر مرتبطة.
+  link_items_to: ربط العناصر بـ
+  select_items_to_link: اختر العناصر لربط هذا المرفق بها.
+  search_for: ابحث عن
+  keywords: الكلمات المفتاحية
+  or: أو
+  smart_search_instruction: يمكنك البحث الذكي عما تريد إضافته. ابحث مرة أخرى لإضافة
+    عنصر آخر.
+  link_items: ربط العناصر
+  translation_outdated: الترجمة قديمة
+  needs_translation_for: تحتاج ترجمة للغة %{lang}
+  other_language_modified: تم تعديل نسخة اللغة الأخرى
+  translation_needs_review: الترجمة تحتاج إلى مراجعة
+  review_badge: مراجعة
+  mark_as_reviewed: وضع علامة كمراجعة
+  translating: جاري الترجمة...
+
+  # محرر البنود (سحب وإفلات)
+  new_clause_default: بند جديد
+  new_checkpoint_default: نقطة تحقق جديدة
+  drop_here: أفلت هنا
+  drop_here_root_level: أفلت هنا · المستوى الأساسي
+  drop_here_inside: أفلت هنا · داخل %{code}
+  drop_here_to_cancel: أفلت هنا للإلغاء
+  hold_to_nest: اضغط مطولًا للتداخل…
+  drop_to_nest: أفلت للتداخل
+  edit_clause_action: تعديل البند
+  delete_clause_action: حذف البند
+  delete_checkpoint_action: حذف نقطة التحقق
+  confirm_delete_title: تأكيد الحذف
+  confirm_delete_clause_message: هل أنت متأكد أنك تريد حذف هذا البند وجميع البنود الفرعية ونقاط التحقق التابعة له؟
+  confirm_delete_checkpoint_message: هل أنت متأكد أنك تريد حذف نقطة التحقق هذه؟
+
+  # الأوزان والنقاط
+  weight_label: الوزن
+  pts_unit: نقطة
+  sum_of_children_label: مجموع الفرعية Σ
+  set_parent_to_sum: اضبط الأصلي = Σ
+  set_parent_to_sum_tooltip: اضبط الإجمالي للأصلي ليساوي مجموع الفرعية واحفظ
+  save_children: حفظ الفرعية
+  set_parent_weight_first: اضبط وزن الأصلي أولاً
+  weight_matches: ✓ متطابق
+  weight_over: زيادة %{n}
+  weight_remaining: متبقي %{n}
+  weight_saved: تم الحفظ
+  weight_failed_to_save: فشل الحفظ
+  weight_network_error: 'خطأ في الشبكة: %{message}'
+  weights_sum_must_be_positive: يجب أن يكون مجموع أوزان البنود الفرعية أكبر من 0
+  points_must_be_positive: يجب أن تكون النقاط أكبر من 0
+  set_parent_total_confirm: اضبط إجمالي الأصلي على %{sum} نقطة واحفظ؟
+  grandparent_sum_mismatch: مجموع البنود الفرعية للجد لم يعد متطابقًا — أعد التوزيع في المستوى الأعلى.
+  children_sum_mismatch: 'مجموع الفرعية (%{sum}) لا يتطابق مع الإجمالي الجديد. أعد توزيع الأوزان أدناه.'
+  save_changes: حفظ التغييرات
+  discard_modifications: تجاهل التغييرات
+  my_profile: ملفي الشخصي
+  change_image: تغيير الصورة
+  remove_image: إزالة الصورة
+  first_last_name: الاسم الأول والأخير
+  my_email: بريدي الإلكتروني
+  organization: المنظمة
+  title: العنوان
+  account_created_on: تاريخ إنشاء الحساب
+  platform_settings: إعدادات المنصة
+  email_notifications: إشعارات البريد الإلكتروني
+  receive_notifications_description: تلقي إشعارات حول التحديثات المهمة
+  receive_notifications_via_email: تلقي الإشعارات عبر البريد الإلكتروني
+  view_in_app: عرض في التطبيق
+  notification_email_footer: تلقيت هذا البريد لأنك مفعل إشعارات البريد الإلكتروني
+    في إعدادات حسابك.
+  daily: يومي
+  weekly: أسبوعي
+  monthly: شهري
+  at_5_pm: في الساعة 5 مساءً
+  at_8_am: في الساعة 8 صباحاً
+  at_12_pm: في الساعة 12 ظهراً
+  at_6_pm: في الساعة 6 مساءً
+  export_data: تصدير البيانات
+  delete_my_account: حذف حسابي
+  not_set: غير محدد
+  not_assigned: غير معين
+  n_a: غير متاح
+  and: و
+  saving: جاري الحفظ...
+  audit_log:
+    assignment:
+      by: بواسطة
+      UPDATE_ASSIGNMENT_CONTENT: تم تحديث محتوى التعيين
+      UPDATE_ASSIGNMENT_CONTENT_with_chars: تم تحديث محتوى التعيين (%{char_count})
+      char_count:
+        one: حرف واحد
+        other: "%{count} أحرف"
+      EVALUATE_ASSIGNMENT_approved: تم اعتماد التعيين بنسبة %{score}٪ (%{role})
+      EVALUATE_ASSIGNMENT_approved_no_score: تم اعتماد التعيين (%{role})
+      EVALUATE_ASSIGNMENT_rejected: تم رفض التعيين بنسبة %{score}٪ (%{role})
+      EVALUATE_ASSIGNMENT_rejected_no_score: تم رفض التعيين (%{role})
+      EVALUATE_ASSIGNMENT_approved_no_role: تم اعتماد التعيين بنسبة %{score}٪
+      EVALUATE_ASSIGNMENT_rejected_no_role: تم رفض التعيين بنسبة %{score}٪
+      EVALUATE_ASSIGNMENT_approved_simple: تم اعتماد التعيين
+      EVALUATE_ASSIGNMENT_rejected_simple: تم رفض التعيين
+      EVALUATE_ASSIGNMENT_auditor_reviewed: قام المدقق بمراجعة التعيين
+      doc_count:
+        one: مستند واحد
+        other: "%{count} مستندات"
+      LINK_DOCUMENTS_TO_ASSIGNMENT: تم ربط %{doc_count} بالتعيين
+      LINK_DOCUMENTS_TO_ASSIGNMENT_with_names: تم ربط %{doc_count} بالتعيين (%{names})
+      LINK_DOCUMENTS_TO_ASSIGNMENT_with_names_more: تم ربط %{doc_count} بالتعيين (%{names}
+        و%{more_count} أخرى)
+      UNLINK_DOCUMENT_FROM_ASSIGNMENT: تم إلغاء ربط المستند
+      UNLINK_DOCUMENT_FROM_ASSIGNMENT_with_name: تم إلغاء ربط المستند "%{name}"
+    evaluator_roles:
+      quality_manager: مدير الجودة
+      auditor: مدقق
+      unknown: غير معروف
+    tool:
+      default_tool: أداة
+      default_standard: معيار
+      default_user: مستخدم
+      clauses_count:
+        one: بند واحد
+        other: "%{count} بنود"
+      change_name: تم تحديث الاسم
+      change_description: تم تحديث الوصف
+      change_business_rules: تم تحديث القواعد التجارية
+      standard_removed: "، تم إزالة المعيار من الأداة"
+      CREATE_TOOL: "تم إنشاء الأداة \"%{tool_name}\""
+      UPDATE_TOOL: "تم تحديث الأداة \"%{tool_name}\""
+      UPDATE_TOOL_single: "تم تحديث الأداة \"%{tool_name}\"، %{change}"
+      UPDATE_TOOL_multiple: "تم تحديث الأداة \"%{tool_name}\": %{changes}"
+      DELETE_TOOL: "تم حذف الأداة \"%{tool_name}\""
+      LINK_STANDARD_TO_TOOL: "تم ربط المعيار \"%{standard_name}\" بالأداة \"%{tool_name}\" (%{clauses})"
+      UNLINK_STANDARD_FROM_TOOL: "تم إلغاء ربط المعيار \"%{standard_name}\" من الأداة \"%{tool_name}\" (%{clauses})"
+      ASSIGN_USER_TO_TOOL_SUBCHECKPOINT: "تم تعيين %{user_name} إلى الأداة \"%{tool_name}\""
+      ASSIGN_AUDITOR_TO_TOOL_SUBCHECKPOINT: "تم تعيين %{user_name} مدققاً للأداة \"%{tool_name}\""
+      UNASSIGN_USER_FROM_TOOL_SUBCHECKPOINT: "تم إلغاء تعيين %{user_name} من الأداة \"%{tool_name}\""
+    company:
+      default_company: شركة
+      CREATE_COMPANY: "تم إنشاء الشركة \"%{company_name}\""
+      DELETE_COMPANY: "تم حذف الشركة \"%{company_name}\""
+      UPDATE_COMPANY_LICENSE_SEATS: "تم تغيير مقاعد الترخيص للشركة \"%{company_name}\" من %{old_seats} إلى %{new_seats}"
+    user:
+      default_user: مستخدم
+      default_role: مستخدم
+      permissions_added: "مضاف: %{list}"
+      permissions_removed: "محذوف: %{list}"
+      ACTIVATE_USER: "تم تفعيل المستخدم \"%{user_name}\""
+      DEACTIVATE_USER: "تم إلغاء تفعيل المستخدم \"%{user_name}\""
+      UPDATE_USER_PERMISSIONS: "تم تحديث صلاحيات المستخدم \"%{user_name}\""
+      UPDATE_USER_PERMISSIONS_with_changes: "تم تحديث صلاحيات المستخدم \"%{user_name}\" (%{changes})"
+      CREATE_USER_INVITATION: "تم إرسال دعوة إلى \"%{user_name}\" (%{role})"
+      CREATE_USER_INVITATION_with_company: "تم إرسال دعوة إلى \"%{user_name}\" (%{role}) لشركة \"%{company_name}\""
+      UPDATE_USER_NAME: "تم تحديث اسم المستخدم إلى \"%{user_name}\""
+      UPDATE_USER_NAME_from: "تم تغيير اسم المستخدم من \"%{old_name}\" إلى \"%{user_name}\""
+      ACCEPT_USER_INVITATION: "قبل المستخدم \"%{user_name}\" الدعوة"
+      USER_LOGIN: "سجّل المستخدم \"%{user_name}\" دخوله"
+  date:
+    formats:
+      default: "%d %b %Y"
+      medium: "%d %b %Y"
+      short: "%d %b"
+      long: "%d %b %Y الساعة %I:%M %p"
+      time: "%I:%M %p"
+  time:
+    formats:
+      default: "%d %b %Y %I:%M %p"
+      medium: "%d %b %Y"
+      short: "%d %b %I:%M %p"
+      long: "%d %b %Y الساعة %I:%M %p"
+      time: "%I:%M %p"
+  open: مفتوح
+  assigned: معين
+  in_progress: قيد التنفيذ
+  closed: مغلق
+  priority: الأولوية
+  priority_levels:
+    low: أولوية منخفضة
+    medium: أولوية متوسطة
+    high: أولوية مرتفعة
+  total_ai_actions: إجمالي إجراءات الذكاء الاصطناعي
+  total_credits_used: إجمالي الائتمانات المستخدمة
+  most_used_feature: الميزة الأكثر استخداماً
+  top_credit_cost_activities: أعلى الأنشطة تكلفة للأرصدة
+  personal_most_used_activities: أنشطتي الأكثر استخداماً
+  all_time: كل الوقت
+  last_30_days: آخر 30 يوماً
+  ai_usage_over_time: استخدام الذكاء الاصطناعي بمرور الوقت
+  usage_by_action_type: الاستخدام حسب نوع الإجراء
+  ai_activity: نشاط الذكاء الاصطناعي
+  available_credits: الائتمانات المتاحة
+  credits_remaining: الائتمانات المتبقية
+  credit_usage_over_time: استخدام الائتمانات بمرور الوقت
+  no_data_available: لا توجد بيانات
+  no_activity_logged_yet: لم يتم تسجيل أي نشاط بعد
+  by: بواسطة
+  none: لا شيء
+  ai_action_names:
+    generate_capa_actions: إنشاء إجراءات
+    generate_capa_questionnaire: إنشاء استبيان
+    suggest_capa_clauses: اقتراح بنود
+    regenerate_root_cause: إعادة إنشاء السبب الجذري
+  top_credit_spenders: أكثر المستخدمين إنفاقاً للائتمانات
+  most_used_activities: الأنشطة الأكثر استخداماً
+  times: مرات
+  credit_assignments_subtitle: وزع أرصدة الشركة على المستخدمين الفرديين.
+  company_credits_available: رصيد الشركة المتاح
+  assigned_credits: الأرصدة المخصصة
+  total_credits: إجمالي الرصيد
+  credit_assignment_updated: تم تحديث تخصيص الرصيد بنجاح.
+  company_user_not_found: لم يتم العثور على مستخدم الشركة.
+  no_company_users_available: لا يوجد مستخدمون للشركة بعد.
+  split_credits_equally: قسّم
+  split_credits_equally_confirm: هل تريد توزيع جميع أرصدة الشركة المتاحة بالتساوي
+    على كل المستخدمين؟
+  split_credits_equally_confirm_company: هل تريد توزيع جميع الأرصدة المتاحة لشركة
+    %{company} بالتساوي على جميع المستخدمين؟
+  credits_split_equally_success: تم توزيع أرصدة الشركة المتاحة بالتساوي على جميع المستخدمين.
+  credits_split_equally_no_users: لا يوجد مستخدمون للشركة لاستلام الأرصدة.
+  credits_split_equally_no_credits: لا توجد أرصدة متاحة للتوزيع.
+  credits_split_equally_error: 'تعذّر توزيع الأرصدة: %{message}'
+  reset_credits: إعادة التعيين
+  reset_credits_confirm: هل تريد ضبط الأرصدة المخصصة لجميع المستخدمين إلى 0 وإعادتها
+    إلى رصيد الشركة؟
+  reset_credits_confirm_company: هل تريد ضبط الأرصدة المخصصة لجميع المستخدمين في %{company}
+    إلى 0 وإعادتها إلى رصيد الشركة؟
+  credits_reset_success: تمت إعادة تعيين جميع الأرصدة المخصصة للمستخدمين إلى 0 وإعادتها
+    إلى رصيد الشركة.
+  credits_reset_no_users: لا يوجد مستخدمون للشركة لإعادة التعيين.
+  credits_reset_error: 'تعذّر إعادة تعيين الأرصدة: %{message}'
+  insufficient_user_credits: لديك فقط %{available} رصيداً مخصصاً لحسابك، بينما يتطلب
+    هذا الإجراء %{needed} رصيداً. يرجى التواصل مع المسؤول لزيادة رصيدك.
+  no_clauses_linked: لا توجد بنود مرتبطة بعد
+  capa_management_requirements:
+    generate_actions:
+      button_requirement: أكمل الاستبيان والسبب الجذري قبل إنشاء الإجراءات.
+      errors:
+        missing_questionnaire: أكمل الاستبيان قبل إنشاء الإجراءات التصحيحية والوقائية.
+        missing_root_cause: أضف السبب الجذري قبل إنشاء الإجراءات التصحيحية والوقائية.
+  capa_export:
+    headers:
+      capa_code: رمز CAPA
+      title: العنوان
+      description: الوصف
+      status: الحالة
+      priority: الأولوية
+      source: المصدر
+      standard: المعيار
+      due_date: تاريخ الاستحقاق
+      assigned_to: مُعيّن إلى
+      created_at: تاريخ الإنشاء
+    actions:
+      headers:
+        capa_code: رمز CAPA
+        title: العنوان
+        action_type: نوع الإجراء
+        status: الحالة
+        due_date: تاريخ الاستحقاق
+        notes: ملاحظات
+        assigned_to: مُعيّن إلى
+        created_at: تاريخ الإنشاء
+  capa_sources:
+    internal_audit: تدقيق داخلي
+    external_audit: تدقيق خارجي
+    customer_complaint: شكوى عميل
+    supplier_issue: مشكلة مورد
+  capa_management_ui:
+    statuses:
+      open: مفتوح
+      assigned: مسندة
+      in_progress: قيد التنفيذ
+      closed: مغلق
+    status_labels:
+      overdue: متأخرة
+      in_time: في الوقت المحدد
+  capa_management_activity:
+    na: غير متوفر
+    create_capa: تم إنشاء CAPA "‎%{title}‎"
+    update_capa: تم تحديث CAPA
+    update_capa_single: تم تحديث CAPA، %{change}
+    update_capa_multiple: 'تم تحديث CAPA: %{changes}'
+    delete_capa: تم حذف CAPA "‎%{title}‎"
+    archive_capa: تمت أرشفة CAPA "‎%{title}‎"
+    unarchive_capa: تم إلغاء أرشفة CAPA "‎%{title}‎"
+    status_changed: تم تغيير الحالة من %{old} إلى %{new}
+    title_updated: تم تحديث العنوان
+    description_updated: تم تحديث الوصف
+    priority_changed: تم تغيير الأولوية من %{old} إلى %{new}
+    due_date_set: تم تعيين تاريخ الاستحقاق إلى %{new}
+    due_date_removed: تمت إزالة تاريخ الاستحقاق
+    due_date_changed: تم تغيير تاريخ الاستحقاق من %{old} إلى %{new}
+    standard_updated: تم تحديث المعيار
+    source_changed: تم تغيير المصدر من %{old} إلى %{new}
+    action_created: تم إنشاء إجراء %{type} "‎%{title}‎"
+    action_updated: تم تحديث إجراء %{type} "‎%{title}‎"
+    action_deleted: تم حذف إجراء %{type} "‎%{title}‎"
+    clause_linked: تم ربط البند "‎%{clause}‎"
+    clause_unlinked: تم إلغاء ربط البند "‎%{clause}‎"
+    document_linked: تم ربط المستند "‎%{filename}‎"
+    document_unlinked: تم إلغاء ربط المستند "‎%{filename}‎"
+    actions_generated:
+      one: تم إنشاء إجراء واحد
+      other: تم إنشاء %{count} إجراء
+    questionnaire_created_manual: تم إنشاء الاستبيان يدوياً
+    questionnaire_generated_ai: تم إنشاء الاستبيان باستخدام الذكاء الاصطناعي
+    root_cause_regenerated: تم إعادة توليد السبب الجذري
+    root_cause_regenerated_ai: تم إعادة توليد السبب الجذري باستخدام الذكاء الاصطناعي
+    root_cause_edited: تم تعديل السبب الجذري
+    questionnaire_edited: تم تعديل الاستبيان يدوياً
+    assign_user: تم تعيين %{user}
+    unassign_user: تم إلغاء تعيين %{user}
+    assign_user_to_action: تم تعيين %{user} إلى الإجراء "%{action_title}"
+    unassign_user_from_action: تم إلغاء تعيين %{user} من الإجراء "%{action_title}"
+    clause_suggested:
+      one: تم اقتراح بند واحد
+      other: تم اقتراح %{count} بند
+    list_filters:
+      due_date: تاريخ الاستحقاق
+      assigned_to_label: مُعيّن إلى
+      priority_placeholder: اختر الأولوية
+      clear_filters: مسح الفلاتر
+    confirmations:
+      default_title: تأكيد الإجراء
+      confirm_button: تأكيد
+      delete_title: تأكيد الحذف
+      delete_button: حذف
+      unlink_title: تأكيد إلغاء الربط
+      unlink_button: إلغاء الربط
+      remove_title: تأكيد الإزالة
+      remove_button: إزالة
+    archives:
+      empty:
+        none: لا توجد CAPA مؤرشفة.
+        filtered: لا توجد CAPA مؤرشفة تطابق فلاترك الحالية.
+      alerts:
+        select_unarchive: يرجى اختيار CAPA واحدة على الأقل لإلغاء الأرشفة.
+        select_delete: يرجى اختيار CAPA واحدة على الأقل للحذف.
+      confirmations:
+        unarchive_single: هل أنت متأكد أنك تريد إلغاء أرشفة هذه CAPA؟
+        unarchive_multiple: هل أنت متأكد أنك تريد إلغاء أرشفة %{count} CAPA؟
+        delete_single: هل أنت متأكد أنك تريد حذف هذه CAPA؟ لا يمكن التراجع عن هذا
+          الإجراء.
+        delete_multiple: هل أنت متأكد أنك تريد حذف %{count} CAPA؟ لا يمكن التراجع
+          عن هذا الإجراء.
+      errors:
+        unarchive_single: حدث خطأ أثناء إلغاء أرشفة CAPA
+        unarchive_multiple: حدث خطأ أثناء إلغاء أرشفة CAPA
+        delete_single: حدث خطأ أثناء حذف CAPA
+        delete_multiple: حدث خطأ أثناء حذف CAPA
+    list_page:
+      empty:
+        with_cta_html: لا توجد CAPA. %{create_link} للبدء.
+        create_first: أنشئ أول CAPA لك
+      alerts:
+        select_archive: يرجى اختيار CAPA واحدة على الأقل للأرشفة.
+        select_delete: يرجى اختيار CAPA واحدة على الأقل للحذف.
+      confirmations:
+        archive_single: هل أنت متأكد أنك تريد أرشفة هذه CAPA؟
+        archive_multiple: هل أنت متأكد أنك تريد أرشفة %{count} CAPA؟
+        delete_single: هل أنت متأكد أنك تريد حذف هذه CAPA؟ لا يمكن التراجع عن هذا
+          الإجراء.
+        delete_multiple: هل أنت متأكد أنك تريد حذف %{count} CAPA؟ لا يمكن التراجع
+          عن هذا الإجراء.
+      errors:
+        archive_single: حدث خطأ أثناء أرشفة CAPA
+        archive_multiple: حدث خطأ أثناء أرشفة CAPA
+        delete_single: حدث خطأ أثناء حذف CAPA
+        delete_multiple: حدث خطأ أثناء حذف CAPA
+    notifications:
+      capa_not_found: لم يتم العثور على CAPA
+      no_company_context: لا يوجد سياق شركة حالي
+      no_capas_selected: لم يتم تحديد أي CAPA
+      archive_success: تمت أرشفة CAPA بنجاح
+      unarchive_success: تم إلغاء أرشفة CAPA بنجاح
+      bulk_archive_success: تمت أرشفة %{count} CAPA بنجاح
+      bulk_archive_partial: 'تمت أرشفة %{count} CAPA بنجاح. حدثت بعض الأخطاء: %{errors}'
+      bulk_archive_error: 'فشل أرشفة CAPA: %{errors}'
+      archive_failed: 'فشل أرشفة CAPA %{id}: %{error}'
+      bulk_unarchive_success: تم إلغاء أرشفة %{count} CAPA بنجاح
+      bulk_unarchive_partial: 'تم إلغاء أرشفة %{count} CAPA بنجاح. حدثت بعض الأخطاء:
+        %{errors}'
+      bulk_unarchive_error: 'فشل إلغاء أرشفة CAPA: %{errors}'
+      unarchive_failed: 'فشل إلغاء أرشفة CAPA %{id}: %{error}'
+      bulk_delete_success: تم حذف %{count} CAPA بنجاح
+      bulk_delete_partial: 'تم حذف %{count} CAPA بنجاح. حدثت بعض الأخطاء: %{errors}'
+      bulk_delete_error: 'فشل حذف CAPA: %{errors}'
+      delete_failed: 'فشل حذف CAPA %{id}: %{error}'
+    export_modal:
+      title: تصدير CAPA
+      description: حدد خيارات التصدير لتنزيل بيانات CAPA
+      file_type_label: نوع الملف
+      csv_label: CSV
+      export_button: تصدير
+      filters:
+        title: الفلاتر
+        subtitle: سيتم تضمين CAPA التي تطابق هذه الفلاتر فقط.
+        status_label: الحالة
+        status_options:
+          all: جميع الحالات
+        priority_label: الأولوية
+        priority_placeholder: أي أولوية
+        due_date_from_label: تاريخ الاستحقاق من
+        due_date_to_label: تاريخ الاستحقاق إلى
+        assignees_label: المستخدمون المعيّنون
+        assignees_toggle_label: تنشيط فلتر المستخدمين المعيّنين
+        assignees_hint: اضغط مع الاستمرار على Ctrl (ويندوز) أو Command (ماك) لاختيار
+          عدة مستخدمين.
+        archived_label: حالة الأرشفة
+        archived_options:
+          active: نشطة فقط
+          archived: مؤرشفة فقط
+          all: نشطة + مؤرشفة
+    overview_cards:
+      open_capas: الحالات المفتوحة
+      assistant_interactions: تفاعلات المساعد
+      high_priority: أولوية مرتفعة
+      view_list: عرض القائمة
+      overdue: متأخرة
+      avg_resolution_time: المدة الزمنية لإغلاق الحالات
+      days_label: أيام
+      ai_assessed: تقييم الذكاء الاصطناعي
+    overview_charts:
+      resolved_over_time: CAPA المغلقة بمرور الوقت
+      closed_vs_total: CAPA المغلقة مقابل الإجمالي
+      closed_capa: CAPA مغلقة
+      total_capa: إجمالي CAPA
+      status_breakdown: توزيع الحالات حسب الحالة
+      most_assigned: أكثر CAPA مُعيّنة
+      assignee_name: اسم المكلّف
+      nr_assigned: عدد التعيينات
+      no_assignments: لا توجد تعيينات بعد
+    overview_tables:
+      assigned_to_me: مُعيّنة لي
+      no_assigned: لا توجد CAPA مُعيّنة لك
+      overdue_capas: CAPA المتأخرة
+      days_overdue_header: أيام التأخير
+      days_overdue_count:
+        zero: "0 أيام"
+        one: يوم واحد
+        two: يومان
+        few: "%{count} أيام"
+        many: "%{count} يوماً"
+        other: "%{count} يوم"
+      no_overdue: لا توجد CAPA متأخرة
+      title_assigned_to_me: مُعيّنة لي
+      title_overdue_capas: CAPA المتأخرة
+  capa_actions:
+    types:
+      corrective: تصحيحي
+      preventive: وقائي
+    statuses:
+      started: بدأ
+      in_progress: قيد التنفيذ
+      done: منجز
+    list_filters:
+      due_date_placeholder: اختر تاريخ الاستحقاق
+      assigned_to_label: مُعيّن إلى
+      priority_placeholder: اختر الأولوية
+      clear_filters: مسح الفلاتر
+  tool_setup_management: إعداد وإدارة الأدوات
+  add_new_tool: إضافة أداة جديدة
+  select_all: تحديد الكل
+  select_tool: تحديد الأداة %{name}
+  delete_selected_tools: حذف المحدد
+  delete_tools_title: حذف الأدوات
+  bulk_delete_tools_confirm: هل أنت متأكد أنك تريد حذف %{n} أداة؟ لا يمكن التراجع عن هذا الإجراء.
+  bulk_delete_tools_no_selection: يرجى تحديد أداة واحدة على الأقل للحذف.
+  bulk_delete_tools_success:
+    one: تم حذف أداة واحدة بنجاح
+    other: تم حذف %{count} أدوات بنجاح
+  bulk_delete_tools_partial: "تم حذف %{count} أداة. أخطاء: %{errors}"
+  bulk_delete_tools_error: "فشل حذف الأدوات: %{errors}"
+  create_new_tool: إنشاء أداة جديدة
+  edit_tool: تعديل الأداة
+  update_tool: تحديث الأداة
+  tool_translation_marked_as_reviewed: تمت المراجعة بنجاح
+  tool_translation_not_found: لم يتم العثور على الترجمة
+  untitled_tool: أداة بدون عنوان
+  back_to_tools: العودة إلى الأدوات
+  tool_name: اسم الأداة
+  search_tools: البحث عن الأدوات
+  general_information: المعلومات العامة
+  assigned_users_auditor: المستخدمون المعينون والمدقق
+  assigned_users: المستخدمون المعينون
+  select_users: اختر المستخدمين
+  select_multiple_users_description: اختر عدة مستخدمين يمكنهم العمل على المهام لهذه
+    الأداة
+  auditor: مدقق
+  select_auditor_description: اختر مدققاً واحداً سيقوم بتقييم المهام لهذه الأداة
+  select_an_auditor: اختر مدققاً
+  checkpoint_name: اسم نقطة التحقق
+  subcheckpoint: نقطة التحقق الفرعية
+  scoring_type: نوع التقييم
+  scoring: التقييم
+  min_score: الحد الأدنى للنتيجة
+  max_score: الحد الأقصى للنتيجة
+  min_percentage: "الحد الأدنى %"
+  max_percentage: "الحد الأقصى %"
+  choices: "الخيارات"
+  select_option: اختر خياراً
+  number: رقم
+  percentage: نسبة مئوية
+  multiple_choice: اختيار متعدد
+  add_sub_checkpoint: إضافة نقطة تحقق فرعية
+  add_choice: إضافة خيار
+  choice_option: خيار الاختيار
+  linked_standard_clauses: المعيار المرتبط والبنود
+  link_standard: ربط المعيار
+  linked_standard: المعيار المرتبط
+  top_level_clauses: البنود ذات المستوى الأعلى
+  total_points: إجمالي النقاط
+  terminal_clauses: البنود الطرفية
+  date_linked: تاريخ الربط
+  unlink_clauses: إلغاء ربط البنود
+  no_standards_linked: لا توجد معايير مرتبطة. انقر على "ربط المعيار" لإضافة واحد.
+  unlink_clauses_from: إلغاء ربط البنود من %{standard}
+  unlink_clauses_description: اختر البنود ذات المستوى الأعلى التي تريد إلغاء ربطها.
+    سيتم إزالة جميع البنود الطرفية تحت كل منها.
+  unlink_selected: إلغاء ربط المحدد
+  link_top_level_clauses: ربط البنود ذات المستوى الأعلى
+  link_top_level_clauses_description: اختر معياراً، أضف البنود ذات المستوى الأعلى،
+    وحدد النقاط لكل منها. سيتم ربط جميع البنود الطرفية تلقائياً.
+  select_a_standard: اختر معياراً
+  add_top_level_clauses: إضافة البنود ذات المستوى الأعلى
+  add_top_level_clauses_description: اختر البنود واحداً تلو الآخر وحدد النقاط لكل
+    منها. سيتم ربط جميع البنود الطرفية تحت كل منها تلقائياً.
+  select_a_clause_to_add: اختر بنداً لإضافته
+  add_clause: إضافة بند
+  selected_clauses: البنود المحددة
+  link_clauses: ربط البنود
+  table_of_content: جدول المحتويات
+  elements: العناصر
+  attributes: السمات
+  no_checkpoints_found: لم يتم العثور على نقاط تحقق. أضف نقاط التحقق لرؤيتها هنا.
+  business_rules: القواعد التجارية
+  business_rules_description: تحديد القواعد التي تقيد كيفية حساب النتائج
+  edit_rules: تعديل القواعد
+  rule: قاعدة
+  rule_type: نوع القاعدة
+  select_rule_type: اختر نوع القاعدة
+  average_cannot_exceed_attribute: لا يمكن أن يتجاوز متوسط جميع السمات سمة محددة
+  target_attribute: السمة المستهدفة
+  target_attribute_description: اختر السمة التي لا يمكن أن يتجاوزها المتوسط
+  select_an_attribute: اختر سمة
+  no_attributes_available: لا توجد سمات متاحة. أضف نقاط التحقق ونقاط التحقق الفرعية
+    أولاً.
+  description_optional: الوصف (اختياري)
+  add_business_rule: إضافة قاعدة تجارية
+  save_rules: حفظ القواعد
+  no_business_rules_configured: لم يتم تكوين قواعد تجارية بعد.
+  scores: النتائج
+  average_score: متوسط النتيجة
+  score: النتيجة
+  assignees: المعينون
+  summary: ملخص
+  action: إجراء
+  view: عرض
+  evaluate: تقييم
+  eval: تقييم
+  no_evaluations_yet: لا توجد تقييمات بعد
+  not_started: لم يبدأ
+  approved: موافق عليه
+  pending_qm: في انتظار مدير الجودة
+  under_review: قيد المراجعة
+  in_drafts: في المسودات
+  needs_changes: يحتاج إلى تغييرات
+  assigned_to_users: معين إلى %{count} مستخدم(ين)
+  assign_a_member: تعيين عضو
+  assign_member_description: تعيين عضو لنقاط تحقق محددة. يمكنهم تحميل/ربط الأدلة أو
+    كتابة المحتوى.
+  assign_to: تعيين إلى
+  select_a_user: اختر مستخدماً
+  due_date_optional: تاريخ الاستحقاق (اختياري)
+  assign_member: تعيين عضو
+  assign_users: تعيين المستخدمين
+  assign_users_description: تعيين عدة مساهمين ومدقق واحد لهذه السمة. يمكن للمساهمين
+    تحميل الأدلة وكتابة المحتوى، بينما سيقوم المدقق بتقييم عملهم.
+  currently_assigned: المعينون حالياً
+  add_contributors: إضافة مساهمين
+  add_contributors_description: اختر المستخدمين الذين سيعملون على هذه السمة
+  selected_contributors: المساهمون المحددون
+  no_contributors_selected: لم يتم تحديد مساهمين
+  auditor_description: اختر مدققاً واحداً سيقوم بتقييم هذه السمة
+  confirm_deassign: تأكيد إلغاء التعيين
+  deassign: إلغاء التعيين
+  deassign_confirmation: هل أنت متأكد أنك تريد إلغاء تعيين هذا المستخدم؟ لا يمكن التراجع
+    عن هذا الإجراء إذا كان التعيين يحتوي على عمل قيد التنفيذ.
+  assign_users_to: تعيين المستخدمين إلى %{checkpoint} - %{subcheckpoint}
+  no_tools_linked: لا توجد أدوات مرتبطة بهذا البند.
+  ai_key_insight: رؤية رئيسية للذكاء الاصطناعي
+  last_edited: آخر تعديل
+  created_tools: الأدوات المنشأة
+  filtered_tools: الأدوات المفلترة
+  last_edited_sort: آخر تعديل
+  creation_date: تاريخ الإنشاء
+  no_tools_found: لم يتم العثور على أدوات.
+  create_your_first_tool: أنشئ أداةك الأولى
+  no_tools_found_matching: لم يتم العثور على أدوات تطابق "%{search}".
+  clear_search: مسح البحث
+  terminal_clause: بند طرفي
+  terminal_clauses_plural: بند(بنود) طرفي(ة)
+  points: نقاط
+  pts: نقطة
+  permissions:
+    add_companies: إضافة شركات
+    update_company_profiles: تحديث ملفات الشركات
+    add_users: إضافة مستخدمين
+    increase_credit: زيادة الرصيد
+    remove_companies: إزالة شركات
+    assign_standards_to_companies: تعيين معايير للشركات
+    activate_deactivate_users: تنشيط/إلغاء تنشيط المستخدمين
+    modify_license_seats: تعديل مقاعد الترخيص
+    manage_tools: إدارة الأدوات
+  assignments:
+    show:
+      evidence_and_content: الأدلة والمحتوى
+      no_content_yet: لا يوجد محتوى بعد. انقر تعديل لإضافة المحتوى.
+      editing: جاري التعديل...
+      enter_content_placeholder: أدخل محتواك هنا...
+      last_edited_by: آخر تعديل بواسطة
+      last_edited_on: 'آخر تعديل في:'
+      unknown: غير معروف
+      role_user: مستخدم
+      loading_documents: جاري تحميل المستندات...
+      confirm_unlink_title: تأكيد إلغاء الربط
+      failed_to_unlink: فشل إلغاء ربط المستند. يرجى المحاولة مرة أخرى.
+      allocated_points_for: 'النقاط المخصصة لـ %{code}: <strong>%{pts} نقطة</strong>'
+      uploaded_document_fallback: مستند مرفوع.pdf
+      terminal_clause_name: اسم البند الطرفي
+      contributors: 'المساهمون:'
+      auditor: مدقق
+      assigned_by: 'تم التعيين بواسطة:'
+      no_due_date: لا يوجد تاريخ استحقاق
+      evaluation_percent: نسبة التقييم
+      evaluate: تقييم
+      evaluate_qm: تقييم (مدير الجودة)
+      re_evaluate: إعادة التقييم
+      re_evaluate_qm: إعادة التقييم (مدير الجودة)
+      approved: موافق عليه
+      rejected: مرفوض
+      not_yet_evaluated: لم يتم التقييم بعد
+      auditor_approved_pending_qm: موافقة المدقق (في انتظار مدير الجودة)
+      link_document_title: ربط مستند بـ %{checkpoint} - %{subcheckpoint}
+      link_document_description: اختر المستندات من مكتبتك لربطها كدليل لهذا التعيين.
+      select_folder: اختر مجلداً
+      selected_count: "%{count} محدد"
+      loading_folders: جاري تحميل المجلدات...
+      no_folders_found: لم يتم العثور على مجلدات
+      create_folder_message: أنشئ مجلداً لتنظيم مستنداتك.
+      view_all_files: عرض جميع الملفات
+      score: النتيجة
+      comments: التعليقات
+      you: "(أنت)"
+      no_comments_yet: لا توجد تعليقات بعد.
+      activity_log: سجل النشاط
+      no_activity_logged: لم يتم تسجيل أي نشاط بعد
+      link_or_upload_evidence: ربط أو تحميل دليل
+      download: تحميل
+      unlink: إلغاء الربط
+      evaluate_subcheckpoint: تقييم %{name}
+      evaluate_description: قم بالتقييم بإعطاء نتيجة وحالة. يمكنك الموافقة أو رفض
+        الحالة الحالية. إذا رفضت، فهذا يعني أن التغييرات مطلوبة. قدم ملاحظات مفصلة
+        لإعلام المعين بما تريد تحديثه.
+      how_do_you_evaluate: كيف تقيم المحتوى الحالي؟
+      approve: موافقة
+      approve_description: أنا راضٍ عن المحتوى الحالي
+      reject: رفض
+      reject_description: أريد طلب بعض التعديلات.
+      let_assignee_know: 'أخبر المعين بمدى أدائه:'
+      select_one_option: اختر خياراً واحداً أدناه. سيتم حساب النسبة المئوية بناءً
+        على اختيارك.
+      not_selected: لم يتم الاختيار
+      no_multiple_choice_options: لم يتم تكوين خيارات الاختيار المتعدد لهذه السمة.
+      enter_score: أدخل نتيجة بين %{min} و %{max}
+      feedback_optional: ملاحظات (اختياري)
+      feedback_placeholder: قدم ملاحظات مفصلة لمساعدة المعين على التحسين...
+      feedback_required: الملاحظات مطلوبة عند رفض التقييم
+      submit_evaluation: إرسال التقييم
+      cancel: إلغاء
+      confirm_unlink: هل أنت متأكد أنك تريد إلغاء ربط هذا المستند؟
+      score_calculation_note: سيتم حساب النسبة المئوية تلقائياً.
+      characters: حرف
+      link_documents: ربط مستند(ات)
+  attachment_not_found: لم يتم العثور على المرفق
+  attachment_unlink_failed: تعذر إلغاء ارتباط المرفق
+  attachment_unlinked_successfully: تم إلغاء ارتباط المرفق بنجاح
+  checkpoint_date: نقطة التحقق / التاريخ
+  companies_management_description: عرض وإدارة جميع الشركات في النظام
+  enter_description: أدخل الوصف...
+  expand: عرض المزيد
+  file_information: معلومات الملف
+  file_not_available: الملف غير متاح
+  id: المعرّف
+  item_added: تمت إضافة العنصر بنجاح!
+  items_linked_successfully: تمت العملية بنجاح
+  items_partially_linked: تم ربط %{count} عنصر مع وجود بعض الأخطاء.
+  link_clauses_to: ربط البنود بـ
+  link_items_failed: تعذر ربط العناصر.
+  mime_type: نوع الملف (MIME)
+  no_companies_message: لا توجد شركات مسجلة في النظام حتى الآن.
+  no_description: لا يوجد وصف
+  no_standards_assigned_to_company: لم يتم تعيين أي معايير لشركتك حتى الآن. يرجى التواصل
+    مع مسؤول النظام.
+  no_status: لا توجد حالة
+  save_all_changes: حفظ جميع التغييرات
+  select_clauses_to_link: حدد البنود المراد ربطها بهذا الإجراء التصحيحي (CAPA).
+  select_company_to_view_library: اختر شركة لعرض مكتبتها.
+  selected_items: العناصر المحددة
+  unknown: غير معروف
+  unlink: إلغاء الربط
+  unsaved_changes: تغييرات غير محفوظة
+  upload_delete_failed: تعذر حذف الملف المرفوع.
+  upload_deleted_successfully: تمت العملية بنجاح
+  upload_not_found: لم يتم العثور على Upload
+  upload_not_in_folder: لم يتم العثور على الملف في هذا المجلد.
+  upload_updated_successfully: تمت العملية بنجاح
+  deleted_user: مستخدم محذوف
+  assessments:
+    read_only_banner: "أنت تعرض هذا التقييم في وضع القراءة فقط."
+    needs_changes_banner: "تم طلب تغييرات. يرجى مراجعة الملاحظات وتحديث عملك."
+    pending_approval_banner: "هذا التقييم قيد المراجعة. يمكنك الموافقة عليه أو رفضه."
+    allocated_points: "النقاط المخصصة"
+    current_score: "الدرجة الحالية"
+    tool: "الأداة"
+    auditor: "المدقق"
+    no_auditor: "لم يتم تعيين مدقق"
+    assign_auditor_btn: "تعيين مدقق"
+    change_auditor: "تغيير المدقق"
+    previous: "السابق"
+    next: "التالي"
+    checkpoints: "نقاط التحقق"
+    checkpoint: "نقطة تحقق"
+    no_tool_linked: "لا توجد أداة تقييم مرتبطة بهذا البند. اتصل بالمسؤول لربط أداة تقييم قبل بدء التقييم."
+    back_to_clause_list: "العودة إلى قائمة البنود"
+    reject: "رفض"
+    approve: "موافقة"
+    feedback_placeholder: "اذكر السبب..."
+    save_draft: "حفظ المسودة"
+    submit_for_review: "تقديم للمراجعة"
+    saved: "تم حفظ التقييم بنجاح."
+    not_terminal: "التقييم متاح فقط للبنود الطرفية."
+    no_access: "ليس لديك صلاحية الوصول إلى هذا التقييم."
+    evidence: "الأدلة"
+    upload_file: "رفع ملف"
+    link_evidence: "ربط دليل"
+    link_evidence_title: "ربط دليل بـ %{checkpoint}"
+    link_evidence_description: "تصفح مكتبة المستندات واختر الملفات لربطها كأدلة."
+    document: "مستند"
+    no_evidence: "لم يتم رفع أدلة بعد"
+    no_contributor: "لم يتم تعيين مساهم"
+    contributors: "المساهمون"
+    assign_contributor: "تعيين مساهم"
+    assign_contributor_description: "اختر المساهمين الذين سيكتبون التعليقات ويربطون الأدلة لنقطة التحقق هذه."
+    add_contributors_checkpoint_description: "اختر المستخدمين الذين سيعملون على نقطة التحقق هذه."
+    edit_contributors: "تعديل المساهمين"
+    edit_assignments: "تعديل التعيينات"
+    assign_users: "تعيين مستخدمين"
+    assigned_users: "المستخدمون المعينون"
+    no_assignee: "لم يتم تعيين أحد"
+    describe_placeholder: "وصف %{attribute}..."
+    assign_auditor_title: "تعيين مدقق"
+    assign_auditor_description: "اختر مدققاً لهذا التقييم. سيتمكن المدقق من مراجعة جميع نقاط التحقق."
+    assign_auditor_submit: "تعيين المدقق"
+    current_auditor: "المدقق الحالي"
+    select_auditor: "اختر مدققاً"
+    select_auditor_prompt: "اختر مدققاً..."
+    auditor_assigned: "تم تعيين المدقق بنجاح."
+    auditor_not_found: "لم يتم العثور على المدقق."
+    cannot_be_auditor_and_contributor: "هذا المستخدم مساهم بالفعل في هذا التقييم ولا يمكنه أن يكون المدقق أيضاً."
+    reevaluate: "إعادة التقييم"
+    reevaluate_prompt: "لماذا تقوم بإعادة تقييم هذا التقييم؟"
+    reevaluate_confirm: "إعادة التقييم"
+    reevaluate_reason_placeholder: "اشرح سبب الحاجة إلى إعادة تقييم هذا التقييم..."
+    reevaluate_reason_required: "يرجى تقديم سبب لإعادة تقييم هذا التقييم."
+    evaluation_statuses:
+      approved: "معتمد"
+      rejected: "مرفوض"
+      auditor_reviewed: "تمت مراجعته من المدقق"
+      reopened: "تم إعادة الفتح"
+    comments_title: "التعليقات والملاحظات"
+    no_comments: "لا توجد تعليقات أو ملاحظات بعد."
+    write_comment_placeholder: "اكتب تعليقاً أو ملاحظة..."
+    comment_hint: "مرئي لجميع المشاركين في هذا التقييم."
+    post_comment: "نشر التعليق"
+    activity_log_title: "سجل النشاط"
+    no_activity: "لم يتم تسجيل أي نشاط بعد."
+    scoring: "التقييم"
+    scoring_help: "قيّم كل سمة باستخدام أشرطة التمرير. يتم حساب الدرجة الإجمالية تلقائياً باستخدام الأوزان والحدود المُعدّة."
+    overall: "الإجمالي"
+    formula_capped: "المجموع_المرجح = %{weighted_sum} | الحد (%{cap_attr}) = %{cap_val} | الإجمالي = MIN(%{weighted_sum}, %{cap_val}) = %{overall}%"
+    formula_simple: "المجموع_المرجح = %{weighted_sum} | الإجمالي = %{overall}%"
+    evidence_count:
+      one: "ملف مرفق واحد"
+      other: "%{count} ملفات مرفقة"
+    statuses:
+      not_started: "لم يبدأ"
+      in_drafts: "مسودة"
+      in_progress: "قيد التنفيذ"
+      under_review: "قيد المراجعة"
+      auditor_approved: "موافقة المدقق"
+      approved: "موافق عليه"
+      needs_changes: "التغييرات مطلوبة"
+  audit_log_assessment:
+    save_draft: "تم حفظ التقييم %{clause_code} كمسودة"
+    save_draft_content: "تم حفظ التقييم %{clause_code} كمسودة. المحتوى: %{content}"
+    submit_for_review: "تم تقديم التقييم %{clause_code} للمراجعة"
+    approved: "تمت الموافقة على التقييم %{clause_code}"
+    approved_with_feedback: "تمت الموافقة على التقييم %{clause_code}: \"%{feedback}\""
+    rejected: "تم رفض التقييم %{clause_code}"
+    rejected_with_feedback: "تم رفض التقييم %{clause_code}: \"%{feedback}\""
+    reopened: "تم إعادة فتح التقييم %{clause_code} لإعادة التقييم"
+    reopened_with_feedback: "تم إعادة فتح التقييم %{clause_code} لإعادة التقييم: \"%{feedback}\""
+    comment: "تعليق على التقييم %{clause_code}"
+    comment_with_feedback: "تعليق على التقييم %{clause_code}: \"%{feedback}\""
+    auditor_assigned: "تم تعيين المدقق %{auditor_name} للتقييم %{clause_code}"

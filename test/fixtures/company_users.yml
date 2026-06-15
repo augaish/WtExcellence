@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# one:
+#   company: one
+#   user: one
+#   role: company_admin
+#
+# two:
+#   company: two
+#   user: two
+#   role: company_contributor

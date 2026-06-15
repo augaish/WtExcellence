@@ -1,0 +1,145 @@
+<div class="bg-gray-50 min-h-screen" data-controller="comparison">
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 sm:py-4 sticky top-0 z-10">
+    <div class="flex flex-col gap-4 mb-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div class="flex items-center space-x-2 sm:space-x-4">
+          <%= link_to standard_path(@standard), class: "flex items-center space-x-2 text-gray-600 hover:text-gray-900 min-h-[44px]" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            <span class="text-sm sm:text-base"><%= t('back_to_standard') %></span>
+          <% end %>
+          <div class="h-6 w-px bg-gray-300 hidden sm:block"></div>
+          <h1 class="text-lg sm:text-xl font-bold text-gray-900 break-words"><%= @standard.code %></h1>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-4">
+          <!-- Version Selectors -->
+          <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-4">
+            <!-- Old Version Selector (Left Side) -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:space-x-2" data-controller="choices-select">
+              <label class="text-xs sm:text-sm text-gray-600"><%= t('old_version') || 'Old Version' %>:</label>
+              <select id="old-version-selector" 
+                      data-choices-select-target="select"
+                      onchange="updateComparison()"
+                      class="w-full">
+                <% @available_versions.each do |version| %>
+                  <option value="<%= version.id %>" <%= 'selected' if version.id == @compare_version.id %>>
+                    <%= version.version_label %> (<%= version.status %>)
+                  </option>
+                <% end %>
+              </select>
+            </div>
+
+            <!-- Separator -->
+            <span class="text-gray-400 text-center sm:text-left">vs</span>
+
+            <!-- New Version Selector (Right Side) -->
+            <div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:space-x-2" data-controller="choices-select">
+              <label class="text-xs sm:text-sm text-gray-600"><%= t('new_version') || 'New Version' %>:</label>
+              <select id="new-version-selector" 
+                      data-choices-select-target="select"
+                      onchange="updateComparison()"
+                      class="w-full">
+                <% @available_versions.each do |version| %>
+                  <option value="<%= version.id %>" <%= 'selected' if version.id == @current_version.id %>>
+                    <%= version.version_label %> (<%= version.status %>)
+                  </option>
+                <% end %>
+              </select>
+            </div>
+          </div>
+
+          <!-- Exit Compare Mode -->
+          <%= link_to edit_standard_path(@standard, version_id: @current_version.id), 
+              class: "px-4 py-3 sm:py-2 min-h-[44px] bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-center text-[16px] sm:text-sm font-medium" do %>
+            <%= t('exit_compare_mode') %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Change Summary -->
+      <div class="flex flex-wrap items-center gap-2 sm:space-x-6 text-xs sm:text-sm">
+        <div class="flex items-center">
+          <span class="px-2 sm:px-3 py-1 rounded-full bg-green-100 text-green-800 font-medium">
+            <%= t('added') %>: <%= @diff[:summary][:added_count] %>
+          </span>
+        </div>
+        <div class="flex items-center">
+          <span class="px-2 sm:px-3 py-1 rounded-full bg-red-100 text-red-800 font-medium">
+            <%= t('removed') %>: <%= @diff[:summary][:removed_count] %>
+          </span>
+        </div>
+        <div class="flex items-center">
+          <span class="px-2 sm:px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 font-medium">
+            <%= t('modified') %>: <%= @diff[:summary][:modified_count] %>
+          </span>
+        </div>
+        <div class="flex items-center">
+          <span class="px-2 sm:px-3 py-1 rounded-full bg-gray-100 text-gray-800 font-medium">
+            <%= t('unchanged') %>: <%= @diff[:summary][:unchanged_count] %>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Side-by-Side Panels -->
+  <div class="comparison-panels flex flex-col lg:flex-row" data-comparison-target="panels">
+    <!-- Old Version Panel -->
+    <div class="panel panel-old" data-comparison-target="panelOld">
+      <div class="panel-header">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 break-words">
+          <%= t('version') %> <%= @compare_version.version_label %>
+        </h3>
+        <span class="text-xs sm:text-sm text-gray-500">
+          <%= @compare_version.created_at.strftime("%d.%m.%Y") %>
+        </span>
+      </div>
+      <div class="panel-content">
+        <%= render partial: 'clause_tree', locals: { 
+          tree: @diff[:tree], 
+          side: 'old' 
+        } %>
+      </div>
+    </div>
+
+    <!-- New Version Panel -->
+    <div class="panel panel-new" data-comparison-target="panelNew">
+      <div class="panel-header">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 break-words">
+          <%= t('version') %> <%= @current_version.version_label %> (<%= t('new') %>)
+        </h3>
+        <span class="text-xs sm:text-sm text-gray-500">
+          <%= @current_version.created_at.strftime("%d.%m.%Y") %>
+        </span>
+      </div>
+      <div class="panel-content">
+        <%= render partial: 'clause_tree', locals: { 
+          tree: @diff[:tree], 
+          side: 'new' 
+        } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function updateComparison() {
+    const oldVersionId = document.getElementById('old-version-selector').value;
+    const newVersionId = document.getElementById('new-version-selector').value;
+    
+    if (oldVersionId === newVersionId) {
+      alert('Cannot compare a version with itself');
+      return;
+    }
+    
+    // Build URL with both version parameters
+    const url = '<%= compare_standard_path(@standard, compare_with: 'OLD_PLACEHOLDER') %>'
+      .replace('OLD_PLACEHOLDER', oldVersionId) + 
+      '&version_id=' + newVersionId;
+    
+    window.location.href = url;
+  }
+</script>

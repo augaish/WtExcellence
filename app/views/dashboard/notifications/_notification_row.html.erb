@@ -1,0 +1,44 @@
+<%# Renders a single notification row. Local: notification, optional: rtl %>
+<%
+  notification = local_assigns[:notification]
+  rtl = local_assigns.fetch(:rtl, false)
+  # Each row links to read_and_go for this notification's id only (marks only this one as seen)
+  link_path = dashboard_notification_read_and_go_path(notification.id)
+  time_ago = time_ago_in_words(notification.created_at)
+  icon_class = case notification.kind
+    when "capa_assigned" then "bg-[#F7F7FD] text-[#5C3984]"
+    when "capa_unassigned" then "bg-amber-50 text-amber-600"
+    when "capa_evidence_attached" then "bg-[#F7F7FD] text-[#5C3984]"
+    when "tool_assigned" then "bg-green-50 text-green-600"
+    when "tool_unassigned" then "bg-amber-50 text-amber-600"
+    when "assignment_evaluated" then "bg-green-50 text-green-600"
+    else "bg-[#F7F7FD] text-[#5C3984]"
+  end
+%>
+<%= link_to link_path, class: "flex gap-3 px-4 py-3 hover:bg-[#F7F7FD] transition-colors #{rtl ? 'flex-row-reverse' : ''}", data: { turbo_frame: "_top" } do %>
+  <div class="w-10 h-10 rounded-full <%= icon_class %> flex items-center justify-center flex-shrink-0">
+    <% case notification.kind %>
+    <% when "capa_assigned" %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2-2.25A4.125 4.125 0 1110.625 2.25 4.125 4.125 0 0114 6.375zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+    <% when "capa_unassigned" %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
+    <% when "capa_evidence_attached" %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
+    <% when "tool_assigned" %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
+    <% when "tool_unassigned" %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z M6 6h.008v.008H6V6z"/></svg>
+    <% when "assignment_evaluated" %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+    <% else %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+    <% end %>
+  </div>
+  <div class="flex-1 min-w-0">
+    <p class="text-sm text-[#0D1120]"><%= notification_display_title(notification) %></p>
+    <p class="text-xs text-gray-500 mt-0.5"><%= time_ago %> <%= t('ago', default: 'ago') %></p>
+  </div>
+  <% unless notification.read? %>
+    <span class="w-2 h-2 rounded-full bg-[#5C3984] flex-shrink-0 mt-2 <%= rtl ? 'order-first' : '' %>" title="<%= t('unread', default: 'Unread') %>"></span>
+  <% end %>
+<% end %>

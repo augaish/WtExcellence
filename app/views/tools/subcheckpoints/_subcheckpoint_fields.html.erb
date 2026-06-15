@@ -1,0 +1,59 @@
+<div data-nested-form-wrapper class="subcheckpoint border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+  <%= f.hidden_field :_destroy %>
+  
+  <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1.5fr_1fr_1fr_auto]">
+    <!-- Checkpoint Name column (empty for sub-checkpoint) -->
+    <div class="text-left p-4">
+    </div>
+    
+    <!-- Sub-Checkpoint Name -->
+    <div class="text-left p-4">
+      <%= f.text_field :name, placeholder: "Sub-Checkpoint Name", class: "w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984] focus:border-transparent" %>
+    </div>
+    
+    <!-- Description -->
+    <div class="text-left p-4">
+      <%= f.text_area :description, placeholder: "Description", rows: 2, class: "w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984] focus:border-transparent" %>
+    </div>
+    
+    <div class="text-left p-4" data-controller="choices-select">
+      <%= f.select :scoring_type,
+          options_for_select([
+            ["Number", "Number"],
+            ["Percentage", "Percentage"],
+            ["Multiple Choice", "Multiple Choice"]
+          ], f.object&.scoring_type),
+          { prompt: "Select option" },
+          { class: "w-full", data: { "choices-select-target": "select" } } %>
+    </div>
+    
+    <!-- Min Score -->
+    <div class="text-left p-4">
+      <%= f.text_field :min_score, placeholder: "type here", class: "w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984] focus:border-transparent" %>
+    </div>
+    
+    <!-- Max Score -->
+    <div class="text-left p-4">
+      <%= f.text_field :max_score, placeholder: "type here", class: "w-full px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984] focus:border-transparent" %>
+    </div>
+
+
+    <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1.5fr_1fr_1fr_auto]">
+      <div class="text-left p-4">
+      </div>
+
+      <div class="text-left p-4">
+        <button type="button"
+              data-action="nested-form#remove"
+              class="text-gray-400 hover:text-red-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2ß∂" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        fdafdafdafdafdafad
+      </button>
+      </div>
+
+    </div>
+    
+  </div>
+</div>

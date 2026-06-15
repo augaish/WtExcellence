@@ -1,0 +1,101 @@
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <!-- Average Compliance by Standard -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3"
+       data-controller="async-standards-compliance"
+       data-async-standards-compliance-url-value="<%= dashboard_overview_standards_compliance_path %>">
+    <div class="mb-4 px-3">
+      <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('average_compliance_by_standard') %></h3>
+    </div>
+    <div class="overflow-x-auto rounded-lg border border-[#E3E3E3]">
+      <table class="w-full min-w-[520px]">
+        <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+          <tr>
+            <th class="text-start p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('title') %></span></th>
+            <th class="text-start p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('total_vers') %></span></th>
+            <th class="text-start p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('compliance_percent') %></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @standards_compliance&.any? %>
+            <% @standards_compliance.each do |item| %>
+              <tr class="border-b border-[#E3E3E3]" data-standard-id="<%= item[:standard].id %>">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">
+                    <%= item[:standard].display_name(current_locale.to_s) %>
+                  </span>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#0D1120] font-medium"><%= item[:total_versions] %></span>
+                </td>
+                <td class="p-4" data-async-standards-compliance-target="cell">
+                  <span class="inline-block w-5 h-5 border-2 border-[#5C3984]/30 border-t-[#5C3984] rounded-full animate-spin" role="status" aria-label="Loading"></span>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="3" class="p-4 text-center text-sm text-[#797C81]"><%= t('no_standards_available') %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Overdue CAPA -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3">
+    <div class="mb-4 px-3 flex justify-between items-center">
+      <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('overdue_capa') %></h3>
+      <%= link_to dashboard_capa_management_list_path(status: 'overdue'), class: "text-sm font-semibold text-[#5C3984] underline" do %>
+        <%= t('view_list') %>
+      <% end %>
+    </div>
+    <div class="overflow-x-auto rounded-lg border border-[#E3E3E3]">
+      <table class="w-full min-w-[520px]">
+        <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+          <tr>
+            <th class="text-start p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('title') %></span></th>
+            <th class="text-start p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('priority') %></span></th>
+            <th class="text-center p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('days_overdue') %></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @overdue_capas_list&.any? %>
+            <% @overdue_capas_list.each do |capa| %>
+              <% priority_color = case capa.priority
+                                   when 'high' then '#EA4034'
+                                   when 'medium' then '#EC71DD'
+                                   when 'low' then '#64A3EB'
+                                   else '#gray-400'
+                                   end %>
+              <% days_overdue = capa.due_date ? (@date_to - capa.due_date).to_i : 0 %>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">
+                    <%= truncate(capa.title, length: 40) %>
+                  </span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full" style="background: <%= priority_color %>"></div>
+                    <span class="text-sm text-[#0D1120] font-medium"><%= capa.priority&.capitalize || '-' %></span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#C73636] font-medium">
+                    <%= days_overdue == 1 ? "1 #{t('day')}" : "#{days_overdue} #{t('days')}" %>
+                  </span>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="3" class="p-4 text-center text-sm text-[#797C81]"><%= t('no_overdue_capas') %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+

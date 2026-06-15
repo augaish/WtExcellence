@@ -1,0 +1,264 @@
+---
+ar:
+  capa_management_ui:
+    tabs:
+      add_non_conformity: إضافة حالة عدم مطابقة
+      evidence: الأدلة
+      analysis: التحليل
+      activity_log: سجل الأنشطة
+      list_view: قائمة الحالات
+      board_view: عرض اللوحة
+      archived: مؤرشف
+      search_placeholder: ابحث في CAPA
+      clear_search: مسح
+      export_button: تصدير
+      bulk:
+        archive_selected: أرشفة العناصر المحددة
+        unarchive_selected: إلغاء أرشفة العناصر المحددة
+        delete_selected: حذف العناصر المحددة
+    header:
+      go_back: عودة
+      edit: تعديل
+      delete: حذف
+      due_prefix: مستحق في %{date}
+      priority_labels:
+        high: أولوية مرتفعة
+        medium: أولوية متوسطة
+        low: أولوية منخفضة
+        none: بدون أولوية
+      source_labels:
+        audit_fallback: تدقيق
+      title_label: 'العنوان:'
+      description_label: 'الوصف:'
+      more_assignees: "+ %{count} أخرى"
+    evidence_tab:
+      documents_title: المستندات / المرفقات
+      link_document: ربط مستند
+      upload_document: تحميل مستند
+      table_headers:
+        file_name: اسم الملف
+        type: النوع
+        uploaded_by: تم التحميل بواسطة
+        date: التاريخ
+        notes: ملاحظات
+        actions: ''
+      empty_documents: لا توجد مستندات مرفقة بعد
+      mime_type_na: غير متوفر
+      uploaded_by_fallback:
+        user: مستخدم
+        system: النظام
+      linked_clauses_title: البنود / نقاط التحقق المرتبطة
+      link_clauses_button: ربط البنود/البنود الفرعية
+      clause_table_headers:
+        standard: المعيار
+        clause: البند/البند الفرعي
+        checkpoint: نقطة التحقق
+        actions: ''
+      sub_clause_label: "(بند فرعي)"
+      checkpoint_empty: "-"
+      unlink_clause:
+        button_title: إزالة
+        confirm: هل أنت متأكد أنك تريد إلغاء ربط هذا البند؟
+        failure: فشل إلغاء ربط البند. يرجى المحاولة مرة أخرى.
+        error: حدث خطأ. يرجى المحاولة مرة أخرى.
+      unlink_document:
+        button_title: إزالة
+        confirm: هل أنت متأكد أنك تريد إلغاء ربط هذا المستند؟
+        success: تم إلغاء ربط المستند بنجاح
+        failure: فشل إلغاء ربط المستند. يرجى المحاولة مرة أخرى.
+        missing_ids: معرّف CAPA أو الملف مفقود
+        error: حدث خطأ. يرجى المحاولة مرة أخرى.
+    activity_tab:
+      by: بواسطة
+      empty: لا توجد أنشطة مسجلة بعد
+    analysis_tab:
+      questionnaire_title: الاستبيان
+      edit: تعديل
+      regenerate: إعادة التوليد
+      credits_suffix: "%{credits} رصيد"
+      save: حفظ
+      cancel: إلغاء
+      question_header: السؤال
+      answer_header: الإجابة
+      add_question: إضافة سؤال
+      root_cause_title: ملخص السبب الجذري
+      generate_questionnaire: توليد الاستبيان
+      write_questionnaire: كتابة الاستبيان
+      empty_questionnaire: لم يتم توليد أي استبيان بعد.
+      root_cause_pending: سيتم توليد السبب الجذري مع الاستبيان.
+      corrective_preventive_title: الإجراءات التصحيحية والوقائية
+      assign_actions: تعيين الإجراءات
+      generate_actions: توليد الإجراءات
+      actions_empty: لم يتم تعيين أي إجراءات بعد.
+      more_assignees: "+%{count} أخرى"
+      no_assignees: لا يوجد مكلفون
+      assign_button: تعيين
+      notes_placeholder: "-"
+      delete_action_confirm: هل أنت متأكد أنك تريد حذف هذا الإجراء؟ لا يمكن التراجع
+        عن هذا الإجراء.
+      delete_action_failed: فشل حذف الإجراء
+      delete_action_network: خطأ في الشبكة. يرجى المحاولة مرة أخرى.
+      deleting: جارٍ الحذف...
+      delete: حذف
+    modals:
+      new_action:
+        title: إضافة حالة عدم التزام
+        subtitle: أنشئ حالة عدم مطابقة جديدة لمعالجة مشكلات الجودة.
+        title_label: امنحها عنواناً*
+        title_placeholder: اكتب عنوان حالة عدم المطابقة هنا
+        description_label: امنحها وصفاً*
+        description_placeholder: صف المشكلة أو حالة عدم المطابقة.
+        source_label: اختر المصدر*
+        related_standard_label: المعيار المرتبط (اختياري)
+        select_standard_placeholder: اختر المعيار
+        priority_label: الأولوية (اختياري)
+        submit_button: إضافة حالة عدم مطابقة
+      edit_action:
+        title: تعديل الإجراء
+        subtitle: تحديث تفاصيل CAPA.
+        title_label: العنوان*
+        title_placeholder: اكتب عنوان CAPA هنا
+        description_label: الوصف*
+        description_placeholder: صف المشكلة
+        source_label: المصدر*
+        related_standard_label: المعيار المرتبط (اختياري)
+        select_standard_placeholder: اختر المعيار
+        priority_label: الأولوية (اختياري)
+      assign_action:
+        title: تعيين إجراء
+        subtitle: أنشئ إجراءً تصحيحياً أو وقائياً جديداً.
+        title_label: العنوان*
+        title_placeholder: اكتب عنوان الإجراء هنا
+        action_type_label: نوع الإجراء*
+        notes_label: ملاحظات (اختياري)
+        notes_placeholder: أضف أي ملاحظات إضافية
+        submit_button: إنشاء إجراء
+      link_document:
+        title: ربط مستند بـ %{capa_title}
+        subtitle: اختر المستندات من مكتبتك لربطها بهذه CAPA.
+        select_folder: اختر مجلداً
+        selected_count:
+          zero: "0 محدد"
+          one: عنصر واحد محدد
+          two: عنصران محددان
+          few: "%{count} عناصر محددة"
+          many: "%{count} عنصراً محدداً"
+          other: "%{count} عنصر محدد"
+        loading_folders: جارٍ تحميل المجلدات...
+        no_folders: لم يتم العثور على مجلدات
+        no_folders_hint: أنشئ مجلداً لتنظيم مستنداتك.
+        loading_documents: جارٍ تحميل المستندات...
+        submit: ربط المستندات
+        linking: جارٍ ربط المستند...
+        success_fallback: تم ربط المستند بنجاح، ولكن حدثت مشكلة في عرض الإشعار.
+        success_basic: تم ربط المستند بنجاح
+        failed: فشل ربط المستند. يرجى المحاولة مرة أخرى.
+        generic_error: حدث خطأ. يرجى المحاولة مرة أخرى.
+        request_failed: فشل الطلب برمز الحالة %{status}
+        all_documents: جميع المستندات
+        view_all_documents: عرض كل المستندات
+        files_label: ملفات
+        file_label: ملف
+        updated_label: تم التحديث %{date}
+        open_label: فتح
+        untitled: غير معنْون
+        user_label: مستخدم
+        remove: إزالة
+        view_all_files: عرض جميع الملفات
+        load_folders_failed: فشل تحميل المجلدات
+        load_folders_error: حدث خطأ أثناء تحميل المجلدات
+        load_documents_failed: فشل تحميل المستندات
+        load_documents_error: حدث خطأ أثناء تحميل المستندات
+        file_types:
+          pdf: PDF
+          excel: إكسل
+          word: وورد
+          image: صورة
+          text: نص
+          email: بريد إلكتروني
+          file: ملف
+      link_clauses:
+        searching: جارٍ البحث...
+        search_coming_soon: سيتم توفير البحث قريباً...
+        smart_suggest_label: اقتراح ذكي
+        smart_suggest_loading: جارٍ الاقتراح...
+        smart_suggest_analyzing: جارٍ تحليل CAPA واقتراح البنود ذات الصلة...
+        smart_suggest_error: فشل اقتراح البنود
+        no_results: لا توجد نتائج
+        add: إضافة
+        added: تمت الإضافة
+        clause_added: تمت إضافة البند!
+        select_at_least_one: يرجى اختيار بند واحد على الأقل
+        capa_id_missing: معرّف CAPA غير موجود
+        linking: جارٍ الربط...
+        link_success: تم ربط %{count} بند بنجاح!
+        link_failed: فشل ربط البنود. يرجى المحاولة مرة أخرى.
+        generic_error: حدث خطأ. يرجى المحاولة مرة أخرى.
+        search_error: فشل البحث. يرجى المحاولة مرة أخرى.
+        standard_fallback: معيار
+        type_labels:
+          clause: بند
+          sub_clause: بند فرعي
+      questionnaire:
+        title: توليد استبيان
+        subtitle: راجع ووافق على كل زوج سؤال/إجابة. يمكنك إعادة توليد أي زوج قبل قبوله.
+        progress: السؤال %{current} من %{total}
+        regenerate: إعادة التوليد
+        accept: قبول
+        generating: جارٍ توليد السؤال...
+        complete_title: اكتمل الاستبيان!
+        complete_message: تم توليد وقبول جميع الأسئلة الخمسة.
+        complete: مكتمل
+        question_label: السؤال %{number}
+        answer_label: الإجابة
+        accepted_label: تم القبول
+        accepted_heading: السؤال %{number} - تم القبول
+      general_confirmation:
+        title: تأكيد الإجراء
+        message: هل أنت متأكد أنك تريد المتابعة؟
+      delete_confirmation:
+        title: تأكيد الحذف
+        message: هل أنت متأكد أنك تريد حذف هذه CAPA؟ لا يمكن التراجع عن هذا الإجراء.
+      archive_confirmation:
+        title: أرشفة CAPA
+        message: هل أنت متأكد أنك تريد أرشفة هذه CAPA؟
+        archive: أرشفة
+    actions:
+      create_title: تعيين إجراء
+      create_subtitle: أنشئ إجراءً تصحيحياً أو وقائياً جديداً.
+      create_submit: إنشاء إجراء
+      create_loading: جارٍ الإنشاء...
+      edit_title: تعديل الإجراء
+      edit_subtitle: تحديث تفاصيل الإجراء.
+      edit_submit: حفظ التغييرات
+      edit_loading: جارٍ الحفظ...
+      delete_confirm: هل أنت متأكد أنك تريد حذف هذا الإجراء؟ لا يمكن التراجع عن هذا
+        الإجراء.
+      delete_loading: جارٍ الحذف...
+      delete_error: فشل حذف الإجراء
+      delete_button: حذف
+      network_error: خطأ في الشبكة. يرجى المحاولة مرة أخرى.
+      generate_loading: جارٍ التوليد...
+      generate_error: فشل توليد الإجراءات
+    assign_assignees_modal:
+      title: تعيين أشخاص
+      subtitle: اختر من يجب تعيينه لهذا الإجراء.
+      search_placeholder: ابحث عن مستخدم...
+      no_assignees_yet: لم يتم تعيين أحد بعد — استخدم الحقل أعلاه لإضافة أشخاص.
+    select_company:
+      title: اختر الشركة
+      subtitle: اختر الشركة التي تريد العمل معها.
+      users_count:
+        zero: "0 مستخدم"
+        one: مستخدم واحد
+        two: مستخدمان
+        few: "%{count} مستخدمين"
+        many: "%{count} مستخدماً"
+        other: "%{count} مستخدم"
+      standards_count:
+        zero: "0 معيار"
+        one: معيار واحد
+        two: معياران
+        few: "%{count} معايير"
+        many: "%{count} معياراً"
+        other: "%{count} معيار"

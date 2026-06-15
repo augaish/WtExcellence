@@ -1,0 +1,64 @@
+<dialog id="assignStandardDialog-<%= standard.id %>" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-2xl w-full mx-4" data-controller="modal assign-standard dialog-no-backdrop-close" data-assign-standard-no-versions-option-value="<%= t('no_published_versions_available') %>" data-assign-standard-no-versions-message-value="<%= t('no_published_versions_available_for_standard') %>" data-assign-standard-loading-value="<%= t('loading') %>" data-assign-standard-error-standard-id-value="<%= t('error_could_not_find_standard_id') %>" data-assign-standard-error-loading-versions-value="<%= t('error_loading_versions') %>" data-assign-standard-loading-companies-value="<%= t('loading_companies') %>" data-assign-standard-no-available-companies-value="<%= t('no_available_companies') %>" data-assign-standard-error-loading-companies-value="<%= t('error_loading_companies') %>">
+    <div class="p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] break-words"><%= t('assign_standard') %></h2>
+            <button type="button" data-action="click->modal#close" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <%= form_with url: "#", method: :post, local: true, data: { assign_standard_target: "form", turbo_frame: "_top" } do |form| %>
+            <div class="space-y-4">
+                <p class="text-sm text-[#797C81]"><%= t('assign_standard_message') %></p>
+                
+                <div class="space-y-4 choices-overflow-visible" data-assign-standard-target="content">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-medium text-[#0D1120]">
+                            <%= t('select_version') %>
+                        </label>
+                        <select id="assign_version_select" 
+                                data-assign-standard-target="versionSelect"
+                                data-action="change->assign-standard#onVersionChange"
+                                name="version_id"
+                                required
+                                class="h-12 sm:h-11 px-4 py-3 sm:py-2 border border-[#E3E3E3] rounded-lg text-[16px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent">
+                            <option value=""><%= t('loading') %>...</option>
+                        </select>
+                        <input type="hidden" name="standard_id" data-assign-standard-target="standardIdInput" value="">
+                    </div>
+
+                    <div class="mb-6" data-controller="company-selector" data-assign-standard-target="companySelector">
+                        <label class="block text-sm font-semibold text-[#0D1120] mb-3"><%= t('assign_to_companies') %></label>
+
+                        <!-- Selected Companies Container -->
+                        <div data-company-selector-target="selectedList" class="space-y-2 mb-3">
+                            <!-- Companies will be added here dynamically -->
+                        </div>
+
+                        <!-- Add Company Selector (Choices.js with search) -->
+                        <div>
+                            <select 
+                                data-company-selector-target="select" 
+                                data-action="change->company-selector#addSelectedCompany"
+                                class="w-full focus:outline-none">
+                                <option value=""><%= t('choose_company') %></option>
+                                <!-- Companies will be loaded dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col-reverse sm:flex-row <%= rtl? ? 'sm:justify-start sm:flex-row-reverse' : 'sm:justify-end' %> gap-2 <%= rtl? ? 'sm:space-x-reverse sm:space-x-3' : 'sm:space-x-3' %> pt-4 border-t border-[#E3E3E3]">
+                    <button type="button" data-action="click->modal#close" class="w-full sm:w-auto px-6 py-3 sm:py-2 min-h-[44px] border border-[#E3E3E3] text-[#0D1120] rounded-lg hover:bg-[#F7F7FD] transition-colors text-[16px] sm:text-sm font-medium">
+                        <%= t('cancel') %>
+                    </button>
+                    <button type="submit" class="w-full sm:w-auto px-6 py-3 sm:py-2 min-h-[44px] bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium text-[16px] sm:text-sm">
+                        <%= t('assign') %>
+                    </button>
+                </div>
+            </div>
+        <% end %>
+    </div>
+</dialog>

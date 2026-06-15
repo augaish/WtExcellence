@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# one:
+#   email: user1@example.com
+#   name: Test User One
+#   is_active: true
+#   locale_code: en
+#   encrypted_password: <encrypted_password_here>
+#
+# two:
+#   email: user2@example.com
+#   name: Test User Two
+#   is_active: true
+#   locale_code: en
+#   encrypted_password: <encrypted_password_here>

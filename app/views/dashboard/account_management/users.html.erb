@@ -1,0 +1,112 @@
+<%= content_for :title, t('account_management') %>
+
+<div class="min-h-screen bg-gray-50" data-controller="account-management">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-4 mb-6 sm:mb-8">
+      <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#0D1120] break-words"><%= t('account_management') %></h1>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+        <!-- Search Bar -->
+        <%= form_with url: dashboard_account_management_users_path, method: :get, local: true, class: "flex items-center gap-2 flex-1 sm:flex-initial" do |f| %>
+          <%= f.text_field :search, 
+              placeholder: t('search_users_placeholder'), 
+              value: params[:search],
+              class: "flex-1 sm:flex-none px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] w-full sm:w-64 text-[16px] sm:text-sm" %>
+          <!-- Preserve filter params -->
+          <%= hidden_field_tag :role, params[:role] if params[:role].present? %>
+          <%= hidden_field_tag :status, params[:status] if params[:status].present? %>
+          <%= hidden_field_tag :sort, params[:sort] if params[:sort].present? %>
+          <button type="submit" class="p-3 sm:p-2 min-w-[44px] min-h-[44px] sm:min-h-auto bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </button>
+          <% if params[:search].present? %>
+            <%= link_to dashboard_account_management_users_path(role: params[:role], status: params[:status], sort: params[:sort]), class: "p-3 sm:p-2 min-w-[44px] min-h-[44px] sm:min-h-auto text-gray-500 hover:text-gray-700 flex items-center justify-center" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            <% end %>
+          <% end %>
+        <% end %>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <button type="button" 
+                  class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium flex items-center justify-center gap-2 min-h-[44px] text-xs sm:text-sm"
+                  data-action="click->account-management#openAddUserModal">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            <span><%= t('add_new_user') %></span>
+          </button>
+          <% if current_user&.can_manage_companies? %>
+            <button type="button" 
+                    class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium flex items-center justify-center gap-2 min-h-[44px] text-xs sm:text-sm"
+                    data-action="click->account-management#openAddCompanyModal">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+              </svg>
+              <span><%= t('add_company') %></span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl" data-controller="tabs">
+      <!-- Tab Navigation -->
+      <div class="border-b border-[#E3E3E3] px-4 sm:px-6 overflow-x-auto">
+        <div class="flex space-x-4 sm:space-x-8 min-w-max">
+          <%= link_to dashboard_account_management_users_path, 
+              class: "px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-[#5C3984] border-b-2 border-[#5C3984] whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center" do %>
+            <%= t('site_users') %>
+          <% end %>
+          <% if current_user&.can_manage_companies? %>
+            <%= link_to dashboard_account_management_companies_path, 
+                class: "px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium #{request.path.include?('companies') ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81] hover:text-[#0D1120]'} whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center" do %>
+              <%= t('companies') %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Tab Content -->
+      <div class="p-4 sm:p-6">
+        <%= render partial: 'users_tab' %>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- Add User Modal -->
+  <%= render partial: 'add_user_modal' %>
+  
+  <!-- Permissions Modal (for Super Admin only) -->
+  <% if current_user&.super_admin? %>
+    <%= render partial: 'permissions_modal' %>
+  <% end %>
+  
+  <!-- Add Company Modal -->
+  <% if current_user&.can_manage_companies? %>
+    <%= render partial: 'add_company_modal' %>
+  <% end %>
+  
+  <!-- Permissions Modal (for Super Admin only) -->
+  <% if current_user&.super_admin? %>
+    <%= render partial: 'permissions_modal' %>
+  <% end %>
+  
+  <!-- Change Password Modal (for Super Admin only) -->
+  <% if current_user&.super_admin? %>
+    <%= render partial: 'change_password_modal' %>
+  <% end %>
+  
+  <!-- Change Role Modal (for Super Admin only) -->
+  <% if current_user&.super_admin? %>
+    <%= render partial: 'change_role_modal' %>
+  <% end %>
+</div>
+
+

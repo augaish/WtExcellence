@@ -1,0 +1,265 @@
+        <%
+          level ||= clause.code.count('.')
+          current_locale = I18n.locale.to_s
+          current_translation = clause.clause_translations.find_by(language_code: current_locale)
+          needs_review = current_translation&.needs_review == true
+          other_locale = current_locale == 'en' ? 'ar' : 'en'
+          other_translation = clause.clause_translations.find_by(language_code: other_locale)
+          # Show "needs translation" indicator if the other translation exists and needs review
+          has_untranslated_changes = false
+          other_lang_name = other_locale == 'en' ? t('english') : t('arabic')
+        %>
+<div class="clause-hierarchy bg-white border border-gray-200 rounded-lg p-3 sm:p-4 mb-8 sm:mb-14 mt-8 sm:mt-14 <%= 'border-l-4 border-l-[#5C3984]' if needs_review %>" 
+     data-clause-id="<%= clause.id %>" 
+     data-level="<%= level %>"
+     data-needs-review="<%= needs_review %>">
+    <div>
+        <% if needs_review || has_untranslated_changes %>
+            <div class="flex flex-wrap items-center gap-2 mb-2 sm:ml-11 w-full">
+                <% if needs_review %>
+                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-[#F6EEFF] text-[#5C3984] border border-[#D6C4ED]" title="<%= t('translation_outdated') %>">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <%= t('translation_outdated') %>
+                    </span>
+                <% end %>
+                
+                <% if has_untranslated_changes %>
+                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-[#F6EEFF] text-[#5C3984] border border-[#D6C4ED]" title="<%= t('other_language_modified') %>">
+                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <%= t('needs_translation_for', lang: other_lang_name) %>
+                    </span>
+                <% end %>
+                
+                <% if needs_review %>
+                    <button class="px-3 py-2 min-h-[44px] text-xs sm:text-[11px] bg-[#5C3984] text-white rounded hover:bg-[#4A2F6B] transition-colors" 
+                            data-action="click->clause-editor#markAsReviewed"
+                            data-clause-id="<%= clause.id %>">
+                        <%= t('mark_as_reviewed') %>
+                    </button>
+                <% end %>
+            </div>
+        <% end %>
+        
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+            <div class="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                <div data-drag-handle class="cursor-move p-2 hover:bg-gray-50 rounded flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                    <div class="grid grid-cols-3 gap-1 w-5">
+                        <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                        <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                        <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                        <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                        <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                        <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                    </div>
+                </div>
+
+                <input type="text" value="<%= clause.code %>" readonly class="text-xs sm:text-sm font-semibold text-[#5C3984] w-16 sm:w-20 border-none bg-transparent focus:outline-none rounded px-2 py-1 flex-shrink-0">
+
+                <input type="text" value="<%= clause.title(I18n.locale.to_s) %>" readonly class="flex-1 text-xs sm:text-sm text-[#0D1120] border-none bg-transparent focus:outline-none rounded px-2 py-1 min-w-0 break-words">
+
+                <% if clause.root? %>
+                    <div class="flex items-center gap-1 flex-shrink-0"
+                         data-controller="clause-root-weight"
+                         data-clause-root-weight-clause-id-value="<%= clause.id %>"
+                         data-clause-root-weight-saving-label-value="<%= t('saving') %>"
+                         data-clause-root-weight-saved-label-value="<%= t('weight_saved') %>"
+                         data-clause-root-weight-failed-label-value="<%= t('weight_failed_to_save') %>"
+                         data-clause-root-weight-network-error-label-value="<%= t('weight_network_error', message: '%{message}') %>"
+                         data-clause-root-weight-positive-error-value="<%= t('points_must_be_positive') %>"
+                         data-clause-root-weight-children-mismatch-template-value="<%= t('children_sum_mismatch', sum: '%{sum}') %>">
+                        <span class="text-xs text-[#797C81]"><%= t('weight_label') %>:</span>
+                        <input type="number"
+                               min="0"
+                               step="1"
+                               value="<%= clause.base_points.to_i %>"
+                               data-clause-root-weight-target="input"
+                               class="w-20 px-2 py-1 text-xs text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+                        <span class="text-xs text-[#797C81]"><%= t('pts_unit') %></span>
+                        <button type="button"
+                                data-action="click->clause-root-weight#save"
+                                data-clause-root-weight-target="saveButton"
+                                class="px-2 py-1 text-xs font-medium text-white bg-[#5C3984] rounded hover:bg-[#4A2F6B]">
+                            <%= t('save') %>
+                        </button>
+                    </div>
+                <% else %>
+                    <div class="flex items-center gap-1 flex-shrink-0">
+                        <span class="text-xs text-[#797C81]"><%= t('weight_label') %>:</span>
+                        <input type="number"
+                               min="0"
+                               step="1"
+                               value="<%= clause.base_points.to_i %>"
+                               data-clause-weights-target="childInput"
+                               data-action="input->clause-weights#recalculate"
+                               data-clause-id="<%= clause.id %>"
+                               class="w-20 px-2 py-1 text-xs text-center border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+                        <span class="text-xs text-[#797C81]"><%= t('pts_unit') %></span>
+                    </div>
+                <% end %>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 sm:space-x-2">
+                <button class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded transition-colors" data-action="click->clause-editor#toggleEdit" title="Edit clause">
+                    <%= image_tag asset_path('pencil-icon.svg'), class: "w-4 h-4 max-w-full h-auto" %>
+                </button>
+
+                <button class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-red-600 transition-colors" data-action="click->clause-editor#deleteClause" title="Delete clause">
+                    <%= image_tag asset_path('delete-clause-icon.svg'), class: "w-4 h-4 max-w-full h-auto" %>
+                </button>
+
+            <% if level == 0 %>
+                <button class="px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-medium flex items-center gap-2 bg-[#D6C4ED] text-[#0D1120] rounded-xl hover:opacity-90" data-action="click->clause-editor#addClause">
+                    <%= image_tag asset_path('add-subclause-icon.svg'), class: "w-3 h-3 max-w-full h-auto" %>
+                    <span class="whitespace-nowrap"><%= t('add_sub_clause') %></span>
+                </button>
+            <% else %>
+                <button class="px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-medium flex items-center gap-2 bg-[#FFFFFF] text-[#5C3984] border border-gray-400 rounded-xl hover:bg-gray-50" data-action="click->clause-editor#addClause">
+                    <%= image_tag asset_path('add-subclause-blue-icon.svg'), class: "w-3 h-3 max-w-full h-auto" %>
+                    <span class="whitespace-nowrap"><%= t('add_sub_clause') %></span>
+                </button>
+            <% end %>
+
+            <% if clause.children.empty? %>
+                <button class="px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-medium flex items-center gap-2 bg-[#FFFFFF] text-[#5C3984] border border-gray-400 rounded-xl hover:bg-gray-50" data-action="click->clause-editor#addCheckpoint">
+                    <%= image_tag asset_path('plus-blue-icon.svg'), class: "w-3 h-3 max-w-full h-auto" %>
+                    <span class="whitespace-nowrap"><%= t('add_checkpoint') %></span>
+                </button>
+            <% end %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Always create a checkpoint drop zone, even if empty -->
+    <div class="mt-4 mb-4 <%= rtl? ? 'pr-4 sm:pr-8' : 'pl-4 sm:pl-8' %> checkpoint-drop-zone" data-checkpoints-container data-clause-id="<%= clause.id %>">
+        <div data-checkpoints-list class="space-y-2 mb-4">
+            <% if clause.checklist_items.any? %>
+                <div data-checkpoints-label class="text-sm text-gray-600 mb-2"><%= t('checkpoints') %>:</div>
+                <% clause.checklist_items.ordered.each do |checkpoint| %>
+                    <%
+                      checkpoint_translation = checkpoint.checklist_item_translations.find_by(language_code: current_locale)
+                      checkpoint_needs_review = checkpoint_translation&.needs_review == true
+                      checkpoint_other_translation = checkpoint.checklist_item_translations.find_by(language_code: other_locale)
+                      # Show "needs translation" indicator if the other translation exists and needs review
+                      checkpoint_has_untranslated = checkpoint_other_translation.present? && 
+                                                     checkpoint_other_translation.needs_review == true
+                    %>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2 p-2 bg-gray-50 rounded <%= 'border-l-4 border-l-[#5C3984]' if checkpoint_needs_review %>" 
+                         data-checkpoint-id="<%= checkpoint.id %>"
+                         data-needs-review="<%= checkpoint_needs_review %>">
+                        <!-- Translation spinner (hidden by default) -->
+                        <div data-translation-spinner class="hidden ml-2 flex items-center gap-2">
+                            <svg class="w-4 h-4 animate-spin text-[#5C3984]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span class="text-xs text-[#5C3984] font-medium"><%= t('translating') %></span>
+                        </div>
+                        <div data-drag-handle class="cursor-move p-2 hover:bg-gray-100 rounded flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                            <div class="grid grid-cols-3 gap-1 w-5">
+                                <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                                <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                                <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                                <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                                <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                                <div class="w-1 h-1 bg-[#5C3984] rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <% if checkpoint_needs_review || checkpoint_has_untranslated %>
+                          <div class="flex flex-col gap-1 mr-2">
+                            <% if checkpoint_needs_review %>
+                              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-[#F6EEFF] text-[#5C3984]" title="<%= t('translation_outdated') %>">
+                                ⚠️
+                              </span>
+                            <% end %>
+                            <% if checkpoint_has_untranslated %>
+                              <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-[#F6EEFF] text-[#5C3984]" title="<%= t('needs_translation_for', lang: other_lang_name) %>">
+                                ℹ️
+                              </span>
+                            <% end %>
+                          </div>
+                        <% end %>
+
+                        <textarea rows="1" readonly class="flex-1 text-xs sm:text-sm text-[#0D1120] bg-gray-50 rounded px-2 py-1 resize-none overflow-hidden break-words"><%= checkpoint.text(I18n.locale.to_s) %></textarea>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <% if checkpoint_needs_review %>
+                                <button class="px-3 py-2 min-h-[44px] text-xs sm:text-[11px] bg-[#5C3984] text-white rounded hover:bg-[#4A2F6B] transition-colors" 
+                                        data-action="click->clause-editor#markCheckpointAsReviewed"
+                                        data-checkpoint-id="<%= checkpoint.id %>">
+                                    <%= t('mark_as_reviewed') %>
+                                </button>
+                            <% end %>
+                            <button class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:bg-gray-100 rounded transition-colors" data-action="click->clause-editor#toggleEdit">
+                                <%= image_tag asset_path('pencil-icon.svg'), class: "w-4 h-4 max-w-full h-auto" %>
+                            </button>
+                            <button class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-600 hover:text-red-600 transition-colors" data-action="click->clause-editor#deleteCheckpoint" title="Delete checkpoint">
+                                <%= image_tag asset_path('delete-clause-icon.svg'), class: "w-4 h-4 max-w-full h-auto" %>
+                            </button>
+                        </div>
+                    </div>
+                <% end %>
+            <% else %>
+                <!-- Empty drop zone hint (only visible when dragging) -->
+                <div data-empty-hint class="empty-checkpoint-hint text-xs text-gray-400 text-center py-4 border-2 border-dashed border-transparent rounded-lg">
+                    <%= t('drop_checkpoints_here') %>
+                </div>
+            <% end %>
+        </div>
+    </div>
+
+    <!-- Always create a container for children, even if empty (for drag-and-drop) -->
+    <% if clause.children.any? %>
+        <div data-children-container
+             data-controller="clause-weights"
+             data-clause-weights-parent-id-value="<%= clause.id %>"
+             data-clause-weights-parent-points-value="<%= clause.base_points || 0 %>"
+             data-clause-weights-saving-label-value="<%= t('saving') %>"
+             data-clause-weights-saved-label-value="<%= t('weight_saved') %>"
+             data-clause-weights-failed-label-value="<%= t('weight_failed_to_save') %>"
+             data-clause-weights-network-error-template-value="<%= t('weight_network_error', message: '%{message}') %>"
+             data-clause-weights-set-parent-first-value="<%= t('set_parent_weight_first') %>"
+             data-clause-weights-matches-value="<%= t('weight_matches') %>"
+             data-clause-weights-over-template-value="<%= t('weight_over', n: '%{n}') %>"
+             data-clause-weights-remaining-template-value="<%= t('weight_remaining', n: '%{n}') %>"
+             data-clause-weights-positive-error-value="<%= t('weights_sum_must_be_positive') %>"
+             data-clause-weights-confirm-template-value="<%= t('set_parent_total_confirm', sum: '%{sum}') %>"
+             data-clause-weights-grandparent-mismatch-value="<%= t('grandparent_sum_mismatch') %>"
+             class="mt-4 space-y-3 min-h-[20px]">
+            <% clause.children.ordered.each do |child_clause| %>
+                <%= render 'clause_hierarchy_edit', clause: child_clause, level: level + 1 %>
+            <% end %>
+
+            <div data-children-stats class="flex flex-wrap items-center gap-3 mt-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">
+                <div class="text-xs text-[#0D1120]">
+                    <%= t('sum_of_children_label') %>:
+                    <span data-clause-weights-target="sum" class="font-bold">0</span>
+                    /
+                    <span class="font-bold"><%= clause.base_points.to_i %></span>
+                    <%= t('pts_unit') %>
+                </div>
+                <span data-clause-weights-target="status" class="text-xs"></span>
+                <div class="ml-auto flex items-center gap-2">
+                    <button type="button"
+                            data-action="click->clause-weights#rollup"
+                            data-clause-weights-target="rollupButton"
+                            title="<%= t('set_parent_to_sum_tooltip') %>"
+                            class="px-3 py-1.5 text-xs font-medium text-[#5C3984] bg-white border border-[#5C3984] rounded hover:bg-[#F6EEFF]">
+                        <%= t('set_parent_to_sum') %>
+                    </button>
+                    <button type="button"
+                            data-action="click->clause-weights#save"
+                            data-clause-weights-target="saveButton"
+                            disabled
+                            class="px-3 py-1.5 text-xs font-medium bg-[#5C3984] text-white rounded hover:bg-[#4A2F6B] disabled:opacity-40 disabled:cursor-not-allowed">
+                        <%= t('save_children') %>
+                    </button>
+                </div>
+            </div>
+        </div>
+    <% else %>
+        <div data-children-container class="mt-4 space-y-3 min-h-[20px]"></div>
+    <% end %>
+</div>

@@ -1,0 +1,132 @@
+<% 
+  action = local_assigns[:action]
+  capa = local_assigns[:capa]
+  
+# Action type styling
+action_type_styles = {
+  'corrective' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.types.corrective') },
+  'preventive' => { bg: 'bg-[#FEF0FF]', text: 'text-[#B130AC]', label: t('capa_actions.types.preventive') }
+}
+action_type_style = action_type_styles[action.action_type] || { bg: 'bg-gray-100', text: 'text-gray-600', label: t("capa_actions.types.#{action.action_type}", default: action.action_type&.humanize || '-') }
+  
+  # Status styling
+  status_styles = {
+  'started' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.started') },
+  'in_progress' => { bg: 'bg-[#E9F0FF]', text: 'text-[#1751A7]', label: t('capa_actions.statuses.in_progress') },
+  'done' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.done') }
+  }
+status_style = status_styles[action.status] || { bg: 'bg-gray-100', text: 'text-gray-600', label: t("capa_actions.statuses.#{action.status}", default: action.status&.humanize || '-') }
+  
+  # Format due date
+due_date_formatted = action.due_date ? l(action.due_date, format: :medium) : '-'
+  
+  # Get assignees
+  assignees = action.company_users.includes(:user).to_a
+  assignee_ids = assignees.map(&:id).join(',')
+%>
+<tr class="hover:bg-[#F7F7FD] cursor-pointer"
+    data-action-id="<%= action.id %>"
+    onclick="window.location.href='<%= dashboard_capa_action_show_path(capa.id, action.id) %>'">
+  <td class="p-3 sm:p-4 min-w-[160px]">
+    <p class="text-xs sm:text-sm font-medium text-[#0D1120] break-words"><%= action.title %></p>
+  </td>
+  <td class="p-3 sm:p-4 whitespace-nowrap">
+    <span class="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium <%= action_type_style[:bg] %> <%= action_type_style[:text] %>">
+      <%= action_type_style[:label] %>
+    </span>
+  </td>
+  <td class="p-3 sm:p-4 min-w-[140px]">
+    <% if assignees.any? %>
+      <div class="flex items-center min-w-0">
+        <% if assignees.length <= 3 %>
+          <div class="flex items-center flex-shrink-0" style="isolation: isolate;">
+            <% assignees.each_with_index do |cu, idx| %>
+              <% initial = cu.user.name&.first&.upcase || '?' %>
+              <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium border-2 border-white" 
+                   style="<%= idx > 0 ? "margin-left: -8px; z-index: #{assignees.length - idx};" : "z-index: #{assignees.length};" %>">
+                <%= initial %>
+              </div>
+            <% end %>
+          </div>
+          <% if assignees.length > 0 %>
+            <span class="text-[10px] sm:text-xs text-[#0D1120] ml-2 truncate"><%= assignees.map { |cu| cu.user.name }.join(', ') %></span>
+          <% end %>
+        <% else %>
+          <div class="flex items-center flex-shrink-0" style="isolation: isolate;">
+            <% assignees.first(3).each_with_index do |cu, idx| %>
+              <% initial = cu.user.name&.first&.upcase || '?' %>
+              <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium border-2 border-white" 
+                   style="<%= idx > 0 ? "margin-left: -8px; z-index: #{4 - idx};" : "z-index: 4;" %>">
+                <%= initial %>
+              </div>
+            <% end %>
+          </div>
+          <span class="text-[10px] sm:text-xs text-[#797C81] ml-2"><%= t("capa_management_ui.header.more_assignees", count: assignees.length - 3) %></span>
+        <% end %>
+      </div>
+    <% else %>
+      <% if can_assign_to_capa_action?(action) %>
+        <button type="button"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-dashed border-[#5C3984] text-[10px] sm:text-xs font-medium text-[#5C3984] hover:bg-[#F9F5FF] transition-colors"
+                onclick="event.stopPropagation(); openAssignAssigneesModal('<%= capa.id %>', '<%= action.id %>', '<%= assignee_ids %>')"
+                data-action-id="<%= action.id %>">
+          <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <%= t("capa_management_ui.analysis_tab.assign_button") %>
+        </button>
+      <% else %>
+        <span class="text-[10px] sm:text-xs text-[#797C81]"><%= t("capa_management_ui.analysis_tab.no_assignees") %></span>
+      <% end %>
+    <% end %>
+  </td>
+  <td class="p-3 sm:p-4 whitespace-nowrap">
+    <span class="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium <%= status_style[:bg] %> <%= status_style[:text] %>">
+      <%= status_style[:label] %>
+    </span>
+  </td>
+  <td class="p-3 sm:p-4 whitespace-nowrap">
+    <span class="text-xs sm:text-sm text-[#0D1120]"><%= due_date_formatted %></span>
+  </td>
+  <td class="p-3 sm:p-4 min-w-[120px]">
+    <span class="text-xs sm:text-sm text-[#0D1120] break-words"><%= action.notes.presence || '-' %></span>
+  </td>
+  <td class="p-3 sm:p-4 text-right" onclick="event.stopPropagation();">
+    <details class="relative" data-controller="capas--dropdown">
+      <summary class="list-none text-[#797C81] hover:text-[#0D1120] cursor-pointer p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+        </svg>
+      </summary>
+      <div class="absolute right-0 mt-2 w-48 sm:w-40 bg-white border border-[#E3E3E3] rounded-lg shadow-lg z-[9999] py-1" data-capas--dropdown-target="menu">
+        <div class="py-1">
+          <%= link_to dashboard_capa_action_show_path(capa.id, action.id), class: "block w-full text-left px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#0D1120] hover:bg-[#F7F7FD] min-h-[44px] sm:min-h-auto" do %>
+            <%= t("capa_management_ui.analysis_tab.view_action", default: "View") %>
+          <% end %>
+          <% unless viewer? %>
+            <button type="button" 
+                    class="block w-full text-left px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#0D1120] hover:bg-[#F7F7FD] min-h-[44px] sm:min-h-auto"
+                    onclick="openEditCapaActionModal(this.dataset, event)"
+                    data-action-id="<%= action.id %>"
+                    data-action-title="<%= action.title %>"
+                    data-action-type="<%= action.action_type %>"
+                    data-action-status="<%= action.status %>"
+                    data-action-due-date="<%= action.due_date&.strftime('%Y-%m-%d') %>"
+                    data-action-notes="<%= action.notes %>"
+                    data-action-assignee-ids="<%= assignee_ids %>">
+              <%= t("edit") %>
+            </button>
+            <button type="button" 
+                    class="block w-full text-left px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#DC2626] hover:bg-[#F7F7FD] min-h-[44px] sm:min-h-auto"
+                    onclick="deleteCapaAction(this.dataset.actionId, this.dataset.capaId, event)"
+                    data-action-id="<%= action.id %>"
+                    data-capa-id="<%= capa.id %>">
+              <%= t("delete") %>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </details>
+  </td>
+</tr>
+

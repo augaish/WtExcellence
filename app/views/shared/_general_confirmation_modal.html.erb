@@ -1,0 +1,28 @@
+<dialog id="generalConfirmationModal" class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-md w-full mx-4" data-controller="general-confirmation dialog-no-backdrop-close">
+  <div class="p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-[#0D1120]" data-general-confirmation-target="title">Confirm Action</h2>
+      <button type="button" data-action="click->general-confirmation#cancelAction" class="text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="Close">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mb-6">
+      <p class="text-sm text-[#797C81]" data-general-confirmation-target="message">
+        Are you sure you want to proceed?
+      </p>
+    </div>
+
+    <div class="flex items-center justify-end gap-3">
+      <button type="button" data-action="click->general-confirmation#cancelAction" class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200">
+        Cancel
+      </button>
+      <button type="button" data-action="click->general-confirmation#confirmAction" class="px-4 py-2 text-white rounded-lg font-medium transition-colors duration-200" data-general-confirmation-target="confirmButton">
+        Confirm
+      </button>
+    </div>
+  </div>
+</dialog>
+

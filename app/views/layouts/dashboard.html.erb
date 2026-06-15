@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html dir="<%= text_direction %>" lang="<%= current_locale %>">
+    <head>
+        <title><%= content_for(:title) || t('way_to_excellence') %></title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="locale" content="<%= current_locale %>">
+        <%= csrf_meta_tags %>
+        <%= csp_meta_tag %>
+
+        <%= yield :head %>
+
+        <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+        <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+        <%= favicon_link_tag asset_path('logo.png') %>
+
+        <!-- Google Fonts - Geist -->
+        <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+        
+        <!-- Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+        <%= stylesheet_link_tag "select2_custom", "data-turbo-track": "reload" %>
+
+        <%# Includes all stylesheet files in app/assets/stylesheets %>
+        <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+        <%= javascript_importmap_tags %>
+        <!-- Chart.js must load before Chartkick (Chartkick is loaded via importmap) -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js" data-turbo-track="reload"></script>
+        
+    </head>
+
+    <body
+        class="bg-gray-50 h-screen overflow-hidden flex flex-col"
+        data-controller="modal">
+        <%= render "shared/notifications" %>
+        <!-- Top Navbar -->
+        <div class="flex-shrink-0">
+            <%= render "dashboard/shared/navbar" %>
+        </div>
+
+        <div
+            class="flex flex-1 overflow-hidden min-h-0">
+            <!-- Sidebar -->
+            <div class="flex-shrink-0">
+                <%= render "dashboard/shared/sidebar" %>
+            </div>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto transition-all duration-300 ease-in-out min-w-0">
+                <%= yield %>
+            </main>
+        </div>
+
+        <%= render "shared/dashboard_confirmation_modal" %>
+
+        <style>
+            @keyframes progressFill {
+                from {
+                    width: 0;
+                }
+                to {
+                    width: var(--target-width);
+                }
+            }
+
+            .animate-progress {
+                animation: progressFill 1.5s ease-out forwards;
+            }
+
+            .animate-progress[data-width="67%"] {
+                --target-width: 67%;
+            }
+
+            /* Sidebar collapse styles */
+            #sidebar.w-0 {
+                width: 0 !important;
+                min-width: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+            }
+
+            #sidebar.w-0 * {
+                visibility: hidden;
+            }
+
+            /* Dialog styling - centered for both LTR and RTL */
+            dialog {
+                border: none;
+                padding: 0;
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, -50%);
+                margin: 0;
+            }
+            
+            /* Default dialog width if not specified */
+            dialog:not([style*="width"]) {
+                max-width: 28rem;
+                width: 90%;
+            }
+
+            /* RTL support for dialogs - force centering */
+            [dir="rtl"] dialog {
+                left: 50% !important;
+                right: auto !important;
+                margin-left: 0 !important;
+                margin-right: 0 !important;
+                transform: translate(-50%, -50%) !important;
+            }
+
+            /* Wider dialog styling (publish version dialog) */
+            dialog#publishVersionDialog {
+                max-width: 850px;
+                width: 850px;
+            }
+
+            @media(max-width: 960px) {
+                dialog#publishVersionDialog {
+                    width: 90vw;
+                    max-width: 90vw;
+                }
+            }
+
+            /* Link items dialog - wider modal */
+            dialog#link_items_dialog {
+                max-width: 85vw;
+                width: 85vw;
+            }
+
+            /* Export CAPAs dialog - larger width */
+            dialog#export_capas_dialog {
+                width: min(95vw, 674px);
+                max-width: min(95vw, 674px);
+                height: min(95vh, 870px);
+                max-height: min(95vh, 870px);
+            }
+
+            /* Link clauses dialog - wider modal */
+            dialog#link_clauses_dialog {
+                max-width: min(95vw, 896px);
+                width: min(95vw, 896px);
+            }
+
+            /* Link document dialog - wider modal */
+            dialog#link_document_dialog {
+                width: min(90vw, 900px);
+                max-width: calc(100vw - 2rem);
+            }
+
+            @media(min-width: 1280px) {
+                dialog#link_items_dialog {
+                    max-width: 1000px;
+                    width: 1000px;
+                }
+                dialog#link_document_dialog {
+                    width: min(85vw, 1100px);
+                    max-width: calc(100vw - 2rem);
+                }
+            }
+
+            @media(max-width: 768px) {
+                dialog#link_items_dialog {
+                    width: 90vw;
+                    max-width: 90vw;
+                }
+                dialog#link_document_dialog {
+                    width: calc(100vw - 2rem);
+                    max-width: calc(100vw - 2rem);
+                }
+            }
+
+            dialog::backdrop {
+                background: rgba(0, 0, 0, 0.5);
+            }
+
+            /* File input styling */
+            input[type="file"]::-webkit-file-upload-button {
+                background-color: #F7F7FD;
+                color: #5C3984;
+                border: none;
+                border-radius: 0.5rem;
+                padding: 0.5rem 1rem;
+                margin-right: 1rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }
+
+            input[type="file"]::-webkit-file-upload-button:hover {
+                background-color: #E8E8F5;
+            }
+        </style>
+
+        <script>
+
+            function toggleProfileDropdown() {
+                const dropdown = document.getElementById('profileDropdown');
+                dropdown.classList.toggle('hidden');
+            }
+
+            function toggleLanguageDropdown() {
+                const dropdown = document.getElementById('languageDropdown');
+                dropdown.classList.toggle('hidden');
+            }
+
+            function toggleNotificationDropdown() {
+                const dropdown = document.getElementById('notificationDropdown');
+                dropdown.classList.toggle('hidden');
+            }
+
+            function toggleSidebar() {
+                const sidebar = document.getElementById('sidebar');
+                const mainContent = document.querySelector('main');
+
+                if (sidebar.classList.contains('w-64')) { // Collapse sidebar
+                    sidebar.classList.remove('w-64');
+                    sidebar.classList.add('w-0', 'overflow-hidden', 'opacity-0');
+                    mainContent.classList.add('ml-0');
+                } else { // Expand sidebar
+                    sidebar.classList.remove('w-0', 'overflow-hidden', 'opacity-0');
+                    sidebar.classList.add('w-64');
+                    mainContent.classList.remove('ml-0');
+                }
+            }
+
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (event) {
+                const dropdown = document.getElementById('languageDropdown');
+                const button = event.target.closest('button');
+
+                if (! button || ! button.onclick || button.onclick.toString().indexOf('toggleLanguageDropdown') === -1) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            document.addEventListener('click', function (event) {
+                const dropdown = document.getElementById('profileDropdown');
+                const button = event.target.closest('button');
+
+                if (! button || ! button.onclick || button.onclick.toString().indexOf('toggleProfileDropdown') === -1) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            document.addEventListener('click', function (event) {
+                const dropdown = document.getElementById('notificationDropdown');
+                const button = event.target.closest('button');
+                const insideDropdown = event.target.closest('#notificationDropdown');
+
+                if (! dropdown) return;
+                if (insideDropdown) return;
+                if (! button || ! button.onclick || button.onclick.toString().indexOf('toggleNotificationDropdown') === -1) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+        </script>
+    </body>
+</html>

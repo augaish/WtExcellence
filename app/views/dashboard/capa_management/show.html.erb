@@ -1,0 +1,563 @@
+<% 
+  capa_code = @capa.friendly_code
+  
+  # Check if CAPA is overdue (has due_date and it's before today)
+  is_overdue = @capa.due_date.present? && @capa.due_date < Date.today && @capa.status != 'closed'
+  
+  # Status styling
+  status_styles = {
+    'open' => { bg: 'bg-[#FEF0FF]', text: 'text-[#B130AC]', label: t("capa_management_ui.statuses.open") },
+    'assigned' => { bg: 'bg-[#E9F5F8]', text: 'text-[#1B94AD]', label: t("capa_management_ui.statuses.assigned") },
+    'in_progress' => { bg: 'bg-[#E9F0FF]', text: 'text-[#1751A7]', label: t("capa_management_ui.statuses.in_progress") },
+    'closed' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t("capa_management_ui.statuses.closed") }
+  }
+  
+  # Special cases for in_progress status
+  if @capa.status == 'in_progress'
+    if is_overdue
+      status_style = { bg: 'bg-[#FFF1F0]', text: 'text-[#B13030]', label: t("capa_management_ui.status_labels.overdue") }
+    else
+      status_style = { bg: 'bg-[#F5FFD8]', text: 'text-[#789C16]', label: t("capa_management_ui.status_labels.in_time") }
+    end
+  else
+    status_style = status_styles[@capa.status] || { bg: 'bg-gray-100', text: 'text-gray-600', label: @capa.status&.humanize || '-' }
+  end
+  
+  # Priority styling
+  priority_styles = {
+    'high' => t("capa_management_ui.header.priority_labels.high"),
+    'medium' => t("capa_management_ui.header.priority_labels.medium"),
+    'low' => t("capa_management_ui.header.priority_labels.low")
+  }
+  priority_label = priority_styles[@capa.priority] || t("capa_management_ui.header.priority_labels.none")
+  
+  # Format due date
+  due_date_formatted = @capa.due_date ? @capa.due_date.strftime("%b %d, %Y") : nil
+  
+  # Source/Audit styling
+  source_labels = {
+    'internal_audit' => t("capa_sources.internal_audit"),
+    'external_audit' => t("capa_sources.external_audit"),
+    'customer_complaint' => t("capa_sources.customer_complaint")
+  }
+  source_label = source_labels[@capa.source] || t("capa_management_ui.header.source_labels.audit_fallback")
+%>
+
+<% 
+  # Default fallback URL
+  default_back_url = dashboard_capa_management_list_path
+%>
+
+<div class="bg-[#F9FAFC] min-h-screen p-4 sm:p-6">
+  <!-- Header Section -->
+  <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <%= link_to default_back_url, id: 'goBackLink', class: "flex items-center gap-2 text-xs sm:text-sm text-[#797C81] hover:text-[#0D1120] min-h-[44px] sm:min-h-auto" do %>
+      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span><%= t("capa_management_ui.header.go_back") %></span>
+    <% end %>
+    
+    <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+      <% unless viewer? or (!current_user.company_admin? and !current_user.company_quality_manager?) %>
+        <button type="button" 
+                class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-3 sm:py-2 bg-[#D6C4ED] rounded-xl text-xs sm:text-sm font-medium text-[#0D1120] hover:opacity-80 min-h-[44px] sm:min-h-auto"
+                onclick="openEditCapaModal(this.dataset)"
+                data-capa-id="<%= @capa.id %>"
+                data-capa-title="<%= @capa.title %>"
+                data-capa-description="<%= @capa.description %>"
+                data-capa-source="<%= @capa.source %>"
+                data-capa-standard-id="<%= @capa.standard_id %>"
+                data-capa-priority="<%= @capa.priority %>"
+                data-capa-due-date="<%= @capa.due_date&.strftime('%Y-%m-%d') %>"
+                data-capa-status="<%= @capa.status %>"
+                data-capa-assignee-ids="<%= @capa.company_users.pluck(:id).join(',') %>"
+                data-capa-assignee-names="<%= @capa.company_users.includes(:user).map { |cu| cu.user.name }.to_json %>"
+                data-capa-assignee-roles="<%= @capa.company_users.includes(:user).map { |cu| cu.role }.to_json %>"
+                data-capa-assignee-profile-image-urls="<%= @capa.company_users.includes(user: [ :profile_image_attachment ]).map { |cu| cu.user&.profile_image&.attached? ? user_profile_image_url(cu.user) : '' }.to_json %>">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+            <g clip-path="url(#clip0_337_8124)">
+              <path d="M9.38263 2.59022C9.87942 2.05197 10.1278 1.78285 10.3918 1.62587C11.0287 1.24709 11.8129 1.23531 12.4604 1.5948C12.7288 1.74379 12.9848 2.00533 13.4969 2.52843C14.0089 3.05152 14.265 3.31307 14.4108 3.5872C14.7627 4.24866 14.7512 5.04978 14.3804 5.70039C14.2267 5.97002 13.9633 6.22377 13.4364 6.73126L7.16725 12.7694C6.16875 13.7312 5.6695 14.212 5.04554 14.4557C4.42158 14.6995 3.73563 14.6815 2.36374 14.6456L2.17708 14.6408C1.75943 14.6298 1.55061 14.6244 1.42922 14.4866C1.30783 14.3489 1.3244 14.1361 1.35755 13.7107L1.37555 13.4797C1.46883 12.2823 1.51548 11.6836 1.7493 11.1454C1.98312 10.6072 2.38645 10.1702 3.19311 9.29625L9.38263 2.59022Z" stroke="#0D1120" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M8.6665 2.66675L13.3332 7.33341" stroke="#0D1120" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M9.3335 14.6667L14.6668 14.6667" stroke="#0D1120" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <defs>
+              <clipPath id="clip0_337_8124">
+                <rect width="16" height="16" fill="white"/>
+              </clipPath>
+            </defs>
+          </svg>
+          <span><%= t("capa_management_ui.header.edit") %></span>
+        </button>
+        <button type="button" 
+                onclick="deleteCapa('<%= @capa.id %>')"
+                class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 sm:px-4 py-3 sm:py-2 bg-[#D6C4ED] rounded-xl text-xs sm:text-sm font-medium text-[#0D1120] hover:opacity-80 min-h-[44px] sm:min-h-auto">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" class="flex-shrink-0">
+            <path d="M13 3.66675L12.5868 10.3501C12.4813 12.0577 12.4285 12.9115 12.0005 13.5253C11.7889 13.8288 11.5164 14.0849 11.2005 14.2774C10.5614 14.6667 9.70599 14.6667 7.99516 14.6667C6.28208 14.6667 5.42554 14.6667 4.78604 14.2767C4.46987 14.0839 4.19733 13.8273 3.98579 13.5233C3.55792 12.9085 3.5063 12.0535 3.40307 10.3435L3 3.66675" stroke="#0D1120" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M6 7.82324H10" stroke="#0D1120" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M7 10.4363H9" stroke="#0D1120" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M2 3.66659H14M10.7037 3.66659L10.2486 2.72774C9.94626 2.10409 9.7951 1.79227 9.53435 1.59779C9.47651 1.55465 9.41527 1.51628 9.35122 1.48305C9.06248 1.33325 8.71595 1.33325 8.02289 1.33325C7.31243 1.33325 6.95719 1.33325 6.66366 1.48933C6.59861 1.52392 6.53653 1.56385 6.47807 1.6087C6.2143 1.81105 6.06696 2.13429 5.77228 2.78076L5.36849 3.66659" stroke="#0D1120" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span><%= t("capa_management_ui.header.delete") %></span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- CAPA Overview Section -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+    <div class="flex items-start justify-between mb-3 sm:mb-4">
+      <div class="flex-1 min-w-0">
+        <!-- Status, Due Date, Priority, Audit, CAPA Code, Standard Row -->
+        <div class="flex items-center gap-2 mb-3 sm:mb-4 flex-wrap">
+          <!-- Status Badge -->
+          <span id="capa-status-badge" class="inline-flex items-center justify-center px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-medium <%= status_style[:bg] %> <%= status_style[:text] %> whitespace-nowrap" style="min-height: 28px;">
+            <%= status_style[:label] %>
+          </span>
+          
+          <!-- Due Date (if exists) -->
+          <div id="capa-due-date-container" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 bg-[#F7F7FD] rounded-[30px] text-xs sm:text-sm font-medium text-[#0D1120]" style="min-height: 28px; <%= 'display: none;' unless due_date_formatted %>">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 flex-shrink-0 text-[#5C3984]"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+            <span class="whitespace-nowrap"><%= t("capa_management_ui.header.due_prefix", date: due_date_formatted || '') %></span>
+          </div>
+          
+          <!-- Priority -->
+          <div id="capa-priority-container" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 bg-[#F7F7FD] rounded-[30px] text-xs sm:text-sm font-medium text-[#0D1120]" style="min-height: 28px;">
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+            </svg>
+            <span class="whitespace-nowrap"><%= priority_label %></span>
+          </div>
+          
+          <!-- Audit (Source) -->
+          <div id="capa-source-container" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 bg-[#F7F7FD] rounded-[30px] text-xs sm:text-sm font-medium text-[#0D1120]" style="min-height: 28px;">
+            <span class="whitespace-nowrap"><%= source_label %></span>
+          </div>
+          
+          <!-- CAPA Code -->
+          <div id="capa-code-container" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 bg-[#F7F7FD] rounded-[30px] text-xs sm:text-sm font-medium text-[#0D1120]" style="min-height: 28px;">
+            <span class="whitespace-nowrap"><%= capa_code %></span>
+          </div>
+          
+          <!-- Standard (if exists) -->
+          <div id="capa-standard-container" class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-2 bg-[#F7F7FD] rounded-[30px] text-xs sm:text-sm font-medium text-[#0D1120]" style="min-height: 28px; <%= 'display: none;' unless @capa.standard %>">
+            <span class="break-words"><%= @capa.standard&.display_name || '' %></span>
+          </div>
+        </div>
+        
+        <!-- Title, Description, and Assigned Users Row -->
+        <div class="flex flex-col lg:flex-row items-start gap-3 sm:gap-4">
+          <!-- Left Column: Title and Description -->
+          <div class="flex flex-col items-start gap-2 flex-1 min-w-0">
+            <!-- Title Row -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
+              <span class="text-xs sm:text-sm font-medium text-[#797C81] sm:w-[90px] flex-shrink-0"><%= t("capa_management_ui.header.title_label") %></span>
+              <h1 id="capa-title" class="text-base sm:text-xl font-semibold text-[#0D1120] break-words">
+                <%= @capa.title %>
+              </h1>
+            </div>
+            
+            <!-- Description Row -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
+              <span class="text-xs sm:text-sm font-medium text-[#797C81] sm:w-[90px] flex-shrink-0"><%= t("capa_management_ui.header.description_label") %></span>
+              <p id="capa-description" class="text-xs sm:text-sm font-medium text-[#0D1120] break-words">
+                <%= @capa.description %>
+              </p>
+            </div>
+          </div>
+          
+          <!-- Right Column: Assigned Users -->
+          <div id="capa-assignees-container" class="flex flex-row items-start gap-2 p-2 bg-white border border-[#E3E3E3] rounded-lg w-full lg:w-[286px]" <%= 'style="display: none;"' unless @capa.company_users.any? %>>
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <div class="flex items-center flex-shrink-0" style="isolation: isolate;">
+                <% @capa.company_users.limit(3).each_with_index do |company_user, index| %>
+                  <div class="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center border-2 border-white flex-shrink-0"
+                       style="margin-left: <%= index > 0 ? '-8px' : '0' %>; z-index: <%= 3 - index %>; <%= 'background: #E3E3E3;' unless company_user.user.profile_image.attached? %>"
+                       title="<%= company_user.user.name %>">
+                    <% if company_user.user.profile_image.attached? %>
+                      <%= image_tag user_profile_image_url(company_user.user), class: "w-full h-full object-cover", alt: company_user.user.name %>
+                    <% else %>
+                      <span class="text-xs text-[#0D1120] font-medium"><%= company_user.user.name[0].upcase %></span>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+              <span class="text-[10px] sm:text-xs font-medium text-[#797C81] truncate">
+                <%= @capa.company_users.limit(3).map { |cu| cu.user.name }.join(', ') %>
+                <% if @capa.company_users.count > 3 %>
+                  <%= t("capa_management_ui.header.more_assignees", count: @capa.company_users.count - 3) %>
+                <% end %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Section -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl" data-controller="activity-tab">
+    <!-- Tab Navigation -->
+    <div class="border-b border-[#E3E3E3] px-4 sm:px-6 overflow-x-auto -mx-4 sm:mx-0">
+      <div class="flex gap-4 sm:gap-8 min-w-max">
+        <button data-tab="evidence" class="tab-button active px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-[#5C3984] border-b-2 border-[#5C3984] whitespace-nowrap">
+          <%= t("capa_management_ui.tabs.evidence") %>
+        </button>
+        <button data-tab="analysis" class="tab-button px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-[#797C81] hover:text-[#0D1120] whitespace-nowrap">
+          <%= t("capa_management_ui.tabs.analysis") %>
+        </button>
+        <% if @can_view_activity_log %>
+          <button data-tab="activity" class="tab-button px-3 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-[#797C81] hover:text-[#0D1120] whitespace-nowrap" data-action="click->activity-tab#refresh">
+            <%= t("capa_management_ui.tabs.activity_log") %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="p-4 sm:p-6">
+      <!-- Evidence Tab Content -->
+      <div id="tab-evidence" class="tab-content">
+        <%= render partial: 'evidence_tab' %>
+      </div>
+
+      <!-- Analysis Tab Content -->
+      <div id="tab-analysis" class="tab-content hidden">
+        <%= render partial: 'analysis_tab' %>
+      </div>
+
+      <!-- Activity Log Tab Content -->
+      <% if @can_view_activity_log %>
+        <div id="tab-activity" class="tab-content hidden" data-activity-tab-target="content">
+          <%= render partial: 'activity_tab' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Set back URL from sessionStorage
+  (function() {
+    function isValidCapaManagementPage(url, currentCapaId) {
+      if (!url) return false;
+      
+      // Remove hash fragments if present
+      const urlWithoutHash = url.split('#')[0];
+      
+      // Must be a CAPA management page
+      if (!urlWithoutHash.includes('/dashboard/capa_management')) {
+        return false;
+      }
+      
+      // Not the current show page
+      if (urlWithoutHash.includes(`/dashboard/capa_management/${currentCapaId}`)) {
+        return false;
+      }
+      
+      // Valid CAPA management routes (overview, list, board, archives)
+      const validRoutes = ['/dashboard/capa_management', '/dashboard/capa_management/list', '/dashboard/capa_management/board', '/dashboard/capa_management/archives'];
+      const pathWithoutQuery = urlWithoutHash.split('?')[0];
+      
+      // Check if it's a valid route (might have query params)
+      const isKnownRoute = validRoutes.some(route => pathWithoutQuery === route || pathWithoutQuery.startsWith(route + '?'));
+      
+      if (isKnownRoute) {
+        return true;
+      }
+      
+      // If it matches pattern /dashboard/capa_management/{something}, check if it's a show page (UUID)
+      // UUIDs are typically 36 characters with hyphens (8-4-4-4-12 format)
+      const showPageMatch = urlWithoutHash.match(/\/dashboard\/capa_management\/([^\/\?]+)/);
+      if (showPageMatch) {
+        const lastSegment = showPageMatch[1];
+        // Check if it looks like a UUID (contains hyphens and is reasonably long)
+        // or if it's not one of the known routes, assume it's a show page
+        const looksLikeUUID = lastSegment.includes('-') && lastSegment.length > 20;
+        if (looksLikeUUID || !['list', 'board', 'archives'].includes(lastSegment)) {
+          return false; // It's a show page
+        }
+      }
+      
+      return true;
+    }
+
+    function setBackUrl() {
+      const backLink = document.getElementById('goBackLink');
+      if (!backLink) return;
+
+      const storedUrl = sessionStorage.getItem('capa_management_last_page');
+      const defaultUrl = '<%= default_back_url %>';
+      const currentCapaId = '<%= @capa.id %>';
+
+      let backUrl = defaultUrl;
+
+      if (storedUrl && isValidCapaManagementPage(storedUrl, currentCapaId)) {
+        // Remove hash fragments if present
+        backUrl = storedUrl.split('#')[0];
+      } else {
+        // If no valid stored URL, try to use referer if it's a valid CAPA management page
+        const referer = document.referer;
+        if (referer && isValidCapaManagementPage(referer, currentCapaId)) {
+          const refererWithoutHash = referer.split('#')[0];
+          backUrl = refererWithoutHash;
+          // Store it for future use
+          sessionStorage.setItem('capa_management_last_page', refererWithoutHash);
+        }
+      }
+
+      backLink.href = backUrl;
+    }
+
+    // Set back URL on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setBackUrl);
+    } else {
+      setBackUrl();
+    }
+
+    // Also set on Turbo navigation
+    document.addEventListener('turbo:load', setBackUrl);
+    document.addEventListener('turbo:render', setBackUrl);
+  })();
+
+  // Tab switching functionality - works with both regular page loads and Turbo navigation
+  (function() {
+    let hashChangeHandler = null;
+    
+    function initializeTabs() {
+      const tabButtons = document.querySelectorAll('.tab-button');
+      const tabContents = document.querySelectorAll('.tab-content');
+      const validTabs = ['evidence', 'analysis', 'activity'];
+
+      // Remove existing event listeners by cloning buttons
+      tabButtons.forEach(button => {
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+      });
+
+      const freshTabButtons = document.querySelectorAll('.tab-button');
+
+      function switchTab(targetTab, updateUrl = true) {
+        // Validate tab name
+        if (!validTabs.includes(targetTab)) {
+          targetTab = 'evidence'; // Default to evidence for invalid tabs
+        }
+
+        // Update active button
+        freshTabButtons.forEach(btn => {
+          btn.classList.remove('active', 'text-[#5C3984]', 'border-b-2', 'border-[#5C3984]');
+          btn.classList.add('text-[#797C81]');
+          
+          if (btn.getAttribute('data-tab') === targetTab) {
+            btn.classList.add('active', 'text-[#5C3984]', 'border-b-2', 'border-[#5C3984]');
+            btn.classList.remove('text-[#797C81]');
+          }
+        });
+
+        // Show/hide tab content
+        tabContents.forEach(content => {
+          content.classList.add('hidden');
+        });
+        const targetContent = document.getElementById(`tab-${targetTab}`);
+        if (targetContent) {
+          targetContent.classList.remove('hidden');
+        }
+
+        // Update URL hash if requested (avoid infinite loop from hashchange event)
+        if (updateUrl && window.location.hash.substring(1) !== targetTab) {
+          // Use replaceState to avoid adding to history on initial load
+          const isInitialLoad = !window.location.hash || window.location.hash === '#';
+          if (isInitialLoad) {
+            history.replaceState(null, '', `#${targetTab}`);
+          } else {
+            history.pushState(null, '', `#${targetTab}`);
+          }
+        }
+      }
+
+      // Handle tab button clicks
+      freshTabButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetTab = this.getAttribute('data-tab');
+          switchTab(targetTab, true);
+        });
+      });
+
+      // Handle URL fragment on page load
+      function initializeTab() {
+        const hash = window.location.hash.substring(1); // Remove the '#'
+        if (hash && validTabs.includes(hash)) {
+          switchTab(hash, false); // Don't update URL on initial load
+        } else {
+          // Default to evidence tab if no hash or invalid hash
+          switchTab('evidence', false);
+        }
+      }
+
+      // Initialize tab on page load
+      initializeTab();
+
+      // Remove old hashchange handler if it exists
+      if (hashChangeHandler) {
+        window.removeEventListener('hashchange', hashChangeHandler);
+      }
+
+      // Handle browser back/forward buttons
+      hashChangeHandler = function() {
+        const hash = window.location.hash.substring(1);
+        if (hash && validTabs.includes(hash)) {
+          switchTab(hash, false); // Don't update URL (it's already updated)
+        } else {
+          switchTab('evidence', false);
+        }
+      };
+      
+      window.addEventListener('hashchange', hashChangeHandler);
+    }
+
+    // Initialize on DOMContentLoaded (for regular page loads)
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeTabs);
+    } else {
+      initializeTabs();
+    }
+
+    // Initialize on Turbo navigation events (for Turbo-driven navigation)
+    document.addEventListener('turbo:load', initializeTabs);
+    document.addEventListener('turbo:render', initializeTabs);
+  })();
+
+  // Custom confirm function that returns a Promise (like confirm() but async)
+  window.customConfirm = async function(message, options = {}) {
+    const modal = document.getElementById('generalConfirmationModal');
+    if (!modal) {
+      // Fallback to browser confirm if modal not found
+      return confirm(message);
+    }
+
+    try {
+      const generalController = window.Stimulus.getControllerForElementAndIdentifier(
+        modal,
+        'capas--general-confirmation'
+      );
+
+      if (!generalController) {
+        return confirm(message);
+      }
+
+      // Determine button style and text based on message or options
+      const lowerMessage = message.toLowerCase();
+      let buttonStyle = options.buttonStyle || 'danger';
+      let confirmText = options.confirmText;
+      let title = options.title;
+
+      if (lowerMessage.includes('delete')) {
+        buttonStyle = 'danger';
+        confirmText = confirmText || 'Delete';
+        title = title || 'Confirm Delete';
+      } else if (lowerMessage.includes('unlink')) {
+        buttonStyle = 'primary';
+        confirmText = confirmText || 'Unlink';
+        title = title || 'Confirm Unlink';
+      } else if (lowerMessage.includes('remove')) {
+        buttonStyle = 'danger';
+        confirmText = confirmText || 'Remove';
+        title = title || 'Confirm Removal';
+      } else {
+        // Default for other confirmations
+        buttonStyle = options.buttonStyle || 'primary';
+        confirmText = confirmText || 'Confirm';
+        title = title || 'Confirm Action';
+      }
+
+      return await generalController.confirm(message, {
+        title: title,
+        confirmText: confirmText,
+        buttonStyle: buttonStyle,
+        ...options
+      });
+    } catch (error) {
+      console.warn('Custom confirm failed, falling back to browser:', error);
+      return confirm(message);
+    }
+  };
+
+  async function deleteCapa(capaId) {
+    if (!(await customConfirm('Are you sure you want to delete this CAPA? This action cannot be undone.'))) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/dashboard/capa_management/${capaId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        if (error.notification_html) {
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: error.notification_html },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+        }
+        return;
+      }
+
+      const data = await response.json();
+      if (data.notification_html) {
+        // Dispatch toast notification
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: data.notification_html },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      }
+
+      // Redirect to list page after successful delete
+      const backUrl = sessionStorage.getItem('capa_management_last_page') || '<%= default_back_url %>';
+      window.location.href = backUrl;
+    } catch (error) {
+      console.error('Error:', error);
+      const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+      const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+      const notificationHtml = `
+        <div
+          data-toast-target="notification"
+          class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+        >
+          ${icon}
+          <div class="flex-1 text-sm text-[#0D1120] font-medium">
+            An error occurred while deleting the CAPA
+          </div>
+          <button
+            data-action="click->toast#close"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+      `;
+      const event = new CustomEvent('toast:show', {
+        detail: { notificationHtml: notificationHtml },
+        bubbles: true
+      });
+      document.dispatchEvent(event);
+    }
+  }
+</script>
+
+<%= render partial: "edit_action_modal" %>
+
+<%= render partial: "link_clauses_modal" %>
+<%= render partial: "general_confirmation_modal" %>
+<%= render partial: "delete_confirmation_modal" %>

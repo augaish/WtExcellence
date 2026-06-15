@@ -1,0 +1,90 @@
+<dialog id="upload_document_dialog" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-lg w-full mx-4" data-controller="modal file-upload upload-dialog dialog-no-backdrop-close" dir="<%= text_direction %>" lang="<%= current_locale %>">
+    <div
+        class="p-4 sm:p-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <div class="min-w-0 flex-1">
+                <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] mb-2 break-words"><%= t('document.upload_title') %></h2>
+                <p class="text-xs sm:text-sm text-gray-600 break-words"><%= t('document.upload_subtitle') %></p>
+            </div>
+            <button data-action="click->modal#close" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <%= form_with model: Upload.new, url: uploads_path, multipart: true, local: false, data: { action: "submit->modal#submitUploadForm" }, id: "upload_document_form", class: "space-y-4 sm:space-y-6 choices-overflow-visible" do |f| %>
+            <!-- Document Name -->
+            <div>
+                <%= f.label :name, t('document.document_name'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.text_field :name, placeholder: t('document.name_placeholder'), class: "w-full border border-[#5C3984] rounded-md px-4 py-3 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984] transition-colors duration-200 text-[16px] sm:text-sm" %>
+            </div>
+
+            <!-- Notes -->
+            <div>
+                <%= f.label :notes, t('document.notes'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.text_area :notes, placeholder: t('document.notes_placeholder'), rows: 3, class: "w-full border border-[#5C3984] rounded-md px-4 py-3 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984] transition-colors duration-200 resize-y text-[16px] sm:text-sm" %>
+            </div>
+
+            <% if @upload_to_legal_documents %>
+                <!-- Legal Documents: no folder choice; document goes to Legal Documents (private) -->
+                <%= f.hidden_field :folder_id, value: "" %>
+                <%= f.hidden_field :visibility, value: "private" %>
+                <p class="text-sm text-gray-600 break-words">
+                    <%= t('document.upload_to_legal_documents_notice', default: 'This document will be saved to Legal Documents.') %>
+                </p>
+            <% else %>
+                <!-- Folder Selection -->
+                <div data-upload-dialog-target="folderSelection" data-controller="choices-select" data-choices-select-search-value="true">
+                    <%= f.label :folder_id, t('document.select_folder'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= f.collection_select :folder_id, (@folders_for_upload || Folder.none).order(:name), :id, :name, 
+                { prompt: t('document.select_folder_placeholder') }, 
+                { class: "w-full", data: { upload_dialog_target: "folderSelect", choices_select_target: "select" } } %>
+                </div>
+
+                <!-- Visibility Selection -->
+                <div data-controller="choices-select">
+                    <%= f.label :visibility, t('document.visibility'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                    <%= f.select :visibility, 
+                        options_for_select([
+                            [t('document.visibility_public'), 'public'],
+                            [t('document.visibility_private'), 'private']
+                        ], 'public'),
+                        {},
+                        { class: "w-full", data: { choices_select_target: "select" } } %>
+                    <p class="mt-1 text-xs text-gray-500 break-words">
+                        <%= t('document.visibility_help') %>
+                    </p>
+                </div>
+            <% end %>
+
+            <!-- File Upload Section -->
+            <div>
+                <%= f.label :file, t('document.add_attachment'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.file_field :file, accept: "application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,image/*", class: "hidden", data: { file_upload_target: "input", action: "change->file-upload#handleFileSelect" } %>
+                <button type="button" data-action="click->file-upload#triggerFileInput" class="flex items-center justify-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-3 sm:py-2 rounded-md transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                    </svg>
+                    <span>Browse</span>
+                </button>
+                <div data-file-upload-target="fileName" class="mt-2 text-xs sm:text-sm text-gray-600 hidden break-words">
+                    <span data-file-upload-target="fileNameText"></span>
+                    <span data-file-upload-target="fileSize" class="text-gray-500 ms-2"></span>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= rtl? ? 'sm:justify-start sm:flex-row-reverse' : 'sm:justify-end' %> gap-2 <%= rtl? ? 'sm:space-x-reverse sm:space-x-3' : 'sm:space-x-3' %> pt-4">
+                <button type="button" data-action="click->modal#closeById" data-modal-dialog-param="upload_document_dialog" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-purple-700 hover:text-purple-900 font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+                    <%= t('cancel') %>
+                </button>
+                <button type="submit" id="upload_submit_btn" class="w-full sm:w-auto px-6 py-3 sm:py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-md font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+                    <%= t('document.upload_save') %>
+                </button>
+            </div>
+        <% end %>
+    </div>
+</dialog>

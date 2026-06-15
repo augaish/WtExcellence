@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Watch CSS script for Tailwind CSS
+while true; do
+  echo "Building Tailwind CSS..."
+  bin/rails tailwindcss:build
+  echo "Waiting for changes..."
+  sleep 2
+done

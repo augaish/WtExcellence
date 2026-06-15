@@ -1,0 +1,48 @@
+<%
+  priority_color = case capa.priority
+                   when 'high' then '#EA4034'
+                   when 'medium' then '#EC71DD'
+                   when 'low' then '#64A3EB'
+                   else '#gray-400'
+                   end
+  # Check if CAPA is overdue (has due_date and it's before today)
+  is_overdue = capa.due_date.present? && capa.due_date < Date.today && capa.status != 'closed'
+  
+  status_colors = {
+    'open' => { bg: '#FEF0FF', text: '#B130AC', label: 'Open' },
+    'assigned' => { bg: '#E9F5F8', text: '#1B94AD', label: 'Assigned' },
+    'in_progress' => { bg: '#E9F0FF', text: '#1751A7', label: 'In Progress' },
+    'closed' => { bg: '#E0F9DE', text: '#3F9011', label: 'Closed' }
+  }
+  
+  # Special cases for in_progress status
+  if capa.status == 'in_progress'
+    if is_overdue
+      status_style = { bg: '#FFF1F0', text: '#B13030', label: 'Overdue' }
+    else
+      status_style = { bg: '#F5FFD8', text: '#789C16', label: 'In Time' }
+    end
+  else
+    status_style = status_colors[capa.status] || { bg: '#F0F0F0', text: '#797C81', label: capa.status&.humanize || '-' }
+  end
+%>
+<tr class="border-b border-[#E3E3E3]">
+  <td class="p-3 sm:p-4 min-w-[160px]"><span class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= truncate(capa.title, length: 40) %></span></td>
+  <td class="p-3 sm:p-4 whitespace-nowrap">
+    <div class="flex items-center gap-2">
+      <div class="w-3 h-3 rounded-full flex-shrink-0" style="background: <%= priority_color %>"></div>
+      <span class="text-xs sm:text-sm text-[#0D1120] font-medium"><%= capa.priority&.capitalize || '-' %></span>
+    </div>
+  </td>
+  <td class="p-3 sm:p-4 whitespace-nowrap">
+    <span class="text-xs sm:text-sm text-[#0D1120] font-medium">
+      <%= capa.due_date ? capa.due_date.strftime('%b %d, %Y') : '-' %>
+    </span>
+  </td>
+  <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+    <span class="text-[10px] sm:text-xs px-3 sm:px-4 py-1 rounded-full font-medium" style="background: <%= status_style[:bg] %>; color: <%= status_style[:text] %>">
+      <%= status_style[:label] %>
+    </span>
+  </td>
+</tr>
+

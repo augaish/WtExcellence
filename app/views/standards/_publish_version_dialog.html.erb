@@ -1,0 +1,101 @@
+<dialog id="publishVersionDialog" class="rounded-lg shadow-lg border-0 p-0 backdrop:bg-gray-600/30 backdrop:backdrop-blur-sm max-w-2xl w-full mx-4" data-controller="dialog-no-backdrop-close">
+    <div class="p-4 sm:p-8 bg-white rounded-lg choices-overflow-visible">
+        <div class="mb-4 sm:mb-6">
+            <h3 class="text-lg sm:text-xl font-bold text-[#0D1120] mb-2 break-words"><%= t('publish_new_version_assign') %></h3>
+            <p class="text-sm text-gray-600"><%= t('publish_version_description') %></p>
+        </div>
+
+        <%= form_with url: publish_version_standard_path(@standard), method: :patch, local: true, class: "choices-overflow-visible" do |form| %>
+            <%= form.hidden_field :version_id, value: @version&.id %>
+
+            <div class="mb-6">
+                <div class="bg-[#F7F7FD] rounded-lg p-4 border border-[#E3E3E3]">
+                    <div class="mb-3">
+                        <div class="font-semibold text-[#0D1120] mb-3"><%= t('creating_new_version_for') %></div>
+                        <div class="flex flex-wrap items-center gap-2 mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+                                <%= image_tag asset_path("version-created-icon.svg"), class: "w-4 h-4 max-w-full h-auto" %>
+                                <span class="<%= rtl? ? 'mr-2' : 'ml-2' %>"><%= t('new_version_underway') %></span>
+                            </span>
+                            <span class="text-[#0D1120] hidden sm:inline">|</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+                                <%= image_tag asset_path("previous-versions-icon.svg"), class: "w-4 h-4 max-w-full h-auto" %>
+                                <span class="<%= rtl? ? 'mr-2' : 'ml-2' %>"><%= @standard&.standard_versions&.count || 3 %>
+                                    <%= t('previous_versions') %></span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg p-4 border border-[#E3E3E3]">
+                        <div class="text-xl font-bold text-[#0D1120]"><%= @standard&.code || 'ISO 9001' %></div>
+                        <div class="text-sm text-gray-500 mt-1">
+                            <%= t('latest_version') %>
+                            <%= @version&.version_label || '20.09.2020' %>
+                            |
+                            <%= t('last_modified') %>-
+                            <%= @version&.updated_at&.strftime("%d.%m.%Y") || 'Today' %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <% if current_user&.can_assign_standards_to_companies? %>
+                <div class="mb-6" data-controller="company-selector">
+                    <label class="block text-sm font-semibold text-[#0D1120] mb-3"><%= t('assign_to_companies') %></label>
+
+                    <!-- Selected Companies Container -->
+                    <div data-company-selector-target="selectedList" class="space-y-2 mb-3">
+                        <% if @assigned_companies&.any? %>
+                            <% @assigned_companies.each do |company| %>
+                                <div class="flex items-center justify-between p-3 bg-[#F7F7FD] rounded-lg border border-[#E3E3E3]" data-company-id="<%= company.id %>">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-sm font-medium">
+                                            <%= company.name.first(2).upcase %>
+                                        </div>
+                                        <span class="font-medium text-[#0D1120]"><%= company.name %></span>
+                                    </div>
+                                    <button type="button" data-action="click->company-selector#removeCompany" data-company-id="<%= company.id %>" class="text-[#FF6B6B] hover:text-red-700">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                    <%= hidden_field_tag "company_ids[]", company.id, id: "company_#{company.id}" %>
+                                </div>
+                            <% end %>
+                        <% end %>
+                    </div>
+
+                    <!-- Add Company Selector (Choices.js with search) -->
+                    <div>
+                        <select 
+                            data-company-selector-target="select" 
+                            data-action="change->company-selector#addSelectedCompany"
+                            class="w-full focus:outline-none"
+                            data-controller="choices-select"
+                            data-choices-select-search-value="true">
+                            <option value=""><%= t('choose_company') %></option>
+                            <% (@companies || []).each do |company| %>
+                                <% next if @assigned_companies&.include?(company) %>
+                                <option value="<%= company.id %>" data-company-name="<%= company.name %>"><%= company.name %></option>
+                            <% end %>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center mt-3">
+                        <input type="checkbox" id="skip_assigning" name="skip_assigning" class="w-4 h-4 text-[#5C3984] border-gray-300 rounded focus:ring-[#5C3984]">
+                        <label for="skip_assigning" class="<%= rtl? ? 'mr-2' : 'ml-2' %> text-sm text-[#0D1120]"><%= t('skip_assigning') %></label>
+                    </div>
+                </div>
+            <% end %>
+
+            <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= rtl? ? 'sm:justify-start sm:flex-row-reverse' : 'sm:justify-end' %> gap-2 <%= rtl? ? 'sm:space-x-reverse sm:space-x-3' : 'sm:space-x-3' %> pt-4 border-t border-[#E3E3E3]">
+                <button type="button" onclick="document.getElementById('publishVersionDialog').close()" class="w-full sm:w-auto px-6 py-3 sm:py-2 min-h-[44px] border border-[#E3E3E3] text-[#0D1120] rounded-lg hover:bg-[#F7F7FD] transition-colors text-[16px] sm:text-sm font-medium">
+                    <%= t('close') %>
+                </button>
+                <button type="submit" class="w-full sm:w-auto px-6 py-3 sm:py-2 min-h-[44px] bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium text-[16px] sm:text-sm">
+                    <%= t('publish_version') %>
+                </button>
+            </div>
+        <% end %>
+    </div>
+</dialog>

@@ -1,0 +1,48 @@
+<div class="px-4 md:px-6 pb-16">
+    <% current_locale = I18n.locale.to_s %>
+    <% updating_label = current_locale == "ar" ? "جاري التحديث..." : "Updating..." %>
+    <!-- First Row: Title and Action Buttons -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 mb-6 gap-3">
+        <h1 class="text-lg sm:text-2xl font-bold text-[#0D1120] break-words"><%= t('edit_tool') %></h1>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-3">
+            <%= link_to t('cancel'), tool_path(@tool), class: "px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-center min-h-[44px]" %>
+            <button id="update-tool-submit-button"
+                    type="submit"
+                    form="edit_tool"
+                    data-default-label="<%= t('update_tool') %>"
+                    data-loading-label="<%= updating_label %>"
+                    class="px-6 py-3 sm:py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                <svg id="update-tool-submit-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span id="update-tool-submit-label"><%= t('update_tool') %></span>
+            </button>
+        </div>
+    </div>
+
+    <%= render "form" %>
+</div>
+
+<script>
+  (function() {
+    function initUpdateToolSpinner() {
+      const form = document.getElementById("edit_tool");
+      const button = document.getElementById("update-tool-submit-button");
+      const spinner = document.getElementById("update-tool-submit-spinner");
+      const label = document.getElementById("update-tool-submit-label");
+      if (!form || !button || !spinner || !label || form.dataset.spinnerBound === "true") return;
+
+      form.dataset.spinnerBound = "true";
+      form.addEventListener("submit", function() {
+        button.disabled = true;
+        spinner.classList.remove("hidden");
+        label.textContent = button.dataset.loadingLabel || "Updating...";
+      });
+    }
+
+    document.addEventListener("turbo:load", initUpdateToolSpinner);
+    document.addEventListener("DOMContentLoaded", initUpdateToolSpinner);
+  })();
+</script>
+

@@ -1,0 +1,28 @@
+---
+alwaysApply: true
+---
+
+# Way to Excellence - Rails 8 Development Standards
+
+## Project Context
+
+Quality management standards compliance platform built with Rails 8 (full MVC).
+**Current Phase:** Milestone 1, Week 1 - Standards Ingestion & Curation
+
+## Architecture Guidelines
+
+### Rails 8 MVC Structure
+
+- Follow Rails conventions strictly (CoC over configuration)
+- Use Hotwire (Turbo + Stimulus) for interactivity
+- Use Sidekiq for background jobs
+- PostgreSQL for database with proper indexing
+- Use tailwind
+
+### Code Organization
+
+- **Models:** Slim models, business logic in service objects
+- **Controllers:** RESTful actions, delegate complex logic to services
+- **Views:** Use view components for reusable UI elements
+- **Services:** `app/services/` for business logic (StandardIngestionService, ClauseTreeBuilder)
+- **Jobs:** `app/jobs/` for async processing (PdfParsingJob, ClauseTreeGenerationJob)

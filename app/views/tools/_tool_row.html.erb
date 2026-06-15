@@ -1,0 +1,69 @@
+<tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]" data-tool-id="<%= tool.id %>">
+    <td class="p-4">
+        <% unless viewer? %>
+          <input type="checkbox"
+                 class="rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984] cursor-pointer"
+                 data-tools--select-all-target="item"
+                 data-tool-id="<%= tool.id %>"
+                 data-action="change->tools--select-all#syncMaster"
+                 aria-label="<%= t('select_tool', name: tool.name_in(I18n.locale.to_s).presence || t('untitled_tool')) %>">
+        <% end %>
+    </td>
+    <td class="p-4">
+        <span class="text-sm text-[#0D1120] break-words max-w-[220px]"><%= tool.name_in(I18n.locale.to_s).presence || t('untitled_tool') %></span>
+    </td>
+    <td class="p-4">
+        <span class="text-sm text-[#0D1120] break-words max-w-[260px]"><%= tool.description_in(I18n.locale.to_s).presence || "-" %></span>
+    </td>
+    <td class="p-4">
+      <span class="text-sm text-[#0D1120]">
+        <% standards = tool.clauses
+          .includes(standard_version: :standard)
+          .map { |c| c.standard_version&.standard }
+          .compact
+          .uniq %>
+        <% if standards.any? %>
+          <%= standards.map(&:display_name).join(", ") %>
+        <% else %>
+          -
+        <% end %>
+      </span>
+    </td>
+    <td class="p-4">
+        <span class="text-sm text-[#0D1120]">
+            <% if tool.clauses.any? %>
+                <%= tool.clauses.map { |c| c.code }.join(", ") %>
+            <% else %>
+                -
+            <% end %>
+        </span>
+    </td>
+    <td class="p-4">
+        <span class="text-sm text-[#0D1120]"><%= tool.updated_at.strftime("%b %d, %Y") %></span>
+    </td>
+    <td class="p-4 text-right" onclick="event.stopPropagation();">
+        <div class="relative inline-block" data-controller="dropdown" data-dropdown-fixed-value="true">
+            <button type="button" data-action="click->dropdown#toggle" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] text-[#797C81] hover:text-[#0D1120] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:ring-offset-1" aria-haspopup="true" aria-expanded="false" aria-label="<%= t('actions') %>">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                </svg>
+            </button>
+            <div data-dropdown-target="menu" class="hidden w-40 bg-white border border-[#E3E3E3] rounded-xl shadow-lg py-1 z-[9999]" role="menu">
+                <%= link_to t('view'), tool_path(tool), class: "block w-full text-left px-3 py-2 text-sm text-[#0D1120] hover:bg-[#F7F7F7] rounded-lg", role: "menuitem" %>
+                <% unless viewer? || !current_user&.can_manage_tools? %>
+                  <%= link_to t('edit'), edit_tool_path(tool), class: "block w-full text-left px-3 py-2 text-sm text-[#0D1120] hover:bg-[#F7F7F7] rounded-lg", data: { turbo: false }, role: "menuitem" %>
+                  <button type="button"
+                          data-controller="tool-delete"
+                          data-action="click->tool-delete#delete"
+                          data-tool-delete-tool-id-value="<%= tool.id %>"
+                          data-tool-delete-tool-name-value="<%= tool.name_in(I18n.locale.to_s) %>"
+                          class="block w-full text-left px-3 py-2 text-sm text-[#EA4034] hover:bg-[#FFF1F0] rounded-lg border-0 bg-transparent cursor-pointer"
+                          role="menuitem">
+                      <%= t('delete') %>
+                  </button>
+                <% end %>
+            </div>
+        </div>
+    </td>
+</tr>
+

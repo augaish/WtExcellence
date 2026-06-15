@@ -1,0 +1,58 @@
+<%# ===== Comments Section (evaluation feedback) ===== %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-6">
+  <div class="p-4 sm:p-5 border-b border-[#E3E3E3] bg-[#F7F7FD]">
+    <h2 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t("assessments.comments_title") %></h2>
+  </div>
+
+  <div class="p-4 sm:p-6">
+    <div id="assessment-comments-list">
+    <% if @evaluations_with_comments.any? %>
+      <div class="space-y-4">
+        <% @evaluations_with_comments.each do |evaluation| %>
+          <% initials = evaluation.evaluator&.name&.split(' ')&.map(&:first)&.join('')&.upcase&.slice(0,2) || "?" %>
+          <%= render "assessments/comment_item", evaluation: evaluation, initials: initials %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex items-center justify-center py-8" id="assessment-no-comments">
+        <p class="text-sm text-[#797C81]"><%= t("assessments.no_comments") %></p>
+      </div>
+    <% end %>
+    </div>
+
+    <%# Comment input — auditors, QM, admins can leave comments %>
+    <% if (@is_auditor || @is_admin_or_qm) && !@readonly %>
+      <div class="mt-4 pt-4 border-t border-[#E3E3E3]" data-controller="assessment-comment" data-assessment-comment-url-value="<%= comment_clause_assessment_path(@clause) %>">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <% if current_user.profile_image.attached? %>
+              <%= image_tag user_profile_image_url(current_user), class: "w-full h-full object-cover" %>
+            <% else %>
+              <% initials = current_user.name&.split(' ')&.map(&:first)&.join('')&.upcase&.slice(0,2) || "?" %>
+              <span class="text-xs font-medium text-purple-700"><%= initials %></span>
+            <% end %>
+          </div>
+          <div class="flex-1">
+            <textarea
+              data-assessment-comment-target="input"
+              rows="2"
+              maxlength="300"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent resize-none"
+              placeholder="<%= t('assessments.write_comment_placeholder') %>"
+            ></textarea>
+            <div class="flex items-center justify-between mt-2">
+              <span class="text-xs text-[#797C81]"><%= t("assessments.comment_hint") %></span>
+              <button type="button" data-action="click->assessment-comment#post" data-assessment-comment-target="button"
+                      class="px-3 py-1.5 text-xs font-medium text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                </svg>
+                <%= t("assessments.post_comment") %>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

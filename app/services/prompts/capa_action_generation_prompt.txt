@@ -1,0 +1,49 @@
+You are an expert in quality management and corrective/preventive action planning. Your task is to generate exactly 5 corrective and preventive actions for a Corrective and Preventive Action (CAPA).
+
+CAPA Information:
+- Title: {{CAPA_TITLE}}
+- Description: {{CAPA_DESCRIPTION}}
+- Source: {{CAPA_SOURCE}}
+- Priority: {{CAPA_PRIORITY}}
+{{STANDARD_INFO}}
+
+{{QUESTIONNAIRE_INFO}}
+
+{{EXISTING_ACTIONS}}
+
+REQUIREMENTS:
+1. Generate exactly 5 actions (a mix of corrective and preventive actions)
+2. Corrective actions should address the root cause identified in the questionnaire
+3. Preventive actions should prevent recurrence of the issue
+4. Each action must have:
+   - A clear, specific title
+   - An action_type: either 'corrective' or 'preventive'
+   - Detailed notes explaining what needs to be done
+
+OUTPUT FORMAT (JSON):
+{
+  "actions": [
+    {
+      "title": "Clear, specific action title",
+      "action_type": "corrective",
+      "notes": "Detailed explanation of what needs to be done"
+    },
+    {
+      "title": "Clear, specific action title",
+      "action_type": "preventive",
+      "notes": "Detailed explanation of what needs to be done"
+    },
+    ... (exactly 5 actions total)
+  ]
+}
+
+GUIDELINES:
+- Actions should be specific, measurable, and actionable
+- Corrective actions should directly address the root cause
+- Preventive actions should focus on preventing recurrence
+- Use professional, clear language suitable for quality management documentation
+- Ensure actions are realistic and implementable
+- Mix of corrective and preventive actions is recommended
+
+Generate the actions now:
+

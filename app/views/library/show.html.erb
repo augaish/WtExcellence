@@ -1,0 +1,33 @@
+<%= render 'header' %>
+<%= render 'filters' %>
+
+<!-- Folder Content with Turbo Frame -->
+<%= turbo_frame_tag "folder_content" do %>
+    <%= render 'subfolders_section' %>
+    <!-- Files Display (List or Grid View) -->
+    <div id="drop-area-container" class="p-4 sm:p-5" 
+         data-controller="drag-drop-upload" 
+         data-drag-drop-upload-target="dropArea"
+         <% if @folder && params[:id] != 'all' && params[:id] != 'legal_documents' %>
+         data-drag-drop-upload-folder-id-value="<%= @folder.id %>"
+         <% elsif params[:id] == 'legal_documents' %>
+         data-drag-drop-upload-legal-documents-value="true"
+         <% end %>>
+        <% search_query = params[:search]&.strip %>
+        <% if @files.empty? && (!@folder || params[:id] == 'all' || params[:id] == 'legal_documents' || (@folder.children.empty? && search_query.blank?)) %>
+            <%= render 'empty_state' %>
+        <% elsif @current_view == 'grid' %>
+            <%= render 'files_grid' %>
+        <% else %>
+            <%= render 'files_list' %>
+        <% end %>
+    </div>
+<% end %>
+
+
+
+<%= render partial: 'upload_document_dialog' %>
+<%= render partial: 'move_file_dialog' %>
+<%= render partial: 'create_folder_dialog' %>
+<%= render partial: 'delete_folder_dialog' %>
+<%= render partial: 'delete_file_dialog' %>

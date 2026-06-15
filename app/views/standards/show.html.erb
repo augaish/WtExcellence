@@ -1,0 +1,331 @@
+<% if @standard.nil? %>
+    <div class="container mx-auto px-4 py-8">
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6 text-center">
+            <h2 class="text-lg sm:text-xl font-bold text-red-800 mb-2 break-words"><%= t('standard_not_found') %></h2>
+            <p class="text-sm sm:text-base text-red-600 mb-4"><%= t('standard_not_found_message') %></p>
+            <a href="<%= standards_path %>" class="inline-flex items-center justify-center px-4 py-3 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 min-h-[44px] text-[16px] sm:text-sm">
+                <%= t('go_back_to_standards') %>
+            </a>
+        </div>
+    </div>
+<% else %>
+    <div class="container mx-auto px-4 py-6 sm:py-8" data-controller="tabs modal" <%= "data-tabs-initial-tab-value=\"#{@initial_tab}\"".html_safe if @initial_tab %>>
+        <a href="<%= standards_path %>" class="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4 sm:mb-6 min-h-[44px] text-sm sm:text-base">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            <%= t('go_back') %>
+        </a>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-bold text-gray-900 break-words"><%= @standard.code %></h1>
+                    <div class="flex flex-wrap items-center gap-2 sm:space-x-4 mt-2 text-xs sm:text-sm">
+                        <span class="text-gray-600"><%= @versions&.count || 0 %>
+                            <%= t('versions') %></span>
+                        <span class="text-gray-600"><%= t('latest_version') %>:
+                            <%= @latest_version&.version_label || 'N/A' %></span>
+                        <span class="text-gray-600"><%= t('last_modified') %>-
+                            <%= @latest_version&.updated_at&.strftime("%d.%m.%Y") || 'N/A' %></span>
+                        <% if current_user&.platform_admin? %>
+                            <span class="text-gray-600"><%= @standard.company_standards.active.count %>
+                                <%= t('assigned_companies') %></span>
+                        <% end %>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <% if current_user&.platform_admin? %>
+                        <%= link_to edit_standard_path(@standard), class: "flex items-center justify-center space-x-2 px-4 py-3 sm:py-2 min-h-[44px] text-[16px] sm:text-sm text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#5C3984] hover:text-white transition-colors" do %>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            <span><%= t('edit') %></span>
+                        <% end %>
+                        <button data-action="click->modal#open" data-modal-dialog-param="newVersionDialog" class="flex items-center justify-center space-x-2 px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors min-h-[44px] text-[16px] sm:text-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span><%= t('add_new_version') %></span>
+                        </button>
+                    <% end %>
+                </div>
+            </div>
+
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex flex-wrap gap-2 sm:space-x-8">
+                    <button data-tabs-target="tab" data-tab="versions" data-action="click->tabs#switch" data-tabs-tab-param="versions" class="px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-medium text-[#5C3984] border-b-2 border-[#5C3984]">
+                        <%= t('versions') %>
+                    </button>
+                    <button data-tabs-target="tab" data-tab="clause-tree" data-action="click->tabs#switch" data-tabs-tab-param="clause-tree" class="px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300">
+                        <%= t('clause_tree') %>
+                    </button>
+                    <% if current_user&.can_assign_standards_to_companies? %>
+                        <button data-tabs-target="tab" data-tab="assignees" data-action="click->tabs#switch" data-tabs-tab-param="assignees" class="px-3 sm:px-4 py-2 min-h-[44px] text-xs sm:text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300">
+                            <%= t('assignees') %>
+                        </button>
+                    <% end %>
+                </nav>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+            <div class="tab-content" data-tabs-target="content" data-content="versions">
+                <div class="mb-4">
+                    <h3 class="text-base sm:text-lg font-medium text-gray-900"><%= t('previous_versions') %></h3>
+                    <p class="text-xs sm:text-sm text-gray-600"><%= t('compare_versions_message') %></p>
+                </div>
+                <% if @versions&.any? %>
+                    <div class="overflow-x-auto -mx-4 sm:mx-0">
+                        <table class="min-w-[720px] sm:min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <input type="checkbox" class="rounded border-gray-300">
+                                    </th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('version') %></th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('published') %></th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('total_clauses') %></th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('subclauses') %></th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('checkpoints') %></th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('last_modified') %></th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('status_label') %></th>
+                                    <th class="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('actions') %></th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <% @versions.each do |version| %>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                            <input type="checkbox" class="rounded border-gray-300">
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <%= version.version_label %>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= version.created_at.strftime("%Y-%m-%d") %>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= version.clauses.count %>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= version.clauses.where.not(parent_id: nil).count %>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= version.clauses.joins(:checklist_items).count %>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <%= version.updated_at.strftime("%Y-%m-%d") %>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 py-1 text-xs font-medium rounded-full <%= version.status == 'draft' ? 'bg-yellow-100 text-yellow-800' : version.status == 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                                                <%= t("version_statuses.#{version.status}") %>
+                                            </span>
+                                        </td>
+                                        <td class="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <div class="flex items-center justify-end space-x-2">
+                                                <% if @latest_version && version.id != @latest_version.id %>
+                                                    <%= link_to compare_standard_path(@standard, compare_with: version.id, version_id: @latest_version.id), 
+                                                        class: "text-[#5C3984] hover:text-[#4A2F6B] font-medium", 
+                                                        title: t('compare_with_latest_version') do %>
+                                                        <%= t('compare') %>
+                                                    <% end %>
+                                                <% end %>
+                                                <% if current_user&.platform_admin? %>
+                                                    <%= link_to edit_standard_path(@standard, version_id: version.id), class: "text-[#5C3984] hover:text-[#4A2F6B] font-medium" do %>
+                                                        <%= t('edit') %>
+                                                    <% end %>
+                                                <% end %>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% end %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% else %>
+                    <p class="text-center py-8 text-gray-500"><%= t('no_versions_available') %></p>
+                <% end %>
+            </div>
+
+            <div class="tab-content hidden" data-tabs-target="content" data-content="clause-tree"
+                 data-controller="clause-tree"
+                 data-clause-tree-focus-value="<%= @focus_clause_id %>"
+                 data-clause-tree-expand-chain-value="<%= (@focus_expand_chain || []).to_json %>">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="text-base sm:text-lg font-medium text-gray-900"><%= t('clause_tree') %></h3>
+                        <p class="text-xs sm:text-sm text-gray-600"><%= t('clause_tree_description') %></p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-2">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-2" data-controller="version-selector" data-standard-id="<%= @standard.id %>">
+                            <%= form_with url: standard_path(@standard), method: :get, data: { turbo_frame: "clause_tree_content", turbo_action: "replace" }, local: true, class: "inline-block" do |form| %>
+                                <%= form.select :version_id, options_from_collection_for_select(@versions, :id, :version_label, @latest_version&.id), 
+                                { prompt: t('select_version') }, 
+                                { 
+                                    class: "px-4 py-3 sm:py-2 border border-gray-300 rounded-lg text-[16px] sm:text-sm min-h-[44px]",
+                                    id: "version_selector",
+                                    data: { action: "change->version-selector#submitForm", "version-selector-target": "select" }
+                                } %>
+                            <% end %>
+                            <% if current_user&.platform_admin? %>
+                                <button data-action="click->version-selector#editVersion" class="px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors min-h-[44px] text-[16px] sm:text-sm">
+                                    <%= t('edit_selected_version') %>
+                                </button>
+                            <% end %>
+                        </div>
+                        <% if @latest_version && @clauses&.any? %>
+                            <button class="flex items-center px-3 py-2 rounded-md border border-gray-300 text-blue-600 transition-all duration-200 hover:text-purple-700 hover:bg-gray-100 hover:border-gray-400 min-h-[44px] text-xs sm:text-sm" 
+                                    data-action="click->clause-tree#toggleAll" 
+                                    data-state="expanded"
+                                    data-clause-tree-target="toggleAll"
+                                    data-collapse-all-text="<%= t('collapse_all') %>"
+                                    data-expand-all-text="<%= t('expand_all') %>">
+                                <svg class="w-4 h-4 <%= rtl? ? 'ml-2' : 'mr-2' %> expand-icon transition-transform duration-200 max-w-full h-auto" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                                </svg>
+                                <span class="text-xs sm:text-sm font-medium button-text"><%= t('collapse_all') %></span>
+                            </button>
+                        <% end %>
+                    </div>
+                </div>
+
+                <%= turbo_frame_tag "clause_tree_content" do %>
+                    <!-- Processing Status -->
+                    <% if @latest_version.nil? %>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                            <div class="flex items-center">
+                                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-600 mr-3"></div>
+                                <span class="text-yellow-800"><%= t('processing_pdf') %></span>
+                            </div>
+                        </div>
+                    <% end %>
+
+                    <% if @latest_version && @clauses&.any? %>
+                        <div class="space-y-4" id="clause-tree-container">
+                            <% @clauses.each do |clause| %>
+                                <%= render 'clause_hierarchy', clause: clause, level: 0 %>
+                            <% end %>
+                        </div>
+                        <% elsif @latest_version %>
+                        <div class="text-center py-12">
+                            <div class="text-gray-400 mb-4">
+                                <svg class="mx-auto h-12 w-12" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('no_clauses_found') %></h3>
+                            <p class="text-gray-600"><%= t('no_clauses_message') %></p>
+                        </div>
+                    <% end %>
+                <% end %>
+            </div>
+
+
+
+
+
+
+
+            <% if current_user&.can_assign_standards_to_companies? %>
+                <div class="tab-content hidden" data-tabs-target="content" data-content="assignees">
+                    <% if @company_standards.any? %>
+                    <div class="space-y-4">
+                        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">
+                            <%= t('assigned_companies') %> (<%= @company_standards.count %>)
+                        </h3>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-[720px] sm:min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <%= t('company') %>
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <%= t('active_version') %>
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <%= t('compliance') %>
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            status
+                                        </th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <%= t('assigned_at') %>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <% @company_standards.each do |company_standard| %>
+                                        <% 
+                                          company = company_standard.company
+                                          compliance_percentage = @company_compliance[company.id] || 0
+                                          compliance_color_classes = if compliance_percentage >= 80
+                                            { bg: "bg-green-100", text: "text-green-800", border: "border-green-200" }
+                                          elsif compliance_percentage >= 50
+                                            { bg: "bg-yellow-100", text: "text-yellow-800", border: "border-yellow-200" }
+                                          else
+                                            { bg: "bg-red-100", text: "text-red-800", border: "border-red-200" }
+                                          end
+                                        %>
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    <%= company.name %>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="text-sm text-gray-900">
+                                                    <%= company_standard.active_version.version_label %>
+                                                </div>
+                                                <div class="text-xs text-gray-500">
+                                                    <%= company_standard.active_version.status %>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-3 py-1 rounded-full text-sm font-semibold <%= compliance_color_classes[:bg] %> <%= compliance_color_classes[:text] %> border <%= compliance_color_classes[:border] %>">
+                                                        <%= compliance_percentage %>%
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                    <%= company_standard.active? ? 'bg-green-100 text-green-800' : 
+                                                        company_standard.inactive? ? 'bg-yellow-100 text-yellow-800' : 
+                                                        'bg-gray-100 text-gray-800' %>">
+                                                    <%= company_standard.status %>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                <%= company_standard.assigned_at&.strftime("%d.%m.%Y") || '-' %>
+                                            </td>
+                                        </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                <% else %>
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900"><%= t('no_companies_assigned') %></h3>
+                        <p class="mt-1 text-sm text-gray-500"><%= t('no_companies_assigned_message') %></p>
+                    </div>
+                <% end %>
+                </div>
+            <% end %>
+        </div>
+    </div>
+
+    <%= render 'new_version_dialog' %>
+<% end %>
+
+<style>
+    .children-container.collapsed {
+        display: none;
+    }
+</style>

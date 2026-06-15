@@ -1,0 +1,33 @@
+<% if @company %>
+Welcome to <%= @company.name %>!
+<% elsif @user.delegated_admin? %>
+Welcome as a Delegated Admin!
+<% else %>
+Welcome to Way To Excellence!
+<% end %>
+
+Hello <%= @user.name %>,
+
+<% if @company %>
+You've been invited to join <%= @company.name %> on our platform.
+
+Your role: <%= @user.company_user&.role&.humanize || 'User' %>
+<% elsif @user.delegated_admin? %>
+You've been invited as a Delegated Admin on our platform.
+<% if @user.permissions_array.any? %>
+Your permissions:
+<% @user.permissions_array.each do |permission| %>
+<% permission_key = User::PERMISSIONS.key(permission) %>
+- <%= permission_key ? t("permissions.#{permission_key}") : permission.humanize %>
+<% end %>
+<% end %>
+<% else %>
+You've been invited to join our platform.
+<% end %>
+
+To get started, please set up your password by visiting the link below:
+
+<%= @invitation_url %>
+
+This invitation link will expire in 7 days. If you didn't expect this invitation, you can safely ignore this email.
+

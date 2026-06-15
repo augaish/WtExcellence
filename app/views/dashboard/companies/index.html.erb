@@ -1,0 +1,76 @@
+<div class="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+    <div class="mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 break-words"><%= t('companies') %></h1>
+        <p class="text-xs sm:text-sm text-gray-600 mt-2 break-words"><%= t('companies_management_description') %></p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <% if @companies.any? %>
+            <div class="overflow-x-auto -mx-4 sm:mx-0">
+                <table class="min-w-full min-w-[800px] divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= t('company_name') %>
+                            </th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= t('users') %>
+                            </th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= t('assigned_standards') %>
+                            </th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th class="px-4 sm:px-6 py-3 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= t('created_at') %>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% @companies.each do |company| %>
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 min-w-[200px]">
+                                    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                                        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-xs sm:text-sm font-medium flex-shrink-0">
+                                            <%= company.name.first(2).upcase %>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-xs sm:text-sm font-medium text-gray-900 truncate"><%= company.name %></div>
+                                            <% if company.default_locale.present? %>
+                                                <div class="text-[10px] sm:text-xs text-gray-500"><%= company.default_locale %></div>
+                                            <% end %>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                                    <%= company.company_users.count %>
+                                </td>
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                                    <%= company.company_standards.active.count %>
+                                </td>
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                                    <%= company.is_active ? 'active' : 'inactive' %>
+                                </td>
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-500">
+                                    <%= company.created_at.strftime("%d.%m.%Y") %>
+                                </td>
+                            </tr>
+                        <% end %>
+                    </tbody>
+                </table>
+            </div>
+        <% else %>
+            <div class="text-center py-8 sm:py-12 px-4">
+                <div class="text-gray-400 mb-4">
+                    <svg class="mx-auto h-10 w-10 sm:h-12 sm:w-12" fill="none" viewbox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+                <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 break-words"><%= t('no_companies_found') %></h3>
+                <p class="text-xs sm:text-sm text-gray-600 break-words"><%= t('no_companies_message') %></p>
+            </div>
+        <% end %>
+    </div>
+</div>
+

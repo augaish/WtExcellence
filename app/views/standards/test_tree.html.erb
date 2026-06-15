@@ -1,0 +1,223 @@
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <div
+            class="bg-white rounded-lg shadow-sm border border-gray-200">
+            <!-- Header -->
+            <div class="border-b border-gray-200 px-6 py-4">
+                <h1 class="text-2xl font-semibold text-gray-900">Quality Excellence Standard</h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    <% if @source_file %>
+                        Last Modified:
+                        <%= File.mtime(@source_file).strftime("%d.%m.%Y") %>
+                    <% end %>
+                </p>
+            </div>
+
+            <!-- Content -->
+            <div class="p-6">
+                <% if @error %>
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
+                        <strong>Error:</strong>
+                        <%= @error %>
+                    </div>
+                <% end %>
+
+                <% if @data %>
+                    <div class="standards-tree">
+                        <% if @data['clauses'] %>
+                            <% @data['clauses'].each do |clause| %>
+                                <%= render 'clause_node', clause: clause, level: 0 %>
+                            <% end %>
+                        <% else %>
+                            <div class="text-gray-500 italic py-8 text-center">No clauses found in the data</div>
+                        <% end %>
+                    </div>
+                <% else %>
+                    <div class="text-gray-500 italic py-8 text-center">No data available to display</div>
+                <% end %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .standards-tree {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .clause-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f3f4f6;
+        position: relative;
+    }
+
+    .clause-item:last-child {
+        border-bottom: none;
+    }
+
+    .clause-item.level-0 {
+        padding: 16px;
+        font-weight: 600;
+        font-size: 16px;
+        background-color: #f8fafc;
+        border: 1px dashed #d1d5db;
+        border-radius: 8px;
+        margin-bottom: 16px;
+    }
+
+    .clause-item.level-1 {
+        padding-left: 24px;
+        font-weight: 500;
+        font-size: 15px;
+    }
+
+    .clause-item.level-2 {
+        padding-left: 48px;
+        font-weight: 400;
+        font-size: 14px;
+    }
+
+    .clause-item.level-3 {
+        padding-left: 72px;
+        font-weight: 400;
+        font-size: 13px;
+    }
+
+    .drag-handle {
+        color: #9ca3af;
+        margin-right: 12px;
+        cursor: grab;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    .clause-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .clause-code {
+        font-weight: 600;
+        color: #374151;
+        margin-right: 8px;
+        min-width: 24px;
+    }
+
+    .clause-title {
+        color: #111827;
+        flex: 1;
+    }
+
+
+    .clause-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 16px;
+    }
+
+    .action-icon {
+        color: #6b7280;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .action-icon:hover {
+        background-color: #f3f4f6;
+        color: #374151;
+    }
+
+    .action-button {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+    }
+
+    .action-button.add-subclause {
+        background-color: #8b5cf6;
+        color: white;
+    }
+
+    .action-button.add-subclause:hover {
+        background-color: #7c3aed;
+    }
+
+    .action-button.add-checkpoint {
+        background-color: #8b5cf6;
+        color: white;
+    }
+
+    .action-button.add-checkpoint:hover {
+        background-color: #7c3aed;
+    }
+
+    .action-button.expanded {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .action-button.expanded:hover {
+        background-color: #2563eb;
+    }
+
+    .checkpoints-section {
+        margin-top: 8px;
+        padding-left: 24px;
+    }
+
+    .checkpoints-label {
+        color: #6b7280;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .checkpoint-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        color: #374151;
+        font-size: 14px;
+    }
+
+    .checkpoint-item .drag-handle {
+        margin-right: 8px;
+    }
+
+    .checkpoint-text {
+        flex: 1;
+    }
+
+
+    .no-checkpoints {
+        color: #9ca3af;
+        font-style: italic;
+        font-size: 13px;
+        padding: 8px 0;
+    }
+
+    /* Responsive adjustments */
+    @media(max-width: 768px) {
+        .clause-actions {
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .action-button {
+            font-size: 11px;
+            padding: 4px 8px;
+        }
+    }
+</style>

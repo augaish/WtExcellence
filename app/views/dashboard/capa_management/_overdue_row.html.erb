@@ -1,0 +1,24 @@
+<%
+  priority_color = case capa.priority
+                   when 'high' then '#EA4034'
+                   when 'medium' then '#EC71DD'
+                   when 'low' then '#64A3EB'
+                   else '#gray-400'
+                   end
+  days_overdue = capa.due_date ? (Date.today - capa.due_date).to_i : 0
+%>
+<tr class="border-b border-[#E3E3E3]">
+  <td class="p-3 sm:p-4 min-w-[160px]"><span class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= truncate(capa.title, length: 40) %></span></td>
+  <td class="p-3 sm:p-4 whitespace-nowrap">
+    <div class="flex items-center gap-2">
+      <div class="w-3 h-3 rounded-full flex-shrink-0" style="background: <%= priority_color %>"></div>
+      <span class="text-xs sm:text-sm text-[#0D1120] font-medium"><%= capa.priority&.capitalize || '-' %></span>
+    </div>
+  </td>
+  <td class="p-3 sm:p-4 text-center whitespace-nowrap">
+    <span class="text-xs sm:text-sm text-[#C73636] font-medium">
+      <%= days_overdue == 1 ? '1 Day' : "#{days_overdue} Days" %>
+    </span>
+  </td>
+</tr>
+

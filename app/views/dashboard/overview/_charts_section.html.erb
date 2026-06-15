@@ -1,0 +1,110 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+  <!-- Resolved CAPA Over time -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 col-span-1">
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('resolved_capa_over_time') %></h3>
+      <p class="text-xs text-[#797C81]"><%= t('closed_capa_vs_total') %></p>
+    </div>
+    <div class="h-[213px] mb-4">
+      <% if @capa_over_time&.any? %>
+        <%= column_chart @capa_over_time, 
+            colors: ["#79BE52", "#1D5CE5"],
+            height: "213px",
+            legend: false %>
+      <% else %>
+        <div class="h-full flex items-center justify-center text-sm text-[#797C81]">
+          <%= t('no_data_available') %>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex justify-center gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-[#79BE52]"></div>
+        <span class="text-xs text-[#6A7970]"><%= t('closed_capa') %></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-[#1D5CE5]"></div>
+        <span class="text-xs text-[#6A7970]"><%= t('total_capa') %></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAPAs by Status Breakdown -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 col-span-1">
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('capas_by_status_breakdown') %></h3>
+    </div>
+    <div class="h-[211px] flex items-center justify-center mb-4 relative">
+      <% 
+        status_colors = {
+          'closed' => '#79BE52',
+          'in_progress' => '#4F87D9',
+          'assigned' => '#85D8E9',
+          'open' => '#F2C6F1'
+        }
+        status_order = ['closed', 'open', 'in_progress', 'assigned']
+        total = status_order.sum { |status| @status_breakdown[status] || 0 }
+        chart_data = status_order.map do |status|
+          count = @status_breakdown[status] || 0
+          percentage = total > 0 ? ((count.to_f / total) * 100).round(1) : 0
+          [status.humanize, count]
+        end.to_h
+      %>
+      <% if total > 0 %>
+        <%= pie_chart chart_data, 
+            colors: status_order.map { |s| status_colors[s] || '#CCCCCC' },
+            donut: true,
+            legend: false,
+            height: "180px",
+            library: {
+              elements: {
+                arc: {
+                  borderWidth: 0
+                }
+              },
+              plugins: {
+                legend: {
+                  display: false
+                }
+              }
+            } %>
+      <% else %>
+        <div class="h-full flex items-center justify-center text-sm text-[#797C81]">
+          <%= t('no_data_available') %>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex flex-wrap justify-center gap-2">
+      <% status_order.each do |status| %>
+        <% count = @status_breakdown[status] || 0 %>
+        <% percentage = total > 0 ? ((count.to_f / total) * 100).round(1) : 0 %>
+        <% next if count == 0 %>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full" style="background: <%= status_colors[status] || '#CCCCCC' %>"></div>
+          <span class="text-xs text-[#797C81]"><%= status.humanize %> (<%= percentage %>%)</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- AI Usage Overview -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 col-span-1">
+    <div class="mb-4">
+      <h3 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('ai_usage_overview') %></h3>
+      <p class="text-xs text-[#797C81]"><%= t('tokens_used_over_time') %></p>
+    </div>
+    <div class="h-[213px] mb-4">
+      <% if @tokens_over_time.present? && @tokens_over_time.any? %>
+        <%= column_chart @tokens_over_time, 
+            colors: ["#5C3984"],
+            height: "213px",
+            legend: false %>
+      <% else %>
+        <div class="h-full flex items-center justify-center text-sm text-[#797C81]">
+          <%= t('no_data_available') %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+

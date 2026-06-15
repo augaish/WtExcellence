@@ -1,0 +1,29 @@
+<dialog id="delete_folder_dialog" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-md w-full mx-4" data-controller="modal dialog-no-backdrop-close">
+    <div class="p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] break-words"><%= t('delete_folder') %></h2>
+            <button data-action="click->modal#close" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="space-y-4 mb-4 sm:mb-6">
+            <p class="text-sm sm:text-base text-gray-700"><%= t('delete_folder_confirmation_message') %></p>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
+                <p class="text-xs sm:text-sm text-red-800 font-medium mb-2 break-words" id="folder_delete_name"></p>
+                <p class="text-xs text-red-700 break-words" id="folder_delete_files_warning"></p>
+            </div>
+        </div>
+
+        <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= rtl? ? 'sm:justify-start sm:flex-row-reverse' : 'sm:justify-end' %> gap-2 <%= rtl? ? 'sm:space-x-reverse sm:space-x-3' : 'sm:space-x-3' %> pt-4">
+            <button type="button" data-action="click->modal#closeById" data-modal-dialog-param="delete_folder_dialog" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+                <%= t('cancel') %>
+            </button>
+            <button type="button" id="confirm_delete_folder_btn" class="w-full sm:w-auto px-6 py-3 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+                <%= t('delete') %>
+            </button>
+        </div>
+    </div>
+</dialog>

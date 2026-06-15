@@ -1,0 +1,46 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+  <!-- Total CAPAs Logged -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('total_capas_logged') %></p>
+    <div class="flex items-baseline gap-2">
+      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @total_capas %></p>
+      <% if @capas_created_in_period > 0 %>
+        <p class="text-xs text-[#79BE52]">
+          +<%= @capas_created_in_period %> <%= t('in_period') %>
+        </p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Open CAPAs -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('open_capas') %></p>
+    <div class="flex items-baseline gap-2">
+      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @open_capas %></p>
+      <p class="text-xs text-[#797C81]"><%= @open_capas_in_period %> <%= t('created_in_period') %></p>
+    </div>
+  </div>
+
+  <!-- High Priority CAPA -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('high_priority_capa') %></p>
+    <div class="flex items-baseline gap-2">
+      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @high_priority_capas %></p>
+      <%= link_to dashboard_capa_management_list_path(priority: 'high'), class: "text-xs sm:text-[11px] text-[#5C3984] underline" do %>
+        <%= t('view_list') %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Overdue CAPA -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('overdue_capa') %></p>
+    <div class="flex items-baseline gap-2">
+      <p class="text-xl sm:text-2xl font-semibold text-[#C73636]"><%= @overdue_capas %></p>
+      <%= link_to dashboard_capa_management_list_path(status: 'overdue'), class: "text-xs sm:text-[11px] text-[#5C3984] underline" do %>
+        <%= t('view_list') %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

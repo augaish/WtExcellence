@@ -1,0 +1,6 @@
+#!/bin/bash
+# bin/sidekiq
+
+# Start Sidekiq worker
+bundle exec sidekiq
+

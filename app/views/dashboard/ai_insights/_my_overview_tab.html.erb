@@ -1,0 +1,144 @@
+<!-- Personal Statistics Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('total_ai_actions') %></h3>
+    <p class="text-xl sm:text-2xl font-bold text-[#5C3984]"><%= @my_total_ai_actions %></p>
+    <p class="text-[10px] sm:text-xs text-[#797C81] mt-1"><%= t('all_time') %></p>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('total_credits_used') %></h3>
+    <p class="text-xl sm:text-2xl font-bold text-[#5C3984]"><%= @my_total_credits_used %></p>
+    <p class="text-[10px] sm:text-xs text-[#797C81] mt-1"><%= t('all_time') %></p>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('most_used_feature') %></h3>
+    <p class="text-base sm:text-lg font-medium text-[#5C3984] break-words">
+      <%= @my_most_used_feature ? t("ai_action_names.#{@my_most_used_feature.downcase}", default: @my_most_used_feature.humanize) : t('none') %>
+    </p>
+    <p class="text-[10px] sm:text-xs text-[#797C81] mt-1"><%= t('last_30_days') %></p>
+  </div>
+</div>
+
+<!-- Personal Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <div class="mb-3 sm:mb-4">
+      <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('ai_usage_over_time') %></h3>
+      <p class="text-[10px] sm:text-xs text-[#797C81]"><%= t('last_30_days') %></p>
+    </div>
+    <div class="h-[180px] sm:h-[213px] mb-3 sm:mb-4">
+      <% if @my_usage_over_time&.any? && @my_usage_over_time.values.any? { |v| v > 0 } %>
+        <%= column_chart @my_usage_over_time,
+            colors: ["#5C3984"],
+            height: "213px",
+            legend: false %>
+      <% else %>
+        <div class="h-full flex items-center justify-center text-xs sm:text-sm text-[#797C81]">
+          <%= t('no_data_available') %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <div class="mb-3 sm:mb-4">
+      <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('usage_by_action_type') %></h3>
+      <p class="text-[10px] sm:text-xs text-[#797C81]"><%= t('all_time') %></p>
+    </div>
+    <div class="h-[180px] sm:h-[211px] flex items-center justify-center mb-3 sm:mb-4 relative">
+      <%
+        action_colors = {
+          'GENERATE_CAPA_ACTIONS' => '#5C3984',
+          'GENERATE_CAPA_QUESTIONNAIRE' => '#79BE52',
+          'SUGGEST_CAPA_CLAUSES' => '#1D5CE5',
+          'REGENERATE_ROOT_CAUSE' => '#FF8C42'
+        }
+        chart_data = @my_usage_by_action.transform_keys { |k| t("ai_action_names.#{k.downcase}", default: k.humanize) }
+        chart_colors = @my_usage_by_action.keys.map { |key| action_colors[key] || '#CCCCCC' }
+      %>
+      <% if chart_data.any? %>
+        <%= pie_chart chart_data,
+            colors: chart_colors,
+            donut: true,
+            legend: false,
+            height: "180px",
+            library: {
+              elements: { arc: { borderWidth: 0 } },
+              plugins: { legend: { display: false } }
+            } %>
+      <% else %>
+        <div class="h-full flex items-center justify-center text-xs sm:text-sm text-[#797C81]">
+          <%= t('no_data_available') %>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex flex-wrap justify-center gap-2">
+      <% @my_usage_by_action.each do |action, count| %>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full flex-shrink-0" style="background: <%= action_colors[action] || '#CCCCCC' %>"></div>
+          <span class="text-[10px] sm:text-xs text-[#797C81]"><%= t("ai_action_names.#{action.downcase}", default: action.humanize) %> (<%= count %>)</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Personal Activity Summaries -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+  <!-- Top Credit Cost Activities -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-3 sm:mb-4 break-words"><%= t('top_credit_cost_activities') %></h3>
+    <% if @my_top_credit_cost_activities&.any? %>
+      <div class="space-y-2 sm:space-y-3">
+        <% @my_top_credit_cost_activities.first(5).each do |activity_data| %>
+          <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg gap-2">
+            <div class="flex-1 min-w-0">
+              <p class="text-xs sm:text-sm font-medium text-[#0D1120] break-words">
+                <%= t("ai_action_names.#{activity_data[:action].downcase}", default: activity_data[:action].humanize) %>
+              </p>
+              <p class="text-[10px] sm:text-xs text-[#797C81]"><%= activity_data[:count] %> <%= t('actions') %></p>
+            </div>
+            <div class="flex-shrink-0 text-right">
+              <p class="text-xs sm:text-sm font-semibold text-[#5C3984]"><%= activity_data[:total_cost] %></p>
+              <p class="text-[10px] sm:text-xs text-[#797C81]"><%= t('credits') %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex items-center justify-center py-8 sm:py-12">
+        <p class="text-xs sm:text-sm text-[#797C81]"><%= t('no_data_available') %></p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Most Used Activities -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-3 sm:mb-4 break-words"><%= t('most_used_activities') %></h3>
+    <% if @my_most_used_activities&.any? %>
+      <div class="space-y-2 sm:space-y-3">
+        <% @my_most_used_activities.first(5).each do |activity_data| %>
+          <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg gap-2">
+            <div class="flex-1 min-w-0">
+              <p class="text-xs sm:text-sm font-medium text-[#0D1120] break-words">
+                <%= t("ai_action_names.#{activity_data[:action].downcase}", default: activity_data[:action].humanize) %>
+              </p>
+              <p class="text-[10px] sm:text-xs text-[#797C81]"><%= activity_data[:count] %> <%= t('times') %></p>
+            </div>
+            <div class="flex-shrink-0 text-right">
+              <p class="text-xs sm:text-sm font-semibold text-[#5C3984]"><%= activity_data[:total_cost] %></p>
+              <p class="text-[10px] sm:text-xs text-[#797C81]"><%= t('credits') %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="flex items-center justify-center py-8 sm:py-12">
+        <p class="text-xs sm:text-sm text-[#797C81]"><%= t('no_data_available') %></p>
+      </div>
+    <% end %>
+  </div>
+</div>
+

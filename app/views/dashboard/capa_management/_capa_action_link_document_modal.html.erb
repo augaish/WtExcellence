@@ -1,0 +1,123 @@
+<style>
+  dialog#link_document_action_dialog {
+    width: 85vw !important;
+    max-width: 85vw !important;
+  }
+  @media (min-width: 1280px) {
+    dialog#link_document_action_dialog {
+      width: 90vw !important;
+      max-width: 1400px !important;
+    }
+  }
+  @media (max-width: 768px) {
+    dialog#link_document_action_dialog {
+      width: 95vw !important;
+      max-width: 95vw !important;
+    }
+  }
+</style>
+<dialog id="link_document_action_dialog" class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-h-[90vh] overflow-hidden flex flex-col" style="display: none;" data-controller="modal capa-link-document dialog-no-backdrop-close" data-capa-id="<%= @capa.id %>" data-capa-action-id="<%= @capa_action.id %>" data-unlink-icon-path="<%= asset_path('unlink-icon.svg') %>" dir="<%= text_direction %>" lang="<%= current_locale %>" data-selected-count-zero="<%= t('capa_management_ui.modals.link_document.selected_count.zero') %>" data-selected-count-one="<%= t('capa_management_ui.modals.link_document.selected_count.one', count: 1) %>" data-selected-count-two="<%= t('capa_management_ui.modals.link_document.selected_count.two', count: 2) %>" data-selected-count-few="<%= t('capa_management_ui.modals.link_document.selected_count.few', count: 3) %>" data-selected-count-many="<%= t('capa_management_ui.modals.link_document.selected_count.many', count: 11) %>" data-selected-count-other="<%= t('capa_management_ui.modals.link_document.selected_count.other', count: 100) %>" data-linking-label="<%= t('capa_management_ui.modals.link_document.linking') %>" data-submit-label="<%= t('capa_management_ui.modals.link_document.submit') %>" data-link-success-fallback="<%= t('capa_management_ui.modals.link_document.success_fallback') %>" data-link-success-basic="<%= t('capa_management_ui.modals.link_document.success_basic') %>" data-link-failed="<%= t('capa_management_ui.modals.link_document.failed') %>" data-generic-error="<%= t('capa_management_ui.modals.link_document.generic_error') %>" data-request-failed-template="<%= t('capa_management_ui.modals.link_document.request_failed', status: '%{status}') %>" data-all-documents-label="<%= t('capa_management_ui.modals.link_document.all_documents') %>" data-view-all-documents-label="<%= t('capa_management_ui.modals.link_document.view_all_documents') %>" data-files-label="<%= t('capa_management_ui.modals.link_document.files_label') %>" data-file-label="<%= t('capa_management_ui.modals.link_document.file_label') %>" data-updated-label="<%= t('capa_management_ui.modals.link_document.updated_label', date: '%{date}') %>" data-open-label="<%= t('capa_management_ui.modals.link_document.open_label') %>" data-untitled-label="<%= t('capa_management_ui.modals.link_document.untitled') %>" data-user-label="<%= t('capa_management_ui.modals.link_document.user_label') %>" data-remove-label="<%= t('capa_management_ui.modals.link_document.remove') %>" data-view-all-files-label="<%= t('capa_management_ui.modals.link_document.view_all_files') %>" data-mime-na-label="<%= t('capa_management_ui.evidence_tab.mime_type_na') %>" data-file-type-pdf="<%= t('capa_management_ui.modals.link_document.file_types.pdf') %>" data-file-type-excel="<%= t('capa_management_ui.modals.link_document.file_types.excel') %>" data-file-type-word="<%= t('capa_management_ui.modals.link_document.file_types.word') %>" data-file-type-image="<%= t('capa_management_ui.modals.link_document.file_types.image') %>" data-file-type-text="<%= t('capa_management_ui.modals.link_document.file_types.text') %>" data-file-type-email="<%= t('capa_management_ui.modals.link_document.file_types.email') %>" data-file-type-file="<%= t('capa_management_ui.modals.link_document.file_types.file') %>" data-load-folders-failed="<%= t('capa_management_ui.modals.link_document.load_folders_failed') %>" data-load-folders-error="<%= t('capa_management_ui.modals.link_document.load_folders_error') %>" data-load-documents-failed="<%= t('capa_management_ui.modals.link_document.load_documents_failed') %>" data-load-documents-error="<%= t('capa_management_ui.modals.link_document.load_documents_error') %>">
+  <div class="p-4 sm:p-6 border-b border-[#E3E3E3] flex-shrink-0">
+    <div class="flex items-start justify-between mb-4 gap-3">
+      <div class="min-w-0 flex-1">
+        <h2 class="text-lg sm:text-xl md:text-2xl font-semibold text-[#0D1120] mb-2 break-words">
+          <%= t("capa_action_show.link_document") %>: <%= @capa_action.title %>
+        </h2>
+        <p class="text-xs sm:text-sm text-gray-600 break-words">
+          <%= t("capa_management_ui.modals.link_document.subtitle") %>
+        </p>
+      </div>
+      <button data-action="click->modal#close" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div class="relative">
+      <input type="text" id="link_document_search" placeholder="<%= t('start_searching') %>" class="w-full px-4 py-3 sm:py-2 <%= rtl? ? 'pr-10 pl-4' : 'pl-10 pr-4' %> text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-colors duration-200 min-h-[44px]" data-action="input->capa-link-document#handleSearch" />
+      <div class="absolute inset-y-0 <%= rtl? ? 'right-0 pr-3' : 'left-0 pl-3' %> flex items-center pointer-events-none">
+        <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </div>
+    </div>
+  </div>
+  <div class="flex-1 overflow-y-auto">
+    <div id="link_document_folder_view" class="p-4 sm:p-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+        <h3 class="text-base sm:text-lg font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.modals.link_document.select_folder") %></h3>
+        <div class="text-xs sm:text-sm text-gray-600"><span id="link_document_selected_count" class="hidden"><%= t("capa_management_ui.modals.link_document.selected_count", count: 0) %></span></div>
+      </div>
+      <div id="link_document_folders_grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div id="link_document_folders_loading" class="col-span-full text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#5C3984]"></div>
+          <p class="mt-2 text-sm text-gray-600"><%= t("capa_management_ui.modals.link_document.loading_folders") %></p>
+        </div>
+        <div id="link_document_folders_empty" class="hidden col-span-full text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900"><%= t("capa_management_ui.modals.link_document.no_folders") %></h3>
+          <p class="mt-1 text-sm text-gray-500"><%= t("capa_management_ui.modals.link_document.no_folders_hint") %></p>
+        </div>
+      </div>
+    </div>
+    <div id="link_document_document_view" class="hidden">
+      <div class="bg-[#FFFFFF] border-b border-[#E3E3E3] p-4 sm:p-5">
+        <div class="flex flex-col gap-3 sm:gap-4 mb-4">
+          <div class="flex items-center gap-3">
+            <button type="button" id="link_document_back_button" class="flex items-center <%= rtl? ? 'flex-row-reverse gap-2' : 'gap-2' %> text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] sm:min-h-auto" data-action="click->capa-link-document#goBackToFolders">
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= rtl? ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' %>"></path></svg>
+              <span class="font-medium text-sm" id="link_document_back_text"><%= t("view_all_files") %></span>
+            </button>
+          </div>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div class="flex-1 relative">
+              <input type="text" id="link_document_search_document_view" placeholder="<%= t('start_searching') %>" class="w-full px-4 py-3 sm:py-2 <%= rtl? ? 'pr-10 pl-4' : 'pl-10 pr-4' %> text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-colors duration-200 min-h-[44px]" data-action="input->capa-link-document#handleSearch" />
+              <div class="absolute inset-y-0 <%= rtl? ? 'right-0 pr-3' : 'left-0 pl-3' %> flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 bg-white border border-gray-300 rounded-lg p-1">
+              <button type="button" id="link_document_view_list" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors bg-[#5C3984] text-white min-h-[40px]" data-action="click->capa-link-document#switchToListView"><%= t('list_view') %></button>
+              <button type="button" id="link_document_view_grid" class="flex-1 sm:flex-none px-3 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors text-gray-600 hover:text-gray-900 min-h-[40px]" data-action="click->capa-link-document#switchToGridView"><%= t('grid_view') %></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 sm:p-5">
+        <div id="link_document_subfolders_section" class="hidden mb-4 sm:mb-5 border-b border-gray-200 pb-4 sm:pb-5">
+          <h3 class="text-base sm:text-lg font-semibold text-[#0D1120] mb-3 sm:mb-4 break-words"><%= t('subfolders') %></h3>
+          <div id="link_document_subfolders_grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6 items-stretch"></div>
+        </div>
+        <div class="mb-3 sm:mb-4"><h3 id="link_document_current_folder_name" class="text-base sm:text-lg font-semibold text-[#0D1120] break-words"></h3></div>
+        <div id="link_document_documents_list" class="hidden overflow-x-auto -mx-4 sm:mx-0">
+          <div class="border border-[#E3E3E3] rounded-xl overflow-hidden">
+            <table class="table-auto w-full min-w-[700px]">
+              <thead>
+                <tr class="border-b border-gray-200 bg-[#F7F7FD]">
+                  <th class="text-left py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium text-gray-500 w-12"><input type="checkbox" id="link_document_select_all" class="w-5 h-5 sm:w-4 sm:h-4 rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984] flex-shrink-0" data-action="change->capa-link-document#toggleSelectAll" /></th>
+                  <th class="text-left py-3 px-3 sm:px-4 text-[10px] sm:text-xs md:text-sm font-medium text-gray-500"><%= t('name_description') %></th>
+                  <th class="text-left py-3 px-3 sm:px-4 text-[10px] sm:text-xs md:text-sm font-medium text-gray-500"><%= t('type') %></th>
+                  <th class="text-left py-3 px-3 sm:px-4 text-[10px] sm:text-xs md:text-sm font-medium text-gray-500"><%= t('last_modified') %></th>
+                </tr>
+              </thead>
+              <tbody id="link_document_documents_list_tbody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="link_document_documents_grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4"></div>
+        <div id="link_document_documents_loading" class="hidden text-center py-8">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#5C3984]"></div>
+          <p class="mt-2 text-sm text-gray-600"><%= t("capa_management_ui.modals.link_document.loading_documents") %></p>
+        </div>
+        <div id="link_document_documents_empty" class="hidden text-center py-12">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900"><%= t('no_files') %></h3>
+          <p class="mt-1 text-sm text-gray-500"><%= t('no_files_message') %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= rtl? ? 'justify-start sm:flex-row-reverse' : 'justify-end' %> gap-2 sm:gap-3 p-4 sm:p-6 border-t border-gray-200 flex-shrink-0">
+    <button type="button" data-action="click->modal#close" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-[#5C3984] hover:text-[#4A2F6B] font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm"><%= t('cancel') %></button>
+    <button type="button" id="link_document_submit" class="w-full sm:w-auto px-6 py-3 sm:py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] text-[16px] sm:text-sm" disabled data-action="click->capa-link-document#handleSubmit">
+      <span id="link_document_submit_text"><%= t("capa_management_ui.modals.link_document.submit") %></span>
+      <span id="link_document_submit_count" class="hidden"> (<span id="link_document_submit_count_value">0</span>)</span>
+    </button>
+  </div>
+</dialog>

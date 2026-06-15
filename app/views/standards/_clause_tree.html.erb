@@ -1,0 +1,77 @@
+<% tree.each do |node| %>
+  <% 
+    status = node[:status]
+    content = side == 'old' ? node[:old_content] : node[:new_content]
+    
+    # Determine status text to display based on side
+    # Left side: show "deleted" if item doesn't exist in new version (status == 'removed')
+    # Right side: show "added" if item doesn't exist in old version (status == 'added')
+    status_text = if side == 'old' && status == 'removed'
+      t('deleted')
+    elsif side == 'new' && status == 'added'
+      t('added')
+    elsif side == 'new' && status == 'modified'
+      t('modified')
+    else
+      nil
+    end
+    
+    # For clauses, check if codes differ
+    old_code = node[:old_code]
+    new_code = node[:new_code]
+    codes_differ = old_code.present? && new_code.present? && old_code != new_code
+  %>
+
+  <% if content.present? %>
+    <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200" data-node-id="<%= node[:id] %>">
+      <% if node[:type] == 'clause' %>
+        <!-- Clause Content -->
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 mb-1 flex-wrap">
+              <% if side == 'new' && codes_differ %>
+                <!-- Show both codes if they differ on the right side -->
+                <span class="text-sm font-semibold text-[#5C3984]">
+                  <%= old_code %> → <%= new_code %>
+                </span>
+              <% else %>
+                <span class="text-sm font-semibold text-[#5C3984]"><%= content[:code] %></span>
+              <% end %>
+              <span class="font-medium text-gray-900"><%= content[:title] %></span>
+            </div>
+            <% if content[:summary].present? %>
+              <p class="text-sm text-gray-600 mt-1"><%= content[:summary] %></p>
+            <% end %>
+          </div>
+          <% if status_text.present? %>
+            <span class="text-xs text-gray-500 whitespace-nowrap"><%= status_text %></span>
+          <% end %>
+        </div>
+      <% elsif node[:type] == 'checkpoint' %>
+        <!-- Checkpoint Content -->
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1">
+            <p class="text-sm text-gray-700"><%= content[:text] %></p>
+            <% if content[:guidance].present? %>
+              <p class="text-xs text-gray-500 italic mt-1"><%= content[:guidance] %></p>
+            <% end %>
+          </div>
+          <% if status_text.present? %>
+            <span class="text-xs text-gray-500 whitespace-nowrap"><%= status_text %></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <!-- Children (subclauses or nested structure) -->
+      <% if node[:children].present? %>
+        <div class="mt-3 ml-4">
+          <%= render partial: 'clause_tree', locals: { 
+            tree: node[:children], 
+            side: side 
+          } %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>
+

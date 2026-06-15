@@ -1,0 +1,193 @@
+<%= content_for :title, t('settings') %>
+
+<div class="min-h-screen bg-gray-50" data-controller="settings">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-[#0D1120] break-words"><%= t('settings') %></h1>
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+        <button type="button" 
+                class="px-4 py-3 sm:py-2 bg-purple-100 text-[#5C3984] rounded-lg hover:bg-purple-200 transition-colors font-medium min-h-[44px] sm:min-h-auto text-sm"
+                data-action="click->settings#discardChanges"
+                data-settings-target="discardButton">
+          <%= t('discard_modifications') %>
+        </button>
+        <button type="button" 
+                class="px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium min-h-[44px] sm:min-h-auto text-sm"
+                data-action="click->settings#saveChanges"
+                data-settings-target="saveButton"
+                data-save-text="<%= t('save_changes') %>"
+                data-saving-text="<%= t('saving') %>">
+          <%= t('save_changes') %>
+        </button>
+      </div>
+    </div>
+
+    <!-- My Profile Card -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm w-full">
+      <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] mb-4 sm:mb-6 break-words"><%= t('my_profile') %></h2>
+      
+      <%= form_with model: current_user, url: dashboard_update_general_settings_path, method: :patch, local: false, data: { settings_target: "form" }, html: { class: "w-full" } do |f| %>
+        <!-- Profile Image Section -->
+        <div class="mb-6 sm:mb-8">
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+            <div class="relative flex-shrink-0">
+              <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-purple-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-md" data-settings-target="profileImageContainer">
+                <% if current_user.profile_image.attached? %>
+                  <%= image_tag user_profile_image_url(current_user), class: "w-full h-full object-cover max-w-full h-auto", data: { settings_target: "profileImage" } %>
+                <% else %>
+                  <img src="" alt="" class="hidden w-full h-full object-cover max-w-full h-auto" data-settings-target="profileImage">
+                  <span class="text-2xl sm:text-3xl font-semibold text-purple-700" data-settings-target="profileInitials">
+                    <% if current_user.name.present? %>
+                      <%= current_user.name.split(' ').map(&:first).join('').upcase[0..1] %>
+                    <% else %>
+                      U
+                    <% end %>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+            <div class="flex flex-col gap-2 w-full sm:w-auto">
+              <%= f.file_field :profile_image, 
+                  accept: "image/*", 
+                  class: "hidden",
+                  data: { 
+                    settings_target: "imageInput",
+                    action: "change->settings#handleProfileImageUpload"
+                  } %>
+              <%= hidden_field_tag "user[remove_profile_image]", "0", data: { settings_target: "removeImageFlag" } %>
+              <button type="button" 
+                      class="px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-purple-50 transition-colors font-medium min-h-[44px] sm:min-h-auto"
+                      data-action="click->settings#openImagePicker"
+                      data-settings-target="changeImageButton">
+                <%= t('change_image') %>
+              </button>
+              <button type="button" 
+                      class="px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium min-h-[44px] sm:min-h-auto"
+                      data-action="click->settings#removeImage"
+                      data-settings-target="removeImageButton">
+                <%= t('remove_image') %>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Fields -->
+        <div class="space-y-4 sm:space-y-6">
+          <!-- First & Last Name -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 border-b border-gray-200 gap-2 sm:gap-4" data-settings-target="nameField">
+            <div class="flex-1 min-w-0">
+              <label class="text-xs sm:text-sm font-medium text-[#797C81] mb-1 block"><%= t('first_last_name') %></label>
+              <p class="text-sm sm:text-base text-[#0D1120] font-medium break-words" data-settings-target="nameDisplay"><%= current_user.name.presence || t('not_set') %></p>
+              <% if current_user&.platform_admin? %>
+                <%= f.text_field :name,
+                    value: current_user.name.presence || '',
+                    class: "hidden w-full px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] text-[16px] sm:text-sm min-h-[44px] sm:min-h-auto",
+                    data: { settings_target: "nameInput" } %>
+              <% else %>
+                <%= f.hidden_field :name, value: current_user.name.presence || '', data: { settings_target: "nameInput" } %>
+              <% end %>
+            </div>
+            <% if current_user&.platform_admin? %>
+              <button type="button" 
+                      class="text-[#5C3984] hover:text-[#5C3984]/80 font-medium text-xs sm:text-sm flex items-center gap-1 min-h-[44px] sm:min-h-auto justify-center sm:justify-start"
+                      data-action="click->settings#editName"
+                      data-settings-target="nameEditButton">
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <%= t('edit') %>
+              </button>
+            <% end %>
+          </div>
+
+          <!-- Email -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 border-b border-gray-200 gap-2">
+            <div class="flex-1 min-w-0">
+              <label class="text-xs sm:text-sm font-medium text-[#797C81] mb-1 block"><%= t('my_email') %></label>
+              <p class="text-sm sm:text-base text-[#0D1120] font-medium break-words" data-settings-target="emailDisplay"><%= current_user.email %></p>
+              <%= f.hidden_field :email, value: current_user.email, data: { settings_target: "emailInput" } %>
+            </div>
+          </div>
+
+          <!-- Email notifications (value synced with Platform Settings toggle via JS) -->
+          <%= f.hidden_field :receive_notifications_on_email, value: current_user.receive_notifications_on_email ? '1' : '0', data: { settings_target: "emailNotificationsInput" } %>
+        </div>
+      <% end %>
+
+      <!-- Role (Read-only) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 border-b border-gray-200 gap-2">
+          <div class="flex-1 min-w-0">
+            <label class="text-xs sm:text-sm font-medium text-[#797C81] mb-1 block"><%= t('role') %></label>
+            <p class="text-sm sm:text-base text-[#0D1120] font-medium break-words">
+              <% if current_user.super_admin? %>
+                <%= t('super_admin') %>
+              <% elsif current_user.delegated_admin? %>
+                Delegated Admin
+              <% elsif current_user.company_user&.role.present? %>
+                <%= current_user.company_user.role.gsub('company_', '').humanize %>
+              <% else %>
+                <%= t('users') %>
+              <% end %>
+            </p>
+          </div>
+        </div>
+
+        <!-- Organization (Read-only) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 border-b border-gray-200 gap-2">
+          <div class="flex-1 min-w-0">
+            <label class="text-xs sm:text-sm font-medium text-[#797C81] mb-1 block"><%= t('organization') %></label>
+            <p class="text-sm sm:text-base text-[#0D1120] font-medium break-words"><%= current_user.company&.name || t('not_assigned') %></p>
+          </div>
+        </div>
+
+        <!-- Account Created On (Read-only) -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 gap-2">
+          <div class="flex-1 min-w-0">
+            <label class="text-xs sm:text-sm font-medium text-[#797C81] mb-1 block"><%= t('account_created_on') %></label>
+            <p class="text-sm sm:text-base text-[#0D1120] font-medium">
+              <%= current_user.created_at&.strftime("%d.%m.%Y") || t('n_a') %>
+            </p>
+          </div>
+        </div>
+    </div>
+
+    <!-- Platform Settings Card -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm w-full">
+      <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] mb-4 sm:mb-6 break-words"><%= t('platform_settings') %></h2>
+      
+      <div class="space-y-4 sm:space-y-6">
+        <!-- Email Notifications Toggle -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-3 sm:py-4 border-b border-gray-200 gap-3">
+          <div class="flex-1 min-w-0">
+            <label class="text-sm sm:text-base font-medium text-[#0D1120] mb-2 block break-words"><%= t('email_notifications') %></label>
+            <p class="text-xs sm:text-sm text-[#797C81] break-words"><%= t('receive_notifications_description') %></p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+            <input type="checkbox"
+                   class="sr-only peer"
+                   <%= 'checked' if current_user.receive_notifications_on_email != false %>
+                   data-settings-target="emailNotificationsToggle"
+                   data-action="change->settings#syncEmailNotificationsToggle">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5C3984]"></div>
+          </label>
+        </div>
+
+        <!-- Export Data Button (Platform Admin only) -->
+        <% if current_user&.platform_admin? %>
+          <div class="py-3 sm:py-4 border-b border-gray-200">
+            <%= link_to dashboard_export_analytics_path(format: :csv), 
+                class: "inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2 text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-purple-50 transition-colors font-medium text-xs sm:text-sm min-h-[44px] sm:min-h-auto w-full sm:w-auto",
+                data: { turbo: false } do %>
+              <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              <%= t('export_data') %>
+            <% end %>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+  </div>
+</div>

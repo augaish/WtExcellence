@@ -1,0 +1,478 @@
+<!-- Document / Attachments Section -->
+<div class="mb-6 sm:mb-8">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+    <h3 class="text-base sm:text-lg font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.evidence_tab.documents_title") %></h3>
+    <div class="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+      <% unless viewer? %>
+        <button type="button" data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="link_document_dialog" class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] rounded-xl text-xs sm:text-sm font-medium text-[#FFFFFF] hover:opacity-80 flex items-center justify-center gap-2 min-h-[44px]">
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <span><%= t("capa_management_ui.evidence_tab.link_document") %></span>
+        </button>
+        <button type="button" data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="upload_document_dialog" data-capa-id="<%= @capa.id %>" class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] rounded-xl text-xs sm:text-sm font-medium text-[#FFFFFF] hover:opacity-80 flex items-center justify-center gap-2 min-h-[44px]">
+          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+          <span><%= t("capa_management_ui.evidence_tab.upload_document") %></span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Documents Table -->
+  <div class="border border-[#E3E3E3] rounded-xl overflow-x-auto -mx-4 sm:mx-0">
+    <table class="w-full min-w-[800px]">
+      <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+        <tr>
+          <th class="text-left p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.file_name") %></span>
+          </th>
+          <th class="text-left p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.type") %></span>
+          </th>
+          <th class="text-left p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.uploaded_by") %></span>
+          </th>
+          <th class="text-left p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.date") %></span>
+          </th>
+          <th class="text-left p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.notes") %></span>
+          </th>
+          <th class="text-right p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.actions") %></span>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="capa-documents-tbody">
+        <% if @capa.evidence_attachments.any? %>
+          <% @capa.evidence_attachments.includes(:upload, :attached_by_user).order(created_at: :desc).each do |evidence_attachment| %>
+            <% upload = evidence_attachment.upload %>
+            <tr data-upload-id="<%= upload.id %>">
+              <td class="p-3 sm:p-4 min-w-[160px]">
+                <span class="text-xs sm:text-sm text-[#0D1120] break-words"><%= upload.display_name %></span>
+              </td>
+              <td class="p-3 sm:p-4 whitespace-nowrap">
+              <span class="text-xs sm:text-sm text-[#797C81]"><%= upload.mime_type&.split('/')&.last&.upcase || t("capa_management_ui.evidence_tab.mime_type_na") %></span>
+              </td>
+              <td class="p-3 sm:p-4 min-w-[120px]">
+              <span class="text-xs sm:text-sm text-[#797C81] break-words"><%= evidence_attachment.attached_by_user&.name || (upload.uploaded_by.present? ? t("capa_management_ui.evidence_tab.uploaded_by_fallback.user") : t("capa_management_ui.evidence_tab.uploaded_by_fallback.system")) %></span>
+              </td>
+              <td class="p-3 sm:p-4 whitespace-nowrap">
+                <span class="text-xs sm:text-sm text-[#797C81]"><%= upload.created_at.strftime('%b %d, %Y') %></span>
+              </td>
+              <td class="p-3 sm:p-4 min-w-[100px]">
+              <span class="text-xs sm:text-sm text-[#797C81] break-words"><%= upload.notes.presence || t("capa_management_ui.evidence_tab.checkpoint_empty") %></span>
+              </td>
+              <td class="p-3 sm:p-4 text-right">
+                <div class="flex items-center justify-end gap-2 sm:gap-3">
+                  <a href="<%= signed_file_url(upload.file, disposition: "attachment") %>" target="_blank" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#5C3984] hover:text-[#4A2F6B] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                  </a>
+                  <% unless viewer? %>
+                    <button 
+                      type="button" 
+                      class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-red-600 hover:text-red-700 unlink-document-button" 
+                      title="<%= t('capa_management_ui.evidence_tab.unlink_document.button_title') %>"
+                      data-capa-id="<%= @capa.id %>"
+                      data-upload-id="<%= upload.id %>"
+                    >
+                      <%= image_tag asset_path('unlink-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    </button>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="6" class="p-6 sm:p-8 text-center text-xs sm:text-sm text-[#797C81]">
+              <%= t("capa_management_ui.evidence_tab.empty_documents") %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% action_evidence = EvidenceAttachment.where(attachable_type: 'CapaAction', attachable_id: @capa_actions_visible).includes(:upload, :attached_by_user, attachable: :capa).order(created_at: :desc) %>
+  <% action_evidence_by_upload = action_evidence.group_by(&:upload_id) %>
+  <% if action_evidence_by_upload.any? %>
+    <h4 class="text-sm font-semibold text-[#0D1120] mt-6 mb-3"><%= t("capa_management_ui.evidence_tab.documents_linked_to_actions") %></h4>
+    <div class="border border-[#E3E3E3] rounded-xl overflow-x-auto -mx-4 sm:mx-0">
+      <table class="w-full min-w-[700px]">
+        <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+          <tr>
+            <th class="text-left p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.file_name") %></span></th>
+            <th class="text-left p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.type") %></span></th>
+            <th class="text-left p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.action_column") %></span></th>
+            <th class="text-left p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.date") %></span></th>
+            <th class="text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.table_headers.actions") %></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% action_evidence_by_upload.each do |_upload_id, evs| %>
+            <% upload = evs.first.upload %>
+            <% actions = evs.map { |e| e.attachable }.compact.uniq %>
+            <tr>
+              <td class="p-3 sm:p-4 min-w-[160px]"><span class="text-xs sm:text-sm text-[#0D1120] break-words"><%= upload.display_name %></span></td>
+              <td class="p-3 sm:p-4 whitespace-nowrap"><span class="text-xs sm:text-sm text-[#797C81]"><%= upload.mime_type&.split('/')&.last&.upcase || t("capa_management_ui.evidence_tab.mime_type_na") %></span></td>
+              <td class="p-3 sm:p-4 min-w-[140px]">
+                <div class="flex flex-wrap gap-x-2 gap-y-1">
+                  <% actions.each_with_index do |action, idx| %>
+                    <%= link_to action.title, dashboard_capa_action_show_path(@capa.id, action.id), class: "text-xs sm:text-sm text-[#5C3984] hover:underline break-words" %><%= "," unless idx == actions.size - 1 %>
+                  <% end %>
+                </div>
+              </td>
+              <td class="p-3 sm:p-4 whitespace-nowrap"><span class="text-xs sm:text-sm text-[#797C81]"><%= upload.created_at.strftime('%b %d, %Y') %></span></td>
+              <td class="p-3 sm:p-4 text-right">
+                <a href="<%= signed_file_url(upload.file, disposition: "attachment") %>" target="_blank" class="p-2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-[#5C3984] hover:text-[#4A2F6B]">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                </a>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>
+
+<!-- Linked Clauses / Checkpoints Section -->
+<div>
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+    <h3 class="text-base sm:text-lg font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.evidence_tab.linked_clauses_title") %></h3>
+    <% unless viewer? %>
+      <button type="button" data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="link_clauses_dialog" class="w-full sm:w-auto px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] rounded-xl text-xs sm:text-sm font-medium text-[#FFFFFF] hover:opacity-80 flex items-center justify-center gap-2 min-h-[44px]">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+        <span><%= t("capa_management_ui.evidence_tab.link_clauses_button") %></span>
+      </button>
+    <% end %>
+  </div>
+
+  <!-- Clauses Table -->
+  <div class="border border-[#E3E3E3] rounded-xl overflow-x-auto -mx-4 sm:mx-0">
+    <table class="w-full min-w-[700px]">
+      <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+        <tr>
+          <th class="text-left p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.clause_table_headers.standard") %></span>
+          </th>
+          <th class="text-left p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.clause_table_headers.clause") %></span>
+          </th>
+          <th class="text-left p-3 sm:p-4 w-64 max-w-64">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.clause_table_headers.checkpoint") %></span>
+          </th>
+          <th class="text-right p-3 sm:p-4">
+            <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.evidence_tab.clause_table_headers.actions") %></span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @capa.clauses.any? %>
+          <% @capa.clauses.each do |clause| %>
+            <% standard = clause.standard_version&.standard %>
+            <tr data-clause-id="<%= clause.id %>">
+              <td class="p-3 sm:p-4 min-w-[140px]">
+                <span class="text-xs sm:text-sm text-[#0D1120] break-words"><%= standard&.display_name || 'N/A' %></span>
+              </td>
+              <td class="p-3 sm:p-4 min-w-[180px]">
+                <span class="text-xs sm:text-sm text-[#0D1120] break-words"><%= clause.code %> <%= clause.title('en') %></span>
+                <% if clause.parent.present? %>
+                <span class="text-[10px] sm:text-xs text-[#797C81] ml-2 whitespace-nowrap"><%= t("capa_management_ui.evidence_tab.sub_clause_label") %></span>
+                <% end %>
+              </td>
+              <td class="p-3 sm:p-4 w-64 max-w-64">
+                <% if clause.checklist_items.any? %>
+                  <% checkpoint_texts = clause.checklist_items.ordered.map { |checkpoint| checkpoint.text(current_locale.to_s) || checkpoint.text('en') }.compact %>
+                  <% if checkpoint_texts.any? %>
+                    <span class="text-xs sm:text-sm text-[#0D1120] line-clamp-2 break-words"><%= checkpoint_texts.join(', ') %></span>
+                  <% else %>
+                    <span class="text-xs sm:text-sm text-[#797C81]"><%= t("capa_management_ui.evidence_tab.checkpoint_empty") %></span>
+                  <% end %>
+                <% else %>
+                  <span class="text-xs sm:text-sm text-[#797C81]"><%= t("capa_management_ui.evidence_tab.checkpoint_empty") %></span>
+                <% end %>
+              </td>
+              <td class="p-3 sm:p-4 text-right">
+                <% unless viewer? %>
+                  <button 
+                    type="button" 
+                    class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-red-600 hover:text-red-700 unlink-clause-button" 
+                  title="<%= t('capa_management_ui.evidence_tab.unlink_clause.button_title') %>"
+                    data-capa-id="<%= @capa.id %>"
+                    data-clause-id="<%= clause.id %>"
+                  >
+                    <%= image_tag asset_path('unlink-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                  </button>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        <% else %>
+          <tr>
+            <td colspan="4" class="p-6 sm:p-8 text-center text-xs sm:text-sm text-[#797C81]">
+              <%= t('no_clauses_linked') %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // Handle unlink clause button clicks
+  (function() {
+    function initializeUnlinkButtons() {
+      const unlinkButtons = document.querySelectorAll('.unlink-clause-button');
+      
+      unlinkButtons.forEach(button => {
+        // Remove existing event listeners by cloning
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const capaId = this.dataset.capaId;
+          const clauseId = this.dataset.clauseId;
+          const row = this.closest('tr');
+          
+          if (!capaId || !clauseId) {
+            console.error('Missing CAPA ID or Clause ID');
+            return;
+          }
+          
+          // Confirm before unlinking
+          const confirmMessage = "<%= j t('capa_management_ui.evidence_tab.unlink_clause.confirm') %>";
+          const confirmed = window.customConfirm 
+            ? await window.customConfirm(confirmMessage)
+            : confirm(confirmMessage)
+          
+          if (!confirmed) {
+            return;
+          }
+          
+          // Disable button and show loading state
+          this.disabled = true;
+          this.classList.add('opacity-50');
+          
+          // Make DELETE request
+          fetch(`/dashboard/capa_management/${capaId}/unlink_clause/${clauseId}`, {
+            method: 'DELETE',
+            headers: {
+              'Accept': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Get tbody before removing row
+              const tbody = row?.closest('tbody');
+              
+              // Remove the row from the table
+              if (row) {
+                row.remove();
+              }
+              
+              // If no more clauses, show empty state
+              if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="4" class="p-8 text-center text-sm text-[#797C81]">
+                      <%= t('no_clauses_linked') %>
+                    </td>
+                  </tr>
+                `;
+              }
+            } else {
+              alert(data.message || "<%= j t('capa_management_ui.evidence_tab.unlink_clause.failure') %>");
+              this.disabled = false;
+              this.classList.remove('opacity-50');
+            }
+          })
+          .catch(error => {
+            console.error('Unlink clause error:', error);
+            alert("<%= j t('capa_management_ui.evidence_tab.unlink_clause.error') %>");
+            this.disabled = false;
+            this.classList.remove('opacity-50');
+          });
+        });
+      });
+    }
+    
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeUnlinkButtons);
+    } else {
+      initializeUnlinkButtons();
+    }
+    
+    // Also initialize on Turbo navigation
+    document.addEventListener('turbo:load', initializeUnlinkButtons);
+    document.addEventListener('turbo:render', initializeUnlinkButtons);
+  })();
+
+  // Handle unlink document button clicks
+  (function() {
+    function dispatchToast(notificationHtmlOrMessage, type = 'success') {
+      let notificationHtml = notificationHtmlOrMessage;
+
+      // If it's a plain message string, create notification HTML
+      if (!notificationHtmlOrMessage || (typeof notificationHtmlOrMessage === 'string' && !notificationHtmlOrMessage.includes('data-toast-target'))) {
+        const bgColor = type === 'success' 
+          ? 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-[#5C3984]'
+          : type === 'info'
+          ? 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-blue-500'
+          : 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+        
+        const icon = type === 'success'
+          ? '<svg class="w-5 h-5 text-[#5C3984]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>'
+          : type === 'info'
+          ? '<svg class="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>'
+          : '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+
+        notificationHtml = `
+          <div 
+            data-toast-target="notification"
+            class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+          >
+            ${icon}
+            <div class="flex-1 text-sm text-[#0D1120] font-medium">
+              ${notificationHtmlOrMessage}
+            </div>
+            <button 
+              data-action="click->toast#close"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        `;
+      }
+
+      if (!notificationHtml) return;
+
+      const event = new CustomEvent('toast:show', {
+        detail: { notificationHtml },
+        bubbles: true
+      });
+      document.dispatchEvent(event);
+    }
+
+    function initializeUnlinkDocumentButtons() {
+      const unlinkButtons = document.querySelectorAll('.unlink-document-button');
+      
+      unlinkButtons.forEach(button => {
+        // Remove existing event listeners by cloning
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        
+        newButton.addEventListener('click', async function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const capaId = this.dataset.capaId;
+          const uploadId = this.dataset.uploadId;
+          const row = this.closest('tr');
+          
+          if (!capaId || !uploadId) {
+            dispatchToast("<%= j t('capa_management_ui.evidence_tab.unlink_document.missing_ids') %>", 'error');
+            return;
+          }
+          
+          // Confirm before unlinking
+          const confirmMessage = "<%= j t('capa_management_ui.evidence_tab.unlink_document.confirm') %>";
+          const confirmed = window.customConfirm 
+            ? await window.customConfirm(confirmMessage)
+            : confirm(confirmMessage)
+          
+          if (!confirmed) {
+            return;
+          }
+          
+          // Disable button and show loading state
+          this.disabled = true;
+          this.classList.add('opacity-50');
+          
+          // Make DELETE request
+          fetch(`/dashboard/capa_management/${capaId}/unlink_document/${uploadId}`, {
+            method: 'DELETE',
+            headers: {
+              'Accept': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Get tbody before removing row
+              const tbody = row?.closest('tbody');
+              
+              // Remove the row from the table
+              if (row) {
+                row.remove();
+              }
+              
+              // If no more documents, show empty state
+              if (tbody && tbody.querySelectorAll('tr').length === 0) {
+                tbody.innerHTML = `
+                  <tr>
+                    <td colspan="6" class="p-8 text-center text-sm text-[#797C81]">
+                      <%= j t("capa_management_ui.evidence_tab.empty_documents") %>
+                    </td>
+                  </tr>
+                `;
+              }
+              
+              dispatchToast(data.message || "<%= j t('capa_management_ui.evidence_tab.unlink_document.success') %>", 'success');
+            } else {
+              dispatchToast(data.message || "<%= j t('capa_management_ui.evidence_tab.unlink_document.failure') %>", 'error');
+              this.disabled = false;
+              this.classList.remove('opacity-50');
+            }
+          })
+          .catch(error => {
+            dispatchToast("<%= j t('capa_management_ui.evidence_tab.unlink_document.error') %>", 'error');
+            this.disabled = false;
+            this.classList.remove('opacity-50');
+          });
+        });
+      });
+    }
+    
+    // Initialize on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeUnlinkDocumentButtons);
+    } else {
+      initializeUnlinkDocumentButtons();
+    }
+    
+    // Also initialize on Turbo navigation
+    document.addEventListener('turbo:load', initializeUnlinkDocumentButtons);
+    document.addEventListener('turbo:render', initializeUnlinkDocumentButtons);
+    
+    // Re-initialize when new buttons are added dynamically
+    document.addEventListener('capa:reinit-unlink-buttons', initializeUnlinkDocumentButtons);
+  })();
+</script>
+
+<!-- Include Upload Document Dialog Modal -->
+<%= render partial: 'library/upload_document_dialog' %>
+
+<!-- Include Link Document Modal -->
+<%= render partial: 'dashboard/capa_management/link_document_modal' %>
+

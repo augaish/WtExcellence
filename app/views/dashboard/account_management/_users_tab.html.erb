@@ -1,0 +1,249 @@
+<!-- Filters Section -->
+<div class="mb-4 sm:mb-6 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 flex-wrap">
+  <%= form_with url: dashboard_account_management_users_path, method: :get, local: true, class: "flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 flex-wrap w-full sm:w-auto" do |f| %>
+    <!-- Filter by Role -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 sm:flex-none min-w-0" 
+         data-controller="choices-select"
+         data-choices-select-search-value="false">
+      <label class="text-xs sm:text-sm font-medium text-[#797C81] whitespace-nowrap"><%= t('filter_by_role') %>:</label>
+      <%= f.select :role, 
+          options_for_select([[t('all'), '']] + @available_roles.map { |r| [r.gsub('company_', '').humanize, r] }, params[:role]),
+          {},
+          { data: { choices_select_target: "select" }, class: "px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] text-[16px] sm:text-sm min-h-[44px]" } %>
+    </div>
+
+    <!-- Filter by Status -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 sm:flex-none min-w-0" 
+         data-controller="choices-select"
+         data-choices-select-search-value="false">
+      <label class="text-xs sm:text-sm font-medium text-[#797C81] whitespace-nowrap"><%= t('filter_by_status') %>:</label>
+      <%= f.select :status, 
+          options_for_select([[t('all'), '']] + @available_statuses.map { |s| [s.humanize, s] }, params[:status]),
+          {},
+          { data: { choices_select_target: "select" }, class: "px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] text-[16px] sm:text-sm min-h-[44px]" } %>
+    </div>
+
+    <!-- Sort -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 flex-1 sm:flex-none min-w-0" 
+         data-controller="choices-select"
+         data-choices-select-search-value="false">
+      <label class="text-xs sm:text-sm font-medium text-[#797C81] whitespace-nowrap"><%= t('sort') %>:</label>
+      <%= f.select :sort, 
+          options_for_select([
+            [t('sort_name_asc'), 'name_asc'],
+            [t('sort_name_desc'), 'name_desc'],
+            [t('sort_email_asc'), 'email_asc'],
+            [t('sort_email_desc'), 'email_desc'],
+            [t('sort_newest_first'), 'created_desc'],
+            [t('sort_oldest_first'), 'created_asc']
+          ], params[:sort]),
+          {},
+          { data: { choices_select_target: "select" }, class: "px-3 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] text-[16px] sm:text-sm min-h-[44px]" } %>
+    </div>
+
+    <%= f.hidden_field :search, value: params[:search] %>
+    <%= f.submit t('apply_filters'), class: "px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium min-h-[44px] text-[16px] sm:text-sm" %>
+    
+    <% if params[:role].present? || params[:status].present? || params[:sort].present? || params[:search].present? %>
+      <%= link_to dashboard_account_management_users_path(search: params[:search]), class: "px-4 py-3 sm:py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium min-h-[44px] text-[16px] sm:text-sm text-center" do %>
+        <%= t('clear_filters') %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>
+
+<!-- Users Table -->
+<div class="w-full overflow-x-auto -mx-4 sm:mx-0">
+  <table class="w-full divide-y divide-gray-200 table-auto min-w-[900px]">
+    <thead class="bg-gray-50">
+      <tr>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
+          <%= t('full_name') %>
+        </th>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[180px]">
+          <%= t('email_address') %>
+        </th>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell min-w-[120px]">
+          <%= t('part_of_company') %>
+        </th>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+          <%= t('status_label') %>
+        </th>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell min-w-[100px]">
+          <%= t('role') %>
+        </th>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-28">
+          <%= t('joined_on') %>
+        </th>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell w-32">
+          <%= t('access_expiry_date') %>
+        </th>
+        <th scope="col" class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+          <%= t('actions') %>
+        </th>
+      </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200">
+      <% if @users.any? %>
+        <% @users.each do |user| %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-3 sm:px-4 py-4">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="flex-shrink-0 h-8 w-8">
+                  <% if user.profile_image.attached? %>
+                    <%= image_tag user_profile_image_url(user), class: "h-8 w-8 rounded-full bg-purple-200 flex items-center justify-center" %>
+                  <% else %>
+                    <div class="h-8 w-8 rounded-full bg-purple-200 flex items-center justify-center">
+                      <span class="text-purple-700 font-semibold text-xs">
+                        <%= user.name.split(' ').map(&:first).join('').upcase[0..1] %>
+                      </span>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="min-w-0 flex-1 max-w-[150px]" data-controller="truncate-tooltip" data-truncate-tooltip-text-value="<%= user.name %>">
+                  <div class="text-xs sm:text-sm font-medium text-gray-900 truncate break-words"><%= user.name %></div>
+                </div>
+              </div>
+            </td>
+            <td class="px-3 sm:px-4 py-4 min-w-0 max-w-[180px]">
+              <div class="text-xs sm:text-sm text-gray-900 truncate break-words" data-controller="truncate-tooltip" data-truncate-tooltip-text-value="<%= user.email %>"><%= user.email %></div>
+            </td>
+            <td class="px-3 sm:px-4 py-4 hidden lg:table-cell min-w-0 max-w-[120px]">
+              <div class="text-xs sm:text-sm text-gray-900 truncate break-words" data-controller="truncate-tooltip" data-truncate-tooltip-text-value="<%= user.company&.name || t('not_assigned') %>"><%= user.company&.name || t('not_assigned') %></div>
+            </td>
+            <td class="px-3 sm:px-4 py-4 whitespace-nowrap">
+              <% 
+                status = user.is_active? ? 'active' : 'inactive'
+                badge_class = status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                status_text = status == 'active' ? t('active') : t('inactive')
+              %>
+              <span class="px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full <%= badge_class %> whitespace-nowrap">
+                <%= status_text %>
+              </span>
+            </td>
+            <td class="px-3 sm:px-4 py-4 hidden md:table-cell text-xs sm:text-sm text-gray-900 min-w-0 max-w-[100px]">
+              <% 
+                role_display = if user.super_admin?
+                  t('super_admin')
+                elsif user.delegated_admin?
+                  t('delegated_admin')
+                elsif user.company_user
+                  user.company_user.role.gsub('company_', '').humanize
+                else
+                  t('role')
+                end
+              %>
+              <div class="truncate break-words" data-controller="truncate-tooltip" data-truncate-tooltip-text-value="<%= role_display %>"><%= role_display %></div>
+            </td>
+            <td class="px-3 sm:px-4 py-4 hidden lg:table-cell text-xs sm:text-sm text-gray-900 whitespace-nowrap">
+              <%= user.created_at.strftime("%Y-%m-%d") %>
+            </td>
+            <td class="px-3 sm:px-4 py-4 hidden xl:table-cell text-xs sm:text-sm text-gray-900 whitespace-nowrap">
+              <%# Placeholder - adjust based on your schema %>
+              <%= user.created_at > 1.year.ago ? (user.created_at + 1.year).strftime("%b %d, %Y") : t('expired') %>
+            </td>
+            <td class="px-3 sm:px-4 py-4 text-xs sm:text-sm font-medium">
+              <div class="relative" data-controller="dropdown">
+                <button type="button" 
+                        class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                        data-action="click->dropdown#toggle">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                  </svg>
+                </button>
+                <div class="hidden absolute end-0 mt-2 w-48 sm:w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200" data-dropdown-target="menu">
+                  <div class="py-1">
+                    <% if current_user&.super_admin? %>
+                      <% if user.delegated_admin? %>
+                        <button type="button" 
+                                class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto"
+                                data-action="click->account-management#openPermissionsModal"
+                                data-user-id="<%= user.id %>"
+                                data-user-name="<%= user.name %>"
+                                data-user-permissions="<%= user.permissions_array.to_json %>">
+                          <%= t('manage_permissions') %>
+                        </button>
+                      <% end %>
+                      <button type="button" 
+                              class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto"
+                              data-action="click->account-management#openChangePasswordModal"
+                              data-user-id="<%= user.id %>"
+                              data-user-name="<%= user.name %>">
+                        <%= t('change_password') %>
+                      </button>
+                      <button type="button" 
+                              class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto"
+                              data-action="click->account-management#openChangeRoleModal"
+                              data-user-id="<%= user.id %>"
+                              data-user-name="<%= user.name %>"
+                              data-user-role="<%= user.role || '' %>"
+                              data-company-role="<%= user.company_user&.role || '' %>"
+                              data-has-company-user="<%= user.company_user.present? %>">
+                        <%= t('change_role') %>
+                      </button>
+                      <button type="button"
+                              class="block px-4 py-3 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 min-h-[44px] sm:min-h-auto w-full text-start"
+                              data-controller="confirm-link"
+                              data-action="click->confirm-link#handleClick"
+                              data-confirm-link-message-value="<%= t('are_you_sure_delete_user', name: user.name) %>"
+                              data-confirm-link-url-value="<%= dashboard_destroy_user_path(user) %>"
+                              data-confirm-link-method-value="delete"
+                              data-confirm-link-title-value="<%= t('are_you_sure') %>"
+                              data-confirm-link-confirm-text-value="<%= t('delete') %>"
+                              data-confirm-link-button-style-value="danger">
+                        <%= t('delete_account') %>
+                      </button>
+                    <% end %>
+                    <% if current_user&.can_activate_deactivate_users? %>
+                      <% if user.is_active? %>
+                        <button type="button"
+                                class="block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto w-full text-start"
+                                data-controller="confirm-link"
+                                data-action="click->confirm-link#handleClick"
+                                data-confirm-link-message-value="<%= t('are_you_sure_deactivate', name: user.name) %>"
+                                data-confirm-link-url-value="<%= dashboard_update_user_status_path(user, is_active: false) %>"
+                                data-confirm-link-method-value="patch"
+                                data-confirm-link-title-value="<%= t('are_you_sure') %>"
+                                data-confirm-link-confirm-text-value="<%= t('confirm') %>"
+                                data-confirm-link-button-style-value="primary">
+                          <%= t('deactivate') %>
+                        </button>
+                      <% else %>
+                        <button type="button"
+                                class="block px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#5C3984] hover:bg-gray-100 min-h-[44px] sm:min-h-auto w-full text-start"
+                                data-controller="confirm-link"
+                                data-action="click->confirm-link#handleClick"
+                                data-confirm-link-message-value="<%= t('are_you_sure_activate', name: user.name) %>"
+                                data-confirm-link-url-value="<%= dashboard_update_user_status_path(user, is_active: true) %>"
+                                data-confirm-link-method-value="patch"
+                                data-confirm-link-title-value="<%= t('are_you_sure') %>"
+                                data-confirm-link-confirm-text-value="<%= t('confirm') %>"
+                                data-confirm-link-button-style-value="primary">
+                          <%= t('activate') %>
+                        </button>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="9" class="px-4 sm:px-6 py-4 text-center text-xs sm:text-sm text-gray-500">
+            <%= t('no_users_found') %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pagination -->
+<% if @pagy.pages > 1 %>
+  <div class="mt-4 sm:mt-6 px-4">
+    <%== pagy_nav(@pagy) if defined?(pagy_nav) %>
+  </div>
+<% end %>
+

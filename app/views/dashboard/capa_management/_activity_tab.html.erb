@@ -1,0 +1,68 @@
+<% rtl = I18n.locale.to_s.start_with?('ar') %>
+<% line_position_class = rtl ? 'right-[28px]' : 'left-[28px]' %>
+<% list_padding_class = rtl ? 'pr-6' : 'pl-6' %>
+<% content_padding_style = rtl ? 'padding: 16px 28px 16px 0px;' : 'padding: 16px 0px 16px 28px;' %>
+
+<% if @activities&.any? %>
+  <div class="relative">
+    <!-- Timeline Line -->
+    <div class="absolute <%= line_position_class %> w-0 border-[2px] border-[#5C3984]" style="height: 100%; z-index: 0;"></div>
+
+    <!-- Activity List -->
+    <ul class="list-none space-y-4 sm:space-y-6 <%= list_padding_class %>" style="list-style: none;">
+      <% @activities.each do |activity| %>
+        <li class="relative" style="list-style: none;">
+          <!-- Timeline Marker - Circle as bullet point (absolute over the line) -->
+          <div class="absolute" style="top: 40%;">
+            <div class="w-3 h-3 rounded-full bg-[#5C3984]"></div>
+          </div>
+
+          <div class="flex items-start <%= rtl ? 'flex-row-reverse' : '' %>">
+            <!-- Content -->
+            <div class="flex flex-col items-start flex-1 min-w-0" style="<%= content_padding_style %> order: 1; flex-grow: 1; z-index: 1; max-width: 100%; overflow: hidden;">
+              <!-- Main content row -->
+              <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-wrap w-full" style="padding: 0px; width: 100%;">
+                <!-- Date tag (always show if present) -->
+                <% if activity.created_at.present? %>
+                  <div class="flex items-center flex-shrink-0" style="padding: 6px 10px; gap: 6px; background: #FFFFFF; border: 1px solid #E3E3E3; border-radius: 30px;" title="<%= activity.formatted_datetime %>">
+                    <span class="text-xs sm:text-sm font-medium" style="color: #797C81;"><%= activity.formatted_date %></span>
+                  </div>
+                <% end %>
+                
+                <!-- Activity Description -->
+                <p class="text-xs sm:text-sm font-medium break-words flex-1 min-w-0" style="color: #0D1120; word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;">
+                  <%= activity.description %>
+                  <span style="color: #797C81;"> <%= t("capa_management_ui.activity_tab.by") %></span>
+                </p>
+                
+                <!-- User Avatar and Name -->
+                <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium overflow-hidden">
+                    <% if activity.actor_user %>
+                      <% if activity.actor_user.profile_image.attached? %>
+                        <%= image_tag user_profile_image_url(activity.actor_user), class: "w-full h-full object-cover max-w-full h-auto" %>
+                      <% else %>
+                        <%= activity.actor_user.name[0].upcase %>
+                      <% end %>
+                    <% else %>
+                      <svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <% end %>
+                  </div>
+                  <span class="text-xs sm:text-sm font-medium truncate" style="color: #0D1120;">
+                    <%= activity.actor_user ? activity.actor_user.name : t('deleted_user', default: 'Deleted user') %>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+<% else %>
+  <!-- Empty State -->
+  <div class="flex items-center justify-center py-8 sm:py-12 px-4">
+    <p class="text-xs sm:text-sm text-[#797C81]"><%= t("capa_management_ui.activity_tab.empty") %></p>
+  </div>
+<% end %>
+

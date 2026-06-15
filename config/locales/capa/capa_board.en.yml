@@ -1,0 +1,41 @@
+en:
+  capa_management_ui:
+    confirmations:
+      default_title: "Confirm Action"
+      confirm_button: "Confirm"
+      delete_title: "Confirm Delete"
+      delete_button: "Delete"
+      unlink_title: "Confirm Unlink"
+      unlink_button: "Unlink"
+      remove_title: "Confirm Remove"
+      remove_button: "Remove"
+    modals:
+      archive_confirmation:
+        title: "Archive CAPA"
+        message: "Are you sure you want to archive this CAPA?"
+        archive: "Archive"
+        unarchive_title: "Unarchive CAPA"
+        unarchive: "Unarchive"
+    board:
+      no_capas: "No CAPAs"
+      progress_label: "Progress:"
+      more_assignees: "and %{count} more"
+      actions:
+        view: "View"
+    board_page:
+      confirmations:
+        default_title: "Confirm Action"
+        confirm_button: "Confirm"
+        delete_title: "Confirm Delete"
+        delete_button: "Delete"
+        unlink_title: "Confirm Unlink"
+        unlink_button: "Unlink"
+        remove_title: "Confirm Remove"
+        remove_button: "Remove"
+        archive_title: "Archive CAPA"
+        archive_button: "Archive"
+        archive_single: "Are you sure you want to archive this CAPA?"
+        delete_single: "Are you sure you want to delete this CAPA? This action cannot be undone."
+      errors:
+        archive_single: "An error occurred while archiving the CAPA"
+        delete_single: "An error occurred while deleting the CAPA"

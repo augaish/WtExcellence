@@ -1,0 +1,152 @@
+<!-- Grid View -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+    <% @files.each do |file| %>
+        <% if file[:upload].present? %>
+            <% folder_id = file[:upload].folder_id || (params[:id] == 'all' || params[:id] == 'legal_documents' ? params[:id] : params[:id]) %>
+            <div class="bg-white rounded-lg p-3 sm:p-4 border border-gray-200 hover:shadow-lg transition-all duration-200 cursor-pointer" 
+                 data-upload-id="<%= file[:upload].id %>"
+                 data-controller="file-row file-drag"
+                 data-action="click->file-row#openFile"
+                 data-file-row-folder-id-value="<%= folder_id %>"
+                 data-file-row-file-id-value="<%= file[:upload].id %>"
+                 data-file-drag-upload-id-value="<%= file[:upload].id %>"
+                 data-file-drag-file-name-value="<%= file[:name] %>">
+        <% else %>
+            <div class="bg-white rounded-lg p-3 sm:p-4 border border-gray-200 hover:shadow-lg transition-all duration-200" data-upload-id="<%= file[:upload]&.id %>">
+        <% end %>
+            <div class="flex items-center justify-between mb-2 sm:mb-3">
+                <div class="flex items-center gap-2 min-w-0">
+                    <input type="checkbox" class="rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984] w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"/>
+                    <% 
+                        type_classes = {
+                          'PDF' => 'bg-red-100 text-red-800',
+                          'Excel' => 'bg-green-100 text-green-800',
+                          'Word' => 'bg-blue-100 text-blue-800',
+                          'Image' => 'bg-purple-100 text-purple-800',
+                          'Email' => 'bg-blue-100 text-blue-800',
+                          'Text' => 'bg-gray-100 text-gray-800',
+                          'File' => 'bg-gray-100 text-gray-800'
+                        }
+                        badge_class = type_classes[file[:type]] || 'bg-gray-100 text-gray-800'
+                    %>
+                    <span class="px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium <%= badge_class %> whitespace-nowrap">
+                        <%= file[:type] %>
+                    </span>
+                </div>
+                <div class="relative flex-shrink-0" data-controller="dropdown">
+                    <button data-action="click->dropdown#toggle" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20">
+                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                        </svg>
+                    </button>
+                    <div data-dropdown-target="menu" class="hidden absolute end-0 mt-2 w-48 sm:w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-1">
+                            <% if file[:upload].present? %>
+                                <% folder_id = file[:upload].folder_id || (params[:id] == 'all' || params[:id] == 'legal_documents' ? params[:id] : params[:id]) %>
+                                <%= link_to folder_uploads_upload_path(folder_id: folder_id, id: file[:upload].id), data: { turbo_frame: "_top" }, class: "block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 min-h-[44px] sm:min-h-auto" do %>
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                    <%= t('view') %>
+                                <% end %>
+                            <% end %>
+                            <% if file[:upload].present? && file[:upload].file.attached? %>
+                                <%= link_to signed_file_url(file[:upload].file, disposition: "attachment"), class: "block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 min-h-[44px] sm:min-h-auto" do %>
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <%= t('download') %>
+                                <% end %>
+                            <% else %>
+                                <span class="block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-400 cursor-not-allowed flex items-center gap-2 min-h-[44px] sm:min-h-auto">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                    </svg>
+                                    <%= t('download') %>
+                                </span>
+                            <% end %>
+                            <% unless viewer? %>
+                              <% if file[:upload].present? %>
+                                  <button type="button" data-action="click->modal#open" data-modal-dialog-param="move_file_dialog" data-move-file-id="<%= file[:upload].id %>" data-move-file-name="<%= file[:name] %>" data-move-file-current-folder="<%= file[:upload].folder_id %>" class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 min-h-[44px] sm:min-h-auto">
+                                      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                      </svg>
+                                      Move
+                                  </button>
+                              <% end %>
+                              <% if file[:upload].present? && (current_user&.super_admin? || current_user&.delegated_admin? || file[:upload].uploaded_by == current_user&.id || current_user&.company_user&.has_admin_privileges?) %>
+                                  <% folder_id = file[:upload].folder_id || (params[:id] == 'all' || params[:id] == 'legal_documents' ? params[:id] : params[:id]) %>
+                                  <% if file[:upload].public? %>
+                                      <button type="button" 
+                                              data-controller="file-visibility" 
+                                              data-action="click->file-visibility#changeVisibility" 
+                                              data-file-id="<%= file[:upload].id %>" 
+                                              data-folder-id="<%= folder_id %>"
+                                              data-visibility="private"
+                                              class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 min-h-[44px] sm:min-h-auto">
+                                          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                          </svg>
+                                          <%= t('document.make_private') %>
+                                      </button>
+                                  <% else %>
+                                      <button type="button" 
+                                              data-controller="file-visibility" 
+                                              data-action="click->file-visibility#changeVisibility" 
+                                              data-file-id="<%= file[:upload].id %>" 
+                                              data-folder-id="<%= folder_id %>"
+                                              data-visibility="public"
+                                              class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 min-h-[44px] sm:min-h-auto">
+                                          <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                          </svg>
+                                          <%= t('document.make_public') %>
+                                      </button>
+                                  <% end %>
+                              <% end %>
+                              <% if file[:upload].present? %>
+                                  <% folder_id = file[:upload].folder_id || (params[:id] == 'all' || params[:id] == 'legal_documents' ? params[:id] : params[:id]) %>
+                                  <button type="button" data-controller="file-delete" data-action="click->file-delete#openDeleteDialog" data-file-id="<%= file[:upload].id %>" data-file-name="<%= file[:name] %>" data-folder-id="<%= folder_id %>" class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 min-h-[44px] sm:min-h-auto">
+                                      <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                      </svg>
+                                      <%= t('delete') %>
+                                  </button>
+                              <% end %>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <h4 class="font-semibold text-gray-900 text-xs sm:text-sm mb-2 line-clamp-1 break-words"><%= file[:name] %></h4>
+            <p class="text-xs text-gray-500 mb-3 sm:mb-4 line-clamp-2 break-words"><%= file[:description] %></p>
+            <div class="flex items-center gap-2 mb-2">
+                <div class="rounded-full w-6 h-6 bg-pink-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <% uploader = file[:upload]&.uploader %>
+                    <% if uploader&.profile_image&.attached? %>
+                        <%= image_tag user_profile_image_url(uploader), class: "w-full h-full object-cover max-w-full h-auto" %>
+                    <% else %>
+                        <% initials = uploader ? uploader.name.to_s.split(' ').map(&:first).join.upcase.presence : file[:uploaded_by].to_s.split(' ').map(&:first).join.upcase.presence %>
+                        <span class="text-xs font-semibold text-pink-800"><%= initials || 'U' %></span>
+                    <% end %>
+                </div>
+                <span class="text-xs text-gray-600 truncate"><%= file[:uploaded_by] %></span>
+            </div>
+            <% if file[:linked_to].present? && file[:linked_to].any? %>
+                <div class="flex items-center gap-1.5 flex-wrap mb-3">
+                    <% file[:linked_to].first(3).each do |link| %>
+                        <a href="<%= link[:url] %>" data-turbo-frame="_top" class="text-[#5C3984] hover:text-[#4A2F6B] text-[10px] sm:text-xs font-medium px-2 py-1 rounded-md bg-blue-50 hover:bg-blue-100 transition-colors break-words">
+                            <%= link[:name] %>
+                        </a>
+                    <% end %>
+                    <% if file[:linked_to].length > 3 %>
+                        <span class="text-[10px] sm:text-xs text-gray-500">+<%= file[:linked_to].length - 3 %></span>
+                    <% end %>
+                </div>
+            <% end %>
+        </div>
+    <% end %>
+</div>
+

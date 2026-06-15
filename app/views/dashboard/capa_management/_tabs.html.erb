@@ -1,0 +1,94 @@
+<div class="bg-white border-b border-[#E3E3E3] px-4 sm:px-6 py-3 sm:py-4">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <h1 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t("capa_management") %></h1>
+    <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto">
+      <% unless viewer? %>
+        <div class="hidden items-center gap-2 flex-wrap" data-capas--select-all-target="bulkActions">
+          <% if current_page?(dashboard_capa_management_archives_path) %>
+            <button type="button" class="bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="bulkUnarchiveCapas()">
+              <span><%= t("capa_management_ui.tabs.bulk.unarchive_selected") %></span>
+            </button>
+          <% else %>
+            <button type="button" class="bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="bulkArchiveCapas()">
+              <span><%= t("capa_management_ui.tabs.bulk.archive_selected") %></span>
+            </button>
+          <% end %>
+          <button type="button" class="bg-[#EA4034] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="bulkDeleteCapas()">
+            <span><%= t("capa_management_ui.tabs.bulk.delete_selected") %></span>
+          </button>
+        </div>
+      <% end %>
+      <% if can_create_capa? && !viewer? %>
+        <button class="flex-1 sm:flex-none bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="document.getElementById('newActionModal').showModal()">
+          <%= image_tag asset_path('plus-icon.svg'), class: "w-4 h-4 max-w-full h-auto flex-shrink-0" %>
+          <span><%= t("capa_management_ui.tabs.add_non_conformity") %></span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+
+  <% search_enabled = current_page?(dashboard_capa_management_list_path) || current_page?(dashboard_capa_management_board_path) || current_page?(dashboard_capa_management_archives_path) %>
+  <% search_action = if current_page?(dashboard_capa_management_list_path)
+    dashboard_capa_management_list_path
+  elsif current_page?(dashboard_capa_management_board_path)
+    dashboard_capa_management_board_path
+  elsif current_page?(dashboard_capa_management_archives_path)
+    dashboard_capa_management_archives_path
+  end %>
+
+  <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 sm:gap-4 mt-3 sm:mt-4">
+    <div class="overflow-x-auto -mx-4 sm:mx-0">
+      <div class="flex gap-4 sm:gap-8 px-4 sm:px-0 min-w-max">
+        <%= link_to dashboard_capa_management_path, class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{current_page?(dashboard_capa_management_path) ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+          <%= t("overview") %>
+        <% end %>
+        <%= link_to dashboard_capa_management_list_path, data: { turbo: false }, class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{current_page?(dashboard_capa_management_list_path) ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+          <%= t("capa_management_ui.tabs.list_view") %>
+        <% end %>
+        <%= link_to dashboard_capa_management_board_path, data: { turbo: false }, class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{current_page?(dashboard_capa_management_board_path) ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+          <%= t("capa_management_ui.tabs.board_view") %>
+        <% end %>
+        <%= link_to dashboard_capa_management_archives_path, data: { turbo: false }, class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{current_page?(dashboard_capa_management_archives_path) ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+          <%= t("capa_management_ui.tabs.archived") %>
+        <% end %>
+      </div>
+    </div>
+
+    <% if search_enabled %>
+      <form method="get" action="<%= search_action %>" class="flex items-center gap-2 bg-white border border-[#E3E3E3] rounded-xl px-3 py-3 sm:py-2 min-h-[44px] flex-1 lg:flex-none lg:min-w-[240px] lg:ml-auto">
+        <% preserved_params = params.slice(:status, :priority, :assignee_id, :due_date_from, :due_date_to) %>
+        <% preserved_params.each do |key, value| %>
+          <%= hidden_field_tag key, value %>
+        <% end %>
+
+        <svg class="w-4 h-4 text-[#797C81] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <input
+          type="text"
+          name="search"
+          value="<%= params[:search] %>"
+          placeholder="<%= t('capa_management_ui.tabs.search_placeholder') %>"
+          class="flex-1 text-[16px] sm:text-sm font-medium text-[#0D1120] placeholder-[#B0B3B8] focus:outline-none min-w-0"
+        >
+        <% if params[:search].present? %>
+          <button type="submit" name="search" value="" class="text-[10px] sm:text-xs text-[#5C3984] font-medium whitespace-nowrap flex-shrink-0"><%= t('capa_management_ui.tabs.clear_search') %></button>
+        <% end %>
+      </form>
+    <% elsif current_page?(dashboard_capa_management_path) %>
+      <button 
+        type="button" 
+        class="flex items-center justify-center gap-2 bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl font-medium text-xs sm:text-sm min-h-[44px] sm:min-h-auto w-full lg:w-auto lg:ml-auto"
+        data-controller="modal"
+        data-action="click->modal#open"
+        data-modal-dialog-param="export_capas_dialog">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <span><%= t('capa_management_ui.tabs.export_button') %></span>
+      </button>
+    <% end %>
+  </div>
+</div>
+
+

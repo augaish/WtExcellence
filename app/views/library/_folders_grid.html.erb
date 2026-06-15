@@ -1,0 +1,59 @@
+<!-- Folders Grid -->
+<div
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6 items-stretch">
+    <!-- All Uploaded Documents (Static Card) - Always shown -->
+    <% 
+      company_for_count = @company || current_company
+      # Only count public files (private files are in Legal Documents)
+      file_count = company_for_count ? Upload.where(company_id: company_for_count.id, visibility: 'public').count : 0
+    %>
+    <%= render partial: 'folder_card', locals: {
+    title_key: 'all_uploaded_documents',
+    description_key: 'all_uploaded_documents_desc',
+    file_count: file_count,
+    button_text_key: 'view_all',
+    company_id: params[:company_id]
+  } %>
+
+    <!-- Legal Documents (Static Card) - Only visible to super admin and company admins -->
+    <% if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user&.has_admin_privileges? %>
+      <% 
+        company_for_legal = @company || current_company
+        legal_file_count = company_for_legal ? Upload.where(company_id: company_for_legal.id, visibility: 'private').count : 0
+      %>
+      <%= render partial: 'folder_card', locals: {
+        title_key: 'legal_documents',
+        description_key: 'legal_documents_desc',
+        file_count: legal_file_count,
+        button_text_key: 'view_all',
+        company_id: params[:company_id],
+        folder_id: 'legal_documents'
+      } %>
+    <% end %>
+
+    <!-- Dynamic Folders from Database -->
+    <% if @folders.any? %>
+        <% @folders.each do |folder| %>
+            <%= render partial: 'folder_card', locals: {
+                folder: folder,
+                title: folder.name,
+                description: folder.description,
+                file_count: folder.file_count,
+                updated_date: folder.updated_at.strftime('%b %d, %Y'),
+                company_id: params[:company_id]
+            } %>
+        <% end %>
+        <% elsif @search_query.present? %>
+        <!-- No folders found message -->
+        <div class="col-span-full py-6 sm:py-8 text-center px-4">
+            <p class="text-sm sm:text-base text-gray-500"><%= t('no_folders_found') %></p>
+        </div>
+    <% end %>
+</div>
+
+<!-- Pagination (inside Turbo Frame to preserve search/sort) -->
+<% if @pagy && @pagy.pages > 1 %>
+    <div class="flex items-center justify-center gap-2 mt-4 sm:mt-6 px-4">
+        <%== pagy_nav(@pagy).gsub(/<a\s+([^>]*)href="/i, '<a data-turbo-frame="folders_grid" \1href="') %>
+    </div>
+<% end %>

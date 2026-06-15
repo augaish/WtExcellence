@@ -1,0 +1,72 @@
+---
+ar:
+  devise:
+    confirmations:
+      confirmed: تمت العملية بنجاح
+      send_instructions: ستصلك رسالة عبر البريد الإلكتروني تحتوي على تعليمات لتأكيد
+        عنوان بريدك خلال بضع دقائق.
+      send_paranoid_instructions: في حال كان عنوان بريدك الإلكتروني مسجلاً لدينا،
+        ستصلك رسالة تحتوي على تعليمات لتأكيده خلال بضع دقائق.
+    failure:
+      already_authenticated: أنت مسجّل الدخول بالفعل.
+      inactive: تم إيقاف حسابك. يرجى التواصل مع مسؤول النظام.
+      invalid: بيانات الدخول غير صحيحة.
+      last_attempt: تبقّت محاولة واحدة قبل قفل حسابك.
+      locked: تم قفل حسابك.
+      not_found_in_database: بيانات الدخول غير صحيحة.
+      timeout: انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى للمتابعة.
+      unauthenticated: يجب تسجيل الدخول أو إنشاء حساب قبل المتابعة.
+      unconfirmed: يجب تأكيد عنوان بريدك الإلكتروني قبل المتابعة.
+    mailer:
+      confirmation_instructions:
+        subject: تعليمات التأكيد
+      email_changed:
+        subject: تم تغيير البريد الإلكتروني
+      password_change:
+        subject: تم تغيير كلمة المرور
+      reset_password_instructions:
+        subject: تعليمات إعادة تعيين كلمة المرور
+      unlock_instructions:
+        subject: تعليمات فتح الحساب
+    omniauth_callbacks:
+      failure: تعذر التحقق من هويتك عبر %{kind} بسبب "%{reason}".
+      success: تمت العملية بنجاح
+    passwords:
+      no_token: لا يمكنك الوصول إلى هذه الصفحة إلا من خلال رابط إعادة تعيين كلمة المرور
+        المرسل إلى بريدك الإلكتروني. يرجى التأكد من استخدام الرابط الكامل الوارد في
+        الرسالة.
+      send_instructions: ستصلك رسالة عبر البريد الإلكتروني تحتوي على تعليمات لإعادة
+        تعيين كلمة المرور خلال بضع دقائق.
+      send_paranoid_instructions: في حال كان عنوان بريدك الإلكتروني مسجلاً لدينا،
+        ستصلك رسالة تحتوي على رابط استعادة كلمة المرور خلال بضع دقائق.
+      updated: تمت العملية بنجاح
+      updated_not_active: تمت العملية بنجاح
+    registrations:
+      destroyed: تمت العملية بنجاح
+      signed_up: تمت العملية بنجاح
+      signed_up_but_inactive: تمت العملية بنجاح
+      signed_up_but_locked: تمت العملية بنجاح
+      signed_up_but_unconfirmed: تم إرسال رسالة تحتوي على رابط تأكيد إلى بريدك الإلكتروني.
+        يرجى اتباع الرابط لتفعيل حسابك.
+      update_needs_confirmation: تمت العملية بنجاح
+      updated: تمت العملية بنجاح
+      updated_but_not_signed_in: تمت العملية بنجاح
+    sessions:
+      already_signed_out: تمت العملية بنجاح
+      signed_in: تمت العملية بنجاح
+      signed_out: تمت العملية بنجاح
+    unlocks:
+      send_instructions: ستصلك رسالة تحتوي على تعليمات لفتح حسابك خلال بضع دقائق.
+      send_paranoid_instructions: في حال كان حسابك مسجلاً لدينا، ستصلك رسالة تحتوي
+        على تعليمات لفتحه خلال بضع دقائق.
+      unlocked: تمت العملية بنجاح
+  errors:
+    messages:
+      already_confirmed: تم تأكيده مسبقًا، يرجى تسجيل الدخول.
+      confirmation_period_expired: يجب تأكيده خلال %{period}، يرجى طلب رابط جديد.
+      expired: انتهت صلاحيته، يرجى طلب رابط جديد.
+      not_found: لم يتم العثور على
+      not_locked: لم يتم قفل الحساب.
+      not_saved:
+        one: 'يوجد خطأ واحد حال دون حفظ %{resource}:'
+        other: 'يوجد %{count} أخطاء حالت دون حفظ %{resource}:'

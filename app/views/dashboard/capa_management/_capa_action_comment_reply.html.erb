@@ -1,0 +1,24 @@
+<% reply = local_assigns[:reply] %>
+<% can_delete = local_assigns[:can_delete] %>
+<% parent_comment_id = local_assigns[:parent_comment_id] || reply.parent_id %>
+<div class="comment-reply-row flex items-start gap-2.5 py-2 px-2 rounded-lg hover:bg-[#F7F7FD]/50 transition-colors group/reply" data-comment-id="<%= reply.id %>" data-parent-id="<%= parent_comment_id %>">
+  <div class="w-7 h-7 rounded-full overflow-hidden flex-shrink-0 ring-1 ring-[#E3E3E3] bg-[#F7F7FD] flex items-center justify-center">
+    <% if reply.user.profile_image.attached? %>
+      <%= image_tag user_profile_image_url(reply.user), class: "w-full h-full object-cover", alt: reply.user.name %>
+    <% else %>
+      <span class="text-xs font-semibold text-[#5C3984]/80"><%= reply.user.name[0].upcase %></span>
+    <% end %>
+  </div>
+  <div class="flex-1 min-w-0">
+    <div class="flex items-center gap-2 flex-wrap">
+      <span class="text-xs font-semibold text-[#0D1120]"><%= reply.user.name %></span>
+      <span class="text-[10px] text-[#797C81]"><%= l(reply.created_at, format: :short) %></span>
+    </div>
+    <p class="text-xs text-[#0D1120]/90 break-words mt-0.5 whitespace-pre-wrap leading-relaxed"><%= reply.body %></p>
+  </div>
+  <% if can_delete %>
+    <button type="button" class="delete-comment shrink-0 opacity-0 group-hover/reply:opacity-100 text-[#DC2626] hover:bg-red-50 rounded p-1 transition-opacity" data-comment-id="<%= reply.id %>" data-parent-id="<%= parent_comment_id %>" title="<%= t('capa_action_show.delete_comment') %>">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+    </button>
+  <% end %>
+</div>

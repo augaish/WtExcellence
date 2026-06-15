@@ -1,0 +1,32 @@
+en:
+  capa_management_ui:
+    overview_charts:
+      resolved_over_time: "Resolved CAPA Over Time"
+      closed_vs_total: "Closed CAPA vs Total CAPA"
+      closed_capa: "Closed CAPA"
+      total_capa: "Total CAPA"
+      status_breakdown: "Status Breakdown"
+      most_assigned: "Most CAPA Assigned"
+      assignee_name: "Assignee Name"
+      nr_assigned: "Nr Assigned"
+      no_assignments: "No assignments yet"
+    overview_cards:
+      open_capas: "Open CAPAs"
+      assistant_interactions: "Assistant Interactions"
+      high_priority: "High Priority"
+      view_list: "View list"
+      overdue: "Overdue"
+      avg_resolution_time: "Avg. Resolution Time"
+      days_label: "days"
+      ai_assessed: "AI-assessed"
+    overview_tables:
+      assigned_to_me: "Assigned to Me"
+      no_assigned: "No CAPAs assigned to you"
+      overdue_capas: "Overdue CAPA"
+      days_overdue_header: "Days Overdue"
+      days_overdue_count:
+        one: "%{count} day"
+        other: "%{count} days"
+      no_overdue: "No overdue CAPAs"
+      title_assigned_to_me: "Assigned to Me"
+      title_overdue_capas: "Overdue CAPA"

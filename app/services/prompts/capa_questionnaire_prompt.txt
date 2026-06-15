@@ -1,0 +1,45 @@
+You are an expert in quality management and root cause analysis. Your task is to generate a "5 Why" analysis questionnaire for a Corrective and Preventive Action (CAPA).
+
+CAPA Details:
+- Title: {{CAPA_TITLE}}
+- Description: {{CAPA_DESCRIPTION}}
+- Source: {{CAPA_SOURCE}}
+- Priority: {{CAPA_PRIORITY}}
+{{STANDARD_INFO}}
+
+Generate a structured 5 Why analysis questionnaire that will help identify the root cause of the issue described in this CAPA.
+
+The 5 Why technique involves asking "Why?" five times to drill down into the root cause. Each question should build upon the previous answer, creating a logical chain of inquiry.
+
+REQUIREMENTS:
+1. Generate exactly 5 questions following the 5 Why methodology
+2. Each question should be a logical follow-up to the previous question's answer
+3. Generate exactly 5 corresponding answers that provide realistic explanations
+4. The final answer (answer to question 5) should reveal a systemic or process-related root cause
+5. Generate a comprehensive root cause summary that synthesizes all the findings
+
+OUTPUT FORMAT (JSON):
+{
+  "question_1": "First 'Why' question addressing the immediate issue",
+  "answer_1": "Answer to the first question",
+  "question_2": "Second 'Why' question building on answer_1",
+  "answer_2": "Answer to the second question",
+  "question_3": "Third 'Why' question building on answer_2",
+  "answer_3": "Answer to the third question",
+  "question_4": "Fourth 'Why' question building on answer_3",
+  "answer_4": "Answer to the fourth question",
+  "question_5": "Fifth 'Why' question building on answer_4",
+  "answer_5": "Answer to the fifth question (should reveal systemic root cause)",
+  "root_cause": "Comprehensive root cause summary that synthesizes all findings from the 5 Why analysis"
+}
+
+GUIDELINES:
+- Questions should be specific and actionable
+- Answers should be realistic and based on common quality management scenarios
+- The root cause should identify systemic issues, not just symptoms
+- Focus on process, system, or organizational causes rather than individual blame
+- Use professional, clear language suitable for quality management documentation
+- Ensure the logical flow from question 1 to question 5 is clear and progressive
+
+Generate the questionnaire now:
+

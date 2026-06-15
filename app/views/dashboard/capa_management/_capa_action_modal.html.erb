@@ -1,0 +1,111 @@
+<dialog id="capaActionModal" class="rounded-3xl backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white p-0 " style="box-shadow: 0px 16px 32px -4px rgba(12, 12, 13, 0.1), 0px 4px 4px -4px rgba(12, 12, 13, 0.05); width: 674px; max-width: 90vw; max-height: 90vh; overflow: hidden;" data-controller="dialog-no-backdrop-close">
+  <div class="flex flex-col h-full max-h-[90vh]"
+       data-controller="capas--capa-action"
+       data-capas--capa-action-delete-icon-path-value="<%= asset_path('delete-clause-icon.svg') %>"
+       data-create-title="<%= t('capa_management_ui.actions.create_title') %>"
+       data-create-subtitle="<%= t('capa_management_ui.actions.create_subtitle') %>"
+       data-create-submit="<%= t('capa_management_ui.actions.create_submit') %>"
+       data-create-loading="<%= t('capa_management_ui.actions.create_loading') %>"
+       data-edit-title="<%= t('capa_management_ui.actions.edit_title') %>"
+       data-edit-subtitle="<%= t('capa_management_ui.actions.edit_subtitle') %>"
+       data-edit-submit="<%= t('capa_management_ui.actions.edit_submit') %>"
+       data-edit-loading="<%= t('capa_management_ui.actions.edit_loading') %>"
+       data-delete-confirm="<%= t('capa_management_ui.actions.delete_confirm') %>"
+       data-delete-loading="<%= t('capa_management_ui.actions.delete_loading') %>"
+       data-delete-error="<%= t('capa_management_ui.actions.delete_error') %>"
+       data-delete-button="<%= t('capa_management_ui.actions.delete_button') %>"
+       data-network-error="<%= t('capa_management_ui.actions.network_error') %>"
+       data-generate-loading="<%= t('capa_management_ui.actions.generate_loading') %>"
+       data-generate-error="<%= t('capa_management_ui.actions.generate_error') %>">
+    
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-[#F0F0F0] flex-shrink-0">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex flex-col gap-1 min-w-0 flex-1">
+          <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] break-words" data-capas--capa-action-target="modalTitle"><%= t("capa_management_ui.modals.assign_action.title") %></h2>
+          <p class="text-xs sm:text-sm font-medium text-[#797C81] break-words" data-capas--capa-action-target="modalSubtitle"><%= t("capa_management_ui.modals.assign_action.subtitle") %></p>
+        </div>
+        <button type="button" class="text-[#797C81] hover:text-[#0D1120] p-1 flex-shrink-0 transition-colors" data-action="click->capas--capa-action#closeModal">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Body -->
+    <div class="flex-grow overflow-y-auto px-6 py-5 custom-scrollbar">
+      <form id="capaActionForm" method="dialog" class="flex flex-col gap-5" data-action="submit->capas--capa-action#submitForm" data-capas--capa-action-target="form">
+        <input type="hidden" name="capa_action_id" data-capas--capa-action-target="actionId">
+        <input type="hidden" name="capa_id" value="<%= @capa.id %>">
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.assign_action.title_label") %>*</label>
+          <input type="text" name="capa_action[title]" required class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" placeholder="<%= t('capa_management_ui.modals.assign_action.title_placeholder') %>" data-capas--capa-action-target="title">
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex flex-col gap-2 flex-1" data-controller="choices-select">
+            <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.assign_action.action_type_label") %>*</label>
+            <select name="capa_action[action_type]" required data-choices-select-target="select" class="w-full" data-capas--capa-action-target="actionType">
+              <option value="corrective"><%= t("capa_actions.types.corrective") %></option>
+              <option value="preventive"><%= t("capa_actions.types.preventive") %></option>
+            </select>
+          </div>
+          <div class="flex flex-col gap-2 flex-1" data-controller="choices-select">
+            <label class="text-sm font-semibold text-[#0D1120]"><%= t("status") %>*</label>
+            <select name="capa_action[status]" required data-choices-select-target="select" class="w-full" data-capas--capa-action-target="status">
+              <option value="started"><%= t("capa_actions.statuses.started") %></option>
+              <option value="in_progress"><%= t("capa_actions.statuses.in_progress") %></option>
+              <option value="done"><%= t("capa_actions.statuses.done") %></option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-[#0D1120]"><%= t("due_date_optional") %></label>
+          <input type="date" name="capa_action[due_date]" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" data-capas--capa-action-target="dueDate">
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.assign_action.notes_label") %></label>
+          <textarea name="capa_action[notes]" rows="3" class="px-4 py-3 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" placeholder="<%= t('capa_management_ui.modals.assign_action.notes_placeholder') %>" data-capas--capa-action-target="notes"></textarea>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <label class="text-sm font-semibold text-[#0D1120]"><%= t("assign_to") %></label>
+          <div data-capas--capa-action-target="assignedUsers" class="flex flex-col gap-2">
+            <!-- Assigned users will render here -->
+          </div>
+          <div class="flex flex-col gap-2">
+            <select multiple name="capa_action[company_user_ids][]" data-capas--capa-action-target="userSelect" class="w-full">
+              <% @company_users&.each do |company_user| %>
+                <% 
+                   props = { 
+                     name: company_user.user&.name || "Deleted User", 
+                     role: company_user.role, 
+                     profileImageUrl: (company_user.user&.profile_image&.attached? ? user_profile_image_url(company_user.user) : "") 
+                   } 
+                %>
+                <option value="<%= company_user.id %>" data-custom-properties='<%= props.to_json %>'>
+                  <%= company_user.user&.name || "Deleted User" %> (<%= company_user.role %>)
+                </option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-5 border-t border-[#F0F0F0] flex-shrink-0 bg-[#F9FAFC] rounded-b-3xl">
+      <div class="flex flex-col-reverse sm:flex-row justify-end gap-3">
+        <button type="button" class="w-full sm:w-auto px-5 py-2 text-[#797C81] text-sm font-medium hover:text-[#0D1120] transition-colors" data-action="click->capas--capa-action#closeModal"><%= t("cancel") %></button>
+        <button type="submit" form="capaActionForm" class="w-full sm:w-auto px-6 py-2.5 bg-[#5C3984] text-white rounded-xl text-sm font-semibold hover:bg-[#4A2F6B] transition-all shadow-sm hover:shadow-md" data-capas--capa-action-target="submitButton"><%= t("capa_management_ui.modals.assign_action.submit_button") %></button>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+

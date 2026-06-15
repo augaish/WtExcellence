@@ -1,0 +1,260 @@
+<%
+  action = @capa_action
+  capa = @capa
+  action_type_styles = {
+    'corrective' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.types.corrective') },
+    'preventive' => { bg: 'bg-[#FEF0FF]', text: 'text-[#B130AC]', label: t('capa_actions.types.preventive') }
+  }
+  action_type_style = action_type_styles[action.action_type] || { bg: 'bg-gray-100', text: 'text-gray-600', label: action.action_type&.humanize || '-' }
+  status_styles = {
+    'started' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.started') },
+    'in_progress' => { bg: 'bg-[#E9F0FF]', text: 'text-[#1751A7]', label: t('capa_actions.statuses.in_progress') },
+    'done' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.done') }
+  }
+  status_style = status_styles[action.status] || { bg: 'bg-gray-100', text: 'text-gray-600', label: action.status&.humanize || '-' }
+  due_date_formatted = action.due_date ? l(action.due_date, format: :medium) : nil
+  back_url = dashboard_capa_management_show_path(capa)
+%>
+
+<div class="bg-[#F9FAFC] min-h-screen p-4 sm:p-6">
+  <!-- Header -->
+  <div class="mb-4 sm:mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+    <%= link_to back_url, class: "flex items-center gap-2 text-xs sm:text-sm text-[#797C81] hover:text-[#0D1120] min-h-[44px] sm:min-h-auto" do %>
+      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+      <span><%= t("capa_action_show.go_back") %></span>
+    <% end %>
+  </div>
+
+  <!-- Action overview card -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+    <div class="flex flex-wrap items-center gap-2 mb-3 sm:mb-4">
+      <span class="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium <%= action_type_style[:bg] %> <%= action_type_style[:text] %>">
+        <%= action_type_style[:label] %>
+      </span>
+      <% if can_update_capa_action?(@capa_action) && !viewer? %>
+        <span class="text-[10px] sm:text-xs font-medium text-[#797C81]"><%= t("capa_action_show.status_label") %>:</span>
+        <select
+          data-capa-action-status-select
+          data-capa-id="<%= capa.id %>"
+          data-action-id="<%= action.id %>"
+          data-update-url="<%= dashboard_capa_management_path + "/#{capa.id}/capa_actions/#{action.id}" %>"
+          data-csrf-token="<%= form_authenticity_token %>"
+          class="rounded-lg border border-[#E3E3E3] px-2 py-1 text-[10px] sm:text-xs font-medium bg-white text-[#0D1120] focus:ring-2 focus:ring-[#5C3984] focus:border-transparent min-h-[28px]"
+        >
+          <option value="started" <%= 'selected' if action.status == 'started' %>><%= t('capa_actions.statuses.started') %></option>
+          <option value="in_progress" <%= 'selected' if action.status == 'in_progress' %>><%= t('capa_actions.statuses.in_progress') %></option>
+          <option value="done" <%= 'selected' if action.status == 'done' %>><%= t('capa_actions.statuses.done') %></option>
+        </select>
+      <% else %>
+        <span class="inline-flex items-center px-2 py-1 rounded-full text-[10px] sm:text-xs font-medium <%= status_style[:bg] %> <%= status_style[:text] %>">
+          <%= status_style[:label] %>
+        </span>
+      <% end %>
+      <% if due_date_formatted %>
+        <span class="px-2 py-1 bg-[#F7F7FD] rounded-[30px] text-xs font-medium text-[#0D1120]"><%= due_date_formatted %></span>
+      <% end %>
+    </div>
+    <h1 class="text-base sm:text-xl font-semibold text-[#0D1120] break-words mb-2"><%= action.title %></h1>
+    <% if action.notes.present? %>
+      <p class="text-xs sm:text-sm text-[#0D1120] break-words mb-3"><%= action.notes %></p>
+    <% end %>
+    <% if action.company_users.any? %>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-xs font-medium text-[#797C81]"><%= t("capa_action_show.assignees_label") %>:</span>
+        <div class="flex items-center flex-shrink-0" style="isolation: isolate;">
+          <% action.company_users.includes(:user).limit(5).each_with_index do |cu, idx| %>
+            <div class="w-7 h-7 rounded-full overflow-hidden flex items-center justify-center border-2 border-white flex-shrink-0 bg-[#E3E3E3]"
+                 style="margin-left: <%= idx > 0 ? '-8px' : '0' %>; z-index: <%= 5 - idx %>"
+                 title="<%= cu.user.name %>">
+              <% if cu.user.profile_image.attached? %>
+                <%= image_tag user_profile_image_url(cu.user), class: "w-full h-full object-cover", alt: cu.user.name %>
+              <% else %>
+                <span class="text-xs text-[#0D1120] font-medium"><%= cu.user.name[0].upcase %></span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+        <span class="text-xs text-[#797C81]"><%= action.company_users.includes(:user).map { |cu| cu.user.name }.join(", ") %></span>
+      </div>
+    <% else %>
+      <p class="text-xs text-[#797C81]"><%= t("capa_action_show.no_assignees") %></p>
+    <% end %>
+  </div>
+
+  <!-- Evidence section -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 mb-4">
+      <h2 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t("capa_action_show.documents_title") %></h2>
+      <% if can_link_documents_to_capa_action?(@capa_action) && !viewer? %>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button type="button" data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="link_document_action_dialog" class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] rounded-xl text-xs sm:text-sm font-medium text-[#FFFFFF] hover:opacity-80 flex items-center justify-center gap-2 min-h-[44px]">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+            <span><%= t("capa_action_show.link_document") %></span>
+          </button>
+          <% if can_upload_evidence_to_capa_action?(@capa_action) %>
+            <button type="button" data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="upload_document_dialog" data-capa-id="<%= capa.id %>" data-capa-action-id="<%= action.id %>" class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] rounded-xl text-xs sm:text-sm font-medium text-[#FFFFFF] hover:opacity-80 flex items-center justify-center gap-2 min-h-[44px]">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+              <span><%= t("capa_action_show.upload_document") %></span>
+            </button>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    <%= render partial: "capa_action_evidence_table", locals: { capa_action: @capa_action, capa: @capa } %>
+  </div>
+
+  <!-- Unlink document confirm modal -->
+  <dialog id="unlink-document-action-confirm-dialog" class="rounded-xl border border-[#E3E3E3] shadow-lg p-0 max-w-md w-[calc(100%-2rem)] backdrop:bg-black/30" aria-labelledby="unlink-document-modal-title">
+    <div class="p-4 sm:p-6">
+      <h3 id="unlink-document-modal-title" class="text-base font-semibold text-[#0D1120] mb-2"><%= t("capa_action_show.confirm_unlink_title") %></h3>
+      <p class="text-sm text-[#797C81] mb-6"><%= t("capa_action_show.unlink_confirm") %></p>
+      <div class="flex flex-wrap gap-2 justify-end">
+        <button type="button" class="unlink-document-action-cancel px-4 py-2 text-sm font-medium text-[#797C81] hover:text-[#0D1120] rounded-xl border border-[#E3E3E3] hover:bg-[#F7F7FD] transition-colors">
+          <%= t("capa_action_show.cancel") %>
+        </button>
+        <button type="button" id="unlink-document-action-confirm-btn" class="px-4 py-2 text-sm font-medium text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-xl transition-colors">
+          <%= t("capa_action_show.unlink_button") %>
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Comments section -->
+  <div id="capa-action-comments-section" class="bg-white border border-[#E3E3E3] rounded-xl shadow-sm p-4 sm:p-6" data-controller="capa-action-comments" data-capa-id="<%= capa.id %>" data-capa-action-id="<%= action.id %>" data-capa-action-comments-view-one-reply-value="<%= t('capa_action_show.view_replies.one') %>" data-capa-action-comments-view-n-replies-value="<%= t('capa_action_show.view_replies.other') %>" data-capa-action-comments-confirm-delete-comment-value="<%= t('capa_action_show.confirm_delete_comment') %>" data-capa-action-comments-confirm-delete-reply-value="<%= t('capa_action_show.confirm_delete_reply') %>" data-no-comments-text="<%= t('capa_action_show.no_comments') %>">
+    <h2 class="text-base sm:text-lg font-semibold text-[#0D1120] mb-4"><%= t("capa_action_show.comments_section") %></h2>
+    <% unless viewer? %>
+      <div class="mb-6 p-4 rounded-xl bg-[#F9FAFC] border border-[#E3E3E3]/80">
+        <label class="block text-xs font-medium text-[#797C81] mb-2"><%= t("capa_action_show.add_comment") %></label>
+        <div class="flex gap-3 items-end">
+          <textarea data-capa-action-comments-target="input" data-action="keydown->capa-action-comments#maybeSubmit" rows="3" class="flex-1 rounded-xl border border-[#E3E3E3] px-4 py-3 text-sm text-[#0D1120] placeholder-[#797C81] focus:ring-2 focus:ring-[#5C3984]/30 focus:border-[#5C3984] transition-shadow resize-none" placeholder="<%= t('capa_action_show.write_comment_placeholder') %>"></textarea>
+          <button type="button" data-action="click->capa-action-comments#submitRoot" data-capa-action-comments-target="submitBtn" class="shrink-0 px-5 py-3 bg-[#5C3984] rounded-xl text-sm font-medium text-white hover:bg-[#4a2d6a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>
+            <%= t("capa_action_show.submit_comment") %>
+          </button>
+        </div>
+      </div>
+    <% end %>
+    <div data-capa-action-comments-target="list" class="space-y-1">
+      <% if @comments.any? %>
+        <% @comments.each do |comment| %>
+          <%= render partial: "capa_action_comment", locals: { comment: comment, capa: capa, capa_action: action } %>
+        <% end %>
+      <% else %>
+        <div class="text-center py-8 px-4 rounded-xl bg-[#F7F7FD] border border-[#E3E3E3]/60">
+          <p class="text-sm text-[#797C81]"><%= t("capa_action_show.no_comments") %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Delete comment/reply confirm modal -->
+    <dialog data-capa-action-comments-target="confirmDialog" class="rounded-xl border border-[#E3E3E3] shadow-lg p-0 max-w-md w-[calc(100%-2rem)] backdrop:bg-black/30" aria-labelledby="delete-comment-modal-title">
+      <div class="p-4 sm:p-6">
+        <h3 id="delete-comment-modal-title" class="text-base font-semibold text-[#0D1120] mb-2"><%= t("capa_action_show.confirm_delete_title") %></h3>
+        <p data-capa-action-comments-target="confirmMessage" class="text-sm text-[#797C81] mb-6"></p>
+        <div class="flex flex-wrap gap-2 justify-end">
+          <button type="button" data-action="click->capa-action-comments#cancelDelete" class="px-4 py-2 text-sm font-medium text-[#797C81] hover:text-[#0D1120] rounded-xl border border-[#E3E3E3] hover:bg-[#F7F7FD] transition-colors">
+            <%= t("capa_action_show.cancel") %>
+          </button>
+          <button type="button" data-action="click->capa-action-comments#confirmDelete" class="px-4 py-2 text-sm font-medium text-white bg-[#DC2626] hover:bg-[#B91C1C] rounded-xl transition-colors">
+            <%= t("capa_action_show.delete_comment") %>
+          </button>
+        </div>
+      </div>
+    </dialog>
+  </div>
+</div>
+
+<%= render partial: "capa_action_link_document_modal" %>
+<%= render partial: "library/upload_document_dialog" %>
+
+<script>
+(function() {
+  var sel = document.querySelector('[data-capa-action-status-select]');
+  if (!sel) return;
+  var url = sel.dataset.updateUrl;
+  var token = sel.dataset.csrfToken;
+  if (!url || !token) return;
+  sel.addEventListener('change', function() {
+    var value = this.value;
+    var origValue = this.getAttribute('data-current-status');
+    if (value === origValue) return;
+    this.disabled = true;
+    fetch(url, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-CSRF-Token': token
+      },
+      body: JSON.stringify({ capa_action: { status: value } })
+    }).then(function(r) { return r.json().then(function(d) { return { ok: r.ok, data: d }; }); }).then(function(res) {
+      sel.disabled = false;
+      if (res.ok) {
+        sel.setAttribute('data-current-status', value);
+        if (res.data.notification_html) {
+          document.dispatchEvent(new CustomEvent('toast:show', { detail: { notificationHtml: res.data.notification_html }, bubbles: true }));
+        }
+      } else {
+        sel.value = origValue || value;
+        if (res.data && res.data.notification_html) {
+          document.dispatchEvent(new CustomEvent('toast:show', { detail: { notificationHtml: res.data.notification_html }, bubbles: true }));
+        }
+      }
+    }).catch(function() {
+      sel.disabled = false;
+      sel.value = origValue || sel.value;
+    });
+  });
+  sel.setAttribute('data-current-status', sel.value);
+})();
+</script>
+
+<script>
+(function() {
+  function initUnlinkConfirmModal() {
+    var dialog = document.getElementById('unlink-document-action-confirm-dialog');
+    var cancelBtn = dialog && dialog.querySelector('.unlink-document-action-cancel');
+    var confirmBtn = document.getElementById('unlink-document-action-confirm-btn');
+    if (!dialog || !confirmBtn) return;
+    if (dialog.dataset.bound) return;
+    dialog.dataset.bound = '1';
+
+    function closeDialog() {
+      window.__pendingUnlinkDocumentAction = null;
+      dialog.close();
+    }
+
+    if (cancelBtn) cancelBtn.addEventListener('click', closeDialog);
+    dialog.addEventListener('click', function(e) {
+      if (e.target === dialog) closeDialog();
+    });
+
+    confirmBtn.addEventListener('click', function() {
+      var pending = window.__pendingUnlinkDocumentAction;
+      if (!pending || !pending.capaId || !pending.actionId || !pending.uploadId) { closeDialog(); return; }
+      var row = pending.row, btn = pending.btn;
+      btn.disabled = true;
+      fetch('/dashboard/capa_management/' + pending.capaId + '/capa_actions/' + pending.actionId + '/unlink_document/' + pending.uploadId, {
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || '' }
+      }).then(function(r) { return r.json().catch(function() { return {}; }); }).then(function(data) {
+        if (data.success && row) {
+          row.remove();
+          var tbody = document.getElementById('capa-action-documents-tbody');
+          if (tbody && tbody.querySelectorAll('tr').length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-sm text-[#797C81]"><%= j t("capa_action_show.empty_documents") %></td></tr>';
+          }
+          if (data.notification_html) {
+            document.dispatchEvent(new CustomEvent('toast:show', { detail: { notificationHtml: data.notification_html }, bubbles: true }));
+          }
+        }
+        closeDialog();
+      }).finally(function() { btn.disabled = false; });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initUnlinkConfirmModal);
+  else initUnlinkConfirmModal();
+  document.addEventListener('turbo:load', initUnlinkConfirmModal);
+})();
+</script>

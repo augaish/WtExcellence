@@ -1,0 +1,32 @@
+<!-- Subfolders Section (if viewing a folder) -->
+<% if @folder && params[:id] != 'all' && params[:id] != 'legal_documents' %>
+    <% search_query = params[:search]&.strip %>
+    <% filtered_children = @folder.children %>
+    <% if search_query.present? %>
+        <% filtered_children = filtered_children.where("name ILIKE ? OR description ILIKE ?", "%#{search_query}%", "%#{search_query}%") %>
+    <% end %>
+    <% if filtered_children.any? %>
+        <div class="p-4 sm:p-5 border-b border-gray-200">
+            <h3 class="text-base sm:text-lg font-semibold text-[#0D1120] mb-3 sm:mb-4 break-words"><%= t('subfolders') %></h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-5 xl:gap-6 items-stretch">
+                <% filtered_children.ordered.each do |subfolder| %>
+                    <%= render partial: 'folder_card', locals: {
+                        folder: subfolder,
+                        title: subfolder.name,
+                        description: subfolder.description,
+                        file_count: subfolder.file_count,
+                        updated_date: subfolder.updated_at.strftime('%b %d, %Y')
+                    } %>
+                <% end %>
+            </div>
+        </div>
+    <% elsif search_query.present? %>
+        <div class="p-4 sm:p-5 border-b border-gray-200">
+            <h3 class="text-base sm:text-lg font-semibold text-[#0D1120] mb-3 sm:mb-4 break-words"><%= t('subfolders') %></h3>
+            <div class="text-center py-6 sm:py-8">
+                <p class="text-sm sm:text-base text-gray-500"><%= t('no_folders_found') %></p>
+            </div>
+        </div>
+    <% end %>
+<% end %>
+

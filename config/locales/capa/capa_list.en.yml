@@ -1,0 +1,102 @@
+en:
+  capa_management_ui:
+    list_table:
+      headers:
+        title_description: "Title & Description"
+        source: "Source"
+        related_standard: "Related Standard"
+        assignees: "Assignees"
+        priority: "Priority"
+        due_date: "Due Date"
+        status: "Status"
+        actions: "Actions"
+      actions:
+        edit: "Edit"
+        archive: "Archive"
+        delete: "Delete"
+        unarchive: "Unarchive"
+      empty:
+        no_capas: "No CAPAs found."
+        no_capas_filtered: "No CAPAs match your current filters."
+      more_assignees: "more"
+    list_filters:
+      due_date: "Due Date"
+      assigned_to_label: "Assigned to"
+      priority_placeholder: "Select Priority"
+      clear_filters: "Clear Filters"
+    list_page:
+      empty:
+        with_cta_html: "No CAPAs found. %{create_link} to get started."
+        create_first: "Create your first CAPA"
+      alerts:
+        select_archive: "Please select at least one CAPA to archive."
+        select_delete: "Please select at least one CAPA to delete."
+      confirmations:
+        archive_single: "Are you sure you want to archive this CAPA?"
+        archive_multiple: "Are you sure you want to archive %{count} CAPA(s)?"
+        delete_single: "Are you sure you want to delete this CAPA? This action cannot be undone."
+        delete_multiple: "Are you sure you want to delete %{count} CAPA(s)? This action cannot be undone."
+      errors:
+        archive_single: "An error occurred while archiving the CAPA"
+        archive_multiple: "An error occurred while archiving the CAPAs"
+        delete_single: "An error occurred while deleting the CAPA"
+        delete_multiple: "An error occurred while deleting the CAPAs"
+    archives:
+      empty:
+        none: "No archived CAPAs found."
+        filtered: "No archived CAPAs match your current filters."
+      alerts:
+        select_unarchive: "Please select at least one CAPA to unarchive."
+        select_delete: "Please select at least one CAPA to delete."
+      confirmations:
+        unarchive_single: "Are you sure you want to unarchive this CAPA?"
+        unarchive_multiple: "Are you sure you want to unarchive %{count} CAPA(s)?"
+        delete_single: "Are you sure you want to delete this CAPA? This action cannot be undone."
+        delete_multiple: "Are you sure you want to delete %{count} CAPA(s)? This action cannot be undone."
+      errors:
+        unarchive_single: "An error occurred while unarchiving the CAPA"
+        unarchive_multiple: "An error occurred while unarchiving the CAPAs"
+        delete_single: "An error occurred while deleting the CAPA"
+        delete_multiple: "An error occurred while deleting the CAPAs"
+    notifications:
+      capa_not_found: "CAPA not found"
+      no_company_context: "No current company context found"
+      no_capas_selected: "No CAPAs selected"
+      archive_success: "CAPA archived successfully"
+      unarchive_success: "CAPA unarchived successfully"
+      bulk_archive_success: "%{count} CAPA(s) archived successfully"
+      bulk_archive_partial: "%{count} CAPA(s) archived successfully. Some errors occurred: %{errors}"
+      bulk_archive_error: "Failed to archive CAPAs: %{errors}"
+      archive_failed: "Failed to archive CAPA %{id}: %{error}"
+      bulk_unarchive_success: "%{count} CAPA(s) unarchived successfully"
+      bulk_unarchive_partial: "%{count} CAPA(s) unarchived successfully. Some errors occurred: %{errors}"
+      bulk_unarchive_error: "Failed to unarchive CAPAs: %{errors}"
+      unarchive_failed: "Failed to unarchive CAPA %{id}: %{error}"
+      bulk_delete_success: "%{count} CAPA(s) deleted successfully"
+      bulk_delete_partial: "%{count} CAPA(s) deleted successfully. Some errors occurred: %{errors}"
+      bulk_delete_error: "Failed to delete CAPAs: %{errors}"
+      delete_failed: "Failed to delete CAPA %{id}: %{error}"
+    export_modal:
+      title: "Export CAPAs"
+      description: "Select export options to download your CAPA data"
+      file_type_label: "File Type"
+      csv_label: "CSV"
+      export_button: "Export"
+      filters:
+        title: "Filters"
+        subtitle: "Only CAPAs that match these filters will be included."
+        status_label: "Status"
+        status_options:
+          all: "All statuses"
+        priority_label: "Priority"
+        priority_placeholder: "Any priority"
+        due_date_from_label: "Due date from"
+        due_date_to_label: "Due date to"
+        assignees_label: "Assigned users"
+        assignees_toggle_label: "Filter by assigned users"
+        assignees_hint: "Hold Ctrl (Windows) or Command (Mac) to select multiple users."
+        archived_label: "Archived state"
+        archived_options:
+          active: "Active only"
+          archived: "Archived only"
+          all: "Active + Archived"

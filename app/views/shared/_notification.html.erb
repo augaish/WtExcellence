@@ -1,0 +1,29 @@
+<% 
+  notification_type = local_assigns[:type]&.to_sym || :success
+  animated = local_assigns.fetch(:animated, false)
+  initial_classes = animated ? "opacity-0 translate-x-full" : "opacity-100 translate-x-0"
+%>
+<div 
+  data-toast-target="notification"
+  data-transition-enter="transition ease-out duration-300"
+  data-transition-enter-start="opacity-0 translate-x-full"
+  data-transition-enter-end="opacity-100 translate-x-0"
+  data-transition-leave="transition ease-in duration-200"
+  data-transition-leave-start="opacity-100 translate-x-0"
+  data-transition-leave-end="opacity-0 translate-x-full"
+  class="<%= toast_bg_color(notification_type) %> rounded-lg shadow-lg p-4 flex items-start gap-3 transform <%= initial_classes %>"
+>
+  <%= toast_icon(notification_type) %>
+  <div class="flex-1 text-sm text-[#0D1120] font-medium">
+    <%= message %>
+  </div>
+  <button 
+    data-action="click->toast#close"
+    class="text-gray-400 hover:text-gray-600 transition-colors"
+  >
+    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+    </svg>
+  </button>
+</div>
+

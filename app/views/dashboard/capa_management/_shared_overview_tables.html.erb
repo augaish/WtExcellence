@@ -1,0 +1,142 @@
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+    <div class="mb-3 sm:mb-4 px-2 sm:px-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.overview_tables.title_assigned_to_me") %></h3>
+      <% if current_user&.company_user %>
+        <%= link_to dashboard_capa_management_list_path(assignee_id: current_user.company_user.id), class: "text-xs sm:text-sm font-semibold text-[#5C3984] underline min-h-[44px] sm:min-h-auto flex items-center whitespace-nowrap" do %>
+          <%= t("capa_management_ui.overview_cards.view_list") %>
+        <% end %>
+      <% else %>
+        <%= link_to dashboard_capa_management_list_path, class: "text-xs sm:text-sm font-semibold text-[#5C3984] underline min-h-[44px] sm:min-h-auto flex items-center whitespace-nowrap" do %>
+          <%= t("capa_management_ui.overview_cards.view_list") %>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="overflow-x-auto -mx-3 sm:mx-0">
+      <div class="inline-block min-w-full align-middle">
+        <div class="overflow-hidden rounded-lg border border-[#E3E3E3]">
+          <table class="w-full min-w-[600px]" dir="<%= rtl? ? 'rtl' : 'ltr' %>">
+            <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+              <tr>
+                <th class="text-left rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("title") %></span></th>
+                <th class="text-left rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("priority") %></span></th>
+                <th class="text-left rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.due_date") %></span></th>
+                <th class="text-center rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("status_label") %></span></th>
+              </tr>
+            </thead>
+            <tbody data-overview-table="assigned_to_me">
+              <% if @assigned_to_me_capas&.any? %>
+                <% @assigned_to_me_capas.each do |capa| %>
+                  <% priority_color = case capa.priority
+                                       when 'high' then '#EA4034'
+                                       when 'medium' then '#EC71DD'
+                                       when 'low' then '#64A3EB'
+                                       else '#gray-400'
+                                       end %>
+                  <% # Check if CAPA is overdue (has due_date and it's before today)
+                     is_overdue = capa.due_date.present? && capa.due_date < Date.today && capa.status != 'closed' %>
+                  <% status_colors = {
+                    'open' => { bg: '#FEF0FF', text: '#B130AC', label: t('capa_management_ui.statuses.open') },
+                    'assigned' => { bg: '#E9F5F8', text: '#1B94AD', label: t('capa_management_ui.statuses.assigned') },
+                    'in_progress' => { bg: '#E9F0FF', text: '#1751A7', label: t('capa_management_ui.statuses.in_progress') },
+                    'closed' => { bg: '#E0F9DE', text: '#3F9011', label: t('capa_management_ui.statuses.closed') }
+                  } %>
+                  <% # Special cases for in_progress status
+                     if capa.status == 'in_progress'
+                       if is_overdue
+                         status_style = { bg: '#FFF1F0', text: '#B13030', label: t('capa_management_ui.status_labels.overdue') }
+                       else
+                         status_style = { bg: '#F5FFD8', text: '#789C16', label: t('capa_management_ui.status_labels.in_time') }
+                       end
+                     else
+                       status_style = status_colors[capa.status] || { bg: '#F0F0F0', text: '#797C81', label: capa.status&.humanize || '-' }
+                     end %>
+                  <tr class="border-b border-[#E3E3E3]">
+                    <td class="p-3 sm:p-4 rtl:text-right min-w-[160px]"><span class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= truncate(capa.title, length: 40) %></span></td>
+                    <td class="p-3 sm:p-4 rtl:text-right whitespace-nowrap">
+                      <div class="flex items-center gap-2 rtl:flex-row-reverse">
+                        <div class="w-3 h-3 rounded-full flex-shrink-0" style="background: <%= priority_color %>"></div>
+                        <span class="text-xs sm:text-sm text-[#0D1120] font-medium"><%= capa.priority ? t("priority_levels.#{capa.priority}", default: capa.priority.capitalize) : '-' %></span>
+                      </div>
+                    </td>
+                    <td class="p-3 sm:p-4 rtl:text-right whitespace-nowrap">
+                      <span class="text-xs sm:text-sm text-[#0D1120] font-medium">
+                        <%= capa.due_date ? l(capa.due_date, format: :medium) : '-' %>
+                      </span>
+                    </td>
+                    <td class="p-3 sm:p-4 text-center rtl:text-right whitespace-nowrap">
+                      <span class="text-[10px] sm:text-xs px-3 sm:px-4 py-1 rounded-full font-medium" style="background: <%= status_style[:bg] %>; color: <%= status_style[:text] %>">
+                        <%= status_style[:label] %>
+                      </span>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="4" class="p-4 text-center text-xs sm:text-sm text-[#797C81]"><%= t("capa_management_ui.overview_tables.no_assigned") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+    <div class="mb-3 sm:mb-4 px-2 sm:px-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.overview_tables.title_overdue_capas") %></h3>
+      <%= link_to dashboard_capa_management_list_path(status: 'overdue'), class: "text-xs sm:text-sm font-semibold text-[#5C3984] underline min-h-[44px] sm:min-h-auto flex items-center whitespace-nowrap" do %>
+        <%= t("capa_management_ui.overview_cards.view_list") %>
+      <% end %>
+    </div>
+    <div class="overflow-x-auto -mx-3 sm:mx-0">
+      <div class="inline-block min-w-full align-middle">
+        <div class="overflow-hidden rounded-lg border border-[#E3E3E3]">
+          <table class="w-full min-w-[500px]" dir="<%= rtl? ? 'rtl' : 'ltr' %>">
+            <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+              <tr>
+                <th class="text-left rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("title") %></span></th>
+                <th class="text-left rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("priority") %></span></th>
+                <th class="text-center rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.overview_tables.days_overdue_header") %></span></th>
+              </tr>
+            </thead>
+            <tbody data-overview-table="overdue">
+              <% if @overdue_capas&.any? %>
+                <% @overdue_capas.each do |capa| %>
+                  <% priority_color = case capa.priority
+                                       when 'high' then '#EA4034'
+                                       when 'medium' then '#EC71DD'
+                                       when 'low' then '#64A3EB'
+                                       else '#gray-400'
+                                       end %>
+                  <% days_overdue = capa.due_date ? (Date.today - capa.due_date).to_i : 0 %>
+                  <tr class="border-b border-[#E3E3E3]">
+                    <td class="p-3 sm:p-4 rtl:text-right min-w-[160px]"><span class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= truncate(capa.title, length: 40) %></span></td>
+                    <td class="p-3 sm:p-4 rtl:text-right whitespace-nowrap">
+                      <div class="flex items-center gap-2 rtl:flex-row-reverse">
+                        <div class="w-3 h-3 rounded-full flex-shrink-0" style="background: <%= priority_color %>"></div>
+                        <span class="text-xs sm:text-sm text-[#0D1120] font-medium"><%= capa.priority ? t("priority_levels.#{capa.priority}", default: capa.priority.capitalize) : '-' %></span>
+                      </div>
+                    </td>
+                    <td class="p-3 sm:p-4 text-center rtl:text-right whitespace-nowrap">
+                      <span class="text-xs sm:text-sm text-[#C73636] font-medium">
+                        <%= t("capa_management_ui.overview_tables.days_overdue_count", count: days_overdue) %>
+                      </span>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="3" class="p-4 text-center text-xs sm:text-sm text-[#797C81]"><%= t("capa_management_ui.overview_tables.no_overdue") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

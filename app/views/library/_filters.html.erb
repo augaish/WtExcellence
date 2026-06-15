@@ -1,0 +1,83 @@
+<!-- View Toggle & Filters Section -->
+<div class="bg-[#FFFFFF] border-b border-[#E3E3E3] px-4 sm:px-5 py-3 sm:py-4">
+    <div
+        class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 sm:gap-4">
+        <!-- View Toggle -->
+        <div class="flex items-center gap-2 bg-white border border-gray-300 rounded-lg p-1 w-full sm:w-auto">
+            <%= link_to folder_path(params[:id], view: 'list', company_id: params[:company_id]), class: "flex-1 sm:flex-none px-3 sm:px-4 py-2 min-h-[44px] sm:min-h-auto rounded-md text-xs sm:text-sm font-medium transition-colors text-center #{@current_view == 'list' ? 'bg-[#5C3984] text-white' : 'text-gray-600 hover:text-gray-900'}" do %>
+                <%= t('list_view') %>
+            <% end %>
+            <%= link_to folder_path(params[:id], view: 'grid', company_id: params[:company_id]), class: "flex-1 sm:flex-none px-3 sm:px-4 py-2 min-h-[44px] sm:min-h-auto rounded-md text-xs sm:text-sm font-medium transition-colors text-center #{@current_view == 'grid' ? 'bg-[#5C3984] text-white' : 'text-gray-600 hover:text-gray-900'}" do %>
+                <%= t('grid_view') %>
+            <% end %>
+        </div>
+
+        <!-- Filter Dropdowns -->
+        <div
+            class="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto">
+            <!-- Select CAPA -->
+            <% if @current_company_capas.any? %>
+                <div class="relative flex-1 sm:flex-none min-w-0" data-controller="dropdown">
+                    <button data-action="click->dropdown#toggle" class="flex items-center w-full sm:w-auto <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 px-3 sm:px-4 py-3 sm:py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm font-medium min-h-[44px]">
+                        <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        <span class="truncate"><%= params[:capa_id].present? ? @current_company_capas.find { |c| c[:id].to_s == params[:capa_id] }&.dig(:title) || t('select_capa') : t('select_capa') %></span>
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div data-dropdown-target="menu" class="hidden absolute end-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-64 overflow-y-auto">
+                        <div class="py-1">
+                            <%= link_to folder_path(params[:id], search: params[:search], view: params[:view], standard_id: params[:standard_id], company_id: params[:company_id]), 
+                                class: "block px-4 py-2 text-sm #{params[:capa_id].blank? ? 'bg-purple-100 text-purple-900' : 'text-gray-700'} hover:bg-purple-100 hover:text-purple-900" do %>
+                                <%= t('all_capas') %>
+                            <% end %>
+                            <% @current_company_capas.each do |capa| %>
+                                <%= link_to folder_path(params[:id], search: params[:search], view: params[:view], standard_id: params[:standard_id], capa_id: capa[:id], company_id: params[:company_id]), 
+                                    class: "block px-4 py-2 text-sm #{params[:capa_id].to_s == capa[:id].to_s ? 'bg-purple-100 text-purple-900' : 'text-gray-700'} hover:bg-purple-100 hover:text-purple-900" do %>
+                                    <%= capa[:title] %>
+                                <% end %>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
+
+            <!-- Select Standard -->
+            <% if @current_company_standards.any? %>
+                <div class="relative flex-1 sm:flex-none min-w-0" data-controller="dropdown">
+                    <button data-action="click->dropdown#toggle" class="flex items-center w-full sm:w-auto <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 px-3 sm:px-4 py-3 sm:py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm font-medium min-h-[44px]">
+                        <svg class="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                        </svg>
+                        <span class="truncate"><%= params[:standard_id].present? ? @current_company_standards.find { |s| s[:id].to_s == params[:standard_id] }&.dig(:name) || t('select_standard') : t('select_standard') %></span>
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div data-dropdown-target="menu" class="hidden absolute end-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-64 overflow-y-auto">
+                        <div class="py-1">
+                            <%= link_to folder_path(params[:id], search: params[:search], view: params[:view], capa_id: params[:capa_id], company_id: params[:company_id]), 
+                                class: "block px-4 py-2 text-sm #{params[:standard_id].blank? ? 'bg-purple-100 text-purple-900' : 'text-gray-700'} hover:bg-purple-100 hover:text-purple-900" do %>
+                                <%= t('all_standards') %>
+                            <% end %>
+                            <% @current_company_standards.each do |standard| %>
+                                <%= link_to folder_path(params[:id], search: params[:search], view: params[:view], standard_id: standard[:id], capa_id: params[:capa_id], company_id: params[:company_id]), 
+                                    class: "block px-4 py-2 text-sm #{params[:standard_id].to_s == standard[:id].to_s ? 'bg-purple-100 text-purple-900' : 'text-gray-700'} hover:bg-purple-100 hover:text-purple-900" do %>
+                                    <%= standard[:name] %>
+                                <% end %>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
+
+            <!-- Clear Filters -->
+            <button class="text-[#5C3984] hover:text-[#4A2F6B] text-xs sm:text-sm font-medium transition-colors px-3 sm:px-4 py-3 sm:py-2 min-h-[44px] sm:min-h-auto">
+                <%= t('clear_filters') %>
+            </button>
+        </div>
+    </div>
+</div>
+

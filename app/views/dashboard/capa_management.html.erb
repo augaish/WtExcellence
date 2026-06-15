@@ -1,0 +1,464 @@
+<script>
+  // Store current page URL in sessionStorage
+  function storeCurrentPage() {
+    const currentUrl = window.location.pathname + window.location.search;
+    sessionStorage.setItem('capa_management_last_page', currentUrl);
+  }
+
+  // Store page on load and Turbo navigation
+  function initializePageStorage() {
+    storeCurrentPage();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePageStorage);
+  } else {
+    initializePageStorage();
+  }
+  document.addEventListener('turbo:load', initializePageStorage);
+  document.addEventListener('turbo:render', initializePageStorage);
+</script>
+
+<div class="bg-[#F9FAFC] min-h-screen p-6">
+  <!-- Page Header -->
+  <div class="bg-white border-b border-[#E3E3E3] px-6 py-4">
+    <h1 class="text-lg font-semibold text-[#0D1120] mb-4"><%= t("capa_management") %></h1>
+    
+    <!-- Navigation Tabs -->
+    <div class="flex space-x-8 rtl:space-x-reverse">
+      <a href="#" class="text-[#5C3984] font-medium text-sm pb-2 border-b-2 border-[#5C3984]"><%= t("overview") %></a>
+      <a href="#" class="text-[#797C81] font-medium text-sm"><%= t("capa_management_ui.tabs.list_view") %></a>
+      <a href="#" class="text-[#797C81] font-medium text-sm"><%= t("capa_management_ui.tabs.board_view") %></a>
+      <a href="#" class="text-[#797C81] font-medium text-sm"><%= t("capa_management_ui.tabs.archived") %></a>
+    </div>
+  </div>
+
+  <!-- Controls and Summary Section -->
+  <div class="mt-6">
+    <!-- Top Controls -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl px-6 py-4 mb-6 flex justify-between items-center">
+      <!-- Date Range and Filters -->
+      <div class="flex items-center space-x-3">
+        <button class="px-3 py-2 border border-[#E3E3E3] rounded-xl flex items-center space-x-2">
+          <span class="text-[#5C3984] font-medium text-sm">July 01-07 2025</span>
+          <svg class="w-4 h-4 text-[#5C3984]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <svg class="w-4 h-4 text-[#5C3984]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+        <button class="px-4 py-2 border border-[#E3E3E3] rounded-xl">
+          <span class="text-[#5C3984] font-medium text-sm">Weekly View</span currently applied\&gt;
+        </button>
+        <button class="px-3 py-2 border border-[#E3E3E3] rounded-xl">
+          <span class="text-[#5C3984] font-medium text-sm">Clear Filters</span>
+        </button>
+      </div>
+      
+      <!-- New Action Button -->
+      <button class="bg-[#5C3984] text-white px-4 py-2 rounded-xl flex items-center space-x-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        <span class="font-medium text-sm">New Action</span>
+      </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      <!-- Open CAPAs Card -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+        <div class="mb-4">
+          <p class="text-sm font-medium text-[#0D1120]">Open CAPAs</p>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-2xl font-semibold text-[#5C3984]">27</p>
+          <p class="text-xs text-[#797C81]">Assistant Interactions</p>
+        </div>
+      </div>
+
+      <!-- High Priority Card -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+        <div class="mb-4">
+          <p class="text-sm font-medium text-[#0D1120]">High Priority</p>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-2xl font-semibold text-[#5C3984]">4</p>
+          <a href="#" class="text-xs text-[#5C3984] underline">View list</a>
+        </div>
+      </div>
+
+      <!-- Overdue Card -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+        <div class="mb-4">
+          <p class="text-sm font-medium text-[#0D1120]">Overdue</p>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-2xl font-semibold offering text-[#C73636]">4</p>
+          <a href="#" class="text-xs text-[#5C3984] underline">View list</a>
+        </div>
+      </div>
+
+      <!-- Avg Resolution Time Card -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+        <div class="mb-4">
+          <p class="text-sm font-medium text-[#0D1120]">Avg. Resolution Time</p>
+        </div>
+        <div class="flex items-baseline space-x-2">
+          <p class="text-2xl font-semibold text-[#5C3984]">9.4 days</p>
+          <p class="text-xs text-[#797C81]">AI-assessed</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+      <!-- Resolved CAPA Over Time Chart -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 col-span-1">
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold text-[#0D1120] mb-1">Resolved CAPA Over time</h3>
+          <p class="text-xs text-[#797C81]">Closed CAPA vs Total CAPA</p>
+        </div>
+        <div class="h-[213px] flex items-center justify-center mb-4">
+          <!-- Placeholder for bar chart -->
+          <div class="flex items-end space-x-2 h-full">
+            <!-- Bar groups for each day -->
+            <div class="flex space-x-1">
+              <div class="w-3 bg-[#5C3984] rounded-full" style="height: 77%"></div>
+              <div class="w-3 bg-[#D6C4ED] rounded-full" style="height: 41%"></div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="w-3 bg-[#5C3984] rounded-full" style="height: 83%"></div>
+              <div class="w-3 bg-[#D6C4ED] rounded-full" style="height: 83%"></div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="w-3 bg-[#5C3984] rounded-full" style="height: 99%"></div>
+              <div class="w-3 bg-[#D6C4ED] rounded-full" style="height: 34%"></div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="w-3 bg-[#5C3984] rounded-full" style="height: 49%"></div>
+              <div class="w-3 bg-[#D6C4ED] rounded-full" style="height: 46%"></div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="w-3 bg-[#5C3984] rounded-full" style="height: 72%"></div>
+              <div class="w-3 bg-[#D6C4ED] rounded-full" style="height: 55%"></div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="w-3 bg-[#5C3984] rounded-full" style="height: 99%"></div>
+              <div class="w-3 bg-[#D6C4ED] rounded-full" style="height: 79%"></div>
+            </div>
+            <div class="flex space-x-1">
+              <div class="w-3 bg-[#5C3984] rounded-full" style="height: 88%"></div>
+              <div class="w-3 bg-[#D6C4ED] rounded-full" style="height: 78%"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Legend -->
+        <div class="flex justify-center space-x-4">
+          <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 rounded-full bg-[#5C3984]"></div>
+            <span class="text-xs text-[#6A7970]">Closed CAPA</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 rounded-full bg-[#D6C4ED]"></div>
+            <span class="text-xs text-[#6A7970]">Total CAPA</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAPAs by Status Breakdown -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 col-span-1">
+        <div class="mb-4">
+          <h3 class="text-sm font-semibold text-[#0D1120]">CAPAs by Status Breakdown</h3>
+        </div>
+        <div class="h-[211px] flex items-center justify-center mb-4 relative">
+          <!-- Placeholder for donut chart -->
+          <div class="relative w-40 h-40 flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border-[40px] border-[#8343CC]" style="border-left-color: transparent; border-bottom-color: transparent; transform: rotate(-20deg);"></div>
+            <div class="absolute inset-0 rounded-full border-[40px] border-[#F7D683]" style="border-left-color: transparent; border-bottom-color: transparent; transform: rotate(65deg);"></div>
+            <div class="absolute inset-0 rounded-full border-[40px] border-[#5588FF]" style="border-left-color: transparent; border-bottom-color: transparent; transform: rotate(80deg);"></div>
+            <div class="absolute inset-0 rounded-full border-[40px] border-[#E9B2FF]" style="border-left-color: transparent; border-bottom-color: transparent; transform: rotate(88deg);"></div>
+            <div class="absolute bg-white rounded-full w-20 h-20"></div>
+          </div>
+        </div>
+        <!-- Legend -->
+        <div class="flex flex-wrap justify-center gap-2">
+          <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 rounded-full bg-[#8343CC]"></div>
+            <span class="text-xs text-[#797C81]">Closed</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 rounded-full bg-[#5588FF]"></div>
+            <span class="text-xs text-[#797C81]">In Progress</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 rounded-full bg-[#E9B2FF]"></div>
+            <span class="text-xs text-[#797C81]">Reviewing</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <div class="w-2 h-2 rounded-full bg-[#F7D683]"></div>
+            <span class="text-xs text-[#797C81]">Open</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Most CAPA Assigned -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 col-span-1">
+        <div class="mb-4 px-3 flex justify-between items-center">
+          <h3 class="text-sm font-semibold text-[#0D1120]">Most CAPA Assigned</h3>
+          <a href="#" class="text-sm font-semibold text-[#5C3984] underline">View list</a>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-[#E3E3E3]">
+          <table class="w-full">
+            <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+              <tr>
+                <th class="text-left p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Assignee Name</span>
+                </th>
+                <th class="text-left p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Nr Assigned</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium" title="John Miller">J</div>
+                    <span class="text-sm text-[#0D1120] font-medium">John Miller</span>
+                    <span class="text-xs text-[#576A83] bg-[#F7F7FD] px-3 py-1 rounded-full">Auditor</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#0D1120] font-medium">7</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium" title="Aisha Rahman">A</div>
+                    <span class="text-sm text-[#0D1120] font-medium">Aisha Rahman</span>
+                    <span class="text-xs text-[#576A83] bg-[#F7F7FD] px-3 py-1 rounded-full">Maintenance</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#0D1120] font-medium">4</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium" title="Ahmed Said">A</div>
+                    <span class="text-sm text-[#0D1120] font-medium">Ahmed Said</span>
+                    <span class="text-xs text-[#576A83] bg-[#F7F7FD] px-3 py-1 rounded-full">Safety</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#0D1120] font-medium">5</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium" title="Noor Abbas">N</div>
+                    <span class="text-sm text-[#0D1120] font-medium">Noor Abbas</span>
+                    <span class="text-xs text-[#576A83] bg-[#F7F7FD] px-3 py-1 rounded-full">Logistics</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#0D1120] font-medium">5</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tables Row -->
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Assigned to Me -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-3">
+        <div class="mb-4 px-3 flex justify-between items-center">
+          <h3 class="text-sm font-semibold text-[#0D1120]">Assigned to Me</h3>
+          <a href="#" class="text-sm font-semibold text-[#5C3984] underline">View list</a>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-[#E3E3E3]">
+          <table class="w-full">
+            <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+              <tr>
+                <th class="text-left p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Title</span>
+                </th>
+                <th class="text-left p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Priority</span>
+                </th>
+                <th class="text-left p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Due Date</span>
+                </th>
+                <th class="text-center p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Status</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Calibration Missed for Machine #4</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EA4034]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">High</span>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#0D1120] font-medium">Oct 22, 2025</span>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-xs text-[#B14630] bg-[#FFF1F0] px-4 py-1 rounded-full font-medium">Overdue</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Supplier Documentation Incomplete</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EC71DD]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">Medium</span>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#0D1120] font-medium">Oct 19, 2025</span>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-xs text-[#3F9011] bg-[#E0F9DE] px-4 py-1 rounded-full font-medium">Open</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Incorrect Data Entry in Production Logs</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EC71DD]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">Medium</span>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#0D1120] font-medium">Oct 25, 2025</span>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-xs text-[#B130AC] bg-[#FEF0FF] px-4 py-1 rounded-full font-medium">Closed</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Late Employee Training Completion</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EA4034]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">High</span>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#0D1120] font-medium">Oct 23, 2025</span>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-xs text-[#1751A7] bg-[#E9F0FF] px-4 py-1 rounded-full font-medium">In Progress</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Overdue CAPA -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-3">
+        <div class="mb-4 px-3 flex justify-between items-center">
+          <h3 class="text-sm font-semibold text-[#0D1120]">Overdue CAPA</h3>
+          <a href="#" class="text-sm font-semibold text-[#5C3984] underline">View list</a>
+        </div>
+        <div class="overflow-hidden rounded-lg border border-[#E3E3E3]">
+          <table class="w-full">
+            <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+              <tr>
+                <th class="text-left p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Title</span>
+                </th>
+                <th class="text-left p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Priority</span>
+                </th>
+                <th class="text-center p-4">
+                  <span class="text-xs font-semibold text-[#797C81]">Days Overdue</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Calibration Missed for Machine #4</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EA4034]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">High</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#C73636] font-medium">7 Days</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Supplier Documentation Incomplete</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EC71DD]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">Medium</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#C73636] font-medium">7 Days</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Incorrect Data Entry in Production Logs</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EC71DD]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">Medium</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#C73636] font-medium">7 Days</span>
+                </td>
+              </tr>
+              <tr class="border-b border-[#E3E3E3]">
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#0D1120]">Late Employee Training Completion</span>
+                </td>
+                <td class="p-4">
+                  <div class="flex items-center space-x-2">
+                    <div class="w-3 h-3 rounded-full bg-[#EA4034]"></div>
+                    <span class="text-sm text-[#0D1120] font-medium">High</span>
+                  </div>
+                </td>
+                <td class="p-4 text-center">
+                  <span class="text-sm text-[#C73636] font-medium">7 Days</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

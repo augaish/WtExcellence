@@ -1,0 +1,39 @@
+<div class="bg-[#F9FAFC] min-h-screen">
+  <!-- Page Header -->
+  <div class="bg-white border-b border-[#E3E3E3] px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+      <h1 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t('overview') %></h1>
+      
+      <!-- Date Range Selector -->
+      <div class="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3">
+        <%= form_with url: dashboard_overview_path, method: :get, local: true, html: { class: "flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3" } do %>
+          <div class="flex flex-col">
+            <label class="text-xs font-medium text-[#797C81] mb-1"><%= t("from", default: "From") %></label>
+            <%= date_field_tag :date_from,
+              (@date_from.present? ? @date_from.to_date.strftime("%Y-%m-%d") : nil),
+              class: "px-3 sm:px-4 py-3 sm:py-2 min-h-[44px] border border-[#E3E3E3] rounded-xl bg-white text-[15px] sm:text-sm text-[#0D1120] focus:outline-none focus:ring-2 focus:ring-[#D6C4ED]" %>
+          </div>
+
+          <div class="flex flex-col">
+            <label class="text-xs font-medium text-[#797C81] mb-1"><%= t("to", default: "To") %></label>
+            <%= date_field_tag :date_to,
+              (@date_to.present? ? @date_to.to_date.strftime("%Y-%m-%d") : nil),
+              class: "px-3 sm:px-4 py-3 sm:py-2 min-h-[44px] border border-[#E3E3E3] rounded-xl bg-white text-[15px] sm:text-sm text-[#0D1120] focus:outline-none focus:ring-2 focus:ring-[#D6C4ED]" %>
+          </div>
+
+          <%= button_tag type: "submit",
+            class: "px-4 py-3 sm:py-2 min-h-[44px] rounded-xl bg-[#5C3984] text-white text-[15px] sm:text-sm font-medium hover:bg-[#4A2F6B] transition-colors" do %>
+            <%= t("apply", default: "Apply") %>
+          <% end %>
+        <% end %>
+
+        <%= link_to dashboard_overview_path,
+          class: "inline-flex items-center justify-center px-3 sm:px-4 py-3 sm:py-2 min-h-[44px] border border-[#5C3984] rounded-xl text-[15px] sm:text-sm font-medium text-[#5C3984] hover:bg-[#F6EEFF] hover:border-[#4A2F6B] transition-colors" do %>
+          <%= t("clear") %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <%= render partial: "overview_content" %>
+</div>

@@ -1,0 +1,52 @@
+<%# ===== Activity Log Section (audit trail) ===== %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-6">
+  <div class="p-4 sm:p-5 border-b border-[#E3E3E3] bg-[#F7F7FD]">
+    <h2 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t("assessments.activity_log_title") %></h2>
+  </div>
+
+  <div class="p-4 sm:p-6">
+    <% if @audit_logs.any? %>
+      <div class="relative">
+        <%# Timeline line — centered on the dot (ps-1=4px + half of w-3=6px = 10px, minus half line width) %>
+        <div class="absolute w-0.5 bg-[#5C3984] opacity-20" style="<%= rtl? ? 'right' : 'left' %>: 9px; top: 14px; bottom: 14px;"></div>
+
+        <div class="space-y-4">
+          <% @audit_logs.each do |log| %>
+            <div class="relative flex items-start gap-3 ps-1">
+              <%# Timeline dot %>
+              <div class="w-3 h-3 rounded-full bg-[#5C3984] flex-shrink-0 mt-1 relative z-10"></div>
+
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-[#0D1120] break-words">
+                  <%= log.description %>
+                </p>
+
+                <div class="flex items-center gap-2 mt-1">
+                  <%# Actor avatar %>
+                  <% if log.actor_user %>
+                    <div class="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-[10px] text-gray-600 font-medium overflow-hidden flex-shrink-0">
+                      <% if log.actor_user.profile_image.attached? %>
+                        <%= image_tag user_profile_image_url(log.actor_user), class: "w-full h-full object-cover" %>
+                      <% else %>
+                        <%= log.actor_user.name&.first&.upcase || "?" %>
+                      <% end %>
+                    </div>
+                    <span class="text-xs text-[#797C81]"><%= log.actor_user.name %></span>
+                  <% end %>
+
+                  <% if log.created_at.present? %>
+                    <span class="text-xs text-[#797C81]">&middot; <%= log.created_at.strftime("%b %d, %I:%M %p") %></span>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <div class="flex items-center justify-center py-8">
+        <p class="text-sm text-[#797C81]"><%= t("assessments.no_activity") %></p>
+      </div>
+    <% end %>
+  </div>
+</div>

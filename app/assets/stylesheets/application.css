@@ -1,0 +1,299 @@
+/*
+ * This is a manifest file that'll be compiled into application.css.
+ *
+ * With Propshaft, assets are served efficiently without preprocessing steps. You can still include
+ * application-wide styles in this file, but keep in mind that CSS precedence will follow the standard
+ * cascading order, meaning styles declared later in the document or manifest will override earlier ones,
+ * depending on specificity.
+ *
+ * Consider organizing styles into separate files for maintainability.
+ */
+
+/* Choices.js Custom Styling */
+.choices {
+    position: relative;
+    margin-bottom: 0;
+    margin-top: 0;
+    overflow: visible;
+    display: block;
+    width: 100%;
+}
+
+/* Hide default Choices arrow */
+.choices[data-type*="select-one"]::after {
+    display: none;
+}
+
+/* Base input style */
+.choices__inner {
+    background-color: #fff;
+    border: 1px solid #E3E3E3;
+    border-radius: 0.75rem;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    /* Side padding only, vertical managed by items */
+    display: flex;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #0D1120;
+    font-weight: 500;
+    transition: all 0.2s;
+    box-sizing: border-box;
+    box-shadow: none;
+}
+
+/* Utility to hide selected items in the input (when showing them externally) */
+.choices-no-chips .choices__list--multiple .choices__item {
+    display: none;
+}
+
+/* Ensure placeholder and search text are properly positioned when items are hidden */
+.choices-no-chips .choices__input {
+    width: 100%;
+    margin: 0;
+    padding: 0.5rem 0.25rem;
+    min-width: 200px;
+    background-color: transparent;
+    outline: none;
+}
+
+/* Style for CAPA Management Filters (Specific Blue Look) */
+.choices-filter .choices__inner {
+    padding-left: 2.25rem;
+    /* Space for user icon */
+    padding-right: 2.25rem;
+    /* Space for arrow icon */
+    color: #5C3984;
+    height: 44px;
+}
+
+.choices-filter .choices__list--single .choices__item {
+    color: #5C3984;
+}
+
+/* Single select item display */
+.choices__list--single {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    /* Slightly less than 44px to account for borders */
+}
+
+.choices__list--single .choices__item {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin: 0;
+    padding: 0;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Multiple select items (chips) - default if not hidden */
+.choices__list--multiple .choices__item {
+    background-color: #F7F7FD;
+    border: 1px solid #E3E3E3;
+    color: #5C3984;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 4px 4px 4px 0;
+    padding: 4px 10px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.choices__list--multiple .choices__item .choices__button {
+    border-left: 1px solid #E3E3E3;
+    margin-left: 8px;
+    padding-left: 4px;
+    opacity: 0.5;
+}
+
+/* Focus state */
+.choices.is-focused .choices__inner,
+.choices.is-open .choices__inner {
+    border-color: #5C3984;
+    box-shadow: 0 0 0 2px rgba(92, 57, 132, 0.1);
+}
+
+/* Custom Scrollbar for premium feel */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #F9FAFC;
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #D1D5DB;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9CA3AF;
+}
+
+/* Global rule for all dialogs to ensure they are scrollable */
+dialog[open] {
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    contain: none;
+    padding-bottom: 10px !important;
+}
+
+/* Ensure only the MAIN container inside dialogs has room for dropdowns ONLY when they are open */
+/* This prevents empty space when the modal is just being viewed */
+dialog[open]:not(.no-extra-padding):has(.choices.is-open)>div:not(.flex):not(.flex-col):not([data-capas--assign-assignees-target="chipList"]),
+dialog[open]:not(.no-extra-padding):has(.choices.is-open)>form:not(.flex):not(.flex-col) {
+    padding-bottom: 240px;
+}
+
+/* Specific body scroll targets within complex flex dialogs - only pad when dropdown is active */
+dialog[open]:not(.no-extra-padding):has(.choices.is-open) .flex-grow.overflow-y-auto {
+    padding-bottom: 240px;
+}
+
+/* Reset for the outer flex container of complex modals to prevent ghost space below footer */
+dialog[open]>.flex,
+dialog[open]>.flex-col {
+    padding-bottom: 0;
+}
+
+/* Base rule for choices within dialogs - allow overflowing the main container
+   but DON'T force it on the dropdown list itself so it can scroll correctly */
+dialog[open] .choices,
+dialog[open] .choices__inner,
+dialog[open] .choices__list:not(.choices__list--dropdown) {
+    overflow: visible;
+    pointer-events: auto;
+}
+
+/* Helper to allow overflow on specific containers (like forms or divs inside modals)
+   so the absolute-positioned dropdown can escape */
+.choices-overflow-visible {
+    overflow: visible;
+}
+
+/* Ensure choices container creates a stacking context for its dropdown only when active */
+.choices {
+    position: relative;
+}
+
+.choices.is-open,
+.choices.is-focused {
+    z-index: 100;
+}
+
+/* Ensure choices dropdown is on top */
+.choices__list--dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    border: 1px solid #E3E3E3;
+    border-radius: 1rem;
+    margin-top: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    z-index: 10000;
+    min-width: 100%;
+    /* Removed max-content width as it can cause collapse in some contexts */
+    width: auto;
+    max-height: 300px;
+    padding: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-padding: 8px;
+    /* Ensure height grows with content */
+    pointer-events: auto;
+}
+
+.choices.is-open .choices__list--dropdown,
+.choices__list--dropdown.is-active {
+    display: block;
+    pointer-events: auto;
+    visibility: visible;
+    opacity: 1;
+    z-index: 10000;
+}
+
+/* Dropdown items */
+.choices__list--dropdown .choices__item {
+    font-size: 0.875rem;
+    padding: 10px 14px;
+    color: #0D1120;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+    border-radius: 0.625rem;
+    margin-bottom: 2px;
+    transition: background-color 0.1s;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* Add some space after the last item */
+.choices__list--dropdown .choices__item:last-child {
+    margin-bottom: 4px;
+}
+
+.choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background-color: #F7F7FD;
+    color: #5C3984;
+}
+
+/* Search input inside the dropdown */
+.choices__list--dropdown .choices__input {
+    background-color: #F9FAFC;
+    border: 1px solid #E3E3E3;
+    border-radius: 0.75rem;
+    margin: 4px 4px 12px 4px;
+    /* Added more bottom margin to separate from items */
+    padding: 10px 12px;
+    font-size: 0.875rem;
+    width: calc(100% - 8px);
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    pointer-events: auto;
+}
+
+/* Search input inside the main container (Multiple select) */
+.choices__inner .choices__input {
+    background-color: transparent;
+    border: none;
+    margin: 0;
+    padding: 0.25rem 0;
+    box-shadow: none;
+    outline: none;
+    color: #0D1120;
+}
+
+/* Ensure placeholder is properly styled */
+.choices__input::placeholder {
+    color: #9CA3AF;
+    opacity: 1;
+}
+
+/* Placeholder color */
+.choices__placeholder {
+    color: #9CA3AF;
+    /* Neutral gray */
+    opacity: 1;
+}
+
+.choices-filter .choices__placeholder {
+    color: #5C3984;
+}

@@ -1,0 +1,115 @@
+<div class="bg-[#FFFFFF] p-4 sm:p-5 border-b border-[#E3E3E3]">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+        <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] break-words"><%= t('standards') %></h2>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-4">
+            <div data-controller="search-frame">
+                <%= form_with url: standards_path, method: :get, data: { turbo_frame: "standards_content", turbo_action: "replace" }, local: true, class: "flex flex-col sm:flex-row sm:items-center gap-3 sm:space-x-4" do |form| %>
+                    <% if current_user&.super_admin? || current_user&.delegated_admin? %>
+                        <%= form.hidden_field :status, value: params[:status] %>
+                    <% end %>
+                    <div class="relative">
+                        <%= form.text_field :search, placeholder: t('search_standards'), 
+                            value: params[:search], 
+                            class: "w-full sm:w-64 px-4 py-3 sm:py-2 pl-10 pr-4 text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-colors duration-200",
+                            data: { search_frame_target: "searchInput", action: "input->search-frame#perform" } %>
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                <% end %>
+            </div>
+
+            <% if current_user&.platform_admin? %>
+                <button class="flex items-center justify-center space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-5 py-3 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm" data-controller="modal" data-action="click->modal#show" data-modal-dialog-param="new_standard_dialog">
+                    <div class="text-[#5C3984] flex items-center justify-center">
+                        <%= image_tag asset_path('plus-icon.svg'), class: "w-4 h-4 max-w-full h-auto" %>
+                    </div>
+                    <span><%= t('add_new_standard') %></span>
+                </button>
+            <% end %>
+        </div>
+    </div>
+
+    <%= render 'new_standard_dialog' %>
+    <%= render "shared/general_confirmation_modal" %>
+</div>
+
+<%= turbo_frame_tag "standards_content" do %>
+    <% current_status = params[:status].presence || 'all' %>
+
+    <!-- Filter Tabs (for super admin and delegated admin) -->
+    <% if current_user&.super_admin? || current_user&.delegated_admin? %>
+        <div class="py-4 px-4 sm:px-5 pb-3">
+            <div class="flex flex-wrap items-center gap-2 bg-white border border-[#E3E3E3] rounded-lg p-1 w-full sm:w-fit">
+                <%= link_to standards_path(status: 'all', search: params[:search]), 
+                    data: { turbo_frame: "standards_content", turbo_action: "advance" },
+                    class: "px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px] rounded-lg text-xs sm:text-sm font-medium transition-colors #{current_status == 'all' ? 'bg-white text-[#5C3984] shadow-sm' : 'text-gray-600 hover:text-[#0D1120]'}" do %>
+                    <%= t('all') %>
+                <% end %>
+
+                <%= link_to standards_path(status: 'published', search: params[:search]), 
+                    data: { turbo_frame: "standards_content", turbo_action: "advance" },
+                    class: "px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px] rounded-lg text-xs sm:text-sm font-medium transition-colors #{current_status == 'published' ? 'bg-white text-[#5C3984] shadow-sm' : 'text-gray-600 hover:text-[#0D1120]'}" do %>
+                    <%= t('active') %>
+                <% end %>
+
+                <%= link_to standards_path(status: 'draft', search: params[:search]), 
+                    data: { turbo_frame: "standards_content", turbo_action: "advance" },
+                    class: "px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px] rounded-lg text-xs sm:text-sm font-medium transition-colors #{current_status == 'draft' ? 'bg-white text-[#5C3984] shadow-sm' : 'text-gray-600 hover:text-[#0D1120]'}" do %>
+                    <%= t('drafts') %>
+                <% end %>
+
+                <%= link_to standards_path(status: 'archived', search: params[:search]), 
+                    data: { turbo_frame: "standards_content", turbo_action: "advance" },
+                    class: "px-3 sm:px-4 py-2 min-h-[40px] sm:min-h-[44px] rounded-lg text-xs sm:text-sm font-medium transition-colors #{current_status == 'archived' ? 'bg-white text-[#5C3984] shadow-sm' : 'text-gray-600 hover:text-[#0D1120]'}" do %>
+                    <%= t('archived') %>
+                <% end %>
+            </div>
+        </div>
+    <% end %>
+
+    <div class="px-4 py-4 sm:px-6 sm:py-6">
+        <% if @standards_with_stats.any? %>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                 data-controller="async-card-compliance"
+                 data-async-card-compliance-url-value="<%= standards_compliance_path %>">
+                <% @standards_with_stats.each do |stats| %>
+                    <% 
+                        # Demo filtering: skip cards with specific names
+                        standard_name = stats[:standard].code.upcase
+                        
+                        # Demo display: show "KAQA" for "GSSG"
+                        display_name = standard_name == 'GSSG' ? 'KAQA' : standard_name
+                    %>
+                    <%= render 'card', stats: stats.merge(display_name: display_name) %>
+                <% end %>
+            </div>
+        <% else %>
+            <div class="text-center py-12">
+                <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2"><%= t('no_standards_found') %></h3>
+                <p class="text-gray-500 mb-6">
+                    <% if current_user&.super_admin? || current_user&.delegated_admin? %>
+                        <%= t('get_started_message') %>
+                    <% else %>
+                        <%= t('no_standards_assigned_to_company') %>
+                    <% end %>
+                </p>
+                <% if current_user&.super_admin? || current_user&.delegated_admin? %>
+                    <button class="flex items-center justify-center space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 mx-auto min-h-[44px] text-[16px] sm:text-sm" data-controller="modal" data-action="click->modal#show" data-modal-dialog-param="new_standard_dialog">
+                        <div class="text-white flex items-center justify-center">
+                            <%= image_tag asset_path('plus-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        </div>
+                        <span><%= t('upload_first_standard') %></span>
+                    </button>
+                <% end %>
+            </div>
+        <% end %>
+    </div>
+<% end %>

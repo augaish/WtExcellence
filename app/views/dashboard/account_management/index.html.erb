@@ -1,0 +1,174 @@
+<%= content_for :title, t('account_management') %>
+
+<div class="min-h-screen bg-gray-50" data-controller="account-management">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-4 mb-6 sm:mb-8">
+      <div class="min-w-0 flex-1">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-[#0D1120] break-words"><%= t('account_management') %></h1>
+        <p class="mt-2 text-xs sm:text-sm text-[#797C81] break-words">
+          <%= t('account_management_description') %>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto">
+        <% if current_user&.can_manage_companies? %>
+          <%= link_to dashboard_account_management_companies_path,
+                      class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors text-xs sm:text-sm font-medium min-h-[44px]" do %>
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path>
+            </svg>
+            <span><%= t('companies') %></span>
+          <% end %>
+        <% end %>
+
+        <%= link_to dashboard_account_management_users_path,
+                    class: "flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-3 sm:px-4 py-3 sm:py-2 border border-[#E3E3E3] text-[#0D1120] rounded-lg hover:bg-gray-100 transition-colors text-xs sm:text-sm font-medium min-h-[44px]" do %>
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          <span><%= t('site_users') %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-10">
+      <!-- Companies -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('companies') %></p>
+          <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @total_companies %></p>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('site_users') %></p>
+            <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @total_users %></p>
+          </div>
+          <div class="flex flex-col items-end rtl:items-start text-[10px] sm:text-xs text-[#797C81] flex-shrink-0">
+            <span class="whitespace-nowrap"><%= t('active') %>: <span class="font-semibold text-green-700"><%= @active_users %></span></span>
+            <span class="whitespace-nowrap"><%= t('inactive') %>: <span class="font-semibold text-gray-700"><%= @inactive_users %></span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Credits -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('credits') rescue 'Credits' %></p>
+            <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @total_credits %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Licenses helper card -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('license_seats') %></p>
+          <p class="mt-2 text-xs sm:text-sm text-[#0D1120] break-words">
+            <%= t('review_license_seats_description') %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent companies -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl mb-6 sm:mb-8">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4 border-b border-[#E3E3E3]">
+        <div class="min-w-0 flex-1">
+          <h2 class="text-base sm:text-lg font-semibold text-[#0D1120] break-words"><%= t('companies') %></h2>
+          <p class="mt-1 text-xs sm:text-sm text-[#797C81] break-words">
+            <%= t('recently_created_companies_description') %>
+          </p>
+        </div>
+        <% if current_user&.can_manage_companies? %>
+          <%= link_to dashboard_account_management_companies_path,
+                      class: "text-xs sm:text-sm font-medium text-[#5C3984] hover:text-[#4A2F6B] whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center" do %>
+            <%= t('view_all') %> <span class="rtl:rotate-180 inline-block">&rarr;</span>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="px-4 sm:px-6 py-4 overflow-x-auto -mx-4 sm:mx-0">
+        <table class="min-w-full divide-y divide-gray-200 min-w-[700px]">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('company_name') %></th>
+              <th class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('users') %></th>
+              <th class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('license_seats') %></th>
+              <th class="px-3 sm:px-4 py-3 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('created_at') %></th>
+              <th class="px-3 sm:px-4 py-3 text-end text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% if @recent_companies.any? %>
+              <% @recent_companies.each do |company| %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium text-gray-900 break-words">
+                    <%= company.name %>
+                  </td>
+                  <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-900 whitespace-nowrap">
+                    <%= company.company_users.count %>
+                  </td>
+                  <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-900 whitespace-nowrap">
+                    <%= company.license_seats %>
+                  </td>
+                  <td class="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-900 whitespace-nowrap">
+                    <%= company.created_at.strftime("%Y-%m-%d") %>
+                  </td>
+                  <td class="px-3 sm:px-4 py-3 text-end">
+                    <%= link_to t('view_profile'),
+                                dashboard_account_management_company_path(company),
+                                class: "text-xs sm:text-sm font-medium text-[#5C3984] hover:text-[#4A2F6B] whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center justify-end" %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="5" class="px-4 py-4 text-center text-xs sm:text-sm text-gray-500">
+                  <%= t('no_companies_found') %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quick links -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <h3 class="text-sm font-semibold text-[#0D1120] break-words"><%= t('companies') %></h3>
+          <p class="mt-1 text-xs text-[#797C81] break-words">
+            <%= t('full_list_companies_description') %>
+          </p>
+        </div>
+        <% if current_user&.can_manage_companies? %>
+          <%= link_to t('manage'),
+                      dashboard_account_management_companies_path,
+                      class: "text-xs sm:text-sm font-medium text-[#5C3984] hover:text-[#4A2F6B] whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center" %>
+        <% end %>
+      </div>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <h3 class="text-sm font-semibold text-[#0D1120] break-words"><%= t('site_users') %></h3>
+          <p class="mt-1 text-xs text-[#797C81] break-words">
+            <%= t('invite_filter_manage_description') %>
+          </p>
+        </div>
+        <%= link_to t('manage', default: 'Manage'),
+                    dashboard_account_management_users_path,
+                    class: "text-xs sm:text-sm font-medium text-[#5C3984] hover:text-[#4A2F6B] whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+

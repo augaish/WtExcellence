@@ -1,0 +1,212 @@
+<%# Renders a single checkpoint box for a ChecklistItem. %>
+<% locale = I18n.locale.to_s %>
+<% guidance_text = item.text(locale) || item.guidance(locale) %>
+<%# Evidence is scoped to this checkpoint AND the current assessment's company.
+   The attachable is a ChecklistItem (a global per-standard definition), so we
+   must filter by upload.company_id to keep one company's evidence private. %>
+<% evidence_attachments = if @assessment
+     EvidenceAttachment.joins(:upload)
+       .where(attachable_type: "ChecklistItem", attachable_id: item.id)
+       .where(uploads: { company_id: @assessment.company_id })
+       .includes(:upload).to_a
+   else
+     []
+   end %>
+<%# Contributors assigned to this checkpoint (checklist item) %>
+<% checkpoint_assigned_users = if @assessment
+     @assessment.contributors_for_checklist_item(item.id).map(&:user)
+   else
+     []
+   end %>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-4">
+  <%# Checkpoint Header %>
+  <div class="p-4 sm:p-5 border-b border-[#E3E3E3] bg-[#F7F7FD] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex items-center gap-3 min-w-0">
+      <span class="text-sm font-bold text-white bg-[#5C3984] px-3 py-1 rounded-full flex-shrink-0"><%= index + 1 %></span>
+      <h3 class="text-sm sm:text-base font-semibold text-[#0D1120]"><%= item.code || "#{t('assessments.checkpoint')} #{index + 1}" %></h3>
+    </div>
+    <%# Show contributors assigned to this specific checkpoint %>
+    <% header_contributors = checkpoint_assigned_users %>
+    <% if header_contributors.any? %>
+      <div class="flex items-center gap-1">
+        <div class="flex -space-x-1.5">
+          <% header_contributors.first(3).each do |user| %>
+            <% initials = user.name&.split(' ')&.map(&:first)&.join('')&.upcase&.slice(0,2) || user.email[0..1].upcase %>
+            <div class="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-[10px] font-bold text-purple-700 border-2 border-white overflow-hidden" title="<%= user.name || user.email %>">
+              <% if user.profile_image.attached? %>
+                <%= image_tag user_profile_image_url(user), class: "w-full h-full object-cover", alt: user.name || user.email %>
+              <% else %>
+                <%= initials %>
+              <% end %>
+            </div>
+          <% end %>
+          <% if header_contributors.size > 3 %>
+            <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-[10px] font-bold text-gray-600 border-2 border-white">+<%= header_contributors.size - 3 %></div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="p-4 sm:p-5">
+    <%# Guidance Text %>
+    <% if guidance_text.present? %>
+      <div class="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+        <p class="text-sm text-blue-800 leading-relaxed"><%= guidance_text %></p>
+      </div>
+    <% end %>
+
+    <%# Text Fields (one per ToolCheckpoint / Assessment Category) %>
+    <% if checkpoints.any? %>
+      <% cols = [checkpoints.size, 3].min %>
+      <div class="grid grid-cols-1 lg:grid-cols-<%= cols %> gap-4 mb-4">
+        <% checkpoints.each do |cp| %>
+          <% cs = checkpoint_summaries.dig(item.id, cp.id) %>
+          <% current_summary = cs&.summary || "" %>
+          <div data-controller="char-counter">
+            <label class="flex items-center gap-1 text-xs font-semibold text-[#5C3984] uppercase tracking-wider mb-2">
+              <%= cp.name_in %>
+            </label>
+            <textarea
+              name="assessment[checkpoint_summaries][<%= item.id %>][<%= cp.id %>]"
+              maxlength="100"
+              rows="3"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent resize-none"
+              placeholder="<%= t('assessments.describe_placeholder', attribute: cp.name_in) %>"
+              data-char-counter-target="input"
+              data-controller="checkpoint-autosave"
+              data-checkpoint-autosave-url-value="<%= autosave_clause_assessment_path(@clause) %>"
+              data-checkpoint-autosave-checklist-item-id-value="<%= item.id %>"
+              data-checkpoint-autosave-tool-checkpoint-id-value="<%= cp.id %>"
+              data-action="input->char-counter#update input->checkpoint-autosave#save"
+              <% if readonly %>disabled<% end %>
+            ><%= current_summary %></textarea>
+            <div class="flex justify-end mt-1">
+              <span class="text-xs text-gray-400" data-char-counter-target="counter"><%= current_summary.length %>/100</span>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# Evidence & Assignment Row %>
+    <div class="flex flex-col sm:flex-row gap-4">
+      <%# Evidence section %>
+      <div class="flex-1">
+        <label class="text-xs font-semibold text-[#797C81] uppercase tracking-wider mb-2 block"><%= t("assessments.evidence") %></label>
+
+        <%# Existing evidence list %>
+        <% if evidence_attachments.any? %>
+          <div class="space-y-2 mb-3">
+            <% evidence_attachments.each do |attachment| %>
+              <div class="flex items-center justify-between bg-white rounded px-2 py-1.5 border border-gray-200" data-attachment-id="<%= attachment.id %>" data-upload-id="<%= attachment.upload_id %>">
+                <div class="flex items-center gap-2 min-w-0">
+                  <svg class="w-4 h-4 text-[#5C3984] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                  </svg>
+                  <% if attachment.upload&.file&.attached? %>
+                    <%= link_to attachment.upload&.display_name || t('assessments.document'),
+                        signed_file_url(attachment.upload.file, disposition: "attachment"),
+                        class: "text-xs text-[#0D1120] truncate hover:text-[#5C3984]" %>
+                  <% else %>
+                    <span class="text-xs text-[#0D1120] truncate"><%= attachment.upload&.display_name || t('assessments.document') %></span>
+                  <% end %>
+                </div>
+                <% unless readonly %>
+                  <button type="button"
+                          class="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 unlink-document-btn p-1 min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+                          data-upload-id="<%= attachment.upload_id %>"
+                          data-assignment-id="<%= @assessment&.id %>"
+                          data-checklist-item-id="<%= item.id %>">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <%# Action buttons %>
+        <% unless readonly %>
+          <div class="border border-dashed border-gray-300 rounded-lg p-3 bg-gray-50">
+            <div class="flex items-center gap-3 flex-wrap">
+              <% if @assessment&.persisted? %>
+                <button type="button"
+                        class="assessment-link-evidence-btn px-3 py-1.5 text-xs text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-1.5"
+                        data-assignment-id="<%= @assessment&.id %>"
+                        data-checklist-item-id="<%= item.id %>">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                  </svg>
+                  <%= t("assessments.link_evidence") %>
+                </button>
+                <button type="button"
+                        class="px-3 py-1.5 text-xs text-white bg-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#4A2F6B] transition-colors flex items-center gap-1.5"
+                        data-controller="modal"
+                        data-action="click->modal#open"
+                        data-modal-dialog-param="upload_document_dialog"
+                        data-assignment-id="<%= @assessment&.id %>"
+                        data-checklist-item-id="<%= item.id %>">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                  </svg>
+                  <%= t("assessments.upload_file") %>
+                </button>
+              <% end %>
+              <% if evidence_attachments.empty? %>
+                <span class="text-xs text-gray-400"><%= t("assessments.no_evidence") %></span>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Contributors for THIS checkpoint %>
+      <div class="w-full sm:w-64">
+        <label class="text-xs font-semibold text-[#797C81] uppercase tracking-wider mb-2 block"><%= t("assessments.contributors") %></label>
+        <div class="border border-gray-300 rounded-lg p-2 bg-white">
+          <% checkpoint_contributors = checkpoint_assigned_users %>
+          <% if checkpoint_contributors.any? %>
+            <div class="space-y-1.5">
+              <% checkpoint_contributors.each do |user| %>
+                <div class="flex items-center gap-2 p-1">
+                  <div class="w-6 h-6 rounded-full bg-purple-200 flex items-center justify-center text-xs font-bold flex-shrink-0 overflow-hidden">
+                    <% initials = user.name&.split(' ')&.map(&:first)&.join('')&.upcase&.slice(0,2) || user.email[0..1].upcase %>
+                    <% if user.profile_image.attached? %>
+                      <%= image_tag user_profile_image_url(user), class: "w-full h-full object-cover", alt: user.name || user.email %>
+                    <% else %>
+                      <span class="text-purple-700"><%= initials %></span>
+                    <% end %>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-medium text-[#0D1120] truncate"><%= user.name || user.email %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-xs text-gray-400 p-1"><%= t("assessments.no_contributor") %></p>
+          <% end %>
+
+          <%# Assign contributor button — scoped to this checklist item (standard checkpoint) %>
+          <% if @can_manage_assignments && @tool_clause && @assessment&.persisted? && !readonly %>
+            <button type="button"
+                    class="open-multi-assign-btn mt-2 w-full px-2 py-1.5 text-xs text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#F7F7FD] transition-colors flex items-center justify-center gap-1"
+                    data-tool-clause-id="<%= @tool_clause.id %>"
+                    data-checklist-item-id="<%= item.id %>"
+                    data-checkpoint-name="<%= item.code || "#{t('assessments.checkpoint')} #{index + 1}" %>"
+                    data-modal-id="multi-assign-modal-assessment">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <%= checkpoint_contributors.any? ? t("assessments.edit_contributors") : t("assessments.assign_contributor") %>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

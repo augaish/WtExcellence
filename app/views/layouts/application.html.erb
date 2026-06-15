@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title><%= content_for(:title) || "Way To Excellence" %></title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <%= csrf_meta_tags %>
+        <%= csp_meta_tag %>
+
+        <%= yield :head %>
+
+        <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
+        <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+
+        <%= favicon_link_tag asset_path('logo.png') %>
+
+        <!-- Google Fonts - Geist -->
+        <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+        
+        <!-- Select2 CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+        <!-- Choices.js CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+
+        <%# Includes all stylesheet files in app/assets/stylesheets %>
+        <!-- app/views/layouts/application.html.erb -->
+        <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+        <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+
+        <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+        <%= javascript_importmap_tags %>
+      <%= Sentry.get_trace_propagation_meta.html_safe %>
+  </head>
+
+    <body class="bg-gray-50">
+        <%= render "shared/notifications" %>
+        <%= yield %>
+    </body>
+</html>

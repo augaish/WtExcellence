@@ -1,0 +1,43 @@
+<div class="bg-white border-b border-[#E3E3E3] px-4 sm:px-6 py-3 sm:py-4">
+  <div class="flex items-center justify-between">
+    <h1 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t('ai_usage') %></h1>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 sm:gap-4 mt-3 sm:mt-4">
+    <div class="overflow-x-auto -mx-4 sm:mx-0 w-full">
+      <div class="flex gap-4 sm:gap-8 px-4 sm:px-0 min-w-max">
+        <%= link_to dashboard_ai_insights_path(tab: "my_overview"), class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{@tab == 'my_overview' ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+          <%= t('my_overview') %>
+        <% end %>
+        <%= link_to dashboard_ai_insights_path(tab: "my_credits"), class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{@tab == 'my_credits' ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+          <%= t('my_credits') %>
+        <% end %>
+        <% if current_user&.company_user&.company_admin? %>
+          <%= link_to dashboard_ai_insights_path(tab: "overview"), class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{@tab == 'overview' ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+            <%= t('overview') %>
+          <% end %>
+          <%= link_to dashboard_ai_insights_path(tab: "credits"), class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{@tab == 'credits' ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+            <%= t('credits') %>
+          <% end %>
+          <%= link_to dashboard_ai_insights_path(tab: "credit_assignments"), class: "text-xs sm:text-sm font-medium pb-2 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center #{@tab == 'credit_assignments' ? 'text-[#5C3984] border-b-2 border-[#5C3984]' : 'text-[#797C81]'}" do %>
+            <%= t('credit_assignments') %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="p-4 sm:p-6">
+  <% if @tab == "my_overview" %>
+    <%= render partial: "my_overview_tab" %>
+  <% elsif @tab == "my_credits" %>
+    <%= render partial: "my_credits_tab" %>
+  <% elsif @tab == "overview" && current_user&.company_user&.company_admin? %>
+    <%= render partial: "overview_tab" %>
+  <% elsif @tab == "credits" && current_user&.company_user&.company_admin? %>
+    <%= render partial: "credits_tab" %>
+  <% elsif @tab == "credit_assignments" && current_user&.company_user&.company_admin? %>
+    <%= render partial: "credit_assignments_tab" %>
+  <% end %>
+</div>

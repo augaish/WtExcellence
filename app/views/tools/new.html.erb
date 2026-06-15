@@ -1,0 +1,47 @@
+<div class="px-4 md:px-6">
+    <% current_locale = I18n.locale.to_s %>
+    <% creating_label = current_locale == "ar" ? "جاري الإنشاء..." : "Creating..." %>
+    <!-- First Row: Title and Action Buttons -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white p-4 sm:p-6 mb-6 gap-3">
+        <h1 class="text-lg sm:text-2xl font-bold text-[#0D1120] break-words"><%= t('add_new_tool') %></h1>
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:space-x-3">
+            <%= link_to t('cancel'), tools_path, class: "px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 text-center min-h-[44px]" %>
+            <button id="create-tool-submit-button"
+                    type="submit"
+                    form="new_tool"
+                    data-default-label="<%= t('create_new_tool') %>"
+                    data-loading-label="<%= creating_label %>"
+                    class="px-6 py-3 sm:py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm inline-flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                <svg id="create-tool-submit-spinner" class="hidden w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                </svg>
+                <span id="create-tool-submit-label"><%= t('create_new_tool') %></span>
+            </button>
+        </div>
+    </div>
+
+    <%= render "form" %>
+</div>
+
+<script>
+  (function() {
+    function initCreateToolSpinner() {
+      const form = document.getElementById("new_tool");
+      const button = document.getElementById("create-tool-submit-button");
+      const spinner = document.getElementById("create-tool-submit-spinner");
+      const label = document.getElementById("create-tool-submit-label");
+      if (!form || !button || !spinner || !label || form.dataset.spinnerBound === "true") return;
+
+      form.dataset.spinnerBound = "true";
+      form.addEventListener("submit", function() {
+        button.disabled = true;
+        spinner.classList.remove("hidden");
+        label.textContent = button.dataset.loadingLabel || "Creating...";
+      });
+    }
+
+    document.addEventListener("turbo:load", initCreateToolSpinner);
+    document.addEventListener("DOMContentLoaded", initCreateToolSpinner);
+  })();
+</script>

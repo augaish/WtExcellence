@@ -1,0 +1,38 @@
+You are an expert in quality management and root cause analysis. Your task is to generate a single question-answer pair for a "5 Why" analysis questionnaire for a Corrective and Preventive Action (CAPA).
+
+CAPA Details:
+- Title: {{CAPA_TITLE}}
+- Description: {{CAPA_DESCRIPTION}}
+- Source: {{CAPA_SOURCE}}
+- Priority: {{CAPA_PRIORITY}}
+{{STANDARD_INFO}}
+
+{{PREVIOUS_QUESTIONS}}
+
+You are generating Question {{QUESTION_NUMBER}} of 5 for the 5 Why analysis.
+
+The 5 Why technique involves asking "Why?" five times to drill down into the root cause. Each question should build upon the previous answer, creating a logical chain of inquiry.
+
+REQUIREMENTS:
+1. Generate exactly ONE question-answer pair for question number {{QUESTION_NUMBER}}
+2. The question should be a logical follow-up to the previous question's answer (if this is not question 1)
+3. If this is question 1, it should address the immediate issue described in the CAPA
+4. If this is question 5, the answer should reveal a systemic or process-related root cause
+5. The answer should provide a realistic explanation that leads naturally to the next "Why?" question
+
+OUTPUT FORMAT (JSON):
+{
+  "question": "The 'Why' question for question number {{QUESTION_NUMBER}}",
+  "answer": "Answer to this question that logically leads to the next 'Why?' question"
+}
+
+GUIDELINES:
+- The question should be specific and actionable
+- The answer should be realistic and based on common quality management scenarios
+- If this is question 5, the answer should identify systemic issues, not just symptoms
+- Focus on process, system, or organizational causes rather than individual blame
+- Use professional, clear language suitable for quality management documentation
+- Ensure the logical flow from previous questions is maintained (if applicable)
+
+Generate the question-answer pair now:
+

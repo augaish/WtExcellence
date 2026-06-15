@@ -1,0 +1,386 @@
+<%= content_for :title, @company.name %>
+<div class="min-h-screen bg-gray-50" data-controller="account-management">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+    <!-- Breadcrumb / header -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-4 mb-4 sm:mb-6">
+      <div class="min-w-0 flex-1">
+        <%= link_to dashboard_account_management_companies_path, class: "inline-flex items-center gap-1 text-xs sm:text-sm text-[#5C3984] hover:text-[#4A2F6B] min-h-[44px] sm:min-h-auto" do %>
+          <span class="rtl:rotate-180">&larr;</span>
+          <span><%= t('companies') %></span>
+        <% end %>
+        <div class="mt-2 sm:mt-3">
+          <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-[#0D1120] break-words"><%= @company.name %></h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap w-full sm:w-auto">
+        <% if current_user&.can_manage_companies? %>
+          <% if @company.status == "pending" %>
+            <%= link_to t('activate'),
+                        dashboard_update_company_status_path(@company, status: "active"),
+                        method: :patch,
+                        data: { 
+                          action: "click->account-management#updateCompanyStatus",
+                          company_status_button: @company.id
+                        },
+                        class: "inline-flex items-center justify-center flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] text-xs sm:text-sm font-medium min-h-[44px]" %>
+          <% else %>
+            <%= link_to t('deactivate'),
+                        dashboard_update_company_status_path(@company, status: "pending"),
+                        method: :patch,
+                        data: { 
+                          action: "click->account-management#updateCompanyStatus",
+                          company_status_button: @company.id
+                        },
+                        class: "inline-flex items-center justify-center flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs sm:text-sm font-medium min-h-[44px]" %>
+          <% end %>
+        <% end %>
+
+        <% if current_user&.can_add_users? %>
+          <button type="button"
+                  class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] text-xs sm:text-sm font-medium min-h-[44px] text-center"
+                  data-action="click->account-management#openAddUserModal"
+                  data-company-id="<%= @company.id %>">
+            <%= t('add_new_user') %>
+          </button>
+        <% end %>
+
+        <% if current_user&.can_modify_license_seats? %>
+          <button type="button"
+                  class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] text-xs sm:text-sm font-medium min-h-[44px] text-center"
+                  data-action="click->account-management#editLicenseSeats"
+                  data-company-id="<%= @company.id %>"
+                  data-company-name="<%= @company.name %>"
+                  data-current-seats="<%= @company.license_seats %>">
+            <%= t('edit') %> <%= t('license_seats') %>
+          </button>
+        <% end %>
+
+        <% if current_user&.can_remove_companies? %>
+          <button type="button"
+                  class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 text-xs sm:text-sm font-medium min-h-[44px] text-center"
+                  data-controller="confirm-link"
+                  data-action="click->confirm-link#handleClick"
+                  data-confirm-link-message-value="<%= t('are_you_sure_delete_company', name: @company.name) %>"
+                  data-confirm-link-url-value="<%= dashboard_destroy_company_path(@company) %>"
+                  data-confirm-link-method-value="delete"
+                  data-confirm-link-title-value="<%= t('are_you_sure') %>"
+                  data-confirm-link-confirm-text-value="<%= t('delete') %>"
+                  data-confirm-link-button-style-value="danger">
+            <%= t('delete_company') %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+      <!-- Status -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('status_label') %></p>
+        <% 
+          company_status = @company.status || "pending"
+          status_badge_class = company_status == "active" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+          status_text = company_status == "active" ? t('active') : t('pending')
+        %>
+        <span class="mt-2 inline-flex px-3 py-1 text-xs sm:text-sm font-semibold rounded-full <%= status_badge_class %> company-status-badge whitespace-nowrap">
+          <%= status_text %>
+        </span>
+      </div>
+
+      <!-- Accounts -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('site_users') %></p>
+        <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @company_users.size %></p>
+      </div>
+
+      <!-- License seats -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('license_seats') %></p>
+
+        <% if current_user&.can_modify_license_seats? %>
+          <div class="mt-2 flex items-center gap-2 sm:gap-3 flex-wrap">
+            <div class="flex flex-col min-w-0 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xl sm:text-2xl font-semibold text-[#0D1120]" id="license-seats-display-<%= @company.id %>">
+                  <%= @company.license_seats %>
+                </span>
+
+                <input type="number"
+                       id="license-seats-input-<%= @company.id %>"
+                       value="<%= @company.license_seats %>"
+                       min="<%= @company_users.size %>"
+                       step="1"
+                       class="hidden w-20 px-2 py-2 text-xs sm:text-sm border border-[#5C3984] rounded-md focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent min-h-[44px]"
+                       data-company-id="<%= @company.id %>"
+                       data-current-users="<%= @company_users.size %>">
+
+                <button type="button"
+                        id="license-seats-save-<%= @company.id %>"
+                        class="hidden px-3 py-2 text-xs bg-[#5C3984] text-white rounded hover:bg-[#4A2F6B] min-h-[44px]"
+                        data-action="click->account-management#saveLicenseSeats"
+                        data-company-id="<%= @company.id %>">
+                  <%= t('save') %>
+                </button>
+                <button type="button"
+                        id="license-seats-cancel-<%= @company.id %>"
+                        class="hidden px-3 py-2 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 min-h-[44px]"
+                        data-action="click->account-management#cancelLicenseSeatsEdit"
+                        data-company-id="<%= @company.id %>">
+                  <%= t('cancel') %>
+                </button>
+              </div>
+              <p class="mt-1 text-xs text-[#797C81] break-words">
+                <%= @company_users.size %> <%= t('used') %> /
+                <span class="license-seats-available" data-company-id="<%= @company.id %>">
+                  <%= [@company.license_seats - @company_users.size, 0].max %>
+                </span>
+                <%= t('available') %>
+              </p>
+            </div>
+          </div>
+        <% else %>
+          <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @company.license_seats %></p>
+          <p class="mt-1 text-xs text-[#797C81] break-words">
+            <%= @company_users.size %> <%= t('used') %> /
+            <span class="license-seats-available" data-company-id="<%= @company.id %>">
+              <%= [@company.license_seats - @company_users.size, 0].max %>
+            </span>
+            <%= t('available') %>
+          </p>
+        <% end %>
+      </div>
+
+      <!-- Credits -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('credits') rescue 'Credits' %></p>
+        <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @company.credits %></p>
+      </div>
+
+      <!-- Standards -->
+      <div class="bg-white rounded-xl border border-[#E3E3E3] p-3 sm:p-4">
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('assigned_standards') %></p>
+        <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @company.company_standards.count %></p>
+      </div>
+    </div>
+
+    <!-- 2-column layout: Accounts + Licenses / Documents -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-10">
+      <!-- Accounts table -->
+      <div class="lg:col-span-2 bg-white border border-[#E3E3E3] rounded-xl">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[#E3E3E3]">
+          <div class="min-w-0 flex-1">
+            <h2 class="text-sm font-semibold text-[#0D1120] break-words"><%= t('site_users') %></h2>
+            <p class="mt-1 text-xs text-[#797C81] break-words">
+              <%= t('accounts_belong_to_company') %>
+            </p>
+          </div>
+        </div>
+        <div class="px-4 sm:px-6 py-4 overflow-x-auto -mx-4 sm:mx-0">
+          <table class="min-w-full divide-y divide-gray-200 min-w-[700px]">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-3 sm:px-4 py-2 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('full_name') rescue 'Name' %></th>
+                <th class="px-3 sm:px-4 py-2 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('email_address') rescue 'Email' %></th>
+                <th class="px-3 sm:px-4 py-2 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('role') %></th>
+                <th class="px-3 sm:px-4 py-2 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('status_label') %></th>
+                <th class="px-3 sm:px-4 py-2 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('joined_on') rescue 'Joined' %></th>
+                <% if current_user&.super_admin? || current_user&.can_activate_deactivate_users? %>
+                  <th class="px-3 sm:px-4 py-2 text-start text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('actions') %></th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% if @company_users.any? %>
+                <% @company_users.each do |company_user| %>
+                  <% user = company_user.user %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 min-w-0 max-w-[140px] sm:max-w-[180px]">
+                      <div class="truncate break-words" data-controller="truncate-tooltip" data-truncate-tooltip-text-value="<%= user.name %>"><%= user.name %></div>
+                    </td>
+                    <td class="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 min-w-0 max-w-[160px] sm:max-w-[220px]">
+                      <div class="truncate break-words" data-controller="truncate-tooltip" data-truncate-tooltip-text-value="<%= user.email %>"><%= user.email %></div>
+                    </td>
+                    <td class="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 min-w-0 max-w-[100px] sm:max-w-[120px]">
+                      <% role_display = company_user.role.to_s.gsub('company_', '').humanize %>
+                      <div class="truncate break-words" data-controller="truncate-tooltip" data-truncate-tooltip-text-value="<%= role_display %>"><%= role_display %></div>
+                    </td>
+                    <td class="px-3 sm:px-4 py-2 text-xs sm:text-sm">
+                      <% status = user.is_active? ? 'active' : 'inactive' %>
+                      <% badge_class = status == 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>
+                      <% status_text = status == 'active' ? t('active') : t('inactive') %>
+                      <span class="px-2 inline-flex text-[10px] sm:text-xs leading-5 font-semibold rounded-full <%= badge_class %> whitespace-nowrap">
+                        <%= status_text %>
+                      </span>
+                    </td>
+                    <td class="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-900 whitespace-nowrap">
+                      <%= user.created_at.strftime("%Y-%m-%d") %>
+                    </td>
+                    <% if current_user&.super_admin? || current_user&.can_activate_deactivate_users? %>
+                      <td class="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium">
+                        <div class="relative" data-controller="dropdown" data-dropdown-fixed-value="true">
+                          <button type="button"
+                                  class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                                  data-action="click->dropdown#toggle">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                            </svg>
+                          </button>
+                          <div class="hidden absolute end-0 mt-2 w-48 sm:w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200" data-dropdown-target="menu">
+                            <div class="py-1">
+                              <% if current_user&.super_admin? %>
+                                <% if user.delegated_admin? %>
+                                  <button type="button"
+                                          class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto"
+                                          data-action="click->account-management#openPermissionsModal"
+                                          data-user-id="<%= user.id %>"
+                                          data-user-name="<%= user.name %>"
+                                          data-user-permissions="<%= user.permissions_array.to_json %>">
+                                    <%= t('manage_permissions') %>
+                                  </button>
+                                <% end %>
+                                <button type="button"
+                                        class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto"
+                                        data-action="click->account-management#openChangePasswordModal"
+                                        data-user-id="<%= user.id %>"
+                                        data-user-name="<%= user.name %>">
+                                  <%= t('change_password') %>
+                                </button>
+                                <button type="button"
+                                        class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto"
+                                        data-action="click->account-management#openChangeRoleModal"
+                                        data-user-id="<%= user.id %>"
+                                        data-user-name="<%= user.name %>"
+                                        data-user-role="<%= user.role || '' %>"
+                                        data-company-role="<%= user.company_user&.role || '' %>"
+                                        data-has-company-user="<%= user.company_user.present? %>">
+                                  <%= t('change_role') %>
+                                </button>
+                                <% if user.id != current_user&.id %>
+                                  <button type="button"
+                                          class="block px-4 py-3 sm:py-2 text-xs sm:text-sm text-red-600 hover:bg-red-50 min-h-[44px] sm:min-h-auto w-full text-start"
+                                          data-controller="confirm-link"
+                                          data-action="click->confirm-link#handleClick"
+                                          data-confirm-link-message-value="<%= t('are_you_sure_delete_user', name: user.name) %>"
+                                          data-confirm-link-url-value="<%= dashboard_destroy_user_path(user) %>"
+                                          data-confirm-link-method-value="delete"
+                                          data-confirm-link-title-value="<%= t('are_you_sure') %>"
+                                          data-confirm-link-confirm-text-value="<%= t('delete') %>"
+                                          data-confirm-link-button-style-value="danger">
+                                    <%= t('delete_account') %>
+                                  </button>
+                                <% end %>
+                              <% end %>
+                              <% if current_user&.can_activate_deactivate_users? %>
+                                <% if user.is_active? %>
+                                  <button type="button"
+                                          class="block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto w-full text-start"
+                                          data-controller="confirm-link"
+                                          data-action="click->confirm-link#handleClick"
+                                          data-confirm-link-message-value="<%= t('are_you_sure_deactivate', name: user.name) %>"
+                                          data-confirm-link-url-value="<%= dashboard_update_user_status_path(user, is_active: false) %>"
+                                          data-confirm-link-method-value="patch"
+                                          data-confirm-link-title-value="<%= t('are_you_sure') %>"
+                                          data-confirm-link-confirm-text-value="<%= t('confirm') %>"
+                                          data-confirm-link-button-style-value="primary">
+                                    <%= t('deactivate') %>
+                                  </button>
+                                <% else %>
+                                  <button type="button"
+                                          class="block px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#5C3984] hover:bg-gray-100 min-h-[44px] sm:min-h-auto w-full text-start"
+                                          data-controller="confirm-link"
+                                          data-action="click->confirm-link#handleClick"
+                                          data-confirm-link-message-value="<%= t('are_you_sure_activate', name: user.name) %>"
+                                          data-confirm-link-url-value="<%= dashboard_update_user_status_path(user, is_active: true) %>"
+                                          data-confirm-link-method-value="patch"
+                                          data-confirm-link-title-value="<%= t('are_you_sure') %>"
+                                          data-confirm-link-confirm-text-value="<%= t('confirm') %>"
+                                          data-confirm-link-button-style-value="primary">
+                                    <%= t('activate') %>
+                                  </button>
+                                <% end %>
+                              <% end %>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    <% end %>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="6" class="px-4 py-4 text-center text-xs sm:text-sm text-gray-500">
+                    <%= t('no_users_found') %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Licenses & documents / credits -->
+      <div class="space-y-3 sm:space-y-4">
+        <!-- License block -->
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+          <h2 class="text-sm font-semibold text-[#0D1120] mb-2 break-words"><%= t('license_seats') %></h2>
+          <p class="text-xs sm:text-sm text-[#0D1120] break-words">
+            <strong><%= @company.license_seats %></strong> <%= t('total_seats') %>
+          </p>
+          <p class="mt-1 text-xs text-[#797C81] break-words">
+            <%= @company_users.size %> <%= t('users_currently_assigned') %>
+          </p>
+        </div>
+
+        <!-- Legal documents -->
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+          <h2 class="text-sm font-semibold text-[#0D1120] mb-2 break-words"><%= t('legal_documents') %></h2>
+          <% if @recent_uploads.any? %>
+            <ul class="space-y-2">
+              <% @recent_uploads.each do |upload| %>
+                <li class="flex items-center justify-between gap-2 text-xs text-[#0D1120]">
+                  <div class="truncate min-w-0 flex-1">
+                    <a href="<%= upload.file_url %>" target="_blank" class="hover:underline font-medium break-words">
+                      <%= upload.filename.to_s %>
+                    </a>
+                    <% if upload.folder %>
+                      <span class="text-[#797C81]"> · <%= upload.folder.name %></span>
+                    <% end %>
+                  </div>
+                  <span class="text-[#797C81] whitespace-nowrap flex-shrink-0"><%= upload.created_at.strftime("%Y-%m-%d") %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-xs text-[#797C81] break-words">
+              <%= t('no_documents_linked') %>
+            </p>
+          <% end %>
+        </div>
+
+        <!-- Credits detail -->
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+          <h2 class="text-sm font-semibold text-[#0D1120] mb-2 break-words"><%= t('credits') rescue 'Credits' %></h2>
+          <p class="text-xs sm:text-sm text-[#0D1120] break-words">
+            <strong><%= @company.credits %></strong> <%= t('credits_available_description') %>
+          </p>
+          <p class="mt-1 text-xs text-[#797C81] break-words">
+            <%= t('adjust_credits_description') %>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% if current_user&.can_add_users? %>
+    <%= render partial: "add_user_modal" %>
+  <% end %>
+
+  <% if current_user&.super_admin? %>
+    <%= render partial: 'permissions_modal' %>
+    <%= render partial: 'change_password_modal' %>
+    <%= render partial: 'change_role_modal' %>
+  <% end %>
+</div>
+
+
+

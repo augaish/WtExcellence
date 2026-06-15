@@ -1,0 +1,132 @@
+<aside
+    id="sidebar" class="hidden sm:flex sm:flex-col w-56 sm:w-64 bg-white border-e border-gray-200 py-6 px-4 transition-all duration-300 ease-in-out min-w-0 h-full overflow-y-auto overflow-x-hidden" dir="<%= text_direction %>">
+
+    <!-- Main Menu Section -->
+    <div class="mb-8">
+        <h2 class="text-sm sm:text-md font-semibold text-[#0D1120]-500 tracking-wider mb-4"><%= t('main_menu') %></h2>
+        <nav class="space-y-2">
+            <% if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user.present? %>
+                <%= link_to dashboard_overview_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('overview')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('overview') %></span>
+                        <%= image_tag asset_path('overview-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('overview-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('overview') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
+            <%= link_to standards_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/standards')}" do %>
+                <% if rtl? %>
+                    <span><%= t('standards') %></span>
+                    <%= image_tag asset_path('standards-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                <% else %>
+                    <%= image_tag asset_path('standards-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <span><%= t('standards') %></span>
+                <% end %>
+            <% end %>
+            <% unless current_user&.super_admin? || current_user&.delegated_admin? %>
+                <%= link_to dashboard_capa_management_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('capa_management')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('capa_management') %></span>
+                        <%= image_tag asset_path('capa-management-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('capa-management-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('capa_management') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
+            <%= link_to library_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/library')}" do %>
+                <% if rtl? %>
+                    <span><%= t('library') %></span>
+                    <%= image_tag asset_path('library-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                <% else %>
+                    <%= image_tag asset_path('library-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <span><%= t('library') %></span>
+                <% end %>
+            <% end %>
+        </nav>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="mb-6">
+        <h2 class="text-sm sm:text-md font-semibold text-[#0D1120]-500 tracking-wider mb-4"><%= t('settings') %></h2>
+        <nav class="space-y-2">
+            <% if current_user&.can_manage_tools? %>
+                <%= link_to tools_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('tools')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('tool_setup') %></span>
+                        <%= image_tag asset_path('tool-setup-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('tool-setup-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('tool_setup') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
+            <% if current_user&.super_admin? || current_user&.delegated_admin? %>
+                <%= link_to dashboard_credit_changes_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('credit_changes')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('credit_changes') %></span>
+                        <%= image_tag asset_path('account-management-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('account-management-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('credit_changes') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
+            <% if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user&.company_admin? %>
+                <%= link_to dashboard_account_management_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('account_management')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('account_management') %></span>
+                        <%= image_tag asset_path('account-management-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('account-management-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('account_management') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
+            <%= link_to dashboard_general_settings_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('general_settings')}" do %>
+                <% if rtl? %>
+                    <span><%= t('general_settings') %></span>
+                    <%= image_tag asset_path('general-settings-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                <% else %>
+                    <%= image_tag asset_path('general-settings-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <span><%= t('general_settings') %></span>
+                <% end %>
+            <% end %>
+            <% if current_user&.company_user.present? && !current_user&.company_contributor? %>
+                <%= link_to dashboard_ai_insights_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/dashboard/ai_insights')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('ai_usage') %></span>
+                        <%= image_tag asset_path('overview-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('overview-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('ai_usage') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
+        </nav>
+    </div>
+
+    <!-- Company Name Section (for non-super admin users) or Super Admin label -->
+    <div class="mt-auto pt-6 border-t border-gray-200">
+        <div class="px-3 py-2">
+            <% if current_user&.super_admin? %>
+                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1"><%= t('role') %></p>
+                <p class="text-sm font-medium text-[#0D1120]">
+                    <%= t('super_admin') %>
+                </p>
+            <% elsif current_user&.delegated_admin? %>
+                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1"><%= t('role') %></p>
+                <p class="text-sm font-medium text-[#0D1120]">
+                    Delegated Admin
+                </p>
+            <% elsif current_user&.company %>
+                <p class="text-xs text-gray-500 uppercase tracking-wider mb-1"><%= t('company') %></p>
+                <p class="text-sm font-medium text-[#0D1120] truncate" title="<%= current_user.company.name %>">
+                    <%= current_user.company.name %>
+                </p>
+            <% end %>
+        </div>
+    </div>
+</aside>

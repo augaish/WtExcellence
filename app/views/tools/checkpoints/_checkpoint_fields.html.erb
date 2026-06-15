@@ -1,0 +1,74 @@
+<div data-nested-form-wrapper class="checkpoint">
+  <%= f.hidden_field :_destroy %>
+  
+  <!-- Checkpoint Row -->
+  <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1.5fr_1fr_1fr_auto] border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+    <div class="text-left p-4">
+      <div class="flex items-center">
+        <span class="text-sm font-bold text-[#0D1120] mr-2 checkpoint-number" data-checkpoint-number-placeholder>1.</span>
+        <%= f.text_field :name, placeholder: "Checkpoint Name", class: "text-sm font-bold text-[#0D1120] border-0 bg-transparent focus:outline-none focus:ring-0 p-0 flex-1" %>
+      </div>
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty for checkpoint row -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty for checkpoint row -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty for checkpoint row -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty for checkpoint row -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty for checkpoint row -->
+    </div>
+    <div class="text-left p-4 flex items-center">
+      <button type="button"
+              data-action="nested-form#remove"
+              class="text-gray-400 hover:text-red-600 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Sub-checkpoints Container -->
+  <div data-controller="nested-form" data-nested-form-target="container">
+    <%= f.fields_for :subcheckpoints do |sf| %>
+      <%= render partial: "tools/subcheckpoints/subcheckpoint_fields", locals: { f: sf } %>
+    <% end %>
+  </div>
+
+  <!-- Add Sub-Checkpoint Button -->
+  <div class="grid grid-cols-[1.5fr_1.5fr_2fr_1.5fr_1fr_1fr_auto] border-b border-[#E3E3E3]">
+    <div class="text-left p-4">
+      <!-- Empty - aligns with Checkpoint Name column -->
+    </div>
+    <div class="text-left p-4">
+      <button type="button"
+              data-action="nested-form#add"
+              data-template="subcheckpoint-template"
+              class="text-[#5C3984] hover:text-[#4A2F6B] font-medium text-sm transition-colors">
+        + Add Sub-Checkpoint
+      </button>
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty - remaining columns -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty - remaining columns -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty - remaining columns -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty - remaining columns -->
+    </div>
+    <div class="text-left p-4">
+      <!-- Empty - remaining columns -->
+    </div>
+  </div>
+</div>

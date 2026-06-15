@@ -1,0 +1,42 @@
+<div data-nested-form-wrapper class="subcheckpoint">
+
+  <%= f.text_field :name, placeholder: "Sub-Checkpoint Name" %>
+
+  <%= f.text_area :description, placeholder: "Description" %>
+
+  <div data-controller="choices-select">
+    <%= f.select :scoring_type,
+        ["Number", "Percentage", "Multiple Choice"],
+        {}, { class: "w-full", data: { "choices-select-target": "select" } } %>
+  </div>
+
+  <div class="score-range">
+    <%= f.number_field :min_score %>
+    <%= f.number_field :max_score %>
+  </div>
+
+  <%= f.hidden_field :_destroy %>
+
+  <button type="button"
+          data-action="nested-form#remove">
+    Remove
+  </button>
+
+  <!-- Only show options for multiple choice -->
+  <div class="options-wrapper"
+       data-controller="nested-form"
+       data-nested-form-target="container">
+
+    <%= f.fields_for :options do |of| %>
+      <%= render partial: "tools/options/option_fields", locals: { f: of } %>
+    <% end %>
+
+  </div>
+
+  <button type="button"
+          data-action="nested-form#add"
+          data-template="option-template">
+    + Add New Option
+  </button>
+
+</div>

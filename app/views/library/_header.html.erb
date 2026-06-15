@@ -1,0 +1,69 @@
+<!-- Header Section -->
+<div class="bg-[#FFFFFF] border-b border-[#E3E3E3]">
+    <div
+        class="flex flex-col md:flex-row pt-4 sm:pt-5 px-4 sm:px-5 items-start md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <!-- Back Button -->
+        <div class="flex items-center gap-2 sm:gap-3">
+            <%= link_to library_path(company_id: params[:company_id]), class: "flex items-center #{rtl? ? 'flex-row-reverse space-x-reverse' : ''} space-x-2 text-gray-600 hover:text-gray-900 transition-colors min-h-[44px] sm:min-h-auto" do %>
+                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<%= rtl? ? 'M9 5l7 7-7 7' : 'M15 19l-7-7 7-7' %>"></path>
+                </svg>
+                <span class="font-medium text-sm sm:text-base"><%= t('view_all_files') %></span>
+            <% end %>
+        </div>
+
+        <div
+            class="flex flex-col md:flex-row items-stretch md:items-center gap-3 sm:gap-4 w-full md:w-auto">
+            <!-- Search Bar -->
+            <%= form_with url: folder_path(params[:id], company_id: params[:company_id]), method: :get, data: { turbo_frame: "folder_content", controller: "library-search" }, class: "flex-1 md:flex-initial relative" do |f| %>
+                <%= f.hidden_field :view, value: params[:view] if params[:view].present? %>
+                <%= hidden_field_tag :company_id, params[:company_id] if params[:company_id].present? %>
+                <%= f.text_field :search, 
+                    value: params[:search], 
+                    placeholder: t('start_searching'), 
+                    class: "w-full md:w-64 px-4 py-3 sm:py-2 ps-10 pe-4 text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-colors duration-200",
+                    data: { library_search_target: "input", action: "input->library-search#handleSearch" } %>
+                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            <% end %>
+
+            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <% unless viewer? %>
+                  <% if @folder && params[:id] != 'all' %>
+                      <!-- Create Subfolder Button -->
+                      <button data-controller="modal" 
+                              data-action="click->modal#open" 
+                              data-modal-dialog-param="create_folder_dialog"
+                              data-folder-parent-id="<%= @folder.id %>"
+                              data-folder-parent-name="<%= @folder.name %>"
+                              class="flex items-center justify-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#D6C4ED] hover:bg-[#CEBCE5] text-[#0D1120] px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors duration-200 whitespace-nowrap min-h-[44px] text-xs sm:text-sm">
+                          <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                          </svg>
+                          <span><%= t('create_subfolder') %></span>
+                      </button>
+                  <% end %>
+                  <!-- Upload Document Button -->
+                  <button data-controller="modal" 
+                          data-action="click->modal#open" 
+                          data-modal-dialog-param="upload_document_dialog"
+                          <% if @folder && params[:id] != 'all' && params[:id] != 'legal_documents' %>
+                              data-folder-id="<%= @folder.id %>"
+                          <% elsif params[:id] == 'legal_documents' %>
+                              data-legal-documents="true"
+                          <% end %>
+                          class="flex items-center justify-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors duration-200 whitespace-nowrap min-h-[44px] text-xs sm:text-sm">
+                      <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                      </svg>
+                      <span><%= t('upload_document') %></span>
+                  </button>
+                <% end %>
+            </div>
+        </div>
+    </div>
+</div>
+

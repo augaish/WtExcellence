@@ -1,0 +1,388 @@
+<%= render partial: "tabs" %>
+
+<script>
+  // Store current page URL in sessionStorage
+  function storeCurrentPage() {
+    const currentUrl = window.location.pathname + window.location.search;
+    sessionStorage.setItem('capa_management_last_page', currentUrl);
+  }
+
+  // Store page on load and Turbo navigation
+  function initializePageStorage() {
+    storeCurrentPage();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializePageStorage);
+  } else {
+    initializePageStorage();
+  }
+  document.addEventListener('turbo:load', initializePageStorage);
+  document.addEventListener('turbo:render', initializePageStorage);
+
+  const boardTranslations = {
+    confirmArchiveSingle: '<%= j t("capa_management_ui.board_page.confirmations.archive_single") %>',
+    confirmDeleteSingle: '<%= j t("capa_management_ui.board_page.confirmations.delete_single") %>',
+    errorArchiveSingle: '<%= j t("capa_management_ui.board_page.errors.archive_single") %>',
+    errorDeleteSingle: '<%= j t("capa_management_ui.board_page.errors.delete_single") %>'
+  };
+
+  const confirmationTranslations = {
+    defaultTitle: '<%= j t("capa_management_ui.confirmations.default_title") %>',
+    confirmButton: '<%= j t("capa_management_ui.confirmations.confirm_button") %>',
+    deleteTitle: '<%= j t("capa_management_ui.confirmations.delete_title") %>',
+    deleteButton: '<%= j t("capa_management_ui.confirmations.delete_button") %>',
+    unlinkTitle: '<%= j t("capa_management_ui.confirmations.unlink_title") %>',
+    unlinkButton: '<%= j t("capa_management_ui.confirmations.unlink_button") %>',
+    removeTitle: '<%= j t("capa_management_ui.confirmations.remove_title") %>',
+    removeButton: '<%= j t("capa_management_ui.confirmations.remove_button") %>'
+  };
+
+  // Custom confirm function for archiving that returns a Promise
+  window.customArchiveConfirm = async function(message, options = {}) {
+    const modal = document.getElementById('archiveCapaModal');
+    if (!modal) {
+      // Fallback to browser confirm if modal not found
+      return confirm(message);
+    }
+
+    try {
+      const archiveController = window.Stimulus.getControllerForElementAndIdentifier(
+        modal,
+        'capas--archive-confirmation'
+      );
+
+      if (!archiveController) {
+        return confirm(message);
+      }
+
+      return await archiveController.confirm(message, options);
+    } catch (error) {
+      console.warn('Custom archive confirm failed, falling back to browser:', error);
+      return confirm(message);
+    }
+  };
+
+  // Custom confirm function that returns a Promise (like confirm() but async)
+  window.customConfirm = async function(message, options = {}) {
+    const modal = document.getElementById('generalConfirmationModal');
+    if (!modal) {
+      // Fallback to browser confirm if modal not found
+      return confirm(message);
+    }
+
+    try {
+      const generalController = window.Stimulus.getControllerForElementAndIdentifier(
+        modal,
+        'capas--general-confirmation'
+      );
+
+      if (!generalController) {
+        return confirm(message);
+      }
+
+      const intent = options.intent;
+      let buttonStyle = options.buttonStyle;
+      if (!buttonStyle) {
+        if (intent === 'delete' || intent === 'remove') {
+          buttonStyle = 'danger';
+        } else if (intent === 'unlink') {
+          buttonStyle = 'primary';
+        } else {
+          buttonStyle = 'primary';
+        }
+      }
+
+      let confirmText = options.confirmText;
+      if (!confirmText) {
+        if (intent === 'delete') {
+          confirmText = confirmationTranslations.deleteButton;
+        } else if (intent === 'unlink') {
+          confirmText = confirmationTranslations.unlinkButton;
+        } else if (intent === 'remove') {
+          confirmText = confirmationTranslations.removeButton;
+        } else {
+          confirmText = confirmationTranslations.confirmButton;
+        }
+      }
+
+      let title = options.title;
+      if (!title) {
+        if (intent === 'delete') {
+          title = confirmationTranslations.deleteTitle;
+        } else if (intent === 'unlink') {
+          title = confirmationTranslations.unlinkTitle;
+        } else if (intent === 'remove') {
+          title = confirmationTranslations.removeTitle;
+        } else {
+          title = confirmationTranslations.defaultTitle;
+        }
+      }
+
+      return await generalController.confirm(message, {
+        title: title,
+        confirmText: confirmText,
+        buttonStyle: buttonStyle,
+        ...options
+      });
+    } catch (error) {
+      console.warn('Custom confirm failed, falling back to browser:', error);
+      return confirm(message);
+    }
+  };
+
+  async function archiveCapa(capaId) {
+    if (!(await customArchiveConfirm(boardTranslations.confirmArchiveSingle))) {
+      return;
+    }
+
+    fetch(`/dashboard/capa_management/${capaId}/archive`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+      },
+      credentials: 'same-origin'
+    })
+    .then(response => response.json().then(data => ({ response, data })))
+    .then(({ response, data }) => {
+      if (data.notification_html) {
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: data.notification_html },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      }
+      if (data.error) {
+        // Dispatch error toast
+        const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+        const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+        const notificationHtml = `
+          <div
+            data-toast-target="notification"
+            class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+          >
+            ${icon}
+            <div class="flex-1 text-sm text-[#0D1120] font-medium">
+              ${data.error}
+            </div>
+            <button
+              data-action="click->toast#close"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        `;
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: notificationHtml },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      }
+      if (response.ok && !data.error) {
+        const card = document.querySelector(`[data-capa-id="${capaId}"]`);
+        if (card) {
+          const column = card.closest('[data-capas--board-target="column"]');
+          card.remove();
+          const updateEvent = new CustomEvent('capa:counts-update', { bubbles: true });
+          document.dispatchEvent(updateEvent);
+          if (column) {
+            const cardsContainer = column.querySelector('[data-role="cards"]');
+            const emptyState = column.querySelector('[data-role="empty"]');
+            if (cardsContainer && cardsContainer.children.length === 0 && emptyState) {
+              emptyState.classList.remove('hidden');
+            }
+          }
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+      const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+      const notificationHtml = `
+        <div
+          data-toast-target="notification"
+          class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+        >
+          ${icon}
+          <div class="flex-1 text-sm text-[#0D1120] font-medium">
+            ${boardTranslations.errorArchiveSingle}
+          </div>
+          <button
+            data-action="click->toast#close"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+      `;
+      const event = new CustomEvent('toast:show', {
+        detail: { notificationHtml: notificationHtml },
+        bubbles: true
+      });
+      document.dispatchEvent(event);
+    });
+  }
+
+  async function deleteCapa(capaId) {
+    if (!(await customConfirm(
+      boardTranslations.confirmDeleteSingle,
+      { intent: 'delete', confirmText: confirmationTranslations.deleteButton, title: confirmationTranslations.deleteTitle }
+    ))) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/dashboard/capa_management/${capaId}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json'
+        },
+        credentials: 'same-origin'
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        if (error.notification_html) {
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: error.notification_html },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+        }
+        return;
+      }
+
+      const data = await response.json();
+      if (data.notification_html) {
+        // Dispatch toast notification
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: data.notification_html },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      }
+
+      // Remove CAPA card from board
+      const card = document.querySelector(`[data-capa-id="${capaId}"]`);
+      if (card) {
+        const column = card.closest('[data-capas--board-target="column"]');
+        card.remove();
+        
+        // Update counts - dispatch event for board controller
+        const updateEvent = new CustomEvent('capa:counts-update', { bubbles: true });
+        document.dispatchEvent(updateEvent);
+        
+        // Show empty state if column becomes empty
+        if (column) {
+          const cardsContainer = column.querySelector('[data-role="cards"]');
+          const emptyState = column.querySelector('[data-role="empty"]');
+          if (cardsContainer && cardsContainer.children.length === 0 && emptyState) {
+            emptyState.classList.remove('hidden');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+      const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+      const notificationHtml = `
+        <div
+          data-toast-target="notification"
+          class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+        >
+          ${icon}
+          <div class="flex-1 text-sm text-[#0D1120] font-medium">
+            ${boardTranslations.errorDeleteSingle}
+          </div>
+          <button
+            data-action="click->toast#close"
+            class="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </button>
+        </div>
+      `;
+      const event = new CustomEvent('toast:show', {
+        detail: { notificationHtml: notificationHtml },
+        bubbles: true
+      });
+      document.dispatchEvent(event);
+    }
+  }
+</script>
+
+<div>
+<div class="p-4 sm:p-6" data-controller="capas--board">
+  <% statuses = [
+    { key: 'open', label: t('capa_management_ui.statuses.open'), color: 'text-[#B130AC]', bg: 'bg-[#FEF0FF]', dot: '#F2C6F1' },
+    { key: 'assigned', label: t('capa_management_ui.statuses.assigned'), color: 'text-[#1B94AD]', bg: 'bg-[#E9F5F8]', dot: '#85D8E9' },
+    { key: 'in_progress', label: t('capa_management_ui.statuses.in_progress'), color: 'text-[#1751A7]', bg: 'bg-[#E9F0FF]', dot: '#4F87D9' },
+    { key: 'closed', label: t('capa_management_ui.statuses.closed'), color: 'text-[#3F9011]', bg: 'bg-[#E0F9DE]', dot: '#79BE52' }
+  ] %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+    <% statuses.each do |status| %>
+      <% items = @capas.select { |c| c.status == status[:key] } %>
+      <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden" data-capas--board-target="column" data-status="<%= status[:key] %>" data-action="dragover->capas--board#dragOver drop->capas--board#drop">
+        <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-3 border-b border-[#E3E3E3]">
+          <div class="flex items-center gap-2 rtl:flex-row-reverse min-w-0 flex-1">
+            <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: <%= status[:dot] %>"></span>
+            <span class="text-xs sm:text-sm font-semibold text-[#0D1120] truncate"><%= status[:label] %></span>
+          </div>
+          <div class="text-[10px] sm:text-xs text-[#797C81] bg-[#F7F7FD] px-2 py-0.5 rounded-md whitespace-nowrap flex-shrink-0" data-role="count">
+            <%= '%02d' % items.count %>
+          </div>
+        </div>
+
+        <div class="p-2 sm:p-3">
+          <div class="text-center text-[#797C81] text-xs sm:text-sm py-4 sm:py-6 <%= items.any? ? 'hidden' : '' %>" data-role="empty"><%= t("capa_management_ui.board.no_capas") %></div>
+          <div class="space-y-2 sm:space-y-3" data-role="cards">
+            <% if items.any? %>
+              <% items.each do |capa| %>
+                <% # Check if CAPA is overdue (has due_date and it's before today)
+                   is_overdue = capa.due_date.present? && capa.due_date < Date.today && capa.status != 'closed' %>
+                <% # Special cases for in_progress status
+                   if capa.status == 'in_progress'
+                     if is_overdue
+                       card_status_label = t('capa_management_ui.status_labels.overdue')
+                       card_status_text_color = 'text-[#B13030]'
+                       card_status_bg_color = 'bg-[#FFF1F0]'
+                     else
+                       card_status_label = t('capa_management_ui.status_labels.in_time')
+                       card_status_text_color = 'text-[#789C16]'
+                       card_status_bg_color = 'bg-[#F5FFD8]'
+                     end
+                   else
+                     card_status_label = t("capa_management_ui.statuses.#{status[:key]}", default: status[:label])
+                     card_status_text_color = status[:color]
+                     card_status_bg_color = status[:bg]
+                   end %>
+                <%= render partial: 'capa_card', locals: { capa: capa, status_label: card_status_label, status_text_color: card_status_text_color, status_bg_color: card_status_bg_color, is_overdue: is_overdue, draggable: true } %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<%= render partial: "new_action_modal" %>
+<%= render partial: "edit_action_modal" %>
+<%= render partial: "general_confirmation_modal" %>
+<%= render partial: "archive_confirmation_modal" %>
+<%= render partial: "delete_confirmation_modal" %>
+</div>
+
+

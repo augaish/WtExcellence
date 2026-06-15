@@ -1,0 +1,131 @@
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5 col-span-1">
+    <div class="mb-3 sm:mb-4">
+      <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t("capa_management_ui.overview_charts.resolved_over_time") %></h3>
+      <p class="text-[10px] sm:text-xs text-[#797C81] break-words"><%= t("capa_management_ui.overview_charts.closed_vs_total") %></p>
+    </div>
+    <div class="h-[180px] sm:h-[213px] mb-3 sm:mb-4">
+      <% if @capa_over_time&.any? %>
+        <%= column_chart @capa_over_time, 
+            colors: ["#79BE52", "#1D5CE5"],
+            height: "213px",
+            legend: false %>
+      <% else %>
+        <div class="h-full flex items-center justify-center text-sm text-[#797C81]">
+          <%= t("no_data_available") %>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex justify-center gap-3 sm:gap-4 flex-wrap">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-[#79BE52] flex-shrink-0"></div>
+        <span class="text-[10px] sm:text-xs text-[#6A7970]"><%= t("capa_management_ui.overview_charts.closed_capa") %></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-[#1D5CE5] flex-shrink-0"></div>
+        <span class="text-[10px] sm:text-xs text-[#6A7970]"><%= t("capa_management_ui.overview_charts.total_capa") %></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5 col-span-1">
+    <div class="mb-3 sm:mb-4">
+      <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.overview_charts.status_breakdown") %></h3>
+    </div>
+    <div class="h-[180px] sm:h-[211px] flex items-center justify-center mb-3 sm:mb-4 relative">
+      <% 
+        status_colors = {
+          'closed' => '#79BE52',
+          'in_progress' => '#4F87D9',
+          'assigned' => '#85D8E9',
+          'open' => '#F2C6F1'
+        }
+        status_order = ['closed', 'in_progress', 'assigned', 'open']
+        total = status_order.sum { |status| @status_breakdown[status] || 0 }
+        chart_data = status_order.map do |status|
+          count = @status_breakdown[status] || 0
+          percentage = total > 0 ? ((count.to_f / total) * 100).round(1) : 0
+          [t(status, default: status.humanize), count]
+        end.to_h
+      %>
+      <%= pie_chart chart_data, 
+          colors: status_order.map { |s| status_colors[s] || '#CCCCCC' },
+          donut: true,
+          legend: false,
+          height: "180px",
+          library: {
+            elements: {
+              arc: {
+                borderWidth: 0
+              }
+            },
+            plugins: {
+              legend: {
+                display: false
+              }
+            }
+          } %>
+    </div>
+    <div class="flex flex-wrap justify-center gap-2">
+      <% status_order.each do |status| %>
+        <% count = @status_breakdown[status] || 0 %>
+        <% percentage = total > 0 ? ((count.to_f / total) * 100).round(1) : 0 %>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full flex-shrink-0" style="background: <%= status_colors[status] || '#CCCCCC' %>"></div>
+          <span class="text-[10px] sm:text-xs text-[#797C81]"><%= t(status, default: status.humanize) %></span>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4 col-span-1">
+    <div class="mb-3 sm:mb-4 px-2 sm:px-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+      <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words"><%= t("capa_management_ui.overview_charts.most_assigned") %></h3>
+      <%= link_to dashboard_capa_management_list_path, class: "text-xs sm:text-sm font-semibold text-[#5C3984] underline min-h-[44px] sm:min-h-auto flex items-center" do %>
+        <%= t("capa_management_ui.overview_cards.view_list") %>
+      <% end %>
+    </div>
+    <div class="overflow-x-auto -mx-3 sm:mx-0">
+      <div class="inline-block min-w-full align-middle">
+        <div class="overflow-hidden rounded-lg border border-[#E3E3E3]">
+          <table class="w-full min-w-[400px]" dir="<%= rtl? ? 'rtl' : 'ltr' %>">
+            <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+              <tr>
+                <th class="text-left rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.overview_charts.assignee_name") %></span></th>
+                <th class="text-left rtl:text-right p-3 sm:p-4"><span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.overview_charts.nr_assigned") %></span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if @top_assigned_users&.any? %>
+                <% @top_assigned_users.each do |item| %>
+                  <% company_user = item[:company_user] %>
+                  <% next unless company_user&.user %>
+                  <tr class="border-b border-[#E3E3E3]">
+                    <td class="p-3 sm:p-4 rtl:text-right min-w-[180px]">
+                      <div class="flex items-center gap-2 sm:gap-3 rtl:flex-row-reverse min-w-0">
+                        <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium flex-shrink-0" title="<%= company_user.user.name %>">
+                          <%= company_user.user.name[0].upcase %>
+                        </div>
+                        <span class="text-xs sm:text-sm text-[#0D1120] font-medium truncate"><%= company_user.user.name %></span>
+                        <span class="text-[10px] sm:text-xs text-[#576A83] bg-[#F7F7FD] px-2 sm:px-3 py-1 rounded-full whitespace-nowrap"><%= company_user.role %></span>
+                      </div>
+                    </td>
+                    <td class="p-3 sm:p-4 text-center rtl:text-right whitespace-nowrap">
+                      <span class="text-xs sm:text-sm text-[#0D1120] font-medium"><%= item[:count] %></span>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="2" class="p-4 text-center text-xs sm:text-sm text-[#797C81]"><%= t("capa_management_ui.overview_charts.no_assignments") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+

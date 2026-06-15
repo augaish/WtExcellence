@@ -1,0 +1,28 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" dir="<%= rtl? ? 'rtl' : 'ltr' %>">
+  <div class="w-full max-w-2xl">
+    <!-- Logo and Brand -->
+    <div class="flex items-center justify-center gap-3 mb-16">
+      <%= image_tag asset_path('logo.png'), alt: (rtl? ? 'شعار WTE' : 'Way To Excellence'), class: "h-12 w-auto" %>
+      <h1 class="text-2xl font-bold text-[#5C3984]">Way to Excellence</h1>
+    </div>
+
+    <!-- Success Message -->
+    <div class="mb-12" style="text-align: <%= rtl? ? 'right' : 'center' %>;">
+      <h2 class="text-4xl font-bold text-[#0D1120] mb-6">
+        <%= rtl? ? 'أنت في القائمة!' : "You're on the list!" %>
+      </h2>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        <%= rtl? ? 'شكراً لتسجيل اهتمامك في Way to Excellence. سنخطرك بمجرد أن يصبح الوصول المبكر متاحاً.' : "Thank you for registering your interest in Way to Excellence. We'll notify you as soon as early access becomes available." %>
+      </p>
+    </div>
+
+    <!-- Return Button -->
+    <div class="flex justify-center">
+      <%= link_to "https://www.wtexcellence.com/", 
+          class: "inline-flex justify-center items-center px-8 py-4 border border-transparent rounded-lg text-base font-medium text-white bg-[#5C3984] hover:bg-[#4A2F6B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5C3984] transition-colors duration-200" do %>
+        <%= rtl? ? 'العودة إلى الموقع' : 'Back to the website' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+

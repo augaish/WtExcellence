@@ -1,0 +1,460 @@
+<%= content_for :title, @upload.display_name %>
+
+<!-- Header Section -->
+<div class="bg-white border-b border-[#E3E3E3]">
+  <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 px-6 py-4">
+    <!-- Start side: Go Back and Save Changes -->
+    <div class="flex items-center flex-row rtl:flex-row-reverse gap-3">
+      <%= link_to (@folder_id && @folder_id != 'all' ? folder_path(@folder_id) : library_path), class: "flex items-center bg-[#D6C4ED] text-[#0D1120] px-4 py-2 rounded-lg" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        <span><%= t('go_back') %></span>
+      <% end %>
+      
+      <!-- Edit button can be added here if inline editing is needed -->
+      <button type="button" class="flex items-center bg-[#D6C4ED] text-[#0D1120] px-4 py-2 rounded-lg" onclick="alert('Edit functionality to be implemented')">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+        <span><%= t('edit') %></span>
+      </button>
+    </div>
+
+    <!-- End side: Delete and Open Attachment -->
+    <div class="flex items-center flex-row rtl:flex-row-reverse gap-4">
+      <%= link_to download_folder_uploads_upload_path(folder_id: @folder_id, id: @upload.id), class: "flex items-center flex-row rtl:flex-row-reverse gap-2 text-[#5C3984] hover:text-[#5C3984] hover:underline" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+        </svg>
+        <span><%= t('open_attachment') %></span>
+      <% end %>
+      
+      <% unless viewer? %>
+        <button type="button"
+                data-controller="modal"
+                data-action="click->modal#open"
+                data-modal-dialog-param="confirm_delete_upload_modal"
+                class="flex items-center flex-row rtl:flex-row-reverse gap-2 text-red-600 hover:text-red-700 hover:underline">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          <span><%= t('delete') %></span>
+        </button>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="p-6">
+  <div class="max-w-7xl mx-auto">
+    <!-- File Information Section -->
+    <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6 shadow-sm">
+      <!-- Badge/Tag Row -->
+      <div class="flex flex-wrap items-center gap-2 mb-6">
+        <!-- Uploaded Date Badge -->
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+          <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <%= t('uploaded') %> <%= @upload.created_at.strftime('%b %d, %Y') %>
+        </span>
+
+        <!-- Folder Badge -->
+        <% if @upload.folder.present? %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+            <svg class="w-4 h-4 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+            </svg>
+            <%= @upload.folder.name %>
+          </span>
+        <% end %>
+
+        <!-- File Type Badge -->
+        <% if @upload.mime_type&.include?('pdf') %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+            <svg class="w-4 h-4 me-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            PDF
+          </span>
+        <% else %>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+            <%= @upload.mime_type&.split('/')&.last&.upcase || t('file') %>
+          </span>
+        <% end %>
+
+        <!-- File Size Badge -->
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+          <% size_mb = (@upload.size_bytes.to_f / 1024 / 1024).round(2) %>
+          <%= t('file_size') %>: <%= size_mb >= 1 ? "#{size_mb} MB" : "#{(@upload.size_bytes.to_f / 1024).round(2)} KB" %>
+        </span>
+      </div>
+
+      <!-- Title and Description (Display only) -->
+      <div class="space-y-4">
+        <!-- Title -->
+        <div>
+          <label class="text-sm font-medium text-gray-500"><%= t('title') %>:</label>
+          <span class="text-lg font-bold text-[#0D1120]">
+            <%= @upload.name.presence || @upload.filename %>
+          </span>
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="text-sm font-medium text-gray-500"><%= t('description') %>:</label>
+          <span class="text-sm text-[#0D1120]">
+            <%= @upload.notes.presence || t('no_description') %>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linked Items Section -->
+    <div class="space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-semibold text-[#0D1120]"><%= t('linked_items') %></h2>
+        </div>
+        <div>
+          <button type="button" data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="link_items_dialog" class="flex items-center bg-[#D6C4ED] text-[#0D1120] px-4 py-2 rounded-lg hover:bg-[#CEBCE5] transition-colors duration-200">
+            <span><%= t('link_more') %></span>
+          </button>
+        </div>
+      </div>
+      
+      <% if @grouped_by_standard.any? %>
+        <% @grouped_by_standard.each do |standard_id, group_data| %>
+          <% standard = group_data[:standard] %>
+          <% standard_attachment = group_data[:standard_attachment] %>
+          <% attachments = group_data[:attachments] %>
+          
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <!-- Standard Header -->
+            <div class="flex items-center justify-between p-4 border-b border-gray-200">
+              <div class="flex items-center gap-3">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+                  <%= t('standard') %>
+                </span>
+                <span class="text-lg font-semibold text-[#0D1120]">
+                  <%= standard.display_name('en') || standard.code %>
+                </span>
+              </div>
+              
+              <div class="flex items-center flex-row rtl:flex-row-reverse gap-2">
+                <% if standard_attachment %>
+                  <%= link_to evidence_attachment_path(standard_attachment),
+                      method: :delete,
+                      data: { 
+                        turbo_method: :delete,
+                        turbo_confirm: t('confirm_unlink_attachment')
+                      },
+                      class: "text-gray-600 hover:text-gray-700 p-2 rounded hover:bg-gray-100 transition-colors",
+                      title: t('unlink') do %>
+                    <%= image_tag asset_path('unlink-icon.svg'), class: "w-5 h-5" %>
+                  <% end %>
+                <% end %>
+                
+                <%= link_to standard_path(standard), 
+                    class: "text-[#5C3984] hover:text-[#5C3984] p-2 rounded hover:bg-blue-50 transition-colors",
+                    title: t('open') do %>
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                  </svg>
+                <% end %>
+                
+                <button type="button" class="text-gray-600 hover:text-gray-700 p-2 rounded hover:bg-gray-100 transition-colors" title="<%= t('expand') %>">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+            
+            <!-- Linked Items Table -->
+            <% if attachments.any? %>
+              <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                  <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('linked_on') %></th>
+                      <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('type') %></th>
+                      <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('name') %></th>
+                      <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('checkpoint') %></th>
+                      <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('actions') %></th>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <% attachments.each do |attachment| %>
+                      <% 
+                        # Determine type and name based on attachable_type
+                        if attachment.attachable_type == 'ChecklistItem'
+                          # For checkpoints, show parent clause's type and name
+                          checkpoint = attachment.attachable
+                          clause = checkpoint&.clause
+                          if clause
+                            type_display = clause.parent ? t('sub_clause') : t('clause')
+                            name = "#{clause.title('en')}".strip
+                            checkpoint_text = checkpoint.text('en') || checkpoint.guidance('en')
+                          else
+                            type_display = t('checkpoint')
+                            name = checkpoint&.text('en') || checkpoint&.code || t('unknown')
+                            checkpoint_text = checkpoint&.text('en') || checkpoint&.guidance('en')
+                          end
+                        elsif attachment.attachable_type == 'Clause'
+                          clause = attachment.attachable
+                          if clause
+                            type_display = clause.parent ? t('sub_clause') : t('clause')
+                            name = "#{clause.full_code} #{clause.title('en')}".strip
+                            # For clauses, show first checkpoint text if available
+                            first_checkpoint = clause.checklist_items.ordered.first
+                            checkpoint_text = first_checkpoint&.text('en') || first_checkpoint&.guidance('en')
+                          else
+                            type_display = t('clause')
+                            name = attachment.attachable_id.to_s[0..7]
+                            checkpoint_text = nil
+                          end
+                        elsif attachment.attachable_type == 'Capa'
+                          capa = attachment.attachable
+                          if capa
+                            type_display = t('capa')
+                            capa_code = capa.friendly_code
+                            name = "#{capa_code} — #{capa.title}"
+                            checkpoint_text = nil
+                          else
+                            type_display = t('capa')
+                            name = attachment.attachable_id.to_s[0..7]
+                            checkpoint_text = nil
+                          end
+                        else
+                          type_display = attachment.attachable_type
+                          name = attachment.notes.presence || attachment.attachable_type
+                          checkpoint_text = nil
+                        end
+                      %>
+                      <tr class="hover:bg-gray-50 group">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <%= attachment.created_at.strftime('%b %d, %Y') %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          <%= type_display %>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                          <%= name || t('no_description') %>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-700">
+                          <%= checkpoint_text || '-' %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                          <div class="flex items-center justify-end gap-2">
+                            <%= link_to evidence_attachment_path(attachment),
+                                method: :delete,
+                                data: { 
+                                  turbo_method: :delete,
+                                  turbo_confirm: t('confirm_unlink_attachment')
+                                },
+                                class: "text-gray-600 hover:text-gray-700 p-2 rounded hover:bg-gray-100 transition-colors",
+                                title: t('unlink') do %>
+                              <%= image_tag asset_path('unlink-icon.svg'), class: "w-5 h-5" %>
+                            <% end %>
+                            
+                            <% if attachment.attachable_type == 'Capa' && attachment.attachable %>
+                              <%= link_to dashboard_capa_management_show_path(attachment.attachable), 
+                                  class: "text-[#5C3984] hover:text-[#5C3984] p-2 rounded hover:bg-blue-50 transition-colors",
+                                  title: t('open') do %>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                              <% end %>
+                            <% elsif attachment.attachable_type == 'Clause' && attachment.attachable %>
+                              <% clause = attachment.attachable %>
+                              <% standard = clause&.standard_version&.standard %>
+                              <% if standard %>
+                                <%= link_to standard_path(standard, anchor: "clause-#{clause.id}"), 
+                                    class: "text-[#5C3984] hover:text-[#5C3984] p-2 rounded hover:bg-blue-50 transition-colors",
+                                    title: t('open') do %>
+                                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                  </svg>
+                                <% end %>
+                              <% end %>
+                            <% end %>
+                          </div>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% else %>
+              <div class="p-6 text-center text-sm text-gray-500">
+                <%= t('no_linked_items') %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+      
+      <!-- Capas (each Capa gets its own section) -->
+      <% @ungrouped_items.select { |a| a.attachable_type == 'Capa' && a.attachable }.each do |attachment| %>
+        <% capa = attachment.attachable %>
+        <% capa_code = capa.friendly_code %>
+        <% truncated_description = capa.description.present? ? (capa.description.length > 100 ? "#{capa.description[0..100]}..." : capa.description) : nil %>
+        
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <!-- Capa Header -->
+          <div class="flex items-center justify-between p-4">
+            <div class="flex items-center gap-3 flex-1">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+                <%= t('capa') %>
+              </span>
+              <div class="flex-1">
+                <span class="text-lg font-semibold text-[#0D1120]">
+                  <%= capa.title %>
+                </span>
+                <% if truncated_description %>
+                  <p class="text-sm text-gray-600 mt-1">
+                    <%= truncated_description %>
+                  </p>
+                <% end %>
+              </div>
+            </div>
+            
+            <div class="flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2">
+              <%= link_to evidence_attachment_path(attachment),
+                  method: :delete,
+                  data: { 
+                    turbo_method: :delete,
+                    turbo_confirm: t('confirm_unlink_attachment')
+                  },
+                  class: "text-gray-600 hover:text-gray-700 p-2 rounded hover:bg-gray-100 transition-colors",
+                  title: t('unlink') do %>
+                <%= image_tag asset_path('unlink-icon.svg'), class: "w-5 h-5" %>
+              <% end %>
+              
+              <%= link_to dashboard_capa_management_show_path(capa), 
+                  class: "text-[#5C3984] hover:text-[#5C3984] p-2 rounded hover:bg-blue-50 transition-colors",
+                  title: t('open') do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    
+      <% if @grouped_by_standard.empty? && @ungrouped_items.select { |a| a.attachable_type == 'Capa' && a.attachable }.empty? %>
+        <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
+          <p class="text-sm text-gray-500"><%= t('no_linked_items') %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Delete Upload Modal (RTL-aware for Arabic) -->
+<dialog id="confirm_delete_upload_modal" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-md w-full mx-4" data-controller="modal dialog-no-backdrop-close" dir="<%= text_direction %>" lang="<%= current_locale %>">
+  <div class="p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4 sm:mb-6">
+      <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120]"><%= t('are_you_sure') %></h2>
+      <button type="button" data-action="click->modal#close" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <p class="text-sm sm:text-base text-gray-700 mb-4 sm:mb-6"><%= t('confirm_delete_upload', name: @upload.display_name) %></p>
+    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= rtl? ? 'sm:justify-start sm:flex-row-reverse' : 'sm:justify-end' %> gap-2 <%= rtl? ? 'sm:space-x-reverse sm:space-x-3' : 'sm:space-x-3' %> pt-4">
+      <button type="button" data-action="click->modal#close" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm rounded-lg border border-gray-300 hover:bg-gray-50">
+        <%= t('cancel') %>
+      </button>
+      <%= button_to folder_uploads_upload_path(folder_id: @folder_id, id: @upload.id),
+          method: :delete,
+          form: { data: { turbo_confirm: nil } },
+          class: "w-full sm:w-auto px-6 py-3 sm:py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm cursor-pointer" do %>
+        <%= t('delete') %>
+      <% end %>
+    </div>
+  </div>
+</dialog>
+
+<!-- Link Items Modal -->
+<dialog id="link_items_dialog" class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0" data-controller="modal dialog-no-backdrop-close" data-upload-id="<%= @upload.id %>" dir="<%= text_direction %>" lang="<%= current_locale %>">
+  <div class="p-6">
+    <!-- Header -->
+    <div class="mb-6 relative">
+      <button data-action="click->modal#close" class="absolute end-0 top-0 text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      
+      <h2 class="text-2xl font-semibold text-[#0D1120] mb-2">
+        <%= t('link_items_to') %> <%= @upload.name.presence || @upload.filename %>
+      </h2>
+      <p class="text-sm text-gray-600">
+        <%= t('select_items_to_link') %>
+      </p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="space-y-4">
+      <!-- Search Instructions with Filters -->
+      <div class="text-sm text-[#0D1120]">
+        <%= t('search_for') %> 
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B] underline font-medium" data-filter="keywords"><%= t('keywords') %></button>, 
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B] underline font-medium" data-filter="standards"><%= t('standards') %></button> 
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B] underline font-medium" data-filter="actions"><%= t('actions') %></button>, 
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B] underline font-medium" data-filter="clauses"><%= t('clauses') %></button> 
+        <%= t('or') %> 
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B] underline font-medium" data-filter="sub_clauses"><%= t('sub_clauses') %></button>.
+      </div>
+
+      <!-- Search Bar -->
+      <div class="relative" data-controller="link-items-search">
+        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="link_items_search" 
+          placeholder="<%= t('start_searching') %>" 
+          class="w-full ps-12 pe-4 py-4 text-base border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984] transition-colors duration-200"
+          data-action="input->link-items-search#handleSearch"
+        />
+      </div>
+
+      <!-- Instructions -->
+      <p class="text-sm text-[#5C3984]">
+        <%= t('smart_search_instruction') %>
+      </p>
+
+      <!-- Search Results Area (will be populated via JavaScript) -->
+      <div id="link_items_results" class="mt-4 space-y-2 max-h-96 overflow-y-auto hidden">
+        <!-- Results will be added here dynamically -->
+      </div>
+
+      <!-- Selected Items (will show selected items as table) -->
+      <div id="link_items_selected" class="mt-4 hidden">
+        <div id="selected_items_list">
+          <!-- Selected items table will be added here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Buttons -->
+    <div class="flex items-center justify-end flex-row rtl:flex-row-reverse gap-3 pt-6 mt-6 border-t border-gray-200">
+      <button type="button" data-action="click->modal#close" class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors duration-200">
+        <%= t('cancel') %>
+      </button>
+      <button type="button" id="link_items_submit" class="px-6 py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        <%= t('link_items') %>
+      </button>
+    </div>
+  </div>
+</dialog>

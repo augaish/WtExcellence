@@ -1,0 +1,66 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+  <!-- Total Active Standards (Company Admin & Quality Manager only) -->
+  <% if @show_admin_metrics %>
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+      <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('total_active_standards') %></p>
+      <div class="flex items-baseline gap-2">
+        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @total_active_standards %></p>
+        <% if @active_standards_added_in_period.to_i > 0 %>
+          <p class="text-xs text-[#79BE52]">
+            +<%= @active_standards_added_in_period %> <%= t('in_period') %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Total Companies (Platform Admin) or Total Users (Company Admin & Quality Manager only) -->
+  <% if current_user&.platform_admin? %>
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+      <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('total_companies') %></p>
+      <div class="flex items-baseline gap-2">
+        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @total_companies %></p>
+        <%= link_to dashboard_companies_path, class: "text-xs sm:text-[11px] text-[#5C3984] underline" do %>
+          <%= t('view_list') %>
+        <% end %>
+      </div>
+    </div>
+  <% elsif @total_users.present? %>
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+      <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('total_users') %></p>
+      <div class="flex items-baseline gap-2">
+        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @total_users %></p>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Avg. Compliance (loaded asynchronously) -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4"
+       data-controller="async-metric"
+       data-async-metric-url-value="<%= dashboard_overview_avg_compliance_path %>"
+       data-async-metric-key-value="avg_compliance"
+       data-async-metric-suffix-value="%">
+    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('avg_compliance') %></p>
+    <div class="flex items-baseline gap-2">
+      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984] flex items-center gap-2" data-async-metric-target="value">
+        <span class="inline-block w-5 h-5 border-2 border-[#5C3984]/30 border-t-[#5C3984] rounded-full animate-spin" role="status" aria-label="Loading"></span>
+      </p>
+    </div>
+  </div>
+
+  <!-- Credits/Tokens Used -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('credits_used') %></p>
+    <div class="flex items-baseline gap-2">
+      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]">
+        <% if @credits_data[:limit].present? %>
+          <%= number_with_delimiter(@credits_data[:used]) %>/<%= number_with_delimiter(@credits_data[:limit]) %>
+        <% else %>
+          <%= number_with_delimiter(@credits_data[:used]) %>
+        <% end %>
+      </p>
+    </div>
+    <p class="text-xs text-[#797C81] mt-1"><%= number_with_delimiter(@credits_data[:used_in_period]) %> <%= t('used_in_period') %></p>
+  </div>
+</div>
+

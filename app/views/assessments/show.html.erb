@@ -1,0 +1,533 @@
+<%= content_for :title, "#{@clause.code} #{@clause.title(I18n.locale.to_s)}" %>
+
+<div class="px-4 py-4 sm:px-6 sm:py-6">
+
+  <%# ===== Breadcrumb Navigation ===== %>
+  <nav class="flex items-center gap-2 text-sm mb-4 flex-wrap">
+    <% if @standard %>
+      <%= link_to @standard.display_name, standard_path(@standard, tab: "clause-tree"), class: "text-[#5C3984] hover:text-[#4A2F6B] transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] focus-visible:ring-offset-1" %>
+      <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    <% end %>
+    <% if @clause.parent %>
+      <%= link_to "#{@clause.parent.code} #{@clause.parent.title(I18n.locale.to_s)}", standard_path(@standard, focus: @clause.parent.id), class: "text-[#5C3984] hover:text-[#4A2F6B] transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] focus-visible:ring-offset-1" %>
+      <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    <% end %>
+    <%= link_to "#{@clause.code} #{@clause.title(I18n.locale.to_s)}", standard_path(@standard, focus: @clause.id), class: "text-[#5C3984] font-medium hover:text-[#4A2F6B] transition-colors rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] focus-visible:ring-offset-1" %>
+  </nav>
+
+  <%# ===== Role-based banners ===== %>
+  <% if @readonly && @is_viewer %>
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 flex items-center gap-2 text-sm text-blue-800">
+      <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>
+      <%= t("assessments.read_only_banner") %>
+    </div>
+  <% elsif clause_status == "needs_changes" %>
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 flex items-center gap-2 text-sm text-amber-800">
+      <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <%= t("assessments.needs_changes_banner") %>
+    </div>
+  <% elsif clause_status == "under_review" && @can_approve %>
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 flex items-center gap-2 text-sm text-blue-800">
+      <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+      <%= t("assessments.pending_approval_banner") %>
+    </div>
+  <% end %>
+
+  <%# ===== Section 1: Clause Header ===== %>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-6">
+    <div class="p-4 sm:p-6">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-3 mb-3 flex-wrap">
+            <h1 class="text-lg sm:text-2xl font-bold text-[#0D1120]"><%= @clause.code %> <%= @clause.title(I18n.locale.to_s) %></h1>
+            <%= render "assessments/status_badge", status: clause_status %>
+          </div>
+          <% summary = @clause.summary(I18n.locale.to_s) %>
+          <% if summary.present? %>
+            <p class="text-sm sm:text-base text-[#797C81] leading-relaxed"><%= summary %></p>
+          <% end %>
+          <div class="mt-3 flex items-center gap-4 flex-wrap">
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-[#797C81]"><%= t("assessments.allocated_points") %>:</span>
+              <span class="text-sm font-semibold text-[#5C3984]"><%= @clause.calculated_points || 0 %></span>
+            </div>
+            <% if @overall_score && @can_see_scoring %>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-[#797C81]"><%= t("assessments.current_score") %>:</span>
+                <span class="text-sm font-semibold text-[#5C3984]"><%= @overall_score[:percentage] %>%</span>
+              </div>
+            <% end %>
+            <% if @tool %>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-[#797C81]"><%= t("assessments.tool") %>:</span>
+                <span class="text-sm font-medium text-[#0D1120]"><%= @tool.name_in %></span>
+              </div>
+            <% end %>
+            <%# Assessment-level auditor %>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-[#797C81]"><%= t("assessments.auditor") %>:</span>
+              <% if @assessment_auditor %>
+                <div class="flex items-center gap-1.5">
+                  <div class="w-5 h-5 rounded-full bg-blue-200 flex items-center justify-center text-[9px] font-bold text-blue-700 overflow-hidden">
+                    <% if @assessment_auditor.profile_image.attached? %>
+                      <%= image_tag user_profile_image_url(@assessment_auditor), class: "w-full h-full object-cover", alt: @assessment_auditor.name || @assessment_auditor.email %>
+                    <% else %>
+                      <%= @assessment_auditor.name&.split(' ')&.map(&:first)&.join('')&.upcase&.slice(0,2) || @assessment_auditor.email[0..1].upcase %>
+                    <% end %>
+                  </div>
+                  <span class="text-sm font-medium text-[#0D1120]"><%= @assessment_auditor.name || @assessment_auditor.email %></span>
+                </div>
+              <% else %>
+                <span class="text-sm text-[#797C81]"><%= t("assessments.no_auditor") %></span>
+              <% end %>
+              <% if @can_manage_assignments && !@readonly %>
+                <button type="button"
+                        class="px-2 py-1 text-xs text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#F7F7FD] transition-colors flex items-center gap-1"
+                        onclick="document.getElementById('assessment-auditor-modal').showModal()">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <%= @assessment_auditor ? t("assessments.change_auditor") : t("assessments.assign_auditor_btn") %>
+                </button>
+              <% end %>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <% prev_clause = @sibling_clauses&.select { |c| c.sort_order < @clause.sort_order }&.last %>
+          <% next_clause = @sibling_clauses&.select { |c| c.sort_order > @clause.sort_order }&.first %>
+          <% if prev_clause %>
+            <%= link_to clause_assessment_path(prev_clause), class: "px-3 py-1.5 text-xs text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-purple-50 transition-colors flex items-center gap-1.5" do %>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              <%= t("assessments.previous") %>
+            <% end %>
+          <% end %>
+          <% if next_clause %>
+            <%= link_to clause_assessment_path(next_clause), class: "px-3 py-1.5 text-xs text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors flex items-center gap-1.5" do %>
+              <%= t("assessments.next") %>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <% if @tool.nil? %>
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-start gap-3">
+      <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
+      <p class="text-sm text-blue-800"><%= t("assessments.no_tool_linked") %></p>
+    </div>
+  <% else %>
+    <%= form_with url: update_clause_assessment_path(@clause), method: :patch, id: "assessment-form", data: { controller: "assessment-dirty", action: "input->assessment-dirty#changed change->assessment-dirty#changed" } do |f| %>
+
+      <%# ===== Section 2: Checkpoint Boxes ===== %>
+      <% if @checklist_items.any? %>
+        <h2 class="text-base sm:text-lg font-semibold text-[#0D1120] mb-4"><%= t("assessments.checkpoints") %></h2>
+
+        <% @checklist_items.each_with_index do |item, idx| %>
+          <%
+            # Determine if this checkpoint is visible and editable for the current user
+            can_edit_this = user_can_edit_checkpoint?(idx) && !@readonly
+            # Contributors only see their assigned checkpoints; admin/QM/auditor see all
+            visible = @is_admin_or_qm || @is_auditor || @is_viewer || user_can_edit_checkpoint?(idx)
+          %>
+          <% if visible %>
+            <%= render "assessments/checkpoint_box",
+                       item: item,
+                       index: idx,
+                       checkpoints: @checkpoints,
+                       assessment_scores: @assessment_scores,
+                       checkpoint_summaries: @checkpoint_summaries,
+                       readonly: !can_edit_this %>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <%# ===== Section 3: Comments ===== %>
+      <%= render "assessments/comments" %>
+
+      <%# ===== Section 4: Scoring Section (auditor, QM, admin only) ===== %>
+      <% if @subcheckpoints.any? && @can_see_scoring %>
+        <%= render "assessments/scoring_section",
+                   checkpoints: @checkpoints,
+                   assessment_scores: @assessment_scores,
+                   overall_score: @overall_score,
+                   readonly: @readonly || (!@is_auditor && !@is_admin_or_qm) %>
+      <% end %>
+
+      <%# ===== Section 5: Activity Log (always last) ===== %>
+      <%= render "assessments/activity_log" %>
+
+      <%# ===== Bottom Actions ===== %>
+      <% unless @readonly && !@can_approve %>
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 py-4">
+          <%= link_to standard_path(@standard), class: "px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#F7F7FD] transition-colors min-h-[44px] flex items-center gap-2" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            <%= t("assessments.back_to_clause_list") %>
+          <% end %>
+          <div class="flex items-center gap-3">
+            <% if clause_status == "under_review" && @can_approve %>
+              <%# QM/Admin can approve or reject — with feedback prompt %>
+              <div data-controller="assessment-decision">
+                <div data-assessment-decision-target="buttons" class="flex items-center gap-3">
+                  <button type="button" data-action="click->assessment-decision#showReject" class="px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#F7F7FD] transition-colors min-h-[44px] font-medium">
+                    <%= t("assessments.reject") %>
+                  </button>
+                  <button type="button" data-action="click->assessment-decision#showApprove" class="px-6 py-3 sm:py-2 text-[16px] sm:text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors min-h-[44px] font-medium flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <%= t("assessments.approve") %>
+                  </button>
+                </div>
+                <div data-assessment-decision-target="feedbackArea" class="hidden mt-3 p-4 bg-white border border-[#E3E3E3] rounded-xl w-full sm:w-96">
+                  <p class="text-sm font-semibold text-[#0D1120] mb-2" data-assessment-decision-target="prompt"></p>
+                  <textarea name="assessment[feedback]" rows="3" maxlength="300"
+                            data-assessment-decision-target="input"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent resize-none"
+                            placeholder="<%= t('assessments.feedback_placeholder') %>"></textarea>
+                  <div class="flex items-center justify-end gap-2 mt-2">
+                    <button type="button" data-action="click->assessment-decision#cancel" class="px-3 py-1.5 text-xs text-[#797C81] border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                      <%= t("cancel") %>
+                    </button>
+                    <button type="submit" data-assessment-decision-target="confirm" class="px-3 py-1.5 text-xs font-medium text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors">
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% elsif clause_status == "approved" && @is_admin_or_qm %>
+              <%# QM/Admin can re-evaluate an approved assessment — reason required %>
+              <div data-controller="assessment-decision">
+                <div data-assessment-decision-target="buttons" class="flex items-center gap-3">
+                  <button type="button" data-action="click->assessment-decision#showReopen"
+                          data-reopen-prompt="<%= t('assessments.reevaluate_prompt') %>"
+                          data-reopen-confirm="<%= t('assessments.reevaluate_confirm') %>"
+                          class="px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors min-h-[44px] font-medium flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <%= t("assessments.reevaluate") %>
+                  </button>
+                </div>
+                <div data-assessment-decision-target="feedbackArea" class="hidden mt-3 p-4 bg-white border border-[#E3E3E3] rounded-xl w-full sm:w-96">
+                  <p class="text-sm font-semibold text-[#0D1120] mb-2" data-assessment-decision-target="prompt"></p>
+                  <textarea name="assessment[feedback]" rows="3" maxlength="300" required
+                            data-assessment-decision-target="input"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent resize-none"
+                            placeholder="<%= t('assessments.reevaluate_reason_placeholder') %>"></textarea>
+                  <div class="flex items-center justify-end gap-2 mt-2">
+                    <button type="button" data-action="click->assessment-decision#cancel" class="px-3 py-1.5 text-xs text-[#797C81] border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                      <%= t("cancel") %>
+                    </button>
+                    <button type="submit" data-assessment-decision-target="confirm" class="px-3 py-1.5 text-xs font-medium text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors">
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% elsif !@readonly %>
+              <button type="submit" name="assessment[commit]" value="save_draft" data-assessment-dirty-target="saveDraft" class="px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-[#797C81] border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]">
+                <%= t("assessments.save_draft") %>
+              </button>
+              <% if @is_auditor || @is_admin_or_qm %>
+                <%# Only auditor/QM/admin can submit for review %>
+                <button type="submit" name="assessment[commit]" value="submit_for_review" class="px-6 py-3 sm:py-2 text-[16px] sm:text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors min-h-[44px] font-medium flex items-center gap-2">
+                  <%= t("assessments.submit_for_review") %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <%# ===== Shared dialogs and scripts ===== %>
+
+  <%= render "library/upload_document_dialog" %>
+
+  <%# Link-document modal %>
+  <% if @assessment&.persisted? && !@readonly %>
+    <dialog id="link_document_dialog"
+            class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-h-[90vh] overflow-hidden flex flex-col"
+            style="display: none; width: min(95vw, 900px); max-width: 900px;"
+            data-controller="assignment-link-document basic-modal dialog-no-backdrop-close"
+            data-assignment-id="<%= @assessment.id %>"
+            data-unlink-icon-path="<%= asset_path('unlink-icon.svg') %>"
+            dir="<%= text_direction %>"
+            lang="<%= current_locale %>">
+      <div class="p-4 sm:p-6 border-b border-[#E3E3E3] flex-shrink-0">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="min-w-0">
+            <h2 class="text-lg font-semibold text-[#0D1120] mb-1"><%= t('assessments.link_evidence_title', checkpoint: @clause.code) %></h2>
+            <p class="text-sm text-gray-600"><%= t('assessments.link_evidence_description') %></p>
+          </div>
+          <button data-controller="basic-modal" data-basic-modal-dialog-value="link_document_dialog" data-action="click->basic-modal#close" class="text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center rounded-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+        <div class="relative">
+          <input type="text" id="link_document_search" placeholder="<%= t('start_searching', default: 'Search...') %>" class="w-full px-4 py-2 ps-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent" data-action="input->assignment-link-document#handleSearch" />
+          <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+        </div>
+      </div>
+      <div class="flex-1 overflow-y-auto">
+        <%# Folder grid view %>
+        <div id="link_document_folder_view" class="p-4 sm:p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-[#0D1120]"><%= t('assignments.show.select_folder', default: 'Select a folder') %></h3>
+            <span id="link_document_selected_count" class="hidden text-sm text-gray-600"></span>
+          </div>
+          <div id="link_document_folders_grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div id="link_document_folders_loading" class="text-sm text-gray-400 col-span-full text-center py-8"><%= t('loading', default: 'Loading...') %></div>
+            <div id="link_document_folders_empty" class="text-sm text-gray-400 col-span-full text-center py-8 hidden"><%= t('no_folders', default: 'No folders found') %></div>
+          </div>
+        </div>
+        <%# Document list view (after opening a folder) %>
+        <div id="link_document_document_view" class="hidden">
+          <div class="bg-white border-b border-[#E3E3E3] p-4 sm:p-5">
+            <div class="flex items-center gap-3 mb-4">
+              <button type="button" id="link_document_back_button"
+                      class="flex items-center min-h-[44px] space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
+                      data-action="click->assignment-link-document#goBackToFolders">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                <span class="font-medium" id="link_document_back_text"><%= t('assignments.show.view_all_files', default: 'View All Files') %></span>
+              </button>
+            </div>
+            <div class="relative">
+              <input type="text" id="link_document_search_document_view" placeholder="<%= t('start_searching', default: 'Search...') %>"
+                     class="w-full px-4 py-2 pl-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent"
+                     data-action="input->assignment-link-document#handleSearch" />
+              <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 sm:p-5">
+            <div id="link_document_subfolders_section" class="hidden mb-5 border-b border-gray-200 pb-5">
+              <h3 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('subfolders', default: 'Subfolders') %></h3>
+              <div id="link_document_subfolders_grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+            </div>
+            <div class="mb-4">
+              <h3 id="link_document_current_folder_name" class="text-base font-semibold text-[#0D1120]"></h3>
+            </div>
+            <div id="link_document_documents_list" class="hidden overflow-x-auto">
+              <div class="border border-[#E3E3E3] rounded-xl overflow-hidden">
+                <table class="table-auto w-full min-w-[400px]">
+                  <thead>
+                    <tr class="border-b border-gray-200 bg-[#F7F7FD]">
+                      <th class="text-start py-3 px-4 text-sm font-medium text-gray-500 w-12">
+                        <input type="checkbox" id="link_document_select_all"
+                               class="rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984] w-5 h-5"
+                               data-action="change->assignment-link-document#toggleSelectAll" />
+                      </th>
+                      <th class="text-start py-3 px-4 text-sm font-medium text-gray-500"><%= t('name_description', default: 'Name') %></th>
+                      <th class="text-start py-3 px-4 text-sm font-medium text-gray-500"><%= t('type', default: 'Type') %></th>
+                      <th class="text-start py-3 px-4 text-sm font-medium text-gray-500"><%= t('last_modified', default: 'Modified') %></th>
+                    </tr>
+                  </thead>
+                  <tbody id="link_document_documents_list_tbody"></tbody>
+                </table>
+              </div>
+            </div>
+            <div id="link_document_documents_grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+            <div id="link_document_documents_loading" class="hidden text-center py-8">
+              <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#5C3984]"></div>
+              <p class="mt-2 text-sm text-gray-600"><%= t('assignments.show.loading_documents', default: 'Loading documents...') %></p>
+            </div>
+            <div id="link_document_documents_empty" class="hidden text-center py-8">
+              <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <p class="mt-2 text-sm text-gray-500"><%= t('no_files_message', default: 'No documents found in this folder.') %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-[#E3E3E3] flex-shrink-0 flex justify-end gap-3">
+        <button data-controller="basic-modal" data-basic-modal-dialog-value="link_document_dialog" data-action="click->basic-modal#close" class="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 min-h-[44px]"><%= t('cancel', default: 'Cancel') %></button>
+        <button id="link_document_submit" data-action="click->assignment-link-document#handleSubmit" disabled class="px-4 py-2 text-sm text-white bg-[#5C3984] rounded-lg hover:bg-[#4A2F6B] min-h-[44px] disabled:opacity-50 disabled:cursor-not-allowed">
+          <span id="link_document_submit_text"><%= t('assignments.show.link_selected', default: 'Link Selected') %></span>
+          <span id="link_document_submit_count" class="hidden"> (<span id="link_document_submit_count_value">0</span>)</span>
+        </button>
+      </div>
+    </dialog>
+  <% end %>
+
+  <%# Assign Contributors Modal (per checkpoint) %>
+  <% if @tool_clause && @can_manage_assignments %>
+    <div data-controller="multi-user-assignment" data-action="click->multi-user-assignment#removeAssignedUser" class="choices-no-chips">
+      <dialog id="multi-assign-modal-assessment" data-controller="dialog-no-backdrop-close" data-multi-user-assignment-target="modal" class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 mx-4 overflow-y-auto max-h-[90vh]" style="width: min(90vw, 640px); max-width: 640px;">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold text-[#0D1120]" data-multi-user-assignment-target="title"><%= t('assessments.assign_contributor') %></h3>
+            <button type="button" data-action="click->multi-user-assignment#close" class="text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px]">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+          <p class="text-sm text-[#797C81] mb-6"><%= t('assessments.assign_contributor_description') %></p>
+          <%= form_with url: assign_multiple_users_to_subcheckpoint_tools_path, method: :post, data: { multi_user_assignment_target: "form", action: "submit->multi-user-assignment#submit" } do |form| %>
+            <%= form.hidden_field :tool_clause_id, data: { multi_user_assignment_target: "toolClauseId" } %>
+            <%= form.hidden_field :checklist_item_id, data: { multi_user_assignment_target: "checklistItemId" } %>
+            <%= form.hidden_field :users_to_remove, value: "", data: { multi_user_assignment_target: "usersToRemove" } %>
+            <div class="mb-6" data-multi-user-assignment-target="currentAssignmentsSection" style="display: none;">
+              <label class="block text-sm font-semibold text-[#0D1120] mb-2"><%= t('currently_assigned', default: 'Currently Assigned') %></label>
+              <div class="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-lg p-3" data-multi-user-assignment-target="currentAssignmentsList"></div>
+            </div>
+            <div class="mb-6">
+              <%= form.label :contributor_ids, t('add_contributors', default: 'Add Contributors'), class: "block text-sm font-semibold text-[#0D1120] mb-2" %>
+              <p class="text-xs text-gray-500 mb-2"><%= t('assessments.add_contributors_checkpoint_description') %></p>
+              <% assessment_auditor_id = @assessment_auditor&.id %>
+              <% contributor_options = @company_users.filter_map { |u| next if assessment_auditor_id && u.id == assessment_auditor_id; cu = CompanyUser.find_by(user_id: u.id, company_id: current_company&.id); next unless cu; role = cu.role.gsub('company_', '').humanize; pi = u.profile_image.attached? ? user_profile_image_url(u) : nil; [u.name, u.id.to_s, { data: { custom_properties: { role: role, profile_image_url: pi }.to_json } }] } %>
+              <%= form.select :contributor_ids, options_for_select(contributor_options), {}, { multiple: true, class: "w-full focus:outline-none choices-no-chips", data: { multi_user_assignment_target: "contributorsSelect", action: "change->multi-user-assignment#onSelectChange" } } %>
+            </div>
+            <div class="mb-6">
+              <label class="block text-sm font-semibold text-[#0D1120] mb-2"><%= t('selected_contributors', default: 'Selected Contributors') %></label>
+              <div class="space-y-2" data-multi-user-assignment-target="contributorsList">
+                <p class="text-sm text-gray-500 text-center py-4"><%= t('no_contributors_selected', default: 'No contributors selected') %></p>
+              </div>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-[#E3E3E3]">
+              <button type="button" data-action="click->multi-user-assignment#close" class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"><%= t('cancel') %></button>
+              <%= form.submit t('assessments.assign_contributor'), class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors font-medium min-h-[44px]" %>
+            </div>
+          <% end %>
+        </div>
+      </dialog>
+    </div>
+  <% end %>
+
+  <%# Assign Auditor Modal (per assessment) %>
+  <% if @tool_clause && @can_manage_assignments %>
+    <div data-controller="assessment-auditor" class="choices-no-chips">
+      <dialog id="assessment-auditor-modal" data-controller="dialog-no-backdrop-close" data-assessment-auditor-target="modal" class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 mx-4 overflow-y-auto max-h-[90vh]" style="width: min(90vw, 500px); max-width: 500px;">
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-[#0D1120]"><%= t('assessments.assign_auditor_title') %></h3>
+            <button type="button" data-action="click->assessment-auditor#close" class="text-gray-400 hover:text-gray-600 transition-colors p-2 min-h-[44px] min-w-[44px]">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+          <p class="text-sm text-[#797C81] mb-6"><%= t('assessments.assign_auditor_description') %></p>
+          <%= form_with url: assign_assessment_auditor_path(@clause), method: :post, data: { assessment_auditor_target: "form", action: "submit->assessment-auditor#submit" } do |form| %>
+            <% if @assessment_auditor %>
+              <div class="mb-6">
+                <label class="block text-sm font-semibold text-[#0D1120] mb-2"><%= t('assessments.current_auditor') %></label>
+                <div class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                  <div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0 overflow-hidden">
+                    <% if @assessment_auditor.profile_image.attached? %>
+                      <%= image_tag user_profile_image_url(@assessment_auditor), class: "w-full h-full object-cover", alt: @assessment_auditor.name || @assessment_auditor.email %>
+                    <% else %>
+                      <%= @assessment_auditor.name&.split(' ')&.map(&:first)&.join('')&.upcase&.slice(0,2) || @assessment_auditor.email[0..1].upcase %>
+                    <% end %>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-[#0D1120]"><%= @assessment_auditor.name || @assessment_auditor.email %></p>
+                    <p class="text-xs text-[#797C81]"><%= t('assessments.auditor') %></p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+            <div class="mb-6" data-controller="choices-select" data-choices-select-search-value="true">
+              <%= form.label :auditor_id, t('assessments.select_auditor'), class: "block text-sm font-semibold text-[#0D1120] mb-2" %>
+              <% contributor_user_ids = @assessment ? @assessment.assessment_users.where(role: "contributor").pluck(:user_id).to_set : Set.new %>
+              <% auditor_options = @company_users.filter_map { |u| cu = CompanyUser.find_by(user_id: u.id, company_id: current_company&.id); next unless cu&.company_auditor?; next if contributor_user_ids.include?(u.id); role = cu.role.gsub('company_', '').humanize; pi = u.profile_image.attached? ? user_profile_image_url(u) : nil; [u.name, u.id.to_s, { data: { custom_properties: { role: role, profile_image_url: pi }.to_json } }] } %>
+              <%= form.select :auditor_id, options_for_select(auditor_options, @assessment_auditor&.id&.to_s), { include_blank: t('assessments.select_auditor_prompt') }, { class: "w-full focus:outline-none", data: { choices_select_target: "select", assessment_auditor_target: "auditorSelect" } } %>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-[#E3E3E3]">
+              <button type="button" data-action="click->assessment-auditor#close" class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[44px]"><%= t('cancel') %></button>
+              <%= form.submit t('assessments.assign_auditor_submit'), class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors font-medium min-h-[44px]" %>
+            </div>
+          <% end %>
+        </div>
+      </dialog>
+    </div>
+  <% end %>
+
+  <script>
+  (function() {
+    'use strict';
+
+    // ---- Link evidence: open shared modal with correct assignment + checklist item ----
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.assessment-link-evidence-btn');
+      if (!btn) return;
+      e.preventDefault();
+      var dialog = document.getElementById('link_document_dialog');
+      if (!dialog) return;
+      var assignmentId = btn.dataset.assignmentId;
+      var checklistItemId = btn.dataset.checklistItemId;
+      dialog.dataset.assignmentId = assignmentId;
+      if (checklistItemId) {
+        dialog.dataset.checklistItemId = checklistItemId;
+      } else {
+        delete dialog.dataset.checklistItemId;
+      }
+      // Update Stimulus controller's cached properties
+      var ctrl = window.Stimulus && window.Stimulus.getControllerForElementAndIdentifier(dialog, 'assignment-link-document');
+      if (ctrl) {
+        ctrl.assignmentId = assignmentId;
+        ctrl.checklistItemId = checklistItemId || null;
+        ctrl.linkEndpoint = '/assignments/' + assignmentId + '/link_documents';
+        ctrl.unlinkTemplate = '/assignments/' + assignmentId + '/unlink_document/:upload_id';
+      }
+      dialog.style.display = '';
+      dialog.showModal();
+    });
+
+    // ---- Refresh on modal close to show updated state (via Turbo for smooth transition) ----
+    ['link_document_dialog', 'upload_document_dialog', 'multi-assign-modal-assessment', 'assessment-auditor-modal'].forEach(function(id) {
+      var dialog = document.getElementById(id);
+      if (dialog) {
+        dialog.addEventListener('close', function() {
+          if (window.Turbo) {
+            window.Turbo.visit(window.location.href, { action: 'replace' });
+          } else {
+            window.location.reload();
+          }
+        });
+      }
+    });
+
+    // ---- Unlink evidence handler ----
+    document.addEventListener('click', function(e) {
+      var unlinkButton = e.target.closest('.unlink-document-btn');
+      if (!unlinkButton) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var uploadId = unlinkButton.dataset.uploadId;
+      var assignmentId = unlinkButton.dataset.assignmentId;
+      var checklistItemId = unlinkButton.dataset.checklistItemId;
+      var attachmentRow = unlinkButton.closest('[data-attachment-id]');
+      if (!uploadId || !assignmentId) return;
+      if (!confirm('<%= j t("assignments.show.confirm_unlink", default: "Are you sure you want to unlink this document?") %>')) return;
+      unlinkButton.disabled = true;
+      unlinkButton.classList.add('opacity-50', 'cursor-not-allowed');
+      var csrfToken = document.querySelector('meta[name="csrf-token"]');
+      if (!csrfToken) return;
+      var unlinkUrl = '/assignments/' + assignmentId + '/unlink_document/' + uploadId;
+      if (checklistItemId) {
+        unlinkUrl += '?checklist_item_id=' + encodeURIComponent(checklistItemId);
+      }
+      fetch(unlinkUrl, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-Token': csrfToken.getAttribute('content') },
+        credentials: 'same-origin'
+      }).then(function(response) {
+        if (response.ok && attachmentRow) {
+          attachmentRow.style.transition = 'opacity 0.3s ease';
+          attachmentRow.style.opacity = '0';
+          setTimeout(function() { attachmentRow.remove(); }, 300);
+        } else {
+          unlinkButton.disabled = false;
+          unlinkButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }).catch(function() {
+        unlinkButton.disabled = false;
+        unlinkButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      });
+    });
+  })();
+  </script>
+</div>

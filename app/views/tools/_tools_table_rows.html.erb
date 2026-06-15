@@ -1,0 +1,16 @@
+<% if @tools.any? %>
+    <% @tools.each do |tool| %>
+        <%= render partial: "tool_row", locals: { tool: tool } %>
+    <% end %>
+<% else %>
+    <tr>
+        <td colspan="7" class="p-8 text-center text-sm sm:text-base text-[#797C81]">
+            <% if params[:search].present? %>
+                <%= t('no_tools_found_matching', search: params[:search]) %>. <%= link_to t('clear_search'), tools_path, class: "text-[#5C3984] hover:text-[#4A2F6B] underline" %>.
+            <% else %>
+                <%= t('no_tools_found') %> <%= link_to t('create_your_first_tool'), new_tool_path, data: { turbo_frame: "_top" }, class: "text-[#5C3984] hover:text-[#4A2F6B] underline" %>.
+            <% end %>
+        </td>
+    </tr>
+<% end %>
+

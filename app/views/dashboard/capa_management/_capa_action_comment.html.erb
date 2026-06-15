@@ -1,0 +1,58 @@
+<% comment = local_assigns[:comment] %>
+<% capa = local_assigns[:capa] %>
+<% capa_action = local_assigns[:capa_action] %>
+<div class="border-s-2 border-[#5C3984]/20 ps-4 py-3 rounded-e-lg bg-[#FAFAFC]/50 hover:bg-[#F7F7FD]/80 transition-colors" data-comment-id="<%= comment.id %>">
+  <div class="flex items-start gap-3">
+    <div class="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-white shadow-sm bg-[#E3E3E3] flex items-center justify-center">
+      <% if comment.user.profile_image.attached? %>
+        <%= image_tag user_profile_image_url(comment.user), class: "w-full h-full object-cover", alt: comment.user.name %>
+      <% else %>
+        <span class="text-sm font-semibold text-[#5C3984]"><%= comment.user.name[0].upcase %></span>
+      <% end %>
+    </div>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-sm font-semibold text-[#0D1120]"><%= comment.user.name %></span>
+        <span class="text-xs text-[#797C81]"><%= l(comment.created_at, format: :short) %></span>
+      </div>
+      <p class="text-sm text-[#0D1120]/90 break-words mt-1.5 whitespace-pre-wrap leading-relaxed"><%= comment.body %></p>
+      <div class="mt-2 flex items-center gap-2 flex-wrap">
+        <% unless viewer? %>
+          <button type="button" class="inline-flex items-center gap-1 text-xs font-medium text-[#5C3984] hover:text-[#4a2d6a] hover:bg-[#5C3984]/10 rounded-lg px-2 py-1 -ms-1 transition-colors reply-to-comment" data-comment-id="<%= comment.id %>" data-author-name="<%= comment.user.name %>">
+            <%= t("capa_action_show.reply") %>
+          </button>
+        <% end %>
+        <% if can_delete_capa_action_comment?(capa) %>
+          <button type="button" class="delete-comment inline-flex items-center gap-1 text-xs font-medium text-[#DC2626] hover:bg-red-50 rounded-lg px-2 py-1 -ms-1 transition-colors" data-comment-id="<%= comment.id %>" data-parent-id="" title="<%= t('capa_action_show.delete_comment') %>">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            <%= t("capa_action_show.delete_comment") %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <% if comment.replies.any? %>
+    <details class="mt-3 group/replies" data-comment-replies="<%= comment.id %>">
+      <summary class="list-none cursor-pointer inline-flex items-center gap-1.5 text-xs font-medium text-[#5C3984] hover:bg-[#5C3984]/10 rounded-lg px-2 py-1.5 -ms-2 w-fit transition-colors [&::-webkit-details-marker]:hidden">
+        <span class="view-replies-label">
+          <%= t("capa_action_show.view_replies", count: comment.replies.size) %>
+        </span>
+        <svg class="w-4 h-4 transition-transform group-open/replies:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </summary>
+      <div class="comment-replies-container mt-3 ms-6 space-y-2 rounded-lg bg-white/60 border border-[#E3E3E3]/80 p-3">
+        <% comment.replies.includes(:user).order(created_at: :asc).each do |reply| %>
+          <%= render partial: "capa_action_comment_reply", locals: { reply: reply, can_delete: can_delete_capa_action_comment?(capa), parent_comment_id: comment.id } %>
+        <% end %>
+      </div>
+    </details>
+  <% end %>
+  <div class="reply-form hidden mt-3 ms-6 p-3 rounded-xl bg-white border border-[#E3E3E3] shadow-sm" data-reply-to="<%= comment.id %>">
+    <textarea rows="2" class="w-full rounded-lg border border-[#E3E3E3] px-3 py-2.5 text-sm placeholder-[#797C81] focus:ring-2 focus:ring-[#5C3984]/30 focus:border-[#5C3984] transition-shadow resize-none" placeholder="<%= t('capa_action_show.write_comment_placeholder') %>"></textarea>
+    <div class="flex gap-2 mt-3">
+      <button type="button" class="submit-reply px-4 py-2 bg-[#5C3984] rounded-lg text-xs font-medium text-white hover:bg-[#4a2d6a] transition-colors" data-parent-id="<%= comment.id %>"><%= t("capa_action_show.submit_comment") %></button>
+      <button type="button" class="cancel-reply text-xs font-medium text-[#797C81] hover:text-[#0D1120] transition-colors"><%= t("capa_action_show.cancel") %></button>
+    </div>
+  </div>
+</div>

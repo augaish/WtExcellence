@@ -1,0 +1,178 @@
+<!-- Standards Card Partial -->
+<% standard = stats[:standard] %>
+<% latest_version = stats[:latest_version] %>
+<% clause_count = stats[:clause_count] %>
+<% checklist_count = stats[:checklist_count] %>
+<% subclause_count = stats[:subclause_count] %>
+<% compliance_percentage = stats[:compliance_percentage] %>
+<% is_processing = stats[:is_processing] || false %>
+<% display_name = stats[:display_name] || standard.display_name %>
+
+<div class="bg-white rounded-lg border border-[#E3E3E3] p-4 sm:p-6 h-full flex flex-col" data-standard-id="<%= standard.id %>" data-processing="<%= is_processing %>" data-controller="standards">
+    <div
+        class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+        <!-- Status Badges -->
+        <div class="flex items-center space-x-2 bg-[#F6EEFF] rounded-full text-[#0D1120]">
+            <% if latest_version %>
+                <span class="inline-flex items-center px-3 py-1 space-x-2 rounded-full text-xs font-medium">
+                    <%= image_tag asset_path("version-created-icon.svg"), class: "w-4 h-4 max-w-full h-auto" %>
+                    <span><%= t('version') %>
+                        <%= latest_version.version_label %></span>
+                </span>
+                <% if standard.standard_versions.count > 1 %>
+                    <span>|</span>
+                    <span class="inline-flex items-center px-3 py-1 space-x-2 rounded-full text-xs font-medium">
+                        <%= image_tag asset_path("previous-versions-icon.svg"), class: "w-4 h-4 max-w-full h-auto" %>
+                        <span class="ml-2"><%= standard.standard_versions.count - 1 %>
+                            <%= t('previous_versions') %></span>
+                    </span>
+                <% end %>
+            <% else %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium">
+                    <%= image_tag asset_path("version-created-icon.svg"), class: "w-4 h-4 max-w-full h-auto" %>
+                    <span class="ml-2"><%= t('processing') %></span>
+                </span>
+            <% end %>
+        </div>
+        <span class="text-[#B130AC] text-sm font-medium bg-[#F6EEFF] rounded-full px-3 py-1">
+            <%= is_processing ? t('processing') : (latest_version&.status ? t("version_statuses.#{latest_version.status}") : t('processing')) %>
+        </span>
+    </div>
+
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4 mb-4 mt-4">
+        <div>
+            <h3 class="text-base sm:text-xl font-bold text-gray-900 mb-1 break-words leading-snug"><%= display_name %></h3>
+            <p class="text-sm sm:text-xs text-gray-500">
+                <% if latest_version %>
+                    <%= t('last_modified') %>:
+                    <%= latest_version.updated_at.strftime("%d.%m.%Y") %>
+                <% else %>
+                    <%= t('uploaded') %>:
+                    <%= standard.created_at.strftime("%d.%m.%Y") %>
+                <% end %>
+            </p>
+        </div>
+    </div>
+
+    <!-- Compliance Section (value loaded async via async-card-compliance controller) -->
+    <% is_super_view = stats[:company_count].present? %>
+    <% header_text = is_super_view ? t('average_company_compliance') : t('compliance') %>
+    <% subtext_static = is_super_view ? t('average_across_all_companies', count: stats[:company_count]) : nil %>
+    <div class="mb-6 border border-[#E3E3E3] rounded-lg p-3"
+         data-async-card-compliance-target="block"
+         data-standard-id="<%= standard.id %>">
+        <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium text-[#5C3984]"><%= header_text %></span>
+            <span class="text-lg font-bold text-[#5C3984] flex items-center" data-role="value">
+                <span class="inline-block w-5 h-5 border-2 border-[#5C3984]/30 border-t-[#5C3984] rounded-full animate-spin" role="status" aria-label="Loading"></span>
+            </span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+            <div class="bg-[#5C3984] h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%" data-role="bar"></div>
+        </div>
+        <p class="text-xs text-gray-600 mt-2 italic <%= 'hidden' unless subtext_static %>" data-role="subtext">
+            <%= subtext_static %>
+        </p>
+        <div class="mt-3 pt-3 border-t border-[#E3E3E3] hidden" data-role="tool-breakdown">
+            <p class="text-xs font-medium text-gray-600 mb-2">By Tool:</p>
+            <div class="space-y-1" data-role="tool-breakdown-list"></div>
+        </div>
+
+        <% unless is_super_view %>
+            <%# Metrics Section %>
+            <div class="grid grid-cols-3 divide-x divide-[#E3E3E3] mt-4 text-center">
+                <div class="flex flex-col items-center px-2 py-1">
+                    <span class="text-base sm:text-lg font-bold text-gray-900"><%= clause_count %></span>
+                    <span class="text-xs text-gray-500 whitespace-nowrap"><%= t('clauses') %></span>
+                </div>
+                <div class="flex flex-col items-center px-2 py-1">
+                    <span class="text-base sm:text-lg font-bold text-gray-900"><%= subclause_count %></span>
+                    <span class="text-xs text-gray-500 whitespace-nowrap"><%= t('sub_clauses') %></span>
+                </div>
+                <div class="flex flex-col items-center px-2 py-1">
+                    <span class="text-base sm:text-lg font-bold text-gray-900"><%= checklist_count %></span>
+                    <span class="text-xs text-gray-500 whitespace-nowrap"><%= t('checkpoints') %></span>
+                </div>
+            </div>
+        <% end %>
+    </div>
+    
+    <!-- Super Admin: Metrics Section with Companies -->
+    <% if stats[:company_count].present? %>
+        <div class="mb-6 border border-[#E3E3E3] rounded-lg p-3 bg-gray-50">
+            <div class="grid grid-cols-3 divide-x divide-[#E3E3E3] mb-3 text-center">
+                <div class="flex flex-col items-center px-2 py-1">
+                    <span class="text-base sm:text-lg font-bold text-gray-900"><%= clause_count %></span>
+                    <span class="text-xs text-gray-500 whitespace-nowrap"><%= t('clauses') %></span>
+                </div>
+                <div class="flex flex-col items-center px-2 py-1">
+                    <span class="text-base sm:text-lg font-bold text-gray-900"><%= subclause_count %></span>
+                    <span class="text-xs text-gray-500 whitespace-nowrap"><%= t('sub_clauses') %></span>
+                </div>
+                <div class="flex flex-col items-center px-2 py-1">
+                    <span class="text-base sm:text-lg font-bold text-gray-900"><%= checklist_count %></span>
+                    <span class="text-xs text-gray-500 whitespace-nowrap"><%= t('checkpoints') %></span>
+                </div>
+            </div>
+            <div class="pt-3 border-t border-gray-200">
+                <div class="flex items-center justify-center py-2">
+                    <span class="text-sm text-gray-600 font-medium mr-3"><%= t('assigned_companies') %>:</span>
+                    <span class="text-2xl font-bold text-[#5C3984]"><%= stats[:company_count] %></span>
+                </div>
+            </div>
+        </div>
+    <% end %>
+
+    <!-- Action Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-2 mt-auto">
+        <% if latest_version && !is_processing %>
+            <%= link_to standard_path(standard), class: "flex items-center justify-center space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors duration-200 flex-1 min-h-[44px] text-[16px] sm:text-sm", data: { turbo: false } do %>
+                <span><%= t('view_details') %></span>
+                <%= image_tag asset_path("arrow-up-right-icon.svg"), class: "w-4 h-4 max-w-full h-auto" %>
+            <% end %>
+        <% else %>
+            <button class="flex items-center justify-center space-x-2 bg-gray-400 text-white px-4 py-3 sm:py-2 rounded-lg font-medium flex-1 cursor-not-allowed min-h-[44px] text-[16px] sm:text-sm" disabled>
+                <span><%= t('processing') %></span>
+                <%= image_tag asset_path("arrow-up-right-icon.svg"), class: "w-4 h-4 max-w-full h-auto" %>
+            </button>
+        <% end %>
+        <div class="relative flex-shrink-0" data-controller="dropdown">
+            <button data-action="click->dropdown#toggle" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 bg-[#F7F7FD] rounded-lg">
+                <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                </svg>
+            </button>
+            <div data-dropdown-target="menu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#E3E3E3] z-10">
+                <% if current_user&.can_assign_standards_to_companies? %>
+                    <button data-action="click->modal#open" 
+                            data-modal-dialog-param="assignStandardDialog-<%= standard.id %>" 
+                            data-standard-id="<%= standard.id %>"
+                            type="button" 
+                            class="w-full text-left px-4 py-2 text-sm text-[#5C3984] hover:bg-[#F6EEFF] rounded-lg flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                        </svg>
+                        <span><%= t('assign') %></span>
+                    </button>
+                <% end %>
+                <% if current_user&.platform_admin? %>
+                    <button data-action="click->standards#deleteStandard"
+                            data-standard-id="<%= standard.id %>"
+                            data-standard-name="<%= display_name %>"
+                            type="button" 
+                            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center space-x-2 mt-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        <span><%= t('delete') %></span>
+                    </button>
+                <% end %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% if current_user&.can_assign_standards_to_companies? %>
+    <%= render 'assign_standard_dialog', standard: standard %>
+<% end %>

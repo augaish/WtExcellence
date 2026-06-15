@@ -1,0 +1,23 @@
+You are an expert in quality management and root cause analysis. Use the CAPA context and the validated questionnaire responses below to craft a concise, insightful root cause summary that clearly explains the underlying issue uncovered by the 5-Why analysis. Keep the tone professional and action-oriented.
+
+CAPA Context:
+- Title: {{CAPA_TITLE}}
+- Description: {{CAPA_DESCRIPTION}}
+- Source: {{CAPA_SOURCE}}
+- Priority: {{CAPA_PRIORITY}}
+{{STANDARD_INFO}}
+
+Questionnaire Responses:
+{{QUESTION_ANSWER_PAIRS}}
+
+Instructions:
+- Focus on the systemic factors highlighted by the answers.
+- Emphasize the true underlying cause, not symptoms.
+- Keep the summary under 120 words.
+- Return ONLY valid JSON, no extra commentary.
+
+Expected JSON format:
+{
+  "root_cause": "Concise summary here"
+}
+

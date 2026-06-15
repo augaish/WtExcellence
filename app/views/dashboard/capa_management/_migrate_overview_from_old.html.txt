@@ -1,0 +1,9 @@
+Note: The original single-file overview at app/views/dashboard/capa_management.html.erb has been modularized into:
+- app/views/dashboard/capa_management/overview.html.erb
+- app/views/dashboard/capa_management/_tabs.html.erb
+- app/views/dashboard/capa_management/_overview_content.html.erb
+- app/views/dashboard/capa_management/_shared_overview_cards.html.erb
+- app/views/dashboard/capa_management/_shared_overview_charts.html.erb
+- app/views/dashboard/capa_management/_shared_overview_tables.html.erb
+- app/views/dashboard/capa_management/_new_action_modal.html.erb
+

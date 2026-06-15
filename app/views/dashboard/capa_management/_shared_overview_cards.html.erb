@@ -1,0 +1,47 @@
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+    <p class="text-xs sm:text-sm font-medium text-[#0D1120] mb-2 sm:mb-3 break-words"><%= t("capa_management_ui.overview_cards.open_capas") %></p>
+    <div class="flex items-baseline gap-2 flex-wrap">
+      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]" data-overview-stat="open_count"><%= @capas&.where(status: 'open')&.count || 0 %></p>
+      <p class="text-[10px] sm:text-xs text-[#797C81] break-words"><%= t("capa_management_ui.overview_cards.assistant_interactions") %></p>
+    </div>
+  </div>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+    <p class="text-xs sm:text-sm font-medium text-[#0D1120] mb-2 sm:mb-3 break-words"><%= t("capa_management_ui.overview_cards.high_priority") %></p>
+    <div class="flex items-baseline gap-2 flex-wrap">
+      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]" data-overview-stat="high_priority_count"><%= @capas&.where(priority: 'high')&.count || 0 %></p>
+      <%= link_to dashboard_capa_management_list_path(priority: 'high'), class: "text-[10px] sm:text-xs text-[#5C3984] underline min-h-[44px] sm:min-h-auto flex items-center" do %>
+        <%= t("capa_management_ui.overview_cards.view_list") %>
+      <% end %>
+    </div>  
+  </div>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+    <p class="text-xs sm:text-sm font-medium text-[#0D1120] mb-2 sm:mb-3 break-words"><%= t("capa_management_ui.overview_cards.overdue") %></p>
+    <div class="flex items-baseline gap-2 flex-wrap">
+      <% overdue_count = @overdue_capas&.count || 0 %>
+      <p class="text-xl sm:text-2xl font-semibold text-[#C73636]" data-overview-stat="overdue_count"><%= overdue_count %></p>
+      <%= link_to dashboard_capa_management_list_path(status: 'overdue'), class: "text-[10px] sm:text-xs text-[#5C3984] underline min-h-[44px] sm:min-h-auto flex items-center" do %>
+        <%= t("capa_management_ui.overview_cards.view_list") %>
+      <% end %>
+    </div>
+  </div>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-3 sm:p-4">
+    <p class="text-xs sm:text-sm font-medium text-[#0D1120] mb-2 sm:mb-3 break-words"><%= t("capa_management_ui.overview_cards.avg_resolution_time") %></p>
+    <div class="flex items-baseline gap-2 flex-wrap">
+      <% closed_capas = @capas&.where(status: 'closed')&.where.not(created_at: nil, updated_at: nil) %>
+      <% if closed_capas&.any? %>
+        <% avg_days = closed_capas.sum { |c| (c.updated_at.to_date - c.created_at.to_date).to_i } / closed_capas.count.to_f rescue 0 %>
+        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]" data-overview-stat="avg_resolution_days">
+          <%= sprintf('%.1f', avg_days) %> <%= t("capa_management_ui.overview_cards.days_label") %>
+        </p>
+      <% else %>
+        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]" data-overview-stat="avg_resolution_days">
+          0 <%= t("capa_management_ui.overview_cards.days_label") %>
+        </p>
+      <% end %>
+      <p class="text-[10px] sm:text-xs text-[#797C81] break-words"><%= t("capa_management_ui.overview_cards.ai_assessed") %></p>
+    </div>
+  </div>
+</div>
+
+

@@ -1,0 +1,34 @@
+<div class="flex items-start gap-3">
+  <div class="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center flex-shrink-0 overflow-hidden">
+    <% if evaluation.evaluator&.profile_image&.attached? %>
+      <%= image_tag user_profile_image_url(evaluation.evaluator), class: "w-full h-full object-cover" %>
+    <% else %>
+      <span class="text-xs font-medium text-purple-700"><%= initials %></span>
+    <% end %>
+  </div>
+  <div class="flex-1 min-w-0">
+    <div class="flex flex-wrap items-center gap-2 mb-1">
+      <span class="text-sm font-semibold text-[#0D1120]">
+        <%= evaluation.evaluator&.name || t('deleted_user') %>
+      </span>
+      <% if evaluation.evaluation_status.present? %>
+        <%
+          eval_color = case evaluation.evaluation_status
+          when "approved" then "bg-green-100 text-green-700"
+          when "rejected" then "bg-red-100 text-red-700"
+          when "reopened" then "bg-amber-100 text-amber-700"
+          else "bg-gray-100 text-gray-700"
+          end
+          eval_label = t("assessments.evaluation_statuses.#{evaluation.evaluation_status}", default: evaluation.evaluation_status.humanize)
+        %>
+        <span class="px-2 py-0.5 <%= eval_color %> rounded-full text-xs font-medium">
+          <%= eval_label %>
+        </span>
+      <% end %>
+    </div>
+    <div class="bg-gray-50 rounded-lg p-3 mb-1">
+      <p class="text-sm text-[#0D1120] break-words"><%= evaluation.feedback %></p>
+    </div>
+    <span class="text-xs text-[#797C81]"><%= evaluation.created_at.strftime("%b %d, %Y at %I:%M %p") %></span>
+  </div>
+</div>

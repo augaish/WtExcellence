@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  tool_checkpoint: one
+  name: Subcheckpoint One
+  description: Description one
+  scoring_type: Percentage
+  min_score: 0
+  max_score: 100
+  display_order: 1
+
+two:
+  tool_checkpoint: two
+  name: Subcheckpoint Two
+  description: Description two
+  scoring_type: Percentage
+  min_score: 0
+  max_score: 100
+  display_order: 1

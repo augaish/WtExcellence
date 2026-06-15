@@ -1,0 +1,908 @@
+<div
+  id="credit-changes-root"
+  class="container mx-auto px-4 sm:px-6 py-4 sm:py-6"
+  data-active-tab="<%= @active_tab %>"
+  data-invalid-ai-message="<%= j t('invalid_ai_credit_amount') %>"
+  data-invalid-company-message="<%= j t('invalid_company_credit_amount') %>"
+  data-invalid-user-message="<%= j t('invalid_user_credit_amount') %>"
+  data-company-users-loading="<%= j t('company_users_loading') %>"
+  data-company-users-empty="<%= j t('company_users_empty') %>"
+  data-company-users-error="<%= j t('company_users_error') %>"
+  data-company-credits-label="<%= j t('company_credits_available') %>"
+  data-assigned-credits-label="<%= j t('assigned_credits') %>"
+  data-company-users-label="<%= j t('company_users_label') %>"
+  data-actions-label="<%= j t('actions') %>"
+  data-split-label="<%= j t('split_credits_equally') %>"
+  data-split-confirm="<%= j t('split_credits_equally_confirm') %>"
+  data-split-confirm-company="<%= t('split_credits_equally_confirm_company', company: '%{company}') %>"
+  data-reset-label="<%= j t('reset_credits') %>"
+  data-reset-confirm="<%= j t('reset_credits_confirm') %>"
+  data-reset-confirm-company="<%= t('reset_credits_confirm_company', company: '%{company}') %>"
+  data-edit-label="<%= j t('edit') %>"
+  data-save-label="<%= j t('save') %>"
+  data-cancel-label="<%= j t('cancel') %>"
+  data-saving-label="<%= j t('saving_label') %>"
+  data-unknown-user-label="<%= j t('unknown_user') %>"
+  data-header-align="<%= I18n.locale.to_s == 'ar' ? 'text-right' : 'text-left' %>"
+>
+    <% header_align_class = I18n.locale.to_s == 'ar' ? 'text-right' : 'text-left' %>
+    <div class="mb-4 sm:mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-900 break-words"><%= t('credit_changes') %></h1>
+        <p class="text-xs sm:text-sm text-gray-600 mt-2 break-words"><%= t('credit_changes_management_description') %></p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="border-b border-gray-200 overflow-x-auto -mx-4 sm:mx-0">
+      <nav class="-mb-px flex gap-4 sm:gap-6 px-4 sm:px-0 min-w-max" aria-label="Credit settings tabs">
+        <button
+          type="button"
+          class="whitespace-nowrap border-b-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium focus:outline-none hover:text-gray-700 min-h-[44px] flex items-center <%= @active_tab == 'ai_actions' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500' %>"
+          data-tab-target="ai_actions"
+          aria-current="<%= @active_tab == 'ai_actions' ? 'page' : 'false' %>"
+        >
+          <%= t('credit_changes_tabs.ai_actions') %>
+        </button>
+        <button
+          type="button"
+          class="whitespace-nowrap border-b-2 px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium focus:outline-none hover:text-gray-700 min-h-[44px] flex items-center <%= @active_tab == 'company_credits' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500' %>"
+          data-tab-target="company_credits"
+          aria-current="<%= @active_tab == 'company_credits' ? 'page' : 'false' %>"
+        >
+          <%= t('credit_changes_tabs.company_credits') %>
+        </button>
+      </nav>
+    </div>
+
+    <div data-tab-panel="ai_actions" class="<%= @active_tab == 'ai_actions' ? '' : 'hidden' %>">
+      <div class="p-4 sm:p-6">
+        <% if @ai_action_credits.any? %>
+            <div class="overflow-x-auto -mx-4 sm:mx-0">
+                <table class="min-w-full min-w-[700px] divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= t('ai_action') %>
+                            </th>
+                            <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= t('credit_cost') %>
+                            </th>
+                            <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <%= t('actions') %>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <% @ai_action_credits.each do |credit| %>
+                            <tr class="hover:bg-gray-50" id="credit-row-<%= credit.id %>">
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 min-w-[180px]">
+                                    <div class="text-xs sm:text-sm font-medium text-gray-900 break-words"><%= credit.display_name %></div>
+                                    <div class="text-[10px] sm:text-xs text-gray-500 break-words"><%= credit.action_type %></div>
+                                </td>
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                                    <div class="text-xs sm:text-sm text-gray-900" id="credit-display-<%= credit.id %>">
+                                        <%= credit.credit_cost %>
+                                    </div>
+                      <input
+                        type="number"
+                                           id="credit-input-<%= credit.id %>" 
+                                           value="<%= credit.credit_cost %>" 
+                                           min="0" 
+                                           step="1"
+                                           class="hidden w-20 sm:w-24 px-3 py-3 sm:py-1 text-[16px] sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[44px] sm:min-h-auto"
+                        data-credit-id="<%= credit.id %>"
+                      >
+                                </td>
+                                <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm min-w-[140px]">
+                      <button
+                        type="button"
+                                            class="edit-credit-btn flex items-center gap-1 text-purple-600 hover:text-purple-900 font-medium min-h-[44px] sm:min-h-auto"
+                                            data-credit-id="<%= credit.id %>"
+                        id="edit-btn-<%= credit.id %>"
+                      >
+                                        <%= image_tag asset_path('pencil-icon.svg'), class: "w-4 h-4 flex-shrink-0" %>
+                                        <span><%= t('edit') %></span>
+                                    </button>
+                                    <div class="hidden flex flex-col sm:flex-row gap-2" id="save-cancel-<%= credit.id %>">
+                        <button
+                          type="button"
+                                                class="save-credit-btn text-green-600 hover:text-green-900 font-medium min-h-[44px] sm:min-h-auto"
+                          data-credit-id="<%= credit.id %>"
+                        >
+                                            <%= t('save') %>
+                                        </button>
+                        <button
+                          type="button"
+                                                class="cancel-edit-btn text-gray-600 hover:text-gray-900 font-medium min-h-[44px] sm:min-h-auto"
+                          data-credit-id="<%= credit.id %>"
+                        >
+                                            <%= t('cancel') %>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% end %>
+                    </tbody>
+                </table>
+            </div>
+        <% else %>
+            <div class="text-center py-8 sm:py-12 px-4">
+                <div class="text-gray-400 mb-4">
+              <svg class="mx-auto h-10 w-10 sm:h-12 sm:w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 break-words"><%= t('no_ai_actions_found', default: 'No AI Actions Found') %></h3>
+            <p class="text-xs sm:text-sm text-gray-600 break-words"><%= t('no_ai_actions_configured', default: 'There are no AI actions configured yet.') %></p>
+            </div>
+        <% end %>
+      </div>
+    </div>
+
+    <div data-tab-panel="company_credits" class="<%= @active_tab == 'company_credits' ? '' : 'hidden' %>">
+      <div class="p-4 sm:p-6">
+        <p class="text-xs sm:text-sm text-gray-600 mb-4 break-words"><%= t('company_credits_management_description') %></p>
+        <% if @companies.any? %>
+          <div class="overflow-x-auto -mx-4 sm:mx-0">
+            <table class="min-w-full min-w-[900px] divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <%= t('company') %>
+                  </th>
+                  <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <%= t('available_credits') %>
+                  </th>
+                  <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <%= t('assigned_credits') %>
+                  </th>
+                  <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <%= t('total_credits') %>
+                  </th>
+                  <th class="px-4 sm:px-6 py-3 <%= header_align_class %> text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <%= t('actions') %>
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @companies.each do |company| %>
+                  <% assigned_total = company.company_users.sum(:assigned_credits).to_i %>
+                  <tr
+                    class="hover:bg-gray-50"
+                    id="company-credit-row-<%= company.id %>"
+                    data-company-id="<%= company.id %>"
+                  >
+                    <td class="px-4 sm:px-6 py-3 sm:py-4 min-w-[160px]">
+                      <div class="text-xs sm:text-sm font-medium text-gray-900 break-words"><%= company.name %></div>
+                      <div class="text-[10px] sm:text-xs text-gray-500">
+                        <%= t('license_seats') %>: <%= company.license_seats %>
+                      </div>
+                    </td>
+                    <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div class="text-xs sm:text-sm text-gray-900" id="company-credit-display-<%= company.id %>">
+                        <%= company.credits %>
+                      </div>
+                      <input
+                        type="number"
+                        id="company-credit-input-<%= company.id %>"
+                        value="<%= company.credits %>"
+                        min="0"
+                        step="1"
+                        class="hidden w-24 sm:w-28 px-3 py-3 sm:py-1 text-[16px] sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[44px] sm:min-h-auto"
+                        data-company-id="<%= company.id %>"
+                      >
+                    </td>
+                    <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div class="text-xs sm:text-sm text-gray-900" id="company-assigned-display-<%= company.id %>"><%= assigned_total %></div>
+                    </td>
+                    <td class="px-4 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                      <div class="text-xs sm:text-sm text-gray-900" id="company-total-display-<%= company.id %>"><%= company.credits.to_i + assigned_total %></div>
+                    </td>
+                    <td class="px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm min-w-[160px]">
+                      <button
+                        type="button"
+                        class="edit-company-credit-btn flex items-center gap-1 text-purple-600 hover:text-purple-900 font-medium min-h-[44px] sm:min-h-auto"
+                        data-company-id="<%= company.id %>"
+                        id="edit-company-btn-<%= company.id %>"
+                      >
+                        <%= image_tag asset_path('pencil-icon.svg'), class: "w-4 h-4 flex-shrink-0" %>
+                        <span><%= t('edit') %></span>
+                      </button>
+                      <div class="hidden flex flex-col sm:flex-row gap-2" id="company-save-cancel-<%= company.id %>">
+                        <button
+                          type="button"
+                          class="save-company-credit-btn text-green-600 hover:text-green-900 font-medium min-h-[44px] sm:min-h-auto"
+                          data-company-id="<%= company.id %>"
+                          data-update-url="<%= dashboard_credit_changes_company_path(company) %>"
+                        >
+                          <%= t('save') %>
+                        </button>
+                        <button
+                          type="button"
+                          class="cancel-company-credit-btn text-gray-600 hover:text-gray-900 font-medium min-h-[44px] sm:min-h-auto"
+                          data-company-id="<%= company.id %>"
+                        >
+                          <%= t('cancel') %>
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        class="toggle-company-users-btn mt-2 sm:mt-3 inline-flex items-center gap-1 text-xs sm:text-sm text-gray-600 hover:text-gray-900 min-h-[44px] sm:min-h-auto"
+                        data-company-id="<%= company.id %>"
+                        data-users-url="<%= dashboard_credit_changes_company_users_path(company, format: :json) %>"
+                        aria-expanded="false"
+                      >
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                        <span><%= t('manage_users') %></span>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr id="company-users-row-<%= company.id %>" class="hidden bg-gray-50">
+                    <td colspan="5" class="px-4 sm:px-6 py-4">
+                      <div
+                        class="company-users-panel text-xs sm:text-sm text-gray-500"
+                        data-company-users-panel="<%= company.id %>"
+                      >
+                        <%= t('company_users_collapsed_hint') %>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-8 sm:py-12 px-4">
+            <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-2 break-words"><%= t('no_companies_found') %></h3>
+            <p class="text-xs sm:text-sm text-gray-600 break-words"><%= t('no_companies_message') %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+    </div>
+</div>
+
+<%= render "shared/general_confirmation_modal" %>
+
+<script>
+(function() {
+    function initCreditChangesHandlers() {
+        const root = document.getElementById('credit-changes-root');
+        if (!root || root.dataset.initialized === 'true') return;
+        root.dataset.initialized = 'true';
+
+    initTabSwitcher(root);
+    initAiActionCreditHandlers(root);
+    initCompanyCreditHandlers(root);
+    initCompanyUsersHandlers(root);
+  }
+
+  function initTabSwitcher(root) {
+    const tabButtons = root.querySelectorAll('[data-tab-target]');
+    const panels = root.querySelectorAll('[data-tab-panel]');
+    if (!tabButtons.length) return;
+
+    const activeClasses = ['border-purple-500', 'text-purple-600'];
+    const inactiveClasses = ['border-transparent', 'text-gray-500'];
+
+    function setActiveTab(tabName) {
+      root.dataset.activeTab = tabName;
+
+      tabButtons.forEach(button => {
+        const isActive = button.dataset.tabTarget === tabName;
+        button.setAttribute('aria-current', isActive ? 'page' : 'false');
+        activeClasses.forEach(cls => button.classList.toggle(cls, isActive));
+        inactiveClasses.forEach(cls => button.classList.toggle(cls, !isActive));
+      });
+
+      panels.forEach(panel => {
+        panel.classList.toggle('hidden', panel.dataset.tabPanel !== tabName);
+      });
+    }
+
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => setActiveTab(button.dataset.tabTarget));
+    });
+
+    const initialTab = root.dataset.activeTab || (tabButtons[0] && tabButtons[0].dataset.tabTarget);
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }
+
+  function initAiActionCreditHandlers(root) {
+    const validationMessage = root.dataset.invalidAiMessage || 'Please enter a valid credit cost (0 or greater)';
+        const editButtons = root.querySelectorAll('.edit-credit-btn');
+        const cancelButtons = root.querySelectorAll('.cancel-edit-btn');
+        const saveButtons = root.querySelectorAll('.save-credit-btn');
+        const inputs = root.querySelectorAll('input[type="number"][data-credit-id]');
+
+        editButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const creditId = this.getAttribute('data-credit-id');
+                const displayEl = document.getElementById('credit-display-' + creditId);
+                const inputEl = document.getElementById('credit-input-' + creditId);
+                const editBtn = document.getElementById('edit-btn-' + creditId);
+                const saveCancelDiv = document.getElementById('save-cancel-' + creditId);
+
+                displayEl.classList.add('hidden');
+                inputEl.classList.remove('hidden');
+                editBtn.classList.add('hidden');
+                saveCancelDiv.classList.remove('hidden');
+                inputEl.focus();
+            });
+        });
+
+        cancelButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const creditId = this.getAttribute('data-credit-id');
+                const displayEl = document.getElementById('credit-display-' + creditId);
+                const inputEl = document.getElementById('credit-input-' + creditId);
+                const editBtn = document.getElementById('edit-btn-' + creditId);
+                const saveCancelDiv = document.getElementById('save-cancel-' + creditId);
+
+        inputEl.value = displayEl.textContent.trim();
+
+                displayEl.classList.remove('hidden');
+                inputEl.classList.add('hidden');
+                editBtn.classList.remove('hidden');
+                saveCancelDiv.classList.add('hidden');
+            });
+        });
+
+        saveButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const creditId = this.getAttribute('data-credit-id');
+                const inputEl = document.getElementById('credit-input-' + creditId);
+                const creditCost = parseInt(inputEl.value, 10);
+
+                if (isNaN(creditCost) || creditCost < 0) {
+          alert(validationMessage);
+                    return;
+                }
+
+                const button = this;
+                button.disabled = true;
+                button.textContent = root.dataset.savingLabel || 'Saving...';
+
+                fetch('<%= dashboard_credit_changes_path %>/' + creditId, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ credit_cost: creditCost })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const displayEl = document.getElementById('credit-display-' + creditId);
+                        const editBtn = document.getElementById('edit-btn-' + creditId);
+                        const saveCancelDiv = document.getElementById('save-cancel-' + creditId);
+
+                        displayEl.textContent = data.credit_cost;
+                        displayEl.classList.remove('hidden');
+                        inputEl.classList.add('hidden');
+                        editBtn.classList.remove('hidden');
+                        saveCancelDiv.classList.add('hidden');
+                    } else {
+                        alert('Failed to update: ' + (data.errors || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating the credit cost');
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.textContent = '<%= t('save') %>';
+                });
+            });
+        });
+
+        inputs.forEach(input => {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const creditId = this.getAttribute('data-credit-id');
+                    const saveBtn = root.querySelector('.save-credit-btn[data-credit-id="' + creditId + '"]');
+                    if (saveBtn) {
+                        saveBtn.click();
+                    }
+                }
+            });
+        });
+    }
+
+  function initCompanyCreditHandlers(root) {
+    const validationMessage = root.dataset.invalidCompanyMessage || 'Please enter a valid credit amount (0 or greater)';
+    const editButtons = root.querySelectorAll('.edit-company-credit-btn');
+    const cancelButtons = root.querySelectorAll('.cancel-company-credit-btn');
+    const saveButtons = root.querySelectorAll('.save-company-credit-btn');
+    const inputs = root.querySelectorAll('input[type="number"][data-company-id]');
+
+    if (!editButtons.length) return;
+
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const companyId = this.getAttribute('data-company-id');
+        toggleCompanyRow(companyId, { editing: true });
+      });
+    });
+
+    cancelButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const companyId = this.getAttribute('data-company-id');
+        const displayEl = document.getElementById('company-credit-display-' + companyId);
+        const inputEl = document.getElementById('company-credit-input-' + companyId);
+
+        inputEl.value = displayEl.textContent.trim();
+        toggleCompanyRow(companyId, { editing: false });
+      });
+    });
+
+    saveButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const companyId = this.getAttribute('data-company-id');
+        const inputEl = document.getElementById('company-credit-input-' + companyId);
+        const creditAmount = parseInt(inputEl.value, 10);
+        const updateUrl = this.getAttribute('data-update-url');
+
+        if (isNaN(creditAmount) || creditAmount < 0) {
+          alert(validationMessage);
+          return;
+        }
+
+        const button = this;
+        button.disabled = true;
+        button.textContent = root.dataset.savingLabel || 'Saving...';
+
+        fetch(updateUrl, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ credits: creditAmount })
+        })
+          .then(async response => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success) {
+              const message = (data.errors && data.errors.join(', ')) || response.statusText || 'Unknown error';
+              throw new Error(message);
+            }
+            const displayEl = document.getElementById('company-credit-display-' + companyId);
+            if (displayEl) displayEl.textContent = data.credits ?? creditAmount;
+            const badge = document.getElementById('company-users-credits-' + companyId);
+            if (badge && data.credits != null) badge.textContent = data.credits;
+            updateCompanySummary(root, { id: companyId, credits: data.credits, assigned_total: data.assigned_total, total_credits: data.total_credits });
+            toggleCompanyRow(companyId, { editing: false });
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'An error occurred while updating the company credits');
+          })
+          .finally(() => {
+            button.disabled = false;
+            button.textContent = '<%= t('save') %>';
+          });
+      });
+    });
+
+    inputs.forEach(input => {
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          const companyId = this.getAttribute('data-company-id');
+          const saveBtn = root.querySelector('.save-company-credit-btn[data-company-id="' + companyId + '"]');
+          if (saveBtn) {
+            saveBtn.click();
+          }
+        }
+      });
+    });
+  }
+
+  function initCompanyUsersHandlers(root) {
+    const toggleButtons = root.querySelectorAll('.toggle-company-users-btn');
+    if (!toggleButtons.length) return;
+
+    toggleButtons.forEach(button => {
+      button.addEventListener('click', () => handleCompanyUsersToggle(root, button));
+    });
+  }
+
+  function handleCompanyUsersToggle(root, button) {
+    const companyId = button.getAttribute('data-company-id');
+    const row = document.getElementById('company-users-row-' + companyId);
+    const panel = root.querySelector('[data-company-users-panel="' + companyId + '"]');
+    if (!row || !panel) return;
+
+    const isOpen = !row.classList.contains('hidden');
+    if (isOpen) {
+      row.classList.add('hidden');
+      button.setAttribute('aria-expanded', 'false');
+      return;
+    }
+
+    row.classList.remove('hidden');
+    button.setAttribute('aria-expanded', 'true');
+
+    if (panel.dataset.loaded === 'true') {
+      return;
+    }
+
+    renderCompanyUsersLoading(root, panel);
+
+    fetch(button.getAttribute('data-users-url'), {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
+      .then(data => {
+        if (!data.success) {
+          throw new Error((data.errors && data.errors.join(', ')) || 'Unknown error');
+        }
+        renderCompanyUsersPanel(root, panel, data);
+        panel.dataset.loaded = 'true';
+      })
+      .catch(error => {
+        renderCompanyUsersError(root, panel, error);
+      });
+  }
+
+  function renderCompanyUsersLoading(root, panel) {
+    panel.innerHTML = '<div class="text-sm text-gray-600">' + (root.dataset.companyUsersLoading || 'Loading users...') + '</div>';
+  }
+
+  function renderCompanyUsersError(root, panel, error) {
+    console.error('Company users fetch error:', error);
+    const message = (error && error.message) || (root.dataset.companyUsersError || 'Failed to load users.');
+    panel.innerHTML = '<div class="text-sm text-red-600">' + message + '</div>';
+  }
+
+  function renderCompanyUsersPanel(root, panel, data) {
+    const users = data.users || [];
+    const company = data.company || {};
+    const headerAlign = root.dataset.headerAlign || 'text-left';
+
+    if (!users.length) {
+      panel.innerHTML = '<div class="text-sm text-gray-600">' + (root.dataset.companyUsersEmpty || 'No users assigned yet.') + '</div>';
+      return;
+    }
+
+    const rows = users.map(user => companyUserRowTemplate(root, company, user)).join('');
+
+    panel.innerHTML = `
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+        <div class="min-w-0 flex-1">
+          <p class="text-xs sm:text-sm font-medium text-gray-900 break-words">${company.name || ''}</p>
+          <p class="text-[10px] sm:text-xs text-gray-500 break-words">${root.dataset.companyCreditsLabel || 'Company Credits Available'}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <button
+            type="button"
+            class="split-company-users-btn inline-flex items-center justify-center px-3 py-2 rounded-md text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 transition min-h-[40px] flex-1 sm:flex-none"
+            data-company-id="${company.id}"
+            data-split-url="${company.split_users_url}"
+          >
+            ${root.dataset.splitLabel || 'Split'}
+          </button>
+          <button
+            type="button"
+            class="reset-company-users-btn inline-flex items-center justify-center px-3 py-2 rounded-md text-xs font-semibold bg-white border border-gray-300 text-gray-800 hover:bg-gray-50 transition min-h-[40px] flex-1 sm:flex-none"
+            data-company-id="${company.id}"
+            data-reset-url="${company.reset_users_url}"
+          >
+            ${root.dataset.resetLabel || 'Reset'}
+          </button>
+          <span class="inline-flex items-center px-3 py-2 rounded-full text-xs font-medium bg-purple-50 text-purple-700 min-h-[40px]" id="company-users-credits-${company.id}">
+            ${company.credits ?? 0}
+          </span>
+        </div>
+      </div>
+      <div class="overflow-x-auto -mx-4 sm:mx-0 rounded-md border border-gray-200 bg-white">
+        <table class="min-w-full min-w-[600px] divide-y divide-gray-200 text-xs sm:text-sm">
+          <thead class="bg-gray-50 text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <tr>
+              <th class="px-3 sm:px-4 py-3 ${headerAlign}">${root.dataset.companyUsersLabel || 'User'}</th>
+              <th class="px-3 sm:px-4 py-3 ${headerAlign}">${root.dataset.assignedCreditsLabel || 'Assigned Credits'}</th>
+              <th class="px-3 sm:px-4 py-3 ${headerAlign}">${root.dataset.actionsLabel || 'Actions'}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    initCompanyUserEditingHandlers(root, panel, company.id);
+    initCompanyUserBulkActions(root, panel, company);
+  }
+
+  function updateCompanySummary(root, company, users) {
+    if (!company || !company.id) return;
+    const companyId = company.id;
+    const assignedSum = company.assigned_total != null
+      ? company.assigned_total
+      : (users || []).reduce((sum, u) => sum + (u.assigned_credits || 0), 0);
+    const available = company.credits ?? 0;
+    const total = company.total_credits != null ? company.total_credits : available + assignedSum;
+
+    const availableDisplay = document.getElementById(`company-credit-display-${companyId}`);
+    const availableInput = document.getElementById(`company-credit-input-${companyId}`);
+    const assignedDisplay = document.getElementById(`company-assigned-display-${companyId}`);
+    const totalDisplay = document.getElementById(`company-total-display-${companyId}`);
+    const panelBadge = document.getElementById(`company-users-credits-${companyId}`);
+
+    if (availableDisplay) availableDisplay.textContent = available;
+    if (availableInput) availableInput.value = available;
+    if (assignedDisplay) assignedDisplay.textContent = assignedSum;
+    if (totalDisplay) totalDisplay.textContent = total;
+    if (panelBadge) panelBadge.textContent = available;
+  }
+
+  function companyUserRowTemplate(root, company, user) {
+    const safeName = user.name || root.dataset.unknownUserLabel || 'Unknown User';
+    const safeEmail = user.email || '';
+    const assigned = user.assigned_credits ?? 0;
+    const editLabel = root.dataset.editLabel || 'Edit';
+    const saveLabel = root.dataset.saveLabel || 'Save';
+    const cancelLabel = root.dataset.cancelLabel || 'Cancel';
+
+    return `
+      <tr id="company-user-row-${user.id}">
+        <td class="px-3 sm:px-4 py-3 min-w-[180px]">
+          <div class="font-medium text-gray-900 text-xs sm:text-sm break-words">${safeName}</div>
+          <div class="text-[10px] sm:text-xs text-gray-500 truncate">${safeEmail}</div>
+        </td>
+        <td class="px-3 sm:px-4 py-3 whitespace-nowrap">
+          <div class="text-gray-900 text-xs sm:text-sm" id="company-user-display-${user.id}">
+            ${assigned}
+          </div>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value="${assigned}"
+            class="hidden w-20 sm:w-24 px-3 py-3 sm:py-1 text-[16px] sm:text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[44px] sm:min-h-auto"
+            data-company-user-id="${user.id}"
+            data-company-id="${company.id}"
+            data-update-url="${user.update_url}"
+            id="company-user-input-${user.id}"
+          >
+        </td>
+        <td class="px-3 sm:px-4 py-3 min-w-[140px]">
+          <button
+            type="button"
+            class="edit-company-user-btn flex items-center gap-1 text-purple-600 hover:text-purple-900 font-medium text-xs sm:text-sm min-h-[44px] sm:min-h-auto"
+            data-company-user-id="${user.id}"
+            id="edit-company-user-btn-${user.id}"
+          >
+            <svg class="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L7.5 21H3v-4.5L16.732 3.732z" />
+            </svg>
+            <span>${editLabel}</span>
+          </button>
+          <div class="hidden flex flex-col sm:flex-row gap-2" id="company-user-save-cancel-${user.id}">
+            <button
+              type="button"
+              class="save-company-user-btn text-green-600 hover:text-green-900 font-medium text-xs sm:text-sm min-h-[44px] sm:min-h-auto"
+              data-company-user-id="${user.id}"
+            >
+              ${saveLabel}
+            </button>
+            <button
+              type="button"
+              class="cancel-company-user-btn text-gray-600 hover:text-gray-900 font-medium text-xs sm:text-sm min-h-[44px] sm:min-h-auto"
+              data-company-user-id="${user.id}"
+            >
+              ${cancelLabel}
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }
+
+  function initCompanyUserEditingHandlers(root, panel, companyId) {
+    const editButtons = panel.querySelectorAll('.edit-company-user-btn');
+    const cancelButtons = panel.querySelectorAll('.cancel-company-user-btn');
+    const saveButtons = panel.querySelectorAll('.save-company-user-btn');
+    const inputs = panel.querySelectorAll('input[type="number"][data-company-user-id]');
+    const validationMessage = root.dataset.invalidUserMessage || 'Please enter a valid credit amount (0 or greater)';
+
+    editButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const userId = this.getAttribute('data-company-user-id');
+        toggleCompanyUserEditing(userId, true);
+      });
+    });
+
+    cancelButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const userId = this.getAttribute('data-company-user-id');
+        const displayEl = document.getElementById('company-user-display-' + userId);
+        const inputEl = document.getElementById('company-user-input-' + userId);
+        if (displayEl && inputEl) {
+          inputEl.value = displayEl.textContent.trim();
+        }
+        toggleCompanyUserEditing(userId, false);
+      });
+    });
+
+    saveButtons.forEach(btn => {
+      btn.addEventListener('click', function() {
+        const userId = this.getAttribute('data-company-user-id');
+        const inputEl = document.getElementById('company-user-input-' + userId);
+        if (!inputEl) return;
+
+        const assignedCredits = parseInt(inputEl.value, 10);
+        if (isNaN(assignedCredits) || assignedCredits < 0) {
+          alert(validationMessage);
+          return;
+        }
+
+        const button = this;
+        button.disabled = true;
+        button.textContent = root.dataset.savingLabel || 'Saving...';
+
+        fetch(inputEl.getAttribute('data-update-url'), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          },
+          body: JSON.stringify({ assigned_credits: assignedCredits })
+        })
+          .then(async response => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success) {
+              const message = (data.errors && data.errors.join(', ')) || response.statusText || validationMessage;
+              throw new Error(message);
+            }
+
+            const displayEl = document.getElementById('company-user-display-' + userId);
+            if (displayEl) {
+              displayEl.textContent = data.user && data.user.assigned_credits != null
+                ? data.user.assigned_credits
+                : assignedCredits;
+            }
+            inputEl.value = displayEl ? displayEl.textContent.trim() : assignedCredits;
+            toggleCompanyUserEditing(userId, false);
+
+            if (data.company) {
+              updateCompanySummary(root, data.company, data.users ? data.users : [data.user].filter(Boolean));
+            }
+          })
+          .catch(error => {
+            console.error('Error updating user credits:', error);
+            alert(error.message || validationMessage);
+          })
+          .finally(() => {
+            button.disabled = false;
+            button.textContent = root.dataset.saveLabel || 'Save';
+          });
+      });
+    });
+
+    inputs.forEach(input => {
+      input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          const userId = this.getAttribute('data-company-user-id');
+          const saveBtn = panel.querySelector('.save-company-user-btn[data-company-user-id="' + userId + '"]');
+          if (saveBtn) {
+            saveBtn.click();
+          }
+        }
+      });
+    });
+  }
+
+  function initCompanyUserBulkActions(root, panel, company) {
+    const splitBtn = panel.querySelector('.split-company-users-btn');
+    const resetBtn = panel.querySelector('.reset-company-users-btn');
+
+    function refreshPanel() {
+      fetch(`/dashboard/credit_changes/company/${company.id}/users`, { headers: { 'Accept': 'application/json' } })
+        .then(async response => {
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok || !data.success) {
+            const message = (data.errors && data.errors.join(', ')) || response.statusText || 'Unknown error';
+            throw new Error(message);
+          }
+          renderCompanyUsersPanel(root, panel, data);
+        })
+        .catch(error => renderCompanyUsersError(root, panel, error));
+    }
+
+    function handleBulkAction(button, url, confirmMessage, companyName) {
+      if (!button || !url) return;
+      button.addEventListener('click', async () => {
+        const message = (confirmMessage || '').replace('%{company}', companyName || '');
+        const confirmed = await (window.showConfirmationModal
+          ? window.showConfirmationModal(message, { title: companyName || undefined, buttonStyle: 'primary', confirmText: button.textContent || undefined })
+          : Promise.resolve(window.confirm(message || confirmMessage)));
+        if (!confirmed) return;
+
+        button.disabled = true;
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          }
+        })
+          .then(async response => {
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success) {
+              const message = (data.errors && data.errors.join(', ')) || response.statusText || 'Unknown error';
+              throw new Error(message);
+            }
+            updateCompanySummary(root, data.company, data.users);
+            renderCompanyUsersPanel(root, panel, data);
+            panel.dataset.loaded = 'true';
+          })
+          .catch(error => renderCompanyUsersError(root, panel, error))
+          .finally(() => {
+            button.disabled = false;
+          });
+      });
+    }
+
+    handleBulkAction(splitBtn, splitBtn?.dataset.splitUrl, root.dataset.splitConfirmCompany || root.dataset.splitConfirm, company.name);
+    handleBulkAction(resetBtn, resetBtn?.dataset.resetUrl, root.dataset.resetConfirmCompany || root.dataset.resetConfirm, company.name);
+  }
+
+  function toggleCompanyUserEditing(userId, editing) {
+    const displayEl = document.getElementById('company-user-display-' + userId);
+    const inputEl = document.getElementById('company-user-input-' + userId);
+    const editBtn = document.getElementById('edit-company-user-btn-' + userId);
+    const saveCancelDiv = document.getElementById('company-user-save-cancel-' + userId);
+
+    if (!displayEl || !inputEl || !editBtn || !saveCancelDiv) return;
+
+    displayEl.classList.toggle('hidden', editing);
+    inputEl.classList.toggle('hidden', !editing);
+    editBtn.classList.toggle('hidden', editing);
+    saveCancelDiv.classList.toggle('hidden', !editing);
+
+    if (editing) {
+      inputEl.focus();
+    }
+  }
+
+  function updateCompanyCreditsSummary(companyId, credits) {
+    const displayEl = document.getElementById('company-credit-display-' + companyId);
+    const inputEl = document.getElementById('company-credit-input-' + companyId);
+    if (displayEl) displayEl.textContent = credits;
+    if (inputEl) inputEl.value = credits;
+  }
+
+  function toggleCompanyRow(companyId, options) {
+    const editing = options.editing;
+    const displayEl = document.getElementById('company-credit-display-' + companyId);
+    const inputEl = document.getElementById('company-credit-input-' + companyId);
+    const editBtn = document.getElementById('edit-company-btn-' + companyId);
+    const saveCancelDiv = document.getElementById('company-save-cancel-' + companyId);
+
+    if (!displayEl || !inputEl || !editBtn || !saveCancelDiv) return;
+
+    displayEl.classList.toggle('hidden', editing);
+    inputEl.classList.toggle('hidden', !editing);
+    editBtn.classList.toggle('hidden', editing);
+    saveCancelDiv.classList.toggle('hidden', !editing);
+
+    if (editing) {
+      inputEl.focus();
+    }
+  }
+
+    document.addEventListener('turbo:load', initCreditChangesHandlers);
+    document.addEventListener('DOMContentLoaded', initCreditChangesHandlers);
+})();
+</script>
+

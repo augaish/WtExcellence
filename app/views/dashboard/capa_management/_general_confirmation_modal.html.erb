@@ -1,0 +1,28 @@
+<dialog id="generalConfirmationModal" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-md w-full mx-4" data-controller="capas--general-confirmation dialog-no-backdrop-close">
+  <div class="p-4 sm:p-6">
+    <div class="flex items-center justify-between mb-4 gap-3">
+      <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] break-words min-w-0 flex-1" data-capas--general-confirmation-target="title"><%= t("capa_management_ui.modals.general_confirmation.title") %></h2>
+      <button type="button" data-action="click->capas--general-confirmation#cancelAction" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mb-4 sm:mb-6">
+      <p class="text-xs sm:text-sm text-[#797C81] break-words" data-capas--general-confirmation-target="message">
+        <%= t("capa_management_ui.modals.general_confirmation.message") %>
+      </p>
+    </div>
+
+    <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 sm:gap-3">
+      <button type="button" data-action="click->capas--general-confirmation#cancelAction" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-gray-600 hover:text-gray-800 font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm">
+        <%= t("cancel") %>
+      </button>
+      <button type="button" data-action="click->capas--general-confirmation#confirmAction" class="w-full sm:w-auto px-4 py-3 sm:py-2 text-white rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm" data-capas--general-confirmation-target="confirmButton">
+        <%= t("confirm") %>
+      </button>
+    </div>
+  </div>
+</dialog>
+

@@ -1,0 +1,21 @@
+<%
+  badge_classes = case status
+  when "not_started"
+    "bg-gray-100 text-gray-700"
+  when "in_drafts", "in_progress"
+    "bg-yellow-100 text-yellow-700"
+  when "under_review"
+    "bg-blue-100 text-blue-700"
+  when "auditor_approved"
+    "bg-purple-100 text-purple-700"
+  when "approved"
+    "bg-green-100 text-green-700"
+  when "needs_changes"
+    "bg-red-100 text-red-700"
+  else
+    "bg-gray-100 text-gray-700"
+  end
+
+  label = t("assessments.statuses.#{status}", default: status.humanize)
+%>
+<span class="px-3 py-1 <%= badge_classes %> rounded-full text-xs font-medium"><%= label %></span>

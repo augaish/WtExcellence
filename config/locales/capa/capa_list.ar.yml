@@ -1,0 +1,110 @@
+---
+ar:
+  capa_management_ui:
+    list_table:
+      headers:
+        title_description: العنوان والوصف
+        source: المصدر
+        related_standard: المعيار المرتبط
+        assignees: المعينون
+        priority: الأولوية
+        due_date: تاريخ الاستحقاق
+        status: الحالة
+        actions: الإجراءات
+      actions:
+        edit: تعديل
+        archive: أرشفة
+        delete: حذف
+        unarchive: إلغاء الأرشفة
+      empty:
+        no_capas: لا توجد CAPA.
+        no_capas_filtered: لا توجد CAPA تطابق فلاترك الحالية.
+      more_assignees: أخرى
+    list_filters:
+      due_date: تاريخ الاستحقاق
+      assigned_to_label: مُعيّن إلى
+      priority_placeholder: اختر الأولوية
+      clear_filters: مسح الفلاتر
+    list_page:
+      empty:
+        with_cta_html: لا توجد CAPA. %{create_link} للبدء.
+        create_first: أنشئ أول CAPA لك
+      alerts:
+        select_archive: يرجى اختيار CAPA واحدة على الأقل للأرشفة.
+        select_delete: يرجى اختيار CAPA واحدة على الأقل للحذف.
+      confirmations:
+        archive_single: هل أنت متأكد أنك تريد أرشفة هذه CAPA؟
+        archive_multiple: هل أنت متأكد أنك تريد أرشفة %{count} CAPA؟
+        delete_single: هل أنت متأكد أنك تريد حذف هذه CAPA؟ لا يمكن التراجع عن هذا
+          الإجراء.
+        delete_multiple: هل أنت متأكد أنك تريد حذف %{count} CAPA؟ لا يمكن التراجع
+          عن هذا الإجراء.
+      errors:
+        archive_single: حدث خطأ أثناء أرشفة CAPA
+        archive_multiple: حدث خطأ أثناء أرشفة CAPA
+        delete_single: حدث خطأ أثناء حذف CAPA
+        delete_multiple: حدث خطأ أثناء حذف CAPA
+    archives:
+      title: الحالات المؤرشفة
+      empty:
+        none: لا توجد حالات مؤرشفة.
+        filtered: لا توجد حالات مؤرشفة تطابق فلاترك الحالية.
+      alerts:
+        select_unarchive: يرجى اختيار CAPA واحدة على الأقل لإلغاء الأرشفة.
+        select_delete: يرجى اختيار CAPA واحدة على الأقل للحذف.
+      confirmations:
+        unarchive_single: هل أنت متأكد أنك تريد إلغاء أرشفة هذه CAPA؟
+        unarchive_multiple: هل أنت متأكد أنك تريد إلغاء أرشفة %{count} CAPA؟
+        delete_single: هل أنت متأكد أنك تريد حذف هذه CAPA؟ لا يمكن التراجع عن هذا
+          الإجراء.
+        delete_multiple: هل أنت متأكد أنك تريد حذف %{count} CAPA؟ لا يمكن التراجع
+          عن هذا الإجراء.
+      errors:
+        unarchive_single: حدث خطأ أثناء إلغاء أرشفة CAPA
+        unarchive_multiple: حدث خطأ أثناء إلغاء أرشفة CAPA
+        delete_single: حدث خطأ أثناء حذف CAPA
+        delete_multiple: حدث خطأ أثناء حذف CAPA
+    notifications:
+      capa_not_found: لم يتم العثور على CAPA
+      no_company_context: لا يوجد سياق شركة حالي
+      no_capas_selected: لم يتم تحديد أي CAPA
+      archive_success: تمت أرشفة CAPA بنجاح
+      unarchive_success: تم إلغاء أرشفة CAPA بنجاح
+      bulk_archive_success: تمت أرشفة %{count} CAPA بنجاح
+      bulk_archive_partial: 'تمت أرشفة %{count} CAPA بنجاح. حدثت بعض الأخطاء: %{errors}'
+      bulk_archive_error: 'فشل أرشفة CAPA: %{errors}'
+      archive_failed: 'فشل أرشفة CAPA %{id}: %{error}'
+      bulk_unarchive_success: تم إلغاء أرشفة %{count} CAPA بنجاح
+      bulk_unarchive_partial: 'تم إلغاء أرشفة %{count} CAPA بنجاح. حدثت بعض الأخطاء:
+        %{errors}'
+      bulk_unarchive_error: 'فشل إلغاء أرشفة CAPA: %{errors}'
+      unarchive_failed: 'فشل إلغاء أرشفة CAPA %{id}: %{error}'
+      bulk_delete_success: تم حذف %{count} CAPA بنجاح
+      bulk_delete_partial: 'تم حذف %{count} CAPA بنجاح. حدثت بعض الأخطاء: %{errors}'
+      bulk_delete_error: 'فشل حذف CAPA: %{errors}'
+      delete_failed: 'فشل حذف CAPA %{id}: %{error}'
+    export_modal:
+      title: تصدير CAPA
+      description: حدد خيارات التصدير لتنزيل بيانات CAPA
+      file_type_label: نوع الملف
+      csv_label: CSV
+      export_button: تصدير
+      filters:
+        title: الفلاتر
+        subtitle: سيتم تضمين CAPA التي تطابق هذه الفلاتر فقط.
+        status_label: الحالة
+        status_options:
+          all: جميع الحالات
+        priority_label: الأولوية
+        priority_placeholder: أي أولوية
+        due_date_from_label: تاريخ الاستحقاق من
+        due_date_to_label: تاريخ الاستحقاق إلى
+        assignees_label: المستخدمون المعيّنون
+        assignees_toggle_label: تنشيط فلتر المستخدمين المعيّنين
+        assignees_hint: اضغط مع الاستمرار على Ctrl (ويندوز) أو Command (ماك) لاختيار
+          عدة مستخدمين.
+        archived_label: حالة الأرشفة
+        archived_options:
+          active: نشطة فقط
+          archived: مؤرشفة فقط
+          all: نشطة + مؤرشفة

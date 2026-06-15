@@ -1,0 +1,979 @@
+<%= render partial: "tabs" %>
+
+<div>
+<div class="bg-[#F9FAFC] min-h-screen p-4 sm:p-6">
+  <!-- Filters Section -->
+  <div class="mb-4">
+    <div class="flex flex-col gap-3">
+      <!-- Status Filters -->
+      <div class="overflow-x-auto -mx-4 sm:mx-0">
+        <div class="inline-flex items-center gap-2 sm:gap-3 bg-white border border-[#E3E3E3] rounded-xl px-4 sm:px-6 py-2 min-w-max">
+          <% current_status = params[:status] || 'all' %>
+          <% all_link_params = { priority: params[:priority], assignee_id: params[:assignee_id], due_date_to: params[:due_date_to], search: params[:search] }.compact %>
+          <%= link_to dashboard_capa_management_archives_path(all_link_params), 
+                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'all' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+            <%= t("all") %>
+          <% end %>
+          <% status_link_params = { priority: params[:priority], assignee_id: params[:assignee_id], due_date_to: params[:due_date_to], search: params[:search] }.compact %>
+          <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'open')), 
+                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'open' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+            <%= t("capa_management_ui.statuses.open") %>
+          <% end %>
+          <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'assigned')), 
+                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'assigned' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+            <%= t("capa_management_ui.statuses.assigned") %>
+          <% end %>
+          <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'in_progress')), 
+                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'in_progress' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+            <%= t("capa_management_ui.statuses.in_progress") %>
+          <% end %>
+          <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'closed')), 
+                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'closed' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+            <%= t("capa_management_ui.statuses.closed") %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Additional Filters (Right) -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl px-4 sm:px-6 py-3 sm:py-4">
+        <form method="get" action="<%= dashboard_capa_management_archives_path %>" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2" id="filterForm">
+          <% if params[:status].present? %>
+            <input type="hidden" name="status" value="<%= params[:status] %>">
+          <% end %>
+          <% if params[:search].present? %>
+            <input type="hidden" name="search" value="<%= params[:search] %>">
+          <% end %>
+          
+          <!-- Due Date Filter -->
+          <div class="relative flex-1 sm:flex-none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 cursor-pointer text-[#5C3984]" onclick="(function(){var i=document.getElementById('dueDateFilter'); if(i){ if(i.showPicker){ i.showPicker(); } else { i.focus(); i.click(); } }})()"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+            <input type="date" 
+                   name="due_date_to" 
+                   value="<%= params[:due_date_to] %>" 
+                   id="dueDateFilter"
+                   placeholder="<%= t('capa_management_ui.list_filters.due_date') %>"
+                   class="w-full sm:min-w-[160px] pl-9 pr-4 py-3 sm:py-2 border border-[#E3E3E3] rounded-xl text-[16px] sm:text-sm text-[#5C3984] font-medium cursor-pointer bg-white min-h-[44px]"
+                   onchange="document.getElementById('filterForm').submit()">
+          </div>
+
+          <!-- Assigned To Filter -->
+          <% if current_user.company_admin? or current_user.company_quality_manager? %>
+            <div class="relative flex-1 sm:min-w-[240px] sm:flex-none choices-filter" data-controller="capas--filter">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none w-4 h-4 z-10 text-[#5C3984]"><path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"/></svg>
+              <select name="assignee_id" 
+                      id="assigneeFilter"
+                      data-capas--filter-target="select"
+                      data-action="change->capas--filter#submit"
+                      data-placeholder="<%= t('capa_management_ui.list_filters.assigned_to_label') %>"
+                      class="w-full sm:min-w-[240px] py-3 sm:py-2 border border-[#E3E3E3] rounded-xl text-[16px] sm:text-sm text-[#5C3984] font-medium appearance-none bg-white cursor-pointer min-h-[44px]">
+                <option value=""><%= t('capa_management_ui.list_filters.assigned_to_label') %></option>
+                <% @company_users.each do |company_user| %>
+                  <option value="<%= company_user.id %>" <%= 'selected' if params[:assignee_id] == company_user.id.to_s %>><%= company_user.user&.name || "Deleted User" %></option>
+                <% end %>
+              </select>
+              <%= image_tag asset_path('down-arrow-icon.svg'), class: "absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none max-w-full h-auto z-10" %>
+            </div>
+          <% end %>
+
+          <!-- Priority Filter (with background) -->
+          <div class="relative flex-1 sm:flex-none" data-controller="choices-select">
+            <select name="priority" 
+                    id="priorityFilter"
+                    data-choices-select-target="select"
+                    class="w-full sm:min-w-[160px] pl-4 pr-9 py-3 sm:py-2 border border-[#E3E3E3] rounded-xl text-[16px] sm:text-sm text-[#5C3984] font-medium appearance-none bg-white cursor-pointer min-h-[44px]"
+                    onchange="document.getElementById('filterForm').submit()">
+              <option value=""><%= t('capa_management_ui.list_filters.priority_placeholder') %></option>
+              <option value="high" <%= 'selected' if params[:priority] == 'high' %>><%= t('priority_levels.high') %></option>
+              <option value="medium" <%= 'selected' if params[:priority] == 'medium' %>><%= t('priority_levels.medium') %></option>
+              <option value="low" <%= 'selected' if params[:priority] == 'low' %>><%= t('priority_levels.low') %></option>
+            </select>
+          </div>
+          
+          <% link_params = {} %>
+          <% link_params[:status] = params[:status] if params[:status].present? %>
+          <% link_params[:search] = params[:search] if params[:search].present? %>
+          <%= link_to dashboard_capa_management_archives_path(link_params), 
+                      class: "w-full sm:w-auto px-4 py-3 sm:py-2 border-0 rounded-xl text-xs sm:text-sm text-[#797C81] font-medium bg-transparent hover:opacity-70 whitespace-nowrap min-h-[44px] sm:min-h-auto flex items-center justify-center" do %>
+            <%= t("capa_management_ui.list_filters.clear_filters") %>
+          <% end %>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Hide native right-side icon for date input */
+    #dueDateFilter::-webkit-calendar-picker-indicator { display: none; }
+    #dueDateFilter { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+  </style>
+
+  <script>
+    // Store current page URL in sessionStorage
+    function storeCurrentPage() {
+      const currentUrl = window.location.pathname + window.location.search;
+      sessionStorage.setItem('capa_management_last_page', currentUrl);
+    }
+
+    // Store page on load and Turbo navigation
+    function initializePageStorage() {
+      storeCurrentPage();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializePageStorage);
+    } else {
+      initializePageStorage();
+    }
+    document.addEventListener('turbo:load', initializePageStorage);
+    document.addEventListener('turbo:render', initializePageStorage);
+
+    window.archivesTranslations = {
+      empty: '<%= j t("capa_management_ui.archives.empty.none") %>',
+      emptyFiltered: '<%= j t("capa_management_ui.archives.empty.filtered") %>',
+      selectUnarchive: '<%= j t("capa_management_ui.archives.alerts.select_unarchive") %>',
+      selectDelete: '<%= j t("capa_management_ui.archives.alerts.select_delete") %>',
+      confirmUnarchiveSingle: '<%= j t("capa_management_ui.archives.confirmations.unarchive_single") %>',
+      confirmUnarchiveMultiple: '<%= j t("capa_management_ui.archives.confirmations.unarchive_multiple", count: "%{count}") %>',
+      confirmDeleteSingle: '<%= j t("capa_management_ui.archives.confirmations.delete_single") %>',
+      confirmDeleteMultiple: '<%= j t("capa_management_ui.archives.confirmations.delete_multiple", count: "%{count}") %>',
+      errorUnarchiveSingle: '<%= j t("capa_management_ui.archives.errors.unarchive_single") %>',
+      errorUnarchiveMultiple: '<%= j t("capa_management_ui.archives.errors.unarchive_multiple") %>',
+      errorDeleteSingle: '<%= j t("capa_management_ui.archives.errors.delete_single") %>',
+      errorDeleteMultiple: '<%= j t("capa_management_ui.archives.errors.delete_multiple") %>'
+    };
+
+    window.confirmationTranslations = {
+      defaultTitle: '<%= j t("capa_management_ui.confirmations.default_title") %>',
+      confirmButton: '<%= j t("capa_management_ui.confirmations.confirm_button") %>',
+      deleteTitle: '<%= j t("capa_management_ui.confirmations.delete_title") %>',
+      deleteButton: '<%= j t("capa_management_ui.confirmations.delete_button") %>',
+      unlinkTitle: '<%= j t("capa_management_ui.confirmations.unlink_title") %>',
+      unlinkButton: '<%= j t("capa_management_ui.confirmations.unlink_button") %>',
+      removeTitle: '<%= j t("capa_management_ui.confirmations.remove_title") %>',
+      removeButton: '<%= j t("capa_management_ui.confirmations.remove_button") %>'
+    };
+
+    function withCount(template, count) {
+      return template.replace('%{count}', count);
+    }
+
+    function setupCapaRowClickHandlers() {
+      // Remove existing listeners to avoid duplicates
+      const table = document.querySelector('table[data-controller="capas--select-all"]');
+      if (!table) return;
+
+      // Use event delegation on the table
+      table.addEventListener('click', function(event) {
+        const row = event.target.closest('tr[data-capa-id]');
+        if (!row) return;
+
+        // Don't navigate if clicking on interactive elements
+        if (event.target.closest('input[type="checkbox"]') || 
+            event.target.closest('details') ||
+            event.target.closest('button') ||
+            event.target.closest('a') ||
+            event.target.closest('td[onclick]')) {
+          return;
+        }
+
+        const capaId = row.getAttribute('data-capa-id');
+        if (capaId) {
+          // Store current page before navigating
+          storeCurrentPage();
+          const baseUrl = '<%= dashboard_capa_management_show_path(id: 999) %>'.replace('999', capaId);
+          window.location.href = baseUrl + '#evidence';
+        }
+      });
+    }
+
+    // Setup on initial page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupCapaRowClickHandlers);
+    } else {
+      setupCapaRowClickHandlers();
+    }
+
+    // Setup on Turbo navigation
+    document.addEventListener('turbo:load', setupCapaRowClickHandlers);
+
+    // Custom confirm function for archiving that returns a Promise
+    window.customArchiveConfirm = async function(message, options = {}) {
+      const modal = document.getElementById('archiveCapaModal');
+      if (!modal) {
+        // Fallback to browser confirm if modal not found
+        return confirm(message);
+      }
+
+      try {
+        const archiveController = window.Stimulus.getControllerForElementAndIdentifier(
+          modal,
+          'capas--archive-confirmation'
+        );
+
+        if (!archiveController) {
+          return confirm(message);
+        }
+
+        return await archiveController.confirm(message, options);
+      } catch (error) {
+        console.warn('Custom archive confirm failed, falling back to browser:', error);
+        return confirm(message);
+      }
+    };
+
+    // Custom confirm function that returns a Promise (like confirm() but async)
+    window.customConfirm = async function(message, options = {}) {
+      const modal = document.getElementById('generalConfirmationModal');
+      if (!modal) {
+        // Fallback to browser confirm if modal not found
+        return confirm(message);
+      }
+
+      try {
+        const generalController = window.Stimulus.getControllerForElementAndIdentifier(
+          modal,
+          'capas--general-confirmation'
+        );
+
+        if (!generalController) {
+          return confirm(message);
+        }
+
+        const intent = options.intent;
+        let buttonStyle = options.buttonStyle;
+        if (!buttonStyle) {
+          if (intent === 'delete' || intent === 'remove') {
+            buttonStyle = 'danger';
+          } else if (intent === 'unlink') {
+            buttonStyle = 'primary';
+          } else {
+            buttonStyle = 'primary';
+          }
+        }
+
+        let confirmText = options.confirmText;
+        if (!confirmText) {
+          if (intent === 'delete') {
+            confirmText = confirmationTranslations.deleteButton;
+          } else if (intent === 'unlink') {
+            confirmText = confirmationTranslations.unlinkButton;
+          } else if (intent === 'remove') {
+            confirmText = confirmationTranslations.removeButton;
+          } else {
+            confirmText = confirmationTranslations.confirmButton;
+          }
+        }
+
+        let title = options.title;
+        if (!title) {
+          if (intent === 'delete') {
+            title = confirmationTranslations.deleteTitle;
+          } else if (intent === 'unlink') {
+            title = confirmationTranslations.unlinkTitle;
+          } else if (intent === 'remove') {
+            title = confirmationTranslations.removeTitle;
+          } else {
+            title = confirmationTranslations.defaultTitle;
+          }
+        }
+
+        return await generalController.confirm(message, {
+          title: title,
+          confirmText: confirmText,
+          buttonStyle: buttonStyle,
+          ...options
+        });
+      } catch (error) {
+        console.warn('Custom confirm failed, falling back to browser:', error);
+        return confirm(message);
+      }
+    };
+
+    async function unarchiveCapa(capaId) {
+      if (!(await customArchiveConfirm(archivesTranslations.confirmUnarchiveSingle))) {
+        return;
+      }
+
+      fetch(`/dashboard/capa_management/${capaId}/unarchive`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        credentials: 'same-origin'
+      })
+      .then(response => response.json().then(data => ({ response, data })))
+      .then(({ response, data }) => {
+        if (data.notification_html) {
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: data.notification_html },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+        }
+        if (data.error) {
+          const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+          const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+          const notificationHtml = `
+            <div
+              data-toast-target="notification"
+              class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+            >
+              ${icon}
+              <div class="flex-1 text-sm text-[#0D1120] font-medium">
+                ${data.error}
+              </div>
+              <button
+                data-action="click->toast#close"
+                class="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          `;
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: notificationHtml },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+        }
+        if (response.ok && !data.error) {
+          const row = document.querySelector(`tr[data-capa-id="${capaId}"]`);
+          if (row) {
+            row.remove();
+            const table = document.querySelector('table[data-controller="capas--select-all"]');
+            if (table) {
+              const tbody = table.querySelector('tbody');
+              if (tbody && tbody.children.length === 0) {
+                const emptyStateHtml = `
+                  <tr>
+                    <td colspan="9" class="p-8 text-center text-[#797C81]">
+                      ${archivesTranslations.empty}
+                    </td>
+                  </tr>
+                `;
+                const temp = document.createElement('tbody');
+                temp.innerHTML = emptyStateHtml.trim();
+                const emptyRow = temp.firstElementChild;
+                if (emptyRow) tbody.appendChild(emptyRow);
+              }
+            }
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+        const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+        const notificationHtml = `
+          <div
+            data-toast-target="notification"
+            class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+          >
+            ${icon}
+            <div class="flex-1 text-sm text-[#0D1120] font-medium">
+              ${archivesTranslations.errorUnarchiveSingle}
+            </div>
+            <button
+              data-action="click->toast#close"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        `;
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: notificationHtml },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      });
+    }
+
+    async function deleteCapa(capaId) {
+      if (!(await customConfirm(
+        archivesTranslations.confirmDeleteSingle,
+        { intent: 'delete', confirmText: confirmationTranslations.deleteButton, title: confirmationTranslations.deleteTitle }
+      ))) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/dashboard/capa_management/${capaId}`, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json'
+          },
+          credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}));
+          if (error.notification_html) {
+            const event = new CustomEvent('toast:show', {
+              detail: { notificationHtml: error.notification_html },
+              bubbles: true
+            });
+            document.dispatchEvent(event);
+          }
+          return;
+        }
+
+        const data = await response.json();
+        if (data.notification_html) {
+          // Dispatch toast notification
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: data.notification_html },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+        }
+
+        // Remove CAPA row from table
+        const row = document.querySelector(`tr[data-capa-id="${capaId}"]`);
+        if (row) {
+          row.remove();
+          
+          // Check if table is now empty and show empty state
+          const table = document.querySelector('table[data-controller="capas--select-all"]');
+          if (table) {
+            const tbody = table.querySelector('tbody');
+            if (tbody && tbody.children.length === 0) {
+              const emptyStateHtml = `
+                <tr>
+                  <td colspan="9" class="p-8 text-center text-[#797C81]">
+                    ${archivesTranslations.empty}
+                  </td>
+                </tr>
+              `;
+              const temp = document.createElement('tbody');
+              temp.innerHTML = emptyStateHtml.trim();
+              const emptyRow = temp.firstElementChild;
+              if (emptyRow) {
+                tbody.appendChild(emptyRow);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+        const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+        const notificationHtml = `
+          <div
+            data-toast-target="notification"
+            class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+          >
+            ${icon}
+            <div class="flex-1 text-sm text-[#0D1120] font-medium">
+              ${archivesTranslations.errorDeleteSingle}
+            </div>
+            <button
+              data-action="click->toast#close"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        `;
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: notificationHtml },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      }
+    }
+
+    function getSelectAllController() {
+      const table = document.querySelector('table[data-controller="capas--select-all"]');
+      if (!table) return null;
+      return window.Stimulus.getControllerForElementAndIdentifier(table, 'capas--select-all');
+    }
+
+    async function bulkUnarchiveCapas() {
+      const controller = getSelectAllController();
+      if (!controller) return;
+
+      const selectedIds = controller.getSelectedCapaIds();
+      if (selectedIds.length === 0) {
+        alert(archivesTranslations.selectUnarchive);
+        return;
+      }
+
+      if (!(await customArchiveConfirm(withCount(archivesTranslations.confirmUnarchiveMultiple, selectedIds.length)))) {
+        return;
+      }
+
+      fetch('/dashboard/capa_management/bulk_unarchive', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ capa_ids: selectedIds })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.notification_html) {
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: data.notification_html },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+
+          // Remove unarchived CAPA rows from table
+          selectedIds.forEach(capaId => {
+            const row = document.querySelector(`tr[data-capa-id="${capaId}"]`);
+            if (row) {
+              row.remove();
+            }
+          });
+
+          // Uncheck all checkboxes and update visibility
+          const controller = getSelectAllController();
+          if (controller) {
+            controller.itemTargets.forEach(checkbox => checkbox.checked = false);
+            controller.masterTarget.checked = false;
+            controller.masterTarget.indeterminate = false;
+            controller.updateBulkActionsVisibility();
+          }
+
+          // Check if table is now empty and show empty state
+          const table = document.querySelector('table[data-controller="capas--select-all"]');
+          if (table) {
+            const tbody = table.querySelector('tbody');
+            if (tbody && tbody.children.length === 0) {
+              const emptyStateHtml = `
+                <tr>
+                  <td colspan="9" class="p-8 text-center text-[#797C81]">
+                    ${archivesTranslations.empty}
+                  </td>
+                </tr>
+              `;
+              const temp = document.createElement('tbody');
+              temp.innerHTML = emptyStateHtml.trim();
+              const emptyRow = temp.firstElementChild;
+              if (emptyRow) {
+                tbody.appendChild(emptyRow);
+              }
+            }
+          }
+        } else if (data.error) {
+          const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+          const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+          const notificationHtml = `
+            <div
+              data-toast-target="notification"
+              class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+            >
+              ${icon}
+              <div class="flex-1 text-sm text-[#0D1120] font-medium">
+                ${data.error}
+              </div>
+              <button
+                data-action="click->toast#close"
+                class="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          `;
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: notificationHtml },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+        const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+        const notificationHtml = `
+          <div
+            data-toast-target="notification"
+            class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+          >
+            ${icon}
+            <div class="flex-1 text-sm text-[#0D1120] font-medium">
+              ${archivesTranslations.errorUnarchiveMultiple}
+            </div>
+            <button
+              data-action="click->toast#close"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        `;
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: notificationHtml },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      });
+    }
+
+    async function bulkDeleteCapas() {
+      const controller = getSelectAllController();
+      if (!controller) return;
+
+      const selectedIds = controller.getSelectedCapaIds();
+      if (selectedIds.length === 0) {
+        alert(archivesTranslations.selectDelete);
+        return;
+      }
+
+      if (!(await customConfirm(
+        withCount(archivesTranslations.confirmDeleteMultiple, selectedIds.length),
+        { intent: 'delete', confirmText: confirmationTranslations.deleteButton, title: confirmationTranslations.deleteTitle }
+      ))) {
+        return;
+      }
+
+      fetch('/dashboard/capa_management/bulk_delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ capa_ids: selectedIds })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.notification_html) {
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: data.notification_html },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+
+          // Remove deleted CAPA rows from table
+          selectedIds.forEach(capaId => {
+            const row = document.querySelector(`tr[data-capa-id="${capaId}"]`);
+            if (row) {
+              row.remove();
+            }
+          });
+
+          // Uncheck all checkboxes and update visibility
+          const controller = getSelectAllController();
+          if (controller) {
+            controller.itemTargets.forEach(checkbox => checkbox.checked = false);
+            controller.masterTarget.checked = false;
+            controller.masterTarget.indeterminate = false;
+            controller.updateBulkActionsVisibility();
+          }
+
+          // Check if table is now empty and show empty state
+          const table = document.querySelector('table[data-controller="capas--select-all"]');
+          if (table) {
+            const tbody = table.querySelector('tbody');
+            if (tbody && tbody.children.length === 0) {
+              const emptyStateHtml = `
+                <tr>
+                  <td colspan="9" class="p-8 text-center text-[#797C81]">
+                    ${archivesTranslations.empty}
+                  </td>
+                </tr>
+              `;
+              const temp = document.createElement('tbody');
+              temp.innerHTML = emptyStateHtml.trim();
+              const emptyRow = temp.firstElementChild;
+              if (emptyRow) {
+                tbody.appendChild(emptyRow);
+              }
+            }
+          }
+        } else if (data.error) {
+          const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+          const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+          const notificationHtml = `
+            <div
+              data-toast-target="notification"
+              class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+            >
+              ${icon}
+              <div class="flex-1 text-sm text-[#0D1120] font-medium">
+                ${data.error}
+              </div>
+              <button
+                data-action="click->toast#close"
+                class="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          `;
+          const event = new CustomEvent('toast:show', {
+            detail: { notificationHtml: notificationHtml },
+            bubbles: true
+          });
+          document.dispatchEvent(event);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        const bgColor = 'bg-[#FFFFFF] border-[#E3E3E3] border-l-4 border-l-red-500';
+        const icon = '<svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>';
+        const notificationHtml = `
+          <div
+            data-toast-target="notification"
+            class="${bgColor} rounded-lg shadow-lg p-4 flex items-start gap-3 transform opacity-0 translate-x-full transition ease-out duration-300"
+          >
+            ${icon}
+            <div class="flex-1 text-sm text-[#0D1120] font-medium">
+              ${archivesTranslations.errorDeleteMultiple}
+            </div>
+            <button
+              data-action="click->toast#close"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        `;
+        const event = new CustomEvent('toast:show', {
+          detail: { notificationHtml: notificationHtml },
+          bubbles: true
+        });
+        document.dispatchEvent(event);
+      });
+    }
+  </script>
+
+  <!-- CAPAs Table -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
+    <div class="overflow-x-auto -mx-4 sm:mx-0">
+      <table class="w-full min-w-[1100px]" data-controller="capas--select-all" dir="<%= rtl? ? 'rtl' : 'ltr' %>">
+        <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+          <tr>
+            <th class="text-left rtl:text-right p-3 sm:p-4 w-12">
+              <input type="checkbox" class="w-5 h-5 sm:w-4 sm:h-4 rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984] flex-shrink-0" data-capas--select-all-target="master" data-action="change->capas--select-all#toggleAll">
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.title_description") %></span>
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.source") %></span>
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.related_standard") %></span>
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.assignees") %></span>
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.priority") %></span>
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.due_date") %></span>
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.status") %></span>
+            </th>
+            <th class="text-left rtl:text-right p-3 sm:p-4 w-12">
+              <span class="text-[10px] sm:text-xs font-semibold text-[#797C81]"><%= t("capa_management_ui.list_table.headers.actions") %></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @capas.any? %>
+            <% @capas.each do |capa| %>
+              <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD] cursor-pointer" 
+                  data-capa-id="<%= capa.id %>">
+                <td class="p-3 sm:p-4" onclick="event.stopPropagation();">
+                  <input type="checkbox" class="w-5 h-5 sm:w-4 sm:h-4 rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984] flex-shrink-0" data-capas--select-all-target="item" data-action="change->capas--select-all#syncMaster" data-capa-id="<%= capa.id %>">
+                </td>
+                <td class="p-3 sm:p-4 min-w-[180px]">
+                  <div class="flex flex-col">
+                    <span class="text-xs sm:text-sm font-semibold text-[#0D1120] break-words">
+                      <%= truncate(capa.title, length: 30) %>
+                    </span>
+                    <span class="text-[10px] sm:text-xs text-[#797C81] mt-1 break-words">
+                      <%= truncate(capa.description, length: 40) %>
+                    </span>
+                  </div>
+                </td>
+                <td class="p-3 sm:p-4 min-w-[120px]">
+                  <span class="text-xs sm:text-sm text-[#0D1120] break-words">
+                    <%= capa.source&.titleize&.gsub('_', ' ') || '-' %>
+                  </span>
+                </td>
+                <td class="p-3 sm:p-4 min-w-[140px]">
+                  <span class="text-xs sm:text-sm text-[#0D1120] break-words">
+                    <%= capa.standard ? capa.standard.display_name : '-' %>
+                  </span>
+                </td>
+                <td class="p-3 sm:p-4 min-w-[160px]">
+                  <div class="flex items-center gap-2">
+                    <% assignees = capa.company_users.includes(:user).limit(3).to_a %>
+                    <% total_assignees = capa.company_users.count %>
+                    <% if total_assignees > 0 %>
+                      <% if total_assignees <= 2 %>
+                        <!-- Show names when 2 or fewer -->
+                        <% assignees.each_with_index do |company_user, index| %>
+                          <span class="text-xs sm:text-sm text-[#0D1120] truncate">
+                            <%= company_user.user.name %>
+                          </span>
+                          <% unless index == assignees.count - 1 %>
+                            <span class="text-xs sm:text-sm text-[#797C81]">,</span>
+                          <% end %>
+                        <% end %>
+                      <% else %>
+                        <!-- Show avatars when more than 2 -->
+                        <% assignees.each do |company_user| %>
+                          <div class="w-6 h-6 rounded-full bg-[#E3E3E3] flex items-center justify-center text-xs text-[#0D1120] font-medium overflow-hidden flex-shrink-0" title="<%= company_user.user.name %>">
+                            <% if company_user.user.profile_image.attached? %>
+                              <%= image_tag user_profile_image_url(company_user.user), class: "w-full h-full object-cover max-w-full h-auto" %>
+                            <% else %>
+                              <%= company_user.user.name[0].upcase %>
+                            <% end %>
+                          </div>
+                        <% end %>
+                        <% if total_assignees > 3 %>
+                          <span class="text-[10px] sm:text-xs text-[#797C81] font-medium whitespace-nowrap">+<%= total_assignees - 3 %> <%= t("capa_management_ui.list_table.more_assignees") %></span>
+                        <% end %>
+                      <% end %>
+                    <% else %>
+                      <span class="text-xs sm:text-sm text-[#797C81]">-</span>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="p-3 sm:p-4 whitespace-nowrap">
+                  <% priority_color = case capa.priority
+                                       when 'high' then 'bg-[#EA4034]'
+                                       when 'medium' then 'bg-[#EC71DD]'
+                                       when 'low' then 'bg-[#64A3EB]'
+                                       else 'bg-gray-400'
+                                       end %>
+                  <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full <%= priority_color %> flex-shrink-0"></div>
+                    <span class="text-xs sm:text-sm text-[#0D1120] font-medium">
+                      <%= capa.priority.present? ? t("priority_levels.#{capa.priority}") : "-" %>
+                    </span>
+                  </div>
+                </td>
+                <td class="p-3 sm:p-4 whitespace-nowrap">
+                  <span class="text-xs sm:text-sm text-[#0D1120]">
+                    <%= capa.due_date ? capa.due_date.strftime('%Y-%m-%d') : '-' %>
+                  </span>
+                </td>
+                <td class="p-3 sm:p-4 whitespace-nowrap">
+                  <% # Check if CAPA is overdue (has due_date and it's before today)
+                     is_overdue = capa.due_date.present? && capa.due_date < Date.today && capa.status != 'closed' %>
+                  <% status_colors = {
+                    'open' => { bg: 'bg-[#FEF0FF]', text: 'text-[#B130AC]', label: t("capa_management_ui.statuses.open") },
+                    'assigned' => { bg: 'bg-[#E9F5F8]', text: 'text-[#1B94AD]', label: t("capa_management_ui.statuses.assigned") },
+                    'in_progress' => { bg: 'bg-[#E9F0FF]', text: 'text-[#1751A7]', label: t("capa_management_ui.statuses.in_progress") },
+                    'closed' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t("capa_management_ui.statuses.closed") }
+                  } %>
+                  <% # Special cases for in_progress status
+                     if capa.status == 'in_progress'
+                       if is_overdue
+                         status_style = { bg: 'bg-[#FFF1F0]', text: 'text-[#B13030]', label: t("capa_management_ui.status_labels.overdue") }
+                       else
+                         status_style = { bg: 'bg-[#F5FFD8]', text: 'text-[#789C16]', label: t("capa_management_ui.status_labels.in_time") }
+                       end
+                     else
+                       status_style = status_colors[capa.status] || { bg: 'bg-gray-100', text: 'text-gray-600', label: capa.status&.humanize || '-' }
+                     end %>
+                  <span class="text-[10px] sm:text-xs px-3 sm:px-4 py-1 rounded-full font-medium <%= status_style[:bg] %> <%= status_style[:text] %>">
+                    <%= status_style[:label] %>
+                  </span>
+                </td>
+                <td class="p-3 sm:p-4" onclick="event.stopPropagation();">
+                  <details class="relative" data-controller="capas--dropdown">
+                    <summary class="list-none text-[#797C81] hover:text-[#0D1120] cursor-pointer p-2 min-w-[44px] min-h-[44px] flex items-center justify-center">
+                      <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                      </svg>
+                    </summary>
+                    <div class="absolute right-0 mt-2 w-48 sm:w-40 bg-white border border-[#E3E3E3] rounded-xl shadow z-[9999] py-1" data-capas--dropdown-target="menu">
+                      <button type="button" class="block w-full text-left px-3 py-3 sm:py-2 text-xs sm:text-sm text-[#0D1120] hover:bg-[#F7F7F7] rounded-lg min-h-[44px] sm:min-h-auto flex items-center"
+                              onclick="openEditCapaModal(this.dataset)"
+                              data-capa-id="<%= capa.id %>"
+                              data-capa-title="<%= capa.title %>"
+                              data-capa-description="<%= capa.description %>"
+                              data-capa-source="<%= capa.source %>"
+                              data-capa-standard-id="<%= capa.standard_id %>"
+                              data-capa-priority="<%= capa.priority %>"
+                              data-capa-due-date="<%= capa.due_date&.strftime('%Y-%m-%d') %>"
+                              data-capa-status="<%= capa.status %>"
+                              data-capa-assignee-ids="<%= capa.company_users.pluck(:id).join(',') %>"
+                              data-capa-assignee-names="<%= capa.company_users.includes(:user).map { |cu| cu.user&.name || "Deleted User" }.to_json %>"
+                              data-capa-assignee-roles="<%= capa.company_users.includes(:user).map { |cu| cu.role }.to_json %>"
+                              data-capa-assignee-profile-image-urls="<%= capa.company_users.includes(user: [ :profile_image_attachment ]).map { |cu| cu.user&.profile_image&.attached? ? user_profile_image_url(cu.user) : '' }.to_json %>">
+                        <%= t("capa_management_ui.list_table.actions.edit") %>
+                      </button>
+                      <button type="button" 
+                              class="block w-full text-left px-3 py-3 sm:py-2 text-xs sm:text-sm text-[#0D1120] hover:bg-[#F7F7F7] rounded-lg min-h-[44px] sm:min-h-auto flex items-center"
+                              onclick="unarchiveCapa('<%= capa.id %>')">
+                        <%= t("capa_management_ui.list_table.actions.unarchive") %>
+                      </button>
+                      <button type="button" 
+                              class="block w-full text-left px-3 py-3 sm:py-2 text-xs sm:text-sm text-[#EA4034] hover:bg-[#FFF1F0] rounded-lg min-h-[44px] sm:min-h-auto flex items-center"
+                              onclick="deleteCapa('<%= capa.id %>')">
+                        <%= t("capa_management_ui.list_table.actions.delete") %>
+                      </button>
+                    </div>
+                  </details>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="9" class="p-6 sm:p-8 text-center">
+                <% 
+                  # Check if any filters are applied
+                  has_filters = (params[:status].present? && params[:status] != 'all') || 
+                                params[:priority].present? || 
+                                params[:assignee_id].present? || 
+                                params[:due_date_from].present? ||
+                                params[:due_date_to].present? || 
+                                params[:search].present?
+                %>
+                <% if has_filters %>
+                  <div class="flex flex-col items-center gap-3 sm:gap-4">
+                    <p class="text-xs sm:text-sm text-[#797C81] break-words px-4"><%= t("capa_management_ui.archives.empty.filtered") %></p>
+                    <%= link_to dashboard_capa_management_archives_path, 
+                                class: "px-4 py-3 sm:py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-xl text-xs sm:text-sm font-medium transition-colors duration-200 min-h-[44px]" do %>
+                      <%= t("capa_management_ui.list_filters.clear_filters") %>
+                    <% end %>
+                  </div>
+                <% else %>
+                  <p class="text-xs sm:text-sm text-[#797C81] break-words px-4"><%= t("capa_management_ui.archives.empty.none") %></p>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%= render partial: "new_action_modal" %>
+<%= render partial: "edit_action_modal" %>
+<%= render partial: "general_confirmation_modal" %>
+<%= render partial: "delete_confirmation_modal" %>
+<%= render partial: "archive_confirmation_modal" %>
+</div>

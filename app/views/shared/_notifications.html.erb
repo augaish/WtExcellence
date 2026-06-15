@@ -1,0 +1,14 @@
+<div data-controller="toast" class="fixed top-4 right-4 z-50 space-y-3 w-96">
+  <% flash.each do |type, message| %>
+    <% next if message.blank? %>
+    <% 
+      # Map Rails flash types to notification types
+      notification_type = case type.to_sym
+      when :notice then :success
+      when :alert then :error
+      else type.to_sym
+      end
+    %>
+    <%= render partial: "shared/notification", locals: { message: message, type: notification_type } %>
+  <% end %>
+</div>

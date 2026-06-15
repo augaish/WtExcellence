@@ -1,0 +1,152 @@
+<!-- Header Section -->
+<div class="bg-[#FFFFFF] border-b border-[#E3E3E3]">
+    <div class="flex flex-col md:flex-row pt-4 sm:pt-5 px-4 sm:px-5 items-start md:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+            <% if @company.present? %>
+                <%= link_to library_path, class: "text-[#5C3984] hover:text-[#4A2F6B] flex-shrink-0 min-h-[44px] sm:min-h-auto flex items-center" do %>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                <% end %>
+            <% end %>
+            <h1 class="text-lg sm:text-xl md:text-2xl font-semibold text-[#0D1120] break-words">
+                <% if @company.present? %>
+                    <%= @company.name %> - <%= t('document_library') %>
+                <% else %>
+                    <%= t('document_library') %>
+                <% end %>
+            </h1>
+        </div>
+
+        <div
+            class="flex flex-col md:flex-row items-stretch md:items-center gap-3 sm:gap-4 w-full md:w-auto">
+            <!-- Search Bar -->
+            <%= form_with url: library_path, method: :get, data: { turbo_frame: "folders_grid", controller: "library-search" }, class: "flex-1 md:flex-initial relative" do |f| %>
+                <%= f.hidden_field :sort, value: params[:sort] if params[:sort].present? %>
+                <%= hidden_field_tag :company_id, params[:company_id] if params[:company_id].present? %>
+                <%= hidden_field_tag :page, 1 %>
+                <%= f.text_field :search, 
+                    value: params[:search], 
+                    placeholder: t('start_searching'), 
+                    class: "w-full md:w-64 px-4 py-3 sm:py-2 ps-10 pe-4 text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-colors duration-200",
+                    data: { library_search_target: "input", action: "input->library-search#handleSearch" } %>
+                <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            <% end %>
+
+            <!-- Upload Document Button -->
+            <% unless @show_companies || viewer? %>
+                <button data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="upload_document_dialog" class="flex items-center justify-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors duration-200 whitespace-nowrap min-h-[44px] text-xs sm:text-sm">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span><%= t('upload_document') %></span>
+                </button>
+            <% end %>
+        </div>
+    </div>
+</div>
+
+<% if @show_companies %>
+    <!-- Companies Selection Section -->
+    <div class="p-4 sm:p-6">
+        <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] mb-4 sm:mb-6 break-words"><%= t('select_company_to_view_library') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <% @companies.each do |company| %>
+                <%= link_to library_path(company_id: company.id), class: "bg-white border border-[#E3E3E3] rounded-lg p-4 sm:p-6 hover:shadow-lg transition-all duration-200 cursor-pointer min-h-[44px] sm:min-h-auto" do %>
+                    <div class="flex items-center gap-3 sm:gap-4">
+                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white text-base sm:text-lg font-semibold flex-shrink-0">
+                            <%= company.name.first(2).upcase %>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base sm:text-lg font-semibold text-[#0D1120] truncate break-words"><%= company.name %></h3>
+                            <p class="text-xs sm:text-sm text-gray-500 mt-1 break-words">
+                                <%= pluralize(company.company_users.count, 'user') %> • 
+                                <%= pluralize(company.folders.count, 'folder') %> • 
+                                <%= pluralize(company.uploads.count, 'file') %>
+                            </p>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </div>
+                <% end %>
+            <% end %>
+        </div>
+        <% if @companies.empty? %>
+            <div class="text-center py-8 sm:py-12">
+                <p class="text-sm sm:text-base text-gray-500"><%= t('no_companies_found') %></p>
+            </div>
+        <% end %>
+    </div>
+<% else %>
+    <!-- My Folders Section -->
+    <div class="p-4 sm:p-6">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
+            <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] break-words"><%= t('my_folders') %></h2>
+
+        <div
+            class="flex items-center gap-2 sm:gap-3 flex-wrap">
+            <!-- Create New Folder Button -->
+            <% unless viewer? %>
+              <button data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="create_folder_dialog" class="flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#D6C4ED] hover:bg-[#CEBCE5] text-[#0D1120] px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-xs sm:text-sm">
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <span><%= t('create_new_folder') %></span>
+              </button>
+            <% end %>
+
+            <!-- Sort Dropdown Button -->
+            <div class="relative" data-controller="dropdown">
+                <button data-action="click->dropdown#toggle" class="text-[#5C3984] bg-white flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 px-3 sm:px-4 py-3 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium min-h-[44px] text-xs sm:text-sm">
+                    <%= image_tag asset_path('folder-sort-icon.svg'), class: "w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 max-w-full h-auto" %>
+                    <span class="truncate">
+                        <% case params[:sort]
+                         when 'name_asc' %>
+                        <%= t('sort_name_asc') %>
+                        <% when 'name_desc' %>
+                        <%= t('sort_name_desc') %>
+                    <% else %>
+                        <%= t('sort_last_modified') %>
+                    <% end %>
+                </span>
+                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </button>
+            <div data-dropdown-target="menu" class="hidden absolute end-0 mt-2 w-48 sm:w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                <div class="py-1">
+                    <%= link_to library_path(search: params[:search], sort: 'last_modified', company_id: params[:company_id]), 
+                            data: { turbo_frame: "folders_grid", action: "click->dropdown#toggle" },
+                            class: "block px-4 py-3 sm:py-2 text-xs sm:text-sm #{params[:sort] == 'last_modified' || params[:sort].blank? ? 'bg-purple-100 text-purple-900' : 'text-gray-700'} hover:bg-purple-100 hover:text-purple-900 min-h-[44px] sm:min-h-auto" do %>
+                        <%= t('sort_last_modified') %>
+                    <% end %>
+                    <%= link_to library_path(search: params[:search], sort: 'name_asc', company_id: params[:company_id]), 
+                            data: { turbo_frame: "folders_grid", action: "click->dropdown#toggle" },
+                            class: "block px-4 py-3 sm:py-2 text-xs sm:text-sm #{params[:sort] == 'name_asc' ? 'bg-purple-100 text-purple-900' : 'text-gray-700'} hover:bg-purple-100 hover:text-purple-900 min-h-[44px] sm:min-h-auto" do %>
+                        <%= t('sort_name_asc') %>
+                    <% end %>
+                    <%= link_to library_path(search: params[:search], sort: 'name_desc', company_id: params[:company_id]), 
+                            data: { turbo_frame: "folders_grid", action: "click->dropdown#toggle" },
+                            class: "block px-4 py-3 sm:py-2 text-xs sm:text-sm #{params[:sort] == 'name_desc' ? 'bg-purple-100 text-purple-900' : 'text-gray-700'} hover:bg-purple-100 hover:text-purple-900 min-h-[44px] sm:min-h-auto" do %>
+                        <%= t('sort_name_desc') %>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Folders Grid with Turbo Frame -->
+    <%= turbo_frame_tag "folders_grid" do %>
+        <%= render partial: 'folders_grid' %>
+    <% end %>
+<% end %>
+<%= render partial: 'create_folder_dialog' %>
+<%= render partial: 'delete_folder_dialog' %>
+<%= render partial: 'delete_file_dialog' %>
+<%= render partial: 'upload_document_dialog' %>

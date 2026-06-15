@@ -1,0 +1,11 @@
+development:
+  database: alfred_ai_development
+  host: host.docker.internal
+  user: patcasrares
+  adapter: postgresql
+  pool: 7
+
+production:
+  database: alfred_ai_prod
+  adapter: postgresql
+  pool: 7

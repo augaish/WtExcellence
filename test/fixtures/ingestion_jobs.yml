@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+# one:
+#   standard: one
+#   input_pdf: one
+#   status: queued
+#   started_at: 2025-10-22 16:03:18
+#   finished_at: 2025-10-22 16:03:18
+#   message: Test ingestion job message
+#   created_by: <user_id_here>
+#
+# two:
+#   standard: two
+#   input_pdf: two
+#   status: completed
+#   started_at: 2025-10-22 16:03:18
+#   finished_at: 2025-10-22 16:03:18
+#   message: Test ingestion job message
+#   created_by: <user_id_here>

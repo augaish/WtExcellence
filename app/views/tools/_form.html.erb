@@ -1,0 +1,305 @@
+<% current_locale = I18n.locale.to_s %>
+<%= form_with model: @tool, id: (@tool.new_record? ? "new_tool" : "edit_tool"), data: { turbo: false } do |f| %>
+
+  <!-- Error Messages Summary -->
+  <% if @tool.errors.any? %>
+    <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div class="flex-1">
+          <h3 class="text-sm font-medium text-red-800 mb-2">
+            <%= pluralize(@tool.errors.count, "error") %> prohibited this tool from being saved:
+          </h3>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+            <% @tool.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- General Information Section -->
+  <div class="bg-white p-4 sm:p-6 mb-6">
+    <h2 class="text-base sm:text-lg font-semibold text-[#0D1120] mb-4"><%= t('general_information') %></h2>
+    <div class="space-y-4">
+      <div>
+        <%= f.label :name, t('tool_name'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_field :name, value: @tool.name_in(current_locale), placeholder: t('tool_name'), class: "w-full px-4 py-3 border #{@tool.errors[:name].any? ? 'border-red-300 focus:ring-red-500 focus:border-red-300' : 'border-gray-300 focus:ring-[#5C3984] focus:border-transparent'} rounded-lg focus:outline-none focus:ring-2 transition-colors duration-200 text-[16px] sm:text-sm" %>
+        <% if @tool.errors[:name].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @tool.errors[:name].first %></p>
+        <% end %>
+      </div>
+      <div>
+        <%= f.label :description, t('description'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_area :description, value: @tool.description_in(current_locale), placeholder: t('description'), rows: 3, class: "w-full px-4 py-3 border #{@tool.errors[:description].any? ? 'border-red-300 focus:ring-red-500 focus:border-red-300' : 'border-gray-300 focus:ring-[#5C3984] focus:border-transparent'} rounded-lg focus:outline-none focus:ring-2 transition-colors duration-200 text-[16px] sm:text-sm" %>
+        <% if @tool.errors[:description].any? %>
+          <p class="mt-1 text-sm text-red-600"><%= @tool.errors[:description].first %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weight Sum Warning -->
+  <div data-controller="weight-sum" data-action="input@document->weight-sum#recalculate" class="mb-4">
+    <div data-weight-sum-target="banner" class="hidden p-3 rounded-lg border text-sm flex items-center gap-2">
+      <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+      <span data-weight-sum-target="message"></span>
+    </div>
+  </div>
+
+  <!-- Checkpoints Section -->
+  <div data-controller="tools--checkpoints nested-form">
+    <div data-nested-form-target="container" data-tools--checkpoints-target="body" class="space-y-6">
+      <% if @tool.checkpoints.any? %>
+        <% checkpoints_to_render = @tool.persisted? ? @tool.checkpoints.order(Arel.sql("display_order NULLS LAST, created_at")) : @tool.checkpoints %>
+        <% checkpoints_to_render.each_with_index do |checkpoint, cp_index| %>
+          <div data-nested-form-wrapper data-controller="checkpoint-headers" data-checkpoint-headers-min-score-value="<%= t('min_score') %>" data-checkpoint-headers-max-score-value="<%= t('max_score') %>" data-checkpoint-headers-min-percentage-value="<%= t('min_percentage') %>" data-checkpoint-headers-max-percentage-value="<%= t('max_percentage') %>" data-checkpoint-headers-choices-value="<%= t('choices') %>" class="checkpoint bg-white border border-[#E3E3E3] rounded-xl">
+            <input type="hidden" name="tool[checkpoints_attributes][<%= cp_index %>][id]" value="<%= checkpoint.id %>">
+            <input type="hidden" name="tool[checkpoints_attributes][<%= cp_index %>][_destroy]" value="0" id="tool_checkpoints_attributes_<%= cp_index %>__destroy">
+
+            <%# Checkpoint Header %>
+            <div class="p-4 bg-[#F7F7FD] border-b border-[#E3E3E3] flex items-center justify-between">
+              <div class="flex items-center gap-3 flex-1">
+                <span class="text-sm font-bold text-white bg-[#5C3984] px-3 py-1 rounded-full flex-shrink-0 checkpoint-number"><%= cp_index + 1 %></span>
+                <input type="text" name="tool[checkpoints_attributes][<%= cp_index %>][name]" value="<%= checkpoint.name_in(current_locale) %>" placeholder="<%= t('checkpoint_name') %>" class="text-sm font-bold text-[#0D1120] border-0 bg-transparent focus:outline-none focus:ring-0 p-0 flex-1" id="tool_checkpoints_attributes_<%= cp_index %>_name">
+              </div>
+              <button type="button" data-action="nested-form#remove" class="text-gray-400 hover:text-red-600 transition-colors p-1">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+            </div>
+
+            <%# Subcheckpoints Table %>
+            <div class="overflow-x-auto">
+              <table class="w-full min-w-[1000px]">
+                <thead>
+                  <tr class="border-b border-[#E3E3E3] bg-gray-50">
+                    <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-40"><%= t('subcheckpoint') %></th>
+                    <th class="text-left p-3 text-xs font-semibold text-[#797C81]"><%= t('description') %></th>
+                    <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-36"><%= t('scoring_type') %></th>
+                    <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-24" data-checkpoint-headers-target="minHeader"><%= t('min_score') %></th>
+                    <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-24" data-checkpoint-headers-target="maxHeader"><%= t('max_score') %></th>
+                    <th class="text-center p-3 text-xs font-semibold text-[#797C81] w-16">
+                      <span class="inline-flex items-center justify-center gap-1">
+                        <%= t('weight') %>
+                        <span class="relative group inline-flex cursor-help text-[#5C3984]" tabindex="0" aria-label="<%= t('weight_help') %>">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                          <span class="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 bg-gray-900 text-white text-[11px] font-normal leading-snug rounded-lg w-64 text-start opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg normal-case tracking-normal"><%= t('weight_help') %></span>
+                        </span>
+                      </span>
+                    </th>
+                    <th class="text-center p-3 text-xs font-semibold text-[#797C81] w-14">
+                      <span class="inline-flex items-center justify-center gap-1">
+                        <%= t('cap') %>
+                        <span class="relative group inline-flex cursor-help text-[#5C3984]" tabindex="0" aria-label="<%= t('cap_help') %>">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                          <span class="absolute top-full end-0 mt-2 px-3 py-2 bg-gray-900 text-white text-[11px] font-normal leading-snug rounded-lg w-64 text-start opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg normal-case tracking-normal"><%= t('cap_help') %></span>
+                        </span>
+                      </span>
+                    </th>
+                    <th class="p-3 w-10"></th>
+                  </tr>
+                </thead>
+                <tbody data-controller="nested-form" data-nested-form-target="container">
+                  <% subcheckpoints_to_render = checkpoint.persisted? ? checkpoint.subcheckpoints.order(Arel.sql("display_order NULLS LAST, created_at")) : checkpoint.subcheckpoints %>
+                  <% subcheckpoints_to_render.each_with_index do |subcheckpoint, sc_index| %>
+                    <tr subcheckpoint-index="<%= sc_index %>" data-nested-form-wrapper class="subcheckpoint border-b border-[#E3E3E3] hover:bg-[#F7F7FD]" data-controller="subcheckpoint-scoring">
+                      <input type="hidden" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][id]" value="<%= subcheckpoint.id %>">
+                      <input type="hidden" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][_destroy]" value="0" id="tool_checkpoints_attributes_<%= cp_index %>_subcheckpoints_attributes_<%= sc_index %>__destroy">
+                      <td class="p-3">
+                        <input type="text" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][name]" value="<%= subcheckpoint.name_in(current_locale) %>" placeholder="<%= t('subcheckpoint') %>" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+                      </td>
+                      <td class="p-3">
+                        <textarea name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][description]" placeholder="<%= t('description') %>" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984] resize-none"><%= subcheckpoint.description_in(current_locale) %></textarea>
+                      </td>
+                      <td class="p-3" data-controller="choices-select" data-choices-select-float-dropdown-value="true">
+                        <select name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][scoring_type]" class="w-full" data-subcheckpoint-scoring-target="scoringType" data-action="change->subcheckpoint-scoring#scoringTypeChanged" data-choices-select-target="select">
+                          <option value="" disabled hidden><%= t('select_option') %></option>
+                          <option value="Number" <%= 'selected' if subcheckpoint.scoring_type == "Number" %>><%= t('number') %></option>
+                          <option value="Percentage" <%= 'selected' if subcheckpoint.scoring_type == "Percentage" %>><%= t('percentage') %></option>
+                          <option value="Multiple Choice" <%= 'selected' if subcheckpoint.scoring_type == "Multiple Choice" %>><%= t('multiple_choice') %></option>
+                        </select>
+                      </td>
+                      <td class="p-3 <%= 'hidden' if subcheckpoint.scoring_type == 'Multiple Choice' %>" data-subcheckpoint-scoring-target="minMaxSection">
+                        <input type="text" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][min_score]" value="<%= subcheckpoint.min_score %>" placeholder="0" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]" data-subcheckpoint-scoring-target="minScore">
+                      </td>
+                      <td class="p-3 <%= 'hidden' if subcheckpoint.scoring_type == 'Multiple Choice' %>" data-subcheckpoint-scoring-target="minMaxSection">
+                        <input type="text" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][max_score]" value="<%= subcheckpoint.max_score %>" placeholder="100" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]" data-subcheckpoint-scoring-target="maxScore">
+                      </td>
+                      <%# Multiple Choice Section (hidden unless MC selected) %>
+                      <td class="p-3 <%= 'hidden' unless subcheckpoint.scoring_type == 'Multiple Choice' %>" colspan="2" data-subcheckpoint-scoring-target="multipleChoiceSection">
+                        <div data-controller="multiple-choice" data-multiple-choice-target="container">
+                          <% localized_options = subcheckpoint.multiple_choice_options_in(current_locale) %>
+                          <% if localized_options.present? && localized_options.is_a?(Array) %>
+                            <% localized_options.each_with_index do |choice, choice_index| %>
+                              <div data-multiple-choice-wrapper class="flex items-center gap-2 mb-2">
+                                <input type="hidden" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][multiple_choice_options_attributes][<%= choice_index %>][index]" value="<%= choice_index %>">
+                                <input type="hidden" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][multiple_choice_options_attributes][<%= choice_index %>][_destroy]" value="0">
+                                <input type="text" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][multiple_choice_options_attributes][<%= choice_index %>][text]" value="<%= choice['text'] || choice[:text] %>" placeholder="<%= t('choice_option') %>" class="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+                                <input type="number" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][multiple_choice_options_attributes][<%= choice_index %>][weight]" value="<%= choice['weight'] || choice[:weight] %>" placeholder="%" min="0" max="100" step="1" class="w-14 px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+                                <button type="button" data-action="multiple-choice#remove" class="text-gray-400 hover:text-red-600 transition-colors shrink-0">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                              </div>
+                            <% end %>
+                          <% end %>
+                          <button type="button" data-action="multiple-choice#add" data-template="multiple-choice-template" class="text-[#5C3984] hover:text-[#4A2F6B] font-medium text-xs transition-colors">+ <%= t('add_choice') %></button>
+                        </div>
+                      </td>
+                      <td class="p-3 text-center">
+                        <input type="number" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][weight]" value="<%= subcheckpoint.weight %>" placeholder="%" min="0" max="100" step="0.01" class="w-24 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+                      </td>
+                      <td class="p-3 text-center">
+                        <input type="hidden" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][is_cap]" value="0">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" name="tool[checkpoints_attributes][<%= cp_index %>][subcheckpoints_attributes][<%= sc_index %>][is_cap]" value="1" class="sr-only peer" <%= 'checked' if subcheckpoint.is_cap %>>
+                          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#5C3984] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#5C3984]"></div>
+                        </label>
+                      </td>
+                      <td class="p-3 text-center">
+                        <button type="button" data-action="nested-form#remove" class="text-gray-400 hover:text-red-600 transition-colors">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+
+            <%# Add Sub-Checkpoint Button %>
+            <div class="p-3 border-t border-[#E3E3E3]">
+              <button type="button" data-action="nested-form#add" data-template="subcheckpoint-template" class="text-[#5C3984] hover:text-[#4A2F6B] font-medium text-sm transition-colors">
+                + <%= t('add_sub_checkpoint') %>
+              </button>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <!-- Add Checkpoint Button -->
+    <div class="mt-4">
+      <button type="button" data-action="nested-form#add" data-template="checkpoint-template" class="px-4 py-2 text-sm font-medium text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#F7F7FD] transition-colors flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <%= t('add_checkpoint') %>
+      </button>
+    </div>
+  </div>
+
+  <!-- Template: Checkpoint -->
+  <template id="checkpoint-template">
+    <div data-nested-form-wrapper data-controller="checkpoint-headers" data-checkpoint-headers-min-score-value="<%= t('min_score') %>" data-checkpoint-headers-max-score-value="<%= t('max_score') %>" data-checkpoint-headers-min-percentage-value="<%= t('min_percentage') %>" data-checkpoint-headers-max-percentage-value="<%= t('max_percentage') %>" data-checkpoint-headers-choices-value="<%= t('choices') %>" class="checkpoint bg-white border border-[#E3E3E3] rounded-xl">
+      <div class="p-4 bg-[#F7F7FD] border-b border-[#E3E3E3] flex items-center justify-between">
+        <div class="flex items-center gap-3 flex-1">
+          <span class="text-sm font-bold text-white bg-[#5C3984] px-3 py-1 rounded-full flex-shrink-0 checkpoint-number">CHECKPOINT_NUMBER</span>
+          <input type="text" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][name]" placeholder="<%= t('checkpoint_name') %>" class="text-sm font-bold text-[#0D1120] border-0 bg-transparent focus:outline-none focus:ring-0 p-0 flex-1">
+        </div>
+        <button type="button" data-action="nested-form#remove" class="text-gray-400 hover:text-red-600 transition-colors p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[1000px]">
+          <thead>
+            <tr class="border-b border-[#E3E3E3] bg-gray-50">
+              <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-40"><%= t('subcheckpoint') %></th>
+              <th class="text-left p-3 text-xs font-semibold text-[#797C81]"><%= t('description') %></th>
+              <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-36"><%= t('scoring_type') %></th>
+              <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-24" data-checkpoint-headers-target="minHeader"><%= t('min_score') %></th>
+              <th class="text-left p-3 text-xs font-semibold text-[#797C81] w-24" data-checkpoint-headers-target="maxHeader"><%= t('max_score') %></th>
+              <th class="text-center p-3 text-xs font-semibold text-[#797C81] w-16">
+                <span class="inline-flex items-center justify-center gap-1">
+                  <%= t('weight') %>
+                  <span class="cursor-help text-[#5C3984]" title="<%= t('weight_help') %>" tabindex="0" aria-label="<%= t('weight_help') %>">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th class="text-center p-3 text-xs font-semibold text-[#797C81] w-14">
+                <span class="inline-flex items-center justify-center gap-1">
+                  <%= t('cap') %>
+                  <span class="cursor-help text-[#5C3984]" title="<%= t('cap_help') %>" tabindex="0" aria-label="<%= t('cap_help') %>">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/></svg>
+                  </span>
+                </span>
+              </th>
+              <th class="p-3 w-10"></th>
+            </tr>
+          </thead>
+          <tbody data-controller="nested-form" data-nested-form-target="container">
+          </tbody>
+        </table>
+      </div>
+      <div class="p-3 border-t border-[#E3E3E3]">
+        <button type="button" data-action="nested-form#add" data-template="subcheckpoint-template" class="text-[#5C3984] hover:text-[#4A2F6B] font-medium text-sm transition-colors">
+          + <%= t('add_sub_checkpoint') %>
+        </button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Template: Subcheckpoint -->
+  <template id="subcheckpoint-template">
+    <tr subcheckpoint-index="SUBCHECKPOINT_INDEX" data-nested-form-wrapper class="subcheckpoint border-b border-[#E3E3E3] hover:bg-[#F7F7FD]" data-controller="subcheckpoint-scoring">
+      <td class="p-3">
+        <input type="text" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][name]" placeholder="<%= t('subcheckpoint') %>" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+      </td>
+      <td class="p-3">
+        <textarea name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][description]" placeholder="<%= t('description') %>" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984] resize-none"></textarea>
+      </td>
+      <td class="p-3" data-controller="choices-select" data-choices-select-float-dropdown-value="true">
+        <select name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][scoring_type]" class="w-full" data-subcheckpoint-scoring-target="scoringType" data-action="change->subcheckpoint-scoring#scoringTypeChanged" data-choices-select-target="select">
+          <option value="" disabled hidden><%= t('select_option') %></option>
+          <option value="Number"><%= t('number') %></option>
+          <option value="Percentage"><%= t('percentage') %></option>
+          <option value="Multiple Choice"><%= t('multiple_choice') %></option>
+        </select>
+      </td>
+      <td class="p-3" data-subcheckpoint-scoring-target="minMaxSection">
+        <input type="text" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][min_score]" placeholder="0" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]" data-subcheckpoint-scoring-target="minScore">
+      </td>
+      <td class="p-3" data-subcheckpoint-scoring-target="minMaxSection">
+        <input type="text" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][max_score]" placeholder="100" class="w-full px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-xs text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]" data-subcheckpoint-scoring-target="maxScore">
+      </td>
+      <td class="p-3 hidden" colspan="2" data-subcheckpoint-scoring-target="multipleChoiceSection">
+        <div data-controller="multiple-choice" data-multiple-choice-target="container">
+          <button type="button" data-action="multiple-choice#add" data-template="multiple-choice-template" class="text-[#5C3984] hover:text-[#4A2F6B] font-medium text-xs transition-colors">+ <%= t('add_choice') %></button>
+        </div>
+      </td>
+      <td class="p-3 text-center">
+        <input type="number" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][weight]" placeholder="%" min="0" max="100" step="0.01" class="w-24 px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+      </td>
+      <td class="p-3 text-center">
+        <input type="hidden" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][is_cap]" value="0">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][is_cap]" value="1" class="sr-only peer">
+          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#5C3984] rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#5C3984]"></div>
+        </label>
+      </td>
+      <td class="p-3 text-center">
+        <button type="button" data-action="nested-form#remove" class="text-gray-400 hover:text-red-600 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </td>
+    </tr>
+  </template>
+
+  <!-- Template: Multiple Choice Option -->
+  <template id="multiple-choice-template">
+    <div data-multiple-choice-wrapper class="flex items-center gap-2 mb-2">
+      <input type="hidden" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][multiple_choice_options_attributes][CHOICE_INDEX][_destroy]" value="0">
+      <input type="text" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][multiple_choice_options_attributes][CHOICE_INDEX][text]" placeholder="<%= t('choice_option') %>" class="flex-1 px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+      <input type="number" name="tool[checkpoints_attributes][CHECKPOINT_INDEX][subcheckpoints_attributes][SUBCHECKPOINT_INDEX][multiple_choice_options_attributes][CHOICE_INDEX][weight]" placeholder="%" min="0" max="100" step="1" class="w-14 px-2 py-1.5 border border-gray-300 rounded-lg bg-white text-sm text-center focus:outline-none focus:ring-1 focus:ring-[#5C3984]">
+      <button type="button" data-action="multiple-choice#remove" class="text-gray-400 hover:text-red-600 transition-colors shrink-0">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  </template>
+
+<% end %>

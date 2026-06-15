@@ -1,0 +1,486 @@
+<div class="px-4 py-4 sm:px-6 sm:py-6">
+  <% current_locale = (@current_locale || I18n.locale.to_s) %>
+  <% tool_translation = @tool.translation_for(current_locale) %>
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <div class="min-w-0 flex-1">
+      <h1 class="text-lg sm:text-2xl font-bold text-[#0D1120] mb-2 break-words"><%= @tool.name_in(current_locale).presence || t('untitled_tool') %></h1>
+      <% if @tool.description_in(current_locale).present? %>
+        <p class="text-sm sm:text-base text-[#797C81] break-words"><%= @tool.description_in(current_locale) %></p>
+      <% end %>
+      <% if tool_translation&.needs_review %>
+        <div class="mt-3 inline-flex items-center gap-2">
+          <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-[#F6EEFF] text-[#5C3984] border border-[#D6C4ED]">
+            <%= t('translation_needs_review', default: (current_locale == "ar" ? "الترجمة تحتاج إلى مراجعة" : "Translation needs review")) %>
+          </span>
+          <% unless viewer? || !current_user&.can_manage_tools? %>
+            <%= form_with url: mark_reviewed_tool_path(@tool), method: :patch, local: true do |form| %>
+              <%= form.hidden_field :language_code, value: current_locale %>
+              <%= form.submit t('mark_as_reviewed', default: "Mark as Reviewed"), class: "px-3 py-1 text-xs text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded transition-colors" %>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    <div class="relative z-10 flex flex-nowrap shrink-0 items-center gap-2 sm:gap-3">
+      <% unless viewer? || !current_user&.can_manage_tools? %>
+        <%= link_to edit_tool_path(@tool), class: "px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors inline-flex items-center gap-2 min-h-[44px] whitespace-nowrap", data: { turbo: false } do %>
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+          <span><%= t('edit') %></span>
+        <% end %>
+      <% end %>
+      <%= link_to t('back_to_tools'), tools_path, class: "px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-[#5C3984] hover:text-[#4A2F6B] border border-[#5C3984] rounded-lg hover:bg-[#F7F7FD] transition-colors min-h-[44px] inline-flex items-center justify-center whitespace-nowrap" %>
+    </div>
+  </div>
+
+  <!-- Linked Standards & Clauses Section -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-6">
+    <div class="p-4 sm:p-5 border-b border-[#E3E3E3] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <h2 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t('linked_standard_clauses') %></h2>
+      <% unless viewer? || !current_user&.can_manage_tools? %>
+        <button type="button" 
+                data-controller="basic-modal"
+                data-basic-modal-dialog-value="link-standard-modal"
+                data-action="click->basic-modal#open"
+                class="px-4 py-3 sm:py-2 text-[16px] sm:text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors flex items-center gap-2 min-h-[44px]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+          </svg>
+          <span><%= t('link_standard') %></span>
+        </button>
+      <% end %>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[720px]">
+        <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+          <tr>
+            <th class="text-left p-4 w-12">
+              <input type="checkbox" class="rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984]">
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('linked_standard') %></span>
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('top_level_clauses') %></span>
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('total_points') %></span>
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('terminal_clauses') %></span>
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('date_linked') %></span>
+            </th>
+            <th class="text-left p-4 w-12">
+              <!-- Actions column header (empty) -->
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% 
+          # Build a structure showing top-level clauses with their terminal clauses
+          # Group terminal clauses by their root (top-level) clause, then by standard
+          linked_clauses = @tool.clauses.includes(:parent, standard_version: :standard)
+          
+          # Group root clauses by standard
+          clauses_by_standard = {}
+          linked_clauses.each do |terminal_clause|
+            # Find the root clause for this terminal clause
+            current = terminal_clause
+            while current.parent.present?
+              current = current.parent
+            end
+            root_clause = current
+            standard = terminal_clause.standard_version&.standard
+            
+            next unless standard && root_clause
+            
+            # Initialize standard entry if not exists
+            clauses_by_standard[standard.id] ||= { 
+              standard: standard, 
+              root_clauses: {},
+              earliest_date: nil
+            }
+            
+            # Track root clauses for this standard
+            clauses_by_standard[standard.id][:root_clauses][root_clause.id] ||= {
+              root_clause: root_clause,
+              terminal_clauses: []
+            }
+            
+            # Add terminal clause if not already added
+            unless clauses_by_standard[standard.id][:root_clauses][root_clause.id][:terminal_clauses].include?(terminal_clause)
+              clauses_by_standard[standard.id][:root_clauses][root_clause.id][:terminal_clauses] << terminal_clause
+            end
+            
+            # Track earliest linked date
+            first_tool_clause = @tool.tool_clauses.find { |tc| tc.clause_id == terminal_clause.id }
+            if first_tool_clause&.created_at
+              current_earliest = clauses_by_standard[standard.id][:earliest_date]
+              if current_earliest.nil? || first_tool_clause.created_at < current_earliest
+                clauses_by_standard[standard.id][:earliest_date] = first_tool_clause.created_at
+              end
+            end
+          end
+          %>
+
+          <% if clauses_by_standard.any? %>
+            <% clauses_by_standard.each do |standard_id, data| %>
+              <% standard = data[:standard] %>
+              <% root_clauses = data[:root_clauses].values %>
+              <% total_points = root_clauses.sum { |rc| rc[:root_clause].base_points.to_i } %>
+              <% total_terminal_clauses = root_clauses.sum { |rc| rc[:terminal_clauses].count } %>
+              <% linked_date = data[:earliest_date] || Time.current %>
+              
+              <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                <td class="p-4">
+                  <input type="checkbox" class="rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984]">
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#0D1120]"><%= standard.display_name %></span>
+                </td>
+                <td class="p-4">
+                  <div class="flex flex-wrap gap-2">
+                    <% root_clauses.each do |clause_data| %>
+                      <% root_clause = clause_data[:root_clause] %>
+                      <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 border border-purple-200 rounded-md">
+                        <span class="text-xs font-semibold text-[#5C3984]"><%= root_clause.code %></span>
+                        <span class="text-xs text-[#797C81]">(<%= root_clause.base_points.to_i %> <%= t('pts') %>)</span>
+                      </div>
+                    <% end %>
+                  </div>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm font-semibold text-[#5C3984]"><%= total_points %> <%= t('pts') %></span>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#797C81]"><%= total_terminal_clauses %> <%= t('terminal_clauses_plural') %></span>
+                </td>
+                <td class="p-4">
+                  <span class="text-sm text-[#797C81]"><%= linked_date.strftime("%b %d, %Y") %></span>
+                </td>
+                <td class="p-4">
+                  <% unless viewer? || !current_user&.can_manage_tools? %>
+                    <div class="relative inline-block" data-controller="dropdown" data-dropdown-fixed-value="true">
+                      <button type="button" data-action="click->dropdown#toggle" class="inline-flex items-center justify-center min-h-[44px] min-w-[44px] text-[#797C81] hover:text-[#0D1120] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:ring-offset-1" aria-haspopup="true" aria-label="<%= t('actions') %>">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                        </svg>
+                      </button>
+                      <div data-dropdown-target="menu" class="hidden w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-[9999]" role="menu">
+                        <button type="button"
+                                data-controller="basic-modal"
+                                data-basic-modal-dialog-value="unlink-modal-<%= standard.id %>"
+                                data-action="click->basic-modal#open"
+                                class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors rounded-lg"
+                                role="menuitem">
+                          <%= t('unlink_clauses') %>
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="7" class="p-8 text-center text-sm text-[#797C81]">
+                <%= t('no_standards_linked') %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Unlink Modals (one per standard) -->
+  <% if defined?(clauses_by_standard) && clauses_by_standard.any? %>
+    <% clauses_by_standard.each do |standard_id, data| %>
+      <% standard = data[:standard] %>
+      <% root_clauses_data = data[:root_clauses].values %>
+      
+      <dialog id="unlink-modal-<%= standard_id %>" 
+              class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-2xl w-full mx-4"
+              style="max-height: 85vh !important; overflow: visible;"
+              data-controller="basic-modal dialog-no-backdrop-close">
+        <div class="p-6" style="max-height: 85vh; overflow-y: auto;">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-xl font-semibold text-[#0D1120] mb-1"><%= t('unlink_clauses_from', standard: standard.display_name) %></h3>
+              <p class="text-sm text-[#797C81]"><%= t('unlink_clauses_description') %></p>
+            </div>
+            <button type="button" 
+                    data-controller="basic-modal"
+                    data-basic-modal-dialog-value="unlink-modal-<%= standard_id %>"
+                    data-action="click->basic-modal#close"
+                    class="text-gray-400 hover:text-gray-600 transition-colors">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          
+          <%= form_with url: unlink_standard_tool_path(@tool), method: :delete, local: true do |form| %>
+            <%= form.hidden_field :standard_id, value: standard_id %>
+            
+            <div class="mb-6 space-y-3">
+              <% root_clauses_data.each do |clause_data| %>
+                <% root_clause = clause_data[:root_clause] %>
+                <% terminal_count = clause_data[:terminal_clauses].count %>
+                
+                <div class="flex items-start gap-3 p-4 border border-[#E3E3E3] rounded-lg hover:bg-[#F7F7FD] transition-colors">
+                  <input type="checkbox" 
+                         name="top_level_clause_ids[]" 
+                         value="<%= root_clause.id %>"
+                         id="unlink_clause_<%= standard_id %>_<%= root_clause.id %>"
+                         class="mt-1 rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984]">
+                  <label for="unlink_clause_<%= standard_id %>_<%= root_clause.id %>" class="flex-1 cursor-pointer">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-sm font-semibold text-[#0D1120]"><%= root_clause.code %></span>
+                      <span class="text-sm text-[#797C81]"><%= root_clause.title("en") %></span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-[#797C81]">
+                      <span><%= root_clause.base_points.to_i %> <%= t('points') %></span>
+                      <span>•</span>
+                      <span><%= terminal_count %> <%= t('terminal_clauses_plural') %></span>
+                    </div>
+                  </label>
+                </div>
+              <% end %>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-4 border-t border-[#E3E3E3]">
+              <button type="button" 
+                      data-controller="basic-modal"
+                      data-basic-modal-dialog-value="unlink-modal-<%= standard_id %>"
+                      data-action="click->basic-modal#close"
+                      class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <%= t('cancel') %>
+              </button>
+              <%= form.submit t('unlink_selected'), 
+                  class: "px-4 py-2 text-sm text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+      </dialog>
+    <% end %>
+  <% end %>
+
+  <!-- Link Standard Modal -->
+  <dialog id="link-standard-modal" 
+          class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-4xl w-full mx-4"
+          style="width: 80vw !important; max-width: 900px !important; min-width: 700px; max-height: 85vh !important; overflow: visible;"
+          data-controller="basic-modal dialog-no-backdrop-close">
+    <div class="p-6" style="max-height: 85vh; overflow-y: auto; overflow-x: visible;">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-xl font-semibold text-[#0D1120] mb-1"><%= t('link_top_level_clauses') %></h3>
+          <p class="text-sm text-[#797C81]"><%= t('link_top_level_clauses_description') %></p>
+        </div>
+        <button type="button" 
+                data-controller="basic-modal"
+                data-basic-modal-dialog-value="link-standard-modal"
+                data-action="click->basic-modal#close"
+                class="text-gray-400 hover:text-gray-600 transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <%= form_with url: link_standard_tool_path(@tool), method: :post, local: true, data: { controller: "tool-clause-loader", action: "submit->tool-clause-loader#handleFormSubmit" } do |form| %>
+        <div class="mb-4" data-controller="choices-select" data-choices-select-search-value="true">
+          <%= form.label :standard_id, t('standard'), class: "block text-sm font-medium text-[#0D1120] mb-2" %>
+          <%= form.select :standard_id, 
+              options_from_collection_for_select(@standards, :id, :display_name, nil),
+              { prompt: t('select_a_standard') },
+              { 
+                class: "w-full",
+                data: { action: "change->tool-clause-loader#handleStandardChange", "choices-select-target": "select" }
+              } %>
+        </div>
+        
+        <div class="mb-6 hidden" data-tool-clause-loader-target="clauseContainer">
+          <div class="mb-3">
+            <%= form.label :top_level_clause_id, t('add_top_level_clauses'), class: "block text-sm font-medium text-[#0D1120] mb-2" %>
+            <p class="text-xs text-[#797C81]"><%= t('add_top_level_clauses_description') %></p>
+          </div>
+          
+          <div class="flex gap-3 mb-6">
+            <div class="flex-1">
+              <%= form.select :top_level_clause_id,
+                  [],
+                  { prompt: t('select_a_clause_to_add') },
+                  {
+                    id: "tool_top_level_clause_id",
+                    class: "w-full"
+                  } %>
+            </div>
+            <button type="button"
+                    data-action="click->tool-clause-loader#addClause"
+                    class="px-6 py-3 text-sm font-medium text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors whitespace-nowrap flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <%= t('add_clause') %>
+            </button>
+          </div>
+          
+          <!-- Selected Clauses List -->
+          <div class="hidden" data-tool-clause-loader-target="selectedClausesContainer">
+            <div class="border border-[#E3E3E3] rounded-lg p-4 bg-gray-50">
+              <h4 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('selected_clauses') %></h4>
+              <div class="space-y-2" data-tool-clause-loader-target="selectedClausesList">
+                <!-- Dynamic clause items will be added here -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-[#E3E3E3]">
+          <button type="button" 
+                  data-controller="basic-modal"
+                  data-basic-modal-dialog-value="link-standard-modal"
+                  data-action="click->basic-modal#close"
+                  class="px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <%= t('cancel') %>
+          </button>
+          <%= form.submit t('link_clauses'), 
+              class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors",
+              data: { "tool-clause-loader-target": "submitButton" } %>
+        </div>
+      <% end %>
+    </div>
+  </dialog>
+
+
+  <!-- Table of Content -->
+  <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
+    <div class="p-4 sm:p-5 border-b border-[#E3E3E3]">
+      <h2 class="text-base sm:text-lg font-semibold text-[#0D1120]"><%= t('table_of_content') %></h2>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[720px]">
+        <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+          <tr>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('elements') %></span>
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('attributes') %></span>
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('description') %></span>
+            </th>
+            <th class="text-left p-4">
+              <span class="text-xs font-semibold text-[#797C81]"><%= t('scoring_type') %></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @tool.checkpoints.any? %>
+            <% @tool.checkpoints.order(Arel.sql("display_order NULLS LAST, created_at")).each do |checkpoint| %>
+              <% checkpoint_translation = checkpoint.translation_for(current_locale) %>
+              <% subcheckpoints = checkpoint.subcheckpoints.order(Arel.sql("display_order NULLS LAST, created_at")) %>
+              <% if subcheckpoints.any? %>
+                <% subcheckpoints.each_with_index do |subcheckpoint, index| %>
+                  <% subcheckpoint_translation = subcheckpoint.translation_for(current_locale) %>
+                  <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                    <% if index == 0 %>
+                      <td class="p-4 align-top" rowspan="<%= subcheckpoints.count %>">
+                        <div class="flex items-center gap-2">
+                          <span class="text-sm font-medium text-[#0D1120]"><%= checkpoint.name_in(current_locale).presence || "-" %></span>
+                          <% if checkpoint_translation&.needs_review %>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[#F6EEFF] text-[#5C3984] border border-[#D6C4ED]"><%= t('review_badge', default: (current_locale == "ar" ? "مراجعة" : "Review")) %></span>
+                            <% unless viewer? || !current_user&.can_manage_tools? %>
+                              <%= form_with url: mark_tool_checkpoint_reviewed_path(checkpoint_id: checkpoint.id), method: :patch, local: true do |form| %>
+                                <%= form.hidden_field :language_code, value: current_locale %>
+                                <%= form.submit t('mark_as_reviewed', default: "Mark as Reviewed"), class: "px-2 py-0.5 text-[10px] text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded transition-colors" %>
+                              <% end %>
+                            <% end %>
+                          <% end %>
+                        </div>
+                      </td>
+                    <% end %>
+                    <td class="p-4">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm text-[#0D1120]"><%= subcheckpoint.name_in(current_locale).presence || "-" %></span>
+                        <% if subcheckpoint_translation&.needs_review %>
+                          <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-[#F6EEFF] text-[#5C3984] border border-[#D6C4ED]"><%= t('review_badge', default: (current_locale == "ar" ? "مراجعة" : "Review")) %></span>
+                          <% unless viewer? || !current_user&.can_manage_tools? %>
+                            <%= form_with url: mark_tool_subcheckpoint_reviewed_path(subcheckpoint_id: subcheckpoint.id), method: :patch, local: true do |form| %>
+                              <%= form.hidden_field :language_code, value: current_locale %>
+                              <%= form.submit t('mark_as_reviewed', default: "Mark as Reviewed"), class: "px-2 py-0.5 text-[10px] text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded transition-colors" %>
+                            <% end %>
+                          <% end %>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td class="p-4">
+                      <div class="text-sm text-[#0D1120]"><%= simple_format(subcheckpoint.description_in(current_locale).presence || "-", {}, wrapper_tag: "div") %></div>
+                    </td>
+                    <td class="p-4">
+                      <% if subcheckpoint.scoring_type.present? %>
+                        <% case subcheckpoint.scoring_type %>
+                        <% when "Number" %>
+                          <span class="text-sm text-[#0D1120]">
+                            <% if subcheckpoint.min_score.present? || subcheckpoint.max_score.present? %>
+                              <%= t('number') %> (<%= subcheckpoint.min_score.presence || "0" %>-<%= subcheckpoint.max_score.presence || "∞" %>)
+                            <% else %>
+                              <%= t('number') %>
+                            <% end %>
+                          </span>
+                        <% when "Percentage" %>
+                          <span class="text-sm text-[#0D1120]">
+                            <% if subcheckpoint.min_score.present? || subcheckpoint.max_score.present? %>
+                              <%= t('percentage') %> (<%= subcheckpoint.min_score.presence || "0" %>-<%= subcheckpoint.max_score.presence || "100" %>)
+                            <% else %>
+                              <%= t('percentage') %>
+                            <% end %>
+                          </span>
+                        <% when "Multiple Choice" %>
+                          <span class="text-sm text-[#0D1120]"><%= t('multiple_choice') %></span>
+                        <% else %>
+                          <span class="text-sm text-[#797C81]"><%= subcheckpoint.scoring_type %></span>
+                        <% end %>
+                      <% else %>
+                        <span class="text-sm text-[#797C81]">-</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <!-- Checkpoint without subcheckpoints -->
+                <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                  <td class="p-4">
+                    <span class="text-sm font-medium text-[#0D1120]"><%= checkpoint.name_in(current_locale).presence || "-" %></span>
+                  </td>
+                  <td class="p-4">
+                    <span class="text-sm text-[#797C81]">-</span>
+                  </td>
+                  <td class="p-4">
+                    <span class="text-sm text-[#797C81]">-</span>
+                  </td>
+                  <td class="p-4">
+                    <span class="text-sm text-[#797C81]">-</span>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="4" class="p-8 text-center text-sm text-[#797C81]">
+                <%= t('no_checkpoints_found') %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+

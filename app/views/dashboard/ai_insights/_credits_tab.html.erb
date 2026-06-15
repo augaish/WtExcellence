@@ -1,0 +1,40 @@
+<!-- Current Credits Display -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('available_credits') %></h3>
+    <p class="text-2xl sm:text-3xl font-bold text-[#5C3984]"><%= @current_credits %></p>
+    <p class="text-[10px] sm:text-xs text-[#797C81] mt-2"><%= t('credits_remaining') %></p>
+  </div>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('total_credits_used') %></h3>
+    <p class="text-2xl sm:text-3xl font-bold text-[#0D1120]"><%= @total_credits_used %></p>
+    <p class="text-[10px] sm:text-xs text-[#797C81] mt-2"><%= t('all_time') %></p>
+  </div>
+</div>
+
+<!-- Credit Usage Chart -->
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5 mb-4 sm:mb-6">
+  <div class="mb-3 sm:mb-4">
+    <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-1 break-words"><%= t('credit_usage_over_time') %></h3>
+    <p class="text-[10px] sm:text-xs text-[#797C81]"><%= t('last_30_days') %></p>
+  </div>
+  <div class="h-[180px] sm:h-[213px]">
+    <% if @credit_usage_chart&.any? && @credit_usage_chart.values.any? { |v| v > 0 } %>
+      <%= column_chart @credit_usage_chart, 
+          colors: ["#5C3984"],
+          height: "213px",
+          legend: false %>
+    <% else %>
+      <div class="h-full flex items-center justify-center text-xs sm:text-sm text-[#797C81]">
+        <%= t('no_data_available') %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- Activity Feed -->
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-5">
+  <h3 class="text-xs sm:text-sm font-semibold text-[#0D1120] mb-3 sm:mb-4 break-words"><%= t('ai_activity') %></h3>
+  <%= render partial: "activity_feed" %>
+</div>
+
