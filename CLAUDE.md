@@ -87,3 +87,28 @@ Deployed via **Kamal** (Docker-based) to `app.wtexcellence.com`. Config in `conf
 Primary provider: **OpenRouter** (default model: `anthropic/claude-sonnet-4.5`). Per-task provider selection via env vars:
 - `CAPA_ACTION_PROVIDER`, `CAPA_CLAUSE_PROVIDER`, `CAPA_QUESTIONNAIRE_PROVIDER` — set to `ollama` or `openrouter`
 - Each has corresponding `CAPA_*_OLLAMA_MODEL` for local inference
+
+## Outbound Data Flows
+
+External services that receive data from this app — review before adding new ones:
+- **OpenRouter / Ollama**: full CAPA text, descriptions, standards/clauses, questionnaire answers, and extracted PDF text (`app/services/capa_*_service.rb`, `multi_stage_pdf_pipeline.rb`, `ollama_client.rb`)
+- **Aliyun OSS**: all uploaded files/documents (`config/storage.yml`)
+- **Sentry**: error traces and request context, 100% sample rate (`config/initializers/sentry.rb`)
+- **MailerSend SMTP**: notification/invitation emails (`app/mailers/`)
+
+## Code Conventions
+
+- **Controllers**: thin; inherit `Dashboard::BaseController` or `ApplicationController`; use `respond_to` for html/json; status via symbols (`:forbidden`, `:unprocessable_entity`, `:not_found`)
+- **Models**: explicit `class_name:`/`foreign_key:` on associations; Rails 7 hash-enum syntax (`enum :status, { open: "Open" }`); lambda scopes; soft-delete via `deleted_at`; audit context via `Thread.current[:current_user]`
+- **Services**: class-method entry points with keyword args (e.g. `CreditService.deduct_credits(company, action_type, company_user: user)`); custom error classes (e.g. `CreditService::InsufficientCreditsError`); wrap external calls in begin/rescue and log rather than always raising
+- **Views**: i18n via `t()` for all user-facing strings; Tailwind utility classes; partials named `_partial.html.erb`; mobile-first breakpoints (`sm:`, `lg:`)
+- **Tests**: Minitest (not RSpec), mirroring `app/` structure under `test/`; fixtures plus `SecureRandom.hex(4)` for uniqueness in setup
+- **Style**: follows `rubocop-rails-omakase`; snake_case methods/vars, PascalCase classes, CONSTANT_CASE constants
+
+## Development Workflow
+
+For new feature requests or non-trivial changes, work through these stages before declaring done:
+1. **Requirement analysis** — restate the ask, identify affected models/controllers/views, flag ambiguities to the user if blocking
+2. **Design** — propose which files change and how, applying the Code Conventions above
+3. **Implementation** — write the code
+4. **Audit** — re-check the diff for security issues (see `security-review` skill), convention adherence, and that the feature actually works (run relevant tests or verify manually) before reporting completion
