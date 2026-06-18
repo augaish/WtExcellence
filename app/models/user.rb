@@ -64,6 +64,14 @@ class User < ApplicationRecord
     company_user&.company_quality_manager?
   end
 
+  def company_risk_manager?
+    company_user&.company_risk_manager?
+  end
+
+  def can_manage_risks?
+    company_user&.can_manage_risks? || platform_admin?
+  end
+
   def company_contributor?
     company_user&.company_contributor?
   end

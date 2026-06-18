@@ -1,0 +1,74 @@
+<%= form_with model: @risk, url: (@risk.new_record? ? dashboard_risk_management_index_path : dashboard_update_risk_path(@risk)), method: (@risk.new_record? ? :post : :patch), class: "space-y-6" do |f| %>
+
+  <% if @risk.errors.any? %>
+    <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="flex-1">
+          <h3 class="text-sm font-medium text-red-800 mb-2">
+            <%= pluralize(@risk.errors.count, "error") %> prohibited this risk from being saved:
+          </h3>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+            <% @risk.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 space-y-4">
+    <div>
+      <%= f.label :title, "Title", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_field :title, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div>
+      <%= f.label :description, "Description", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_area :description, rows: 3, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :category, "Category", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.text_field :category, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+      </div>
+      <div>
+        <%= f.label :owner_id, "Owner", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.collection_select :owner_id, current_company&.company_users&.includes(:user) || [], :id, ->(cu) { cu.user.name }, { include_blank: "Unassigned" }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :likelihood, "Likelihood (1-5)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.select :likelihood, (1..5), {}, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      </div>
+      <div>
+        <%= f.label :impact, "Impact (1-5)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.select :impact, (1..5), {}, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :residual_likelihood, "Residual Likelihood (after mitigation)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.select :residual_likelihood, (1..5), { include_blank: true }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      </div>
+      <div>
+        <%= f.label :residual_impact, "Residual Impact (after mitigation)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.select :residual_impact, (1..5), { include_blank: true }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :status, "Status", class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.select :status, Risk.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3">
+    <%= link_to "Cancel", dashboard_risk_management_index_path, class: "px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50" %>
+    <%= f.submit (@risk.new_record? ? "Log Risk" : "Save Changes"), class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
+  </div>
+<% end %>

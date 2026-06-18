@@ -17,6 +17,7 @@ class CompanyUser < ApplicationRecord
   ROLES = {
     company_admin: "company_admin",
     company_quality_manager: "company_quality_manager",
+    company_risk_manager: "company_risk_manager",
     company_auditor: "company_auditor",
     company_contributor: "company_contributor",
     company_viewer: "company_viewer"
@@ -29,6 +30,10 @@ class CompanyUser < ApplicationRecord
 
   def company_quality_manager?
     role == ROLES[:company_quality_manager]
+  end
+
+  def company_risk_manager?
+    role == ROLES[:company_risk_manager]
   end
 
   def company_auditor?
@@ -48,6 +53,12 @@ class CompanyUser < ApplicationRecord
   # (either through company admin, quality manager role, or platform-wide admin role)
   def has_admin_privileges?
     company_admin? || company_quality_manager? || user&.platform_admin?
+  end
+
+  # Risk management: company admins have full access; risk managers are
+  # scoped to the risk register (mirrors how quality managers are scoped to assessments)
+  def can_manage_risks?
+    company_admin? || company_risk_manager? || user&.platform_admin?
   end
 
   def credit_balance

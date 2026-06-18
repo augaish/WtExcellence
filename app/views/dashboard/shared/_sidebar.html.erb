@@ -36,6 +36,17 @@
                     <% end %>
                 <% end %>
             <% end %>
+            <% if current_user&.can_manage_risks? %>
+                <%= link_to dashboard_risk_management_index_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('risk_management')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('risk_management') %></span>
+                        <%= image_tag asset_path('score-start-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('score-start-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('risk_management') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
             <%= link_to library_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/library')}" do %>
                 <% if rtl? %>
                     <span><%= t('library') %></span>

@@ -22,7 +22,7 @@ default: &default
 
 development:
   <<: *default
-  database: way_to_excellence_development]
+  database: way_to_excellence_development
 
   username: postgres
   password: Patrick242004

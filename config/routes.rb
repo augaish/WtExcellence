@@ -68,6 +68,16 @@ Rails.application.routes.draw do
       delete "/:capa_id/unlink_document/:upload_id", action: :unlink_document, as: :unlink_capa_document
     end
 
+    scope :risk_management, controller: :risk_management do
+      get "/", action: :index, as: :risk_management_index
+      post "/", action: :create
+      get "/new", action: :new, as: :new_risk
+      get "/:id", action: :show, as: :risk_management
+      get "/:id/edit", action: :edit, as: :edit_risk
+      patch "/:id", action: :update, as: :update_risk
+      delete "/:id", action: :destroy, as: :destroy_risk
+    end
+
     resources :companies, only: [ :index ], controller: :companies
 
     # Account Management routes

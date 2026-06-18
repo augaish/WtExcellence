@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_04_30_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_06_18_161356) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -506,6 +506,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_30_120000) do
     t.index ["capa_id"], name: "index_questionnaires_on_capa_id", unique: true
   end
 
+  create_table "risks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.uuid "owner_id"
+    t.uuid "created_by_id"
+    t.string "title", null: false
+    t.text "description"
+    t.string "category"
+    t.uuid "riskable_id"
+    t.string "riskable_type", limit: 50
+    t.integer "likelihood", default: 1, null: false
+    t.integer "impact", default: 1, null: false
+    t.integer "inherent_score", default: 1, null: false
+    t.integer "residual_likelihood"
+    t.integer "residual_impact"
+    t.integer "residual_score"
+    t.string "status", default: "identified", null: false
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_risks_on_company_id"
+    t.index ["created_by_id"], name: "index_risks_on_created_by_id"
+    t.index ["deleted_at"], name: "index_risks_on_deleted_at"
+    t.index ["owner_id"], name: "index_risks_on_owner_id"
+    t.index ["riskable_type", "riskable_id"], name: "index_risks_on_riskable"
+    t.index ["status"], name: "index_risks_on_status"
+  end
+
   create_table "standard_translations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "standard_id", null: false
     t.string "language_code", limit: 10, null: false
@@ -752,6 +779,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_30_120000) do
   add_foreign_key "ingestion_jobs", "uploads", column: "input_pdf_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "questionnaires", "capas"
+  add_foreign_key "risks", "companies"
+  add_foreign_key "risks", "company_users", column: "owner_id"
+  add_foreign_key "risks", "users", column: "created_by_id"
   add_foreign_key "standard_translations", "languages", column: "language_code", primary_key: "code"
   add_foreign_key "standard_translations", "standards"
   add_foreign_key "standard_versions", "standards"
