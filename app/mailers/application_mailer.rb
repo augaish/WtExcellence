@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "noreply@wtexcellence.com"
+  default from: "noreply@wtexcel.com"
   layout "mailer"
 end
