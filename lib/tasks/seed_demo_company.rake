@@ -3,7 +3,7 @@ namespace :demo do
   task seed_company: :environment do
     password = ENV.fetch("DEMO_PASSWORD", "Password1!")
     company_name = ENV.fetch("DEMO_COMPANY", "Acme Excellence Co.")
-    domain = ENV.fetch("DEMO_EMAIL_DOMAIN", "demo.wtexcel.com")
+    domain = ENV.fetch("DEMO_EMAIL_DOMAIN", "demo.wtexcellence.com")
 
     users_spec = [
       { role: "company_admin",           name: "Alice Admin",      email_local: "admin" },
