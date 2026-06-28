@@ -12,6 +12,9 @@ service: wtexcel
 builder:
   arch: amd64
 
+volumes:
+  - "/var/lib/wtexcel/storage:/rails/storage"
+
 servers:
   web:
     hosts:
@@ -51,6 +54,7 @@ env:
     RAILS_SERVE_STATIC_FILES: "true"
     ROOT_URL: "https://app.wtexcel.com"
     APP_DOMAIN: "wtexcel.com"
+    ACTIVE_STORAGE_SERVICE: "local"
   secret:
     - RAILS_MASTER_KEY
     - SECRET_KEY_BASE
@@ -69,11 +73,6 @@ env:
     - CAPA_QUESTIONNAIRE_OLLAMA_MODEL
     - CAPA_QUESTIONNAIRE_SINGLE_PAIR_OLLAMA_MODEL
     - CAPA_ROOT_CAUSE_OLLAMA_MODEL
-    - ALIYUN_ACCESS_KEY_ID
-    - ALIYUN_ACCESS_KEY_SECRET
-    - ALIYUN_BUCKET
-    - ALIYUN_REGION
-    - ALIYUN_ENDPOINT
     - SMTP_PORT
     - SMTP_SERVER
     - SMTP_LOGIN
