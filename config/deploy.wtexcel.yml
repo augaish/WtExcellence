@@ -1,0 +1,103 @@
+image: atandrau/way_to_excellence
+
+<% require "dotenv"; Dotenv.load(".env") %>
+
+registry:
+  username: atandrau
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+service: wtexcel
+
+builder:
+  arch: amd64
+
+servers:
+  web:
+    hosts:
+      - 74.208.192.18
+    options:
+      memory: "1g"
+
+  job:
+    hosts:
+      - 74.208.192.18
+    cmd: bundle exec sidekiq -q default -c 5
+    options:
+      memory: "512m"
+
+proxy:
+  ssl: true
+  hosts:
+    - wtexcel.com
+    - www.wtexcel.com
+    - app.wtexcel.com
+  response_timeout: 120
+  app_port: 3000
+  healthcheck: # Configure a custom healthcheck (default is /up on port 3000)
+    path: /up
+    interval: 20
+
+boot:
+  limit: 10 # Can also specify as a percentage of total hosts, such as "25%"
+  wait: 2
+
+env:
+  clear:
+    RAILS_ENV: production
+    RAILS_LOG_TO_STDOUT: true
+    NEW_RELIC_LOG: "stdout"
+    PRODUCT: "way_to_excellence"
+    RAILS_SERVE_STATIC_FILES: "true"
+    ROOT_URL: "https://app.wtexcel.com"
+    APP_DOMAIN: "wtexcel.com"
+  secret:
+    - RAILS_MASTER_KEY
+    - SECRET_KEY_BASE
+    - POSTGRES_PASSWORD
+    - REDIS_PASSWORD
+    - DATABASE_URL
+    - REDIS_URL
+    - OPENROUTER_API_KEY
+    - OPENROUTER_MODEL
+    - OLLAMA_URL
+    - CAPA_ACTION_PROVIDER
+    - CAPA_CLAUSE_PROVIDER
+    - CAPA_QUESTIONNAIRE_PROVIDER
+    - CAPA_ACTION_OLLAMA_MODEL
+    - CAPA_CLAUSE_OLLAMA_MODEL
+    - CAPA_QUESTIONNAIRE_OLLAMA_MODEL
+    - CAPA_QUESTIONNAIRE_SINGLE_PAIR_OLLAMA_MODEL
+    - CAPA_ROOT_CAUSE_OLLAMA_MODEL
+    - ALIYUN_ACCESS_KEY_ID
+    - ALIYUN_ACCESS_KEY_SECRET
+    - ALIYUN_BUCKET
+    - ALIYUN_REGION
+    - ALIYUN_ENDPOINT
+    - SMTP_PORT
+    - SMTP_SERVER
+    - SMTP_LOGIN
+    - SMTP_PASSWORD
+    - SMTP_DOMAIN
+    - SENTRY_DSN
+
+accessories:
+  db:
+    image: postgres:17
+    host: 74.208.192.18
+    port: 5432
+    env:
+      clear:
+        POSTGRES_USER: 'wtexcel'
+        POSTGRES_DB: 'wtexcel_prod'
+      secret:
+        - POSTGRES_PASSWORD
+    directories:
+      - data:/var/lib/postgresql/data
+  redis:
+    image: redis:7.0
+    host: 74.208.192.18
+    cmd: redis-server --requirepass <%= ENV['WTEXCEL_REDIS_PASSWORD'] %>
+    port: 6379
+    directories:
+      - data:/data

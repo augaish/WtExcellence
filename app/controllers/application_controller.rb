@@ -30,12 +30,13 @@ class ApplicationController < ActionController::Base
 
   private
 
-  # Restrict www.wtexcellence.com to only show homepage
+  # Restrict www.<APP_DOMAIN> to only show homepage
   def restrict_www_to_homepage
     host = request.host.downcase
-    
-    # Check if host is www.wtexcellence.com or wtexcellence.com (but not test or app)
-    if (host == "www.wtexcellence.com" || host == "wtexcellence.com") && 
+    app_domain = ENV.fetch("APP_DOMAIN", "wtexcellence.com")
+
+    # Check if host is www.<APP_DOMAIN> or <APP_DOMAIN> (but not test or app)
+    if (host == "www.#{app_domain}" || host == app_domain) &&
        !host.include?("test") && !host.include?("app")
       # Allow root path, waitlist routes, and language switching
       allowed_paths = ["/", root_path, "/waitlist", "/waitlist/success"]
