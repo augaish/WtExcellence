@@ -1,11 +1,11 @@
-image: atandrau/way_to_excellence
+image: augaishb/way_to_excellence
 
 <% require "dotenv"; Dotenv.load(".env") %>
 
 registry:
-  username: atandrau
+  username: augaishb
   password:
-    - KAMAL_REGISTRY_PASSWORD
+    - WTEXCEL_KAMAL_REGISTRY_PASSWORD
 
 service: wtexcel
 
