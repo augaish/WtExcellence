@@ -29,6 +29,13 @@ servers:
     options:
       memory: "512m"
 
+  cron_small:
+    hosts:
+      - 74.208.192.18
+    cmd: bundle exec sidekiq -q cron_small -c 1
+    options:
+      memory: "128m"
+
 proxy:
   ssl: true
   hosts:
