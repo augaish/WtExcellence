@@ -63,6 +63,14 @@ class LibraryController < DashboardController
 
     # Folders for upload dialog (company-scoped so company admins only see their company's folders)
     @folders_for_upload = @company ? Folder.where(company_id: @company.id).where.not(company_id: nil).order(:name) : Folder.none
+
+    # Evidence reuse dashboard — top 10 most-linked documents for this company
+    if @company
+      @top_reused_uploads = Upload.for_company(@company.id)
+        .with_reuse_count
+        .order("reuse_count DESC")
+        .limit(10)
+    end
   end
 
   def create
@@ -412,20 +420,20 @@ class LibraryController < DashboardController
         last_modified: upload.updated_at&.strftime("%Y-%m-%d"),
         linked_to: upload.evidence_attachments.includes(:attachable).reject { |a| a.attachable_type == "CapaAction" }.map do |attachment|
           url = case attachment.attachable_type
-                when "Standard"
+          when "Standard"
                   standard_path(attachment.attachable_id) rescue "#"
-                when "Clause"
+          when "Clause"
                   standard_path(attachment.attachable.standard_id) rescue "#"
-                when "ChecklistItem"
+          when "ChecklistItem"
                   "#"
-                when "Capa"
+          when "Capa"
                   dashboard_capa_management_show_path(attachment.attachable_id) rescue "#"
-                when "Assessment"
+          when "Assessment"
                   clause = attachment.attachable&.tool_clause&.clause
                   clause ? clause_assessment_path(clause) : "#"
-                else
+          else
                   "#"
-                end
+          end
           {
             name: attachment.attachable_name(I18n.locale.to_s),
             url: url

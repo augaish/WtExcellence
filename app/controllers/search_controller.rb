@@ -88,6 +88,16 @@ class SearchController < ApplicationController
     }
   end
 
+  def format_upload_result(upload, formatted_results)
+    formatted_results << {
+      id: upload.id,
+      type: "Upload",
+      name: upload.display_name,
+      description: upload.notes,
+      folder_id: upload.folder_id
+    }
+  end
+
   public
 
   def index
@@ -145,8 +155,14 @@ class SearchController < ApplicationController
       .where(capas: { company_id: current_company.id })
       .limit(5)
 
+    uploads_results = PgSearch.multisearch(query)
+      .where(searchable_type: "Upload")
+      .joins("INNER JOIN uploads ON uploads.id::text = pg_search_documents.searchable_id::text")
+      .where(uploads: { company_id: current_company.id })
+      .limit(5)
+
     # Combine results - convert to arrays and combine
-    results = standards_results.to_a + clauses_results.to_a + checklist_items_results.to_a + capas_results.to_a
+    results = standards_results.to_a + clauses_results.to_a + checklist_items_results.to_a + capas_results.to_a + uploads_results.to_a
 
 
     if request.format.json?
@@ -168,6 +184,8 @@ class SearchController < ApplicationController
           format_checklist_item_result(searchable, formatted_results, seen_checkpoint_ids)
         when "Capa"
           format_capa_result(searchable, formatted_results, seen_checkpoint_ids)
+        when "Upload"
+          format_upload_result(searchable, formatted_results)
         end
       end
 

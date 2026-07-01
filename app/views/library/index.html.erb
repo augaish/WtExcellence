@@ -145,6 +145,49 @@
     <%= turbo_frame_tag "folders_grid" do %>
         <%= render partial: 'folders_grid' %>
     <% end %>
+
+    <!-- Evidence Reuse Dashboard -->
+    <% if @top_reused_uploads&.any? %>
+      <div class="mt-8 bg-white rounded-lg border border-gray-200 shadow-sm">
+        <div class="px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-[#0D1120]"><%= t('evidence_reuse_title') %></h2>
+          <p class="text-sm text-gray-500 mt-1"><%= t('evidence_reuse_subtitle') %></p>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('document') %></th>
+                <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('folder') %></th>
+                <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('linked_to') %></th>
+                <th class="px-6 py-3 text-end text-xs font-medium text-gray-500 uppercase tracking-wider"><%= t('actions') %></th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% @top_reused_uploads.each do |upload| %>
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 text-sm font-medium text-[#0D1120]">
+                    <%= upload.display_name %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-500">
+                    <%= upload.folder&.name || t('no_folder') %>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-700">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#5C3984]">
+                      <%= upload.reuse_count %> <%= t('items') %>
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-end text-sm">
+                    <%= link_to t('view'), folder_uploads_upload_path(folder_id: upload.folder_id || "all", id: upload.id),
+                        class: "text-[#5C3984] hover:underline font-medium" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
 <% end %>
 <%= render partial: 'create_folder_dialog' %>
 <%= render partial: 'delete_folder_dialog' %>

@@ -1,0 +1,71 @@
+<dialog id="link_evidence_dialog" class="backdrop:bg-black backdrop:bg-opacity-50 bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-2xl w-full" data-controller="modal dialog-no-backdrop-close" dir="<%= text_direction %>" lang="<%= current_locale %>">
+  <div class="p-6">
+    <div class="flex items-start justify-between mb-4">
+      <div>
+        <h2 class="text-xl font-semibold text-[#0D1120]"><%= t('link_evidence_title') %></h2>
+        <p class="text-sm text-gray-500 mt-1"><%= t('link_evidence_subtitle') %></p>
+      </div>
+      <button data-action="click->modal#close" class="p-2 text-gray-400 hover:text-gray-600" aria-label="<%= t('close') %>">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <% if @linkable_uploads.any? %>
+      <%= form_with url: evidence_attachments_path, method: :post, data: { turbo: false } do |f| %>
+        <%= f.hidden_field :upload_id, id: "evidence_upload_id", value: "" %>
+        <%= f.hidden_field :attachable_type, value: "Standard" %>
+        <%= f.hidden_field :attachable_id, value: @standard.id %>
+
+        <div class="mb-4">
+          <input type="text" placeholder="<%= t('search_documents') %>" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]"
+            oninput="filterEvidenceUploads(this.value)" />
+        </div>
+
+        <div class="max-h-72 overflow-y-auto border border-gray-200 rounded-lg divide-y divide-gray-100" id="evidence_uploads_list">
+          <% @linkable_uploads.each do |upload| %>
+            <label class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer <%= 'opacity-50' if @linked_upload_ids.include?(upload.id) %>" data-upload-name="<%= upload.display_name.downcase %>">
+              <input type="radio" name="upload_id" value="<%= upload.id %>"
+                <%= 'disabled' if @linked_upload_ids.include?(upload.id) %>
+                onchange="document.getElementById('evidence_upload_id').value = this.value; document.getElementById('link_evidence_submit').disabled = false;" />
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-[#0D1120] truncate"><%= upload.display_name %></p>
+                <p class="text-xs text-gray-500"><%= upload.folder&.name || t('no_folder') %></p>
+              </div>
+              <% if @linked_upload_ids.include?(upload.id) %>
+                <span class="text-xs text-green-600 font-medium flex-shrink-0"><%= t('already_linked') %></span>
+              <% end %>
+            </label>
+          <% end %>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+          <button type="button" data-action="click->modal#close" class="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium text-sm">
+            <%= t('cancel') %>
+          </button>
+          <button type="submit" id="link_evidence_submit" disabled
+            class="px-6 py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+            <%= t('link_evidence') %>
+          </button>
+        </div>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-gray-500 py-6 text-center"><%= t('no_uploads_available') %></p>
+      <div class="flex justify-end mt-4">
+        <button type="button" data-action="click->modal#close" class="px-4 py-2 text-gray-600 font-medium text-sm"><%= t('close') %></button>
+      </div>
+    <% end %>
+  </div>
+</dialog>
+
+<script>
+  function filterEvidenceUploads(query) {
+    const items = document.querySelectorAll('#evidence_uploads_list label');
+    const q = query.toLowerCase();
+    items.forEach(function(item) {
+      const name = item.dataset.uploadName || '';
+      item.style.display = name.includes(q) ? '' : 'none';
+    });
+  }
+</script>

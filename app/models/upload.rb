@@ -1,4 +1,7 @@
 class Upload < ApplicationRecord
+  include PgSearch::Model
+  multisearchable against: [ :filename, :name, :notes ]
+
   # Active Storage attachment
   has_one_attached :file
 
@@ -29,6 +32,11 @@ class Upload < ApplicationRecord
   scope :for_company, ->(company_id) { where(company_id: company_id) }
   scope :public_uploads, -> { where(visibility: "public") }
   scope :private_uploads, -> { where(visibility: "private") }
+  scope :with_reuse_count, -> {
+    left_joins(:evidence_attachments)
+      .group(:id)
+      .select("uploads.*, COUNT(evidence_attachments.id) AS reuse_count")
+  }
 
   # Scope to get uploads visible to a specific user
   scope :visible_to_user, ->(user) {

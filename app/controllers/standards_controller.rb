@@ -273,6 +273,11 @@ class StandardsController < Dashboard::BaseController
     # Load all versions for the versions tab
     @versions = @standard.standard_versions.includes(:clauses).order(created_at: :desc)
 
+    # Uploads available for evidence linking (company-scoped)
+    company = current_company || current_user&.company
+    @linkable_uploads = company ? Upload.for_company(company.id).order(:filename).limit(200) : Upload.none
+    @linked_upload_ids = @standard.evidence_attachments.pluck(:upload_id)
+
     # Check if version_id is provided in params (for version selector)
     if params[:version_id].present?
       @selected_version = @standard.standard_versions.find(params[:version_id])
@@ -601,7 +606,7 @@ class StandardsController < Dashboard::BaseController
       end
 
       standard_version = StandardVersion.find(params[:standard_version_id])
-      
+
       # Calculate the next code and sort_order for the new root clause
       existing_root_clauses = standard_version.clauses.root_clauses.ordered
       next_sort_order = existing_root_clauses.maximum(:sort_order).to_i + 1
@@ -730,9 +735,9 @@ class StandardsController < Dashboard::BaseController
     # Invalidate score caches on ancestors before deletion
     standard = standard_version&.standard
     if standard && parent
-      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [parent])
+      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [ parent ])
     elsif standard
-      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [clause])
+      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [ clause ])
     end
 
     # This will also delete children due to dependent: :destroy
@@ -1725,7 +1730,7 @@ class StandardsController < Dashboard::BaseController
       clause.update!(base_points: base_points)
 
       standard = clause.standard_version&.standard
-      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [clause]) if standard
+      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [ clause ]) if standard
 
       children_sum = clause.children.sum(:base_points).to_f
 
@@ -1797,7 +1802,7 @@ class StandardsController < Dashboard::BaseController
       end
 
       standard = parent.standard_version&.standard
-      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [parent]) if standard
+      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [ parent ]) if standard
 
       render json: {
         message: "Sub-clause weights saved",
@@ -1853,7 +1858,7 @@ class StandardsController < Dashboard::BaseController
       end
 
       standard = parent.standard_version&.standard
-      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [parent]) if standard
+      ClauseScorePropagator.invalidate_cache_for_tool_clause_changes(standard, [ parent ]) if standard
 
       grandparent_match = if parent.parent_id.present?
         siblings_sum = Clause.where(parent_id: parent.parent_id).sum(:base_points).to_f
@@ -1904,7 +1909,7 @@ class StandardsController < Dashboard::BaseController
         redirect_to root_path, alert: error_message, status: :see_other
       end
     end
-    return
+    nil
   end
 
   def is_descendant?(potential_descendant, ancestor)
