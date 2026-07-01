@@ -3,6 +3,7 @@ class Risk < ApplicationRecord
   belongs_to :owner, class_name: "CompanyUser", optional: true
   belongs_to :created_by, class_name: "User", optional: true
   belongs_to :riskable, polymorphic: true, optional: true
+  belongs_to :risk_workspace, optional: true
 
   enum :status, {
     identified: "identified",

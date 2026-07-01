@@ -3,6 +3,7 @@ class Company < ApplicationRecord
   has_many :users, through: :company_users
   has_many :capas, dependent: :nullify
   has_many :company_standards, dependent: :destroy
+  has_many :risk_workspaces, dependent: :destroy
   has_many :folders, dependent: :destroy
   has_many :uploads, dependent: :destroy
   has_many :clause_score_caches, class_name: "ClauseScoreCache", dependent: :destroy

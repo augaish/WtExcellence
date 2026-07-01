@@ -16,16 +16,18 @@
                     <% end %>
                 <% end %>
             <% end %>
-            <%= link_to standards_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/standards')}" do %>
-                <% if rtl? %>
-                    <span><%= t('standards') %></span>
-                    <%= image_tag asset_path('standards-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
-                <% else %>
-                    <%= image_tag asset_path('standards-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
-                    <span><%= t('standards') %></span>
+            <% unless current_user&.risk_manager_only? %>
+                <%= link_to standards_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/standards')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('standards') %></span>
+                        <%= image_tag asset_path('standards-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('standards-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('standards') %></span>
+                    <% end %>
                 <% end %>
             <% end %>
-            <% unless current_user&.super_admin? || current_user&.delegated_admin? %>
+            <% unless current_user&.super_admin? || current_user&.delegated_admin? || current_user&.risk_manager_only? %>
                 <%= link_to dashboard_capa_management_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('capa_management')}" do %>
                     <% if rtl? %>
                         <span><%= t('capa_management') %></span>
@@ -46,14 +48,19 @@
                         <span><%= t('risk_management') %></span>
                     <% end %>
                 <% end %>
+                <%= link_to dashboard_risk_workspaces_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-2 ps-10 pe-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-600 font-medium text-xs sm:text-sm min-h-[36px] #{'bg-purple-100 text-purple-900' if request.path.include?('risk_workspaces')}" do %>
+                    <span><%= t('risk_workspaces') %></span>
+                <% end %>
             <% end %>
-            <%= link_to library_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/library')}" do %>
-                <% if rtl? %>
-                    <span><%= t('library') %></span>
-                    <%= image_tag asset_path('library-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
-                <% else %>
-                    <%= image_tag asset_path('library-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
-                    <span><%= t('library') %></span>
+            <% unless current_user&.risk_manager_only? %>
+                <%= link_to library_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/library')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('library') %></span>
+                        <%= image_tag asset_path('library-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('library-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('library') %></span>
+                    <% end %>
                 <% end %>
             <% end %>
         </nav>

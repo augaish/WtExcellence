@@ -108,6 +108,17 @@ class Dashboard::BaseController < ApplicationController
       prevent_viewer_action
     end
 
+    # Risk Managers are scoped to Risk Management only — block them from
+    # CAPA, Standards, and Library controllers even via direct URL access.
+    def ensure_not_risk_manager_only
+      return unless current_user&.risk_manager_only?
+
+      respond_to do |format|
+        format.html { redirect_to dashboard_risk_management_index_path, alert: "Your role is limited to Risk Management.", status: :forbidden }
+        format.json { render json: { success: false, error: "Your role is limited to Risk Management." }, status: :forbidden }
+      end
+    end
+
     private
 
     # Set current user in Thread storage for activity logging in model callbacks
@@ -134,6 +145,6 @@ class Dashboard::BaseController < ApplicationController
         redirect_to dashboard_capa_management_path,
                     alert: "You don't have permission to manage AI credits.",
                     status: :see_other
-        return
+        nil
     end
 end

@@ -1,4 +1,6 @@
 class LibraryController < DashboardController
+  before_action :ensure_not_risk_manager_only
+
   def index
     # For super admins and delegated admins, show company selection if no company_id is provided
     if (current_user&.super_admin? || current_user&.delegated_admin?) && params[:company_id].blank?

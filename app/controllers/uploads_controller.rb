@@ -1,4 +1,6 @@
 class UploadsController < DashboardController
+  before_action :ensure_not_risk_manager_only
+
   def new
     # Filter folders by company for non-platform-admin users
     if current_user&.platform_admin?

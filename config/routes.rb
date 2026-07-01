@@ -81,6 +81,8 @@ Rails.application.routes.draw do
       delete "/:id", action: :destroy, as: :destroy_risk
     end
 
+    resources :risk_workspaces, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
+
     resources :companies, only: [ :index ], controller: :companies
 
     # Account Management routes

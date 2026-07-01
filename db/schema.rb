@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_01_085338) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_01_090744) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -507,6 +507,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_085338) do
     t.index ["capa_id"], name: "index_questionnaires_on_capa_id", unique: true
   end
 
+  create_table "risk_workspaces", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "name", null: false
+    t.string "framework"
+    t.text "description"
+    t.string "department_scope"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_risk_workspaces_on_company_id"
+    t.index ["deleted_at"], name: "index_risk_workspaces_on_deleted_at"
+  end
+
   create_table "risks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "company_id", null: false
     t.uuid "owner_id"
@@ -526,10 +539,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_085338) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "risk_workspace_id"
     t.index ["company_id"], name: "index_risks_on_company_id"
     t.index ["created_by_id"], name: "index_risks_on_created_by_id"
     t.index ["deleted_at"], name: "index_risks_on_deleted_at"
     t.index ["owner_id"], name: "index_risks_on_owner_id"
+    t.index ["risk_workspace_id"], name: "index_risks_on_risk_workspace_id"
     t.index ["riskable_type", "riskable_id"], name: "index_risks_on_riskable"
     t.index ["status"], name: "index_risks_on_status"
   end
@@ -780,8 +795,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_085338) do
   add_foreign_key "ingestion_jobs", "uploads", column: "input_pdf_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "questionnaires", "capas"
+  add_foreign_key "risk_workspaces", "companies"
   add_foreign_key "risks", "companies"
   add_foreign_key "risks", "company_users", column: "owner_id"
+  add_foreign_key "risks", "risk_workspaces"
   add_foreign_key "risks", "users", column: "created_by_id"
   add_foreign_key "standard_translations", "languages", column: "language_code", primary_key: "code"
   add_foreign_key "standard_translations", "standards"

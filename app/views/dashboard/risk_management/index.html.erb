@@ -7,9 +7,12 @@
         <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('risk_management') %></h1>
         <p class="text-[#797C81]">Track, score, and mitigate organizational risk</p>
       </div>
-      <%= link_to dashboard_new_risk_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" do %>
-        Log New Risk
-      <% end %>
+      <div class="flex items-center gap-3">
+        <%= link_to t('manage_workspaces'), dashboard_risk_workspaces_path, class: "px-4 py-2 text-sm text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors" %>
+        <%= link_to dashboard_new_risk_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" do %>
+          Log New Risk
+        <% end %>
+      </div>
     </div>
 
     <!-- Risk Matrix Heatmap -->
@@ -50,57 +53,64 @@
       </table>
     </div>
 
-    <!-- Risk Register -->
-    <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
-      <div class="p-4 border-b border-[#E3E3E3]">
-        <h2 class="text-lg font-semibold text-[#0D1120]">Risk Register</h2>
+    <!-- Risk Register (grouped by workspace) -->
+    <% if @risks.empty? %>
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-8 text-center text-sm text-[#797C81]">
+        No risks logged yet
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
-            <tr>
-              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Title</span></th>
-              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Category</span></th>
-              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Owner</span></th>
-              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Inherent Score</span></th>
-              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Residual Score</span></th>
-              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Status</span></th>
-              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Action</span></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% if @risks.any? %>
-              <% @risks.each do |risk| %>
-                <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
-                  <td class="p-4 text-sm font-medium text-[#0D1120]"><%= risk.title %></td>
-                  <td class="p-4 text-sm text-[#797C81]"><%= risk.category.presence || "-" %></td>
-                  <td class="p-4 text-sm text-[#797C81]"><%= risk.owner&.user&.name || "Unassigned" %></td>
-                  <td class="p-4">
-                    <span class="px-2 py-1 text-xs font-medium rounded-full <%= risk.inherent_level == 'low' ? 'bg-green-100 text-green-800' : risk.inherent_level == 'medium' ? 'bg-yellow-100 text-yellow-800' : risk.inherent_level == 'high' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800' %>">
-                      <%= risk.inherent_score %> (<%= risk.inherent_level %>)
-                    </span>
-                  </td>
-                  <td class="p-4 text-sm text-[#797C81]">
-                    <% if risk.residual_score.present? %>
-                      <%= risk.residual_score %> (<%= risk.residual_level %>)
-                    <% else %>
-                      -
-                    <% end %>
-                  </td>
-                  <td class="p-4 text-sm text-[#797C81]"><%= risk.status.titleize %></td>
-                  <td class="p-4">
-                    <%= link_to "View", dashboard_risk_management_path(risk), class: "text-blue-500 hover:text-blue-700 text-sm" %>
-                  </td>
-                </tr>
-              <% end %>
-            <% else %>
-              <tr>
-                <td colspan="7" class="p-8 text-center text-sm text-[#797C81]">No risks logged yet</td>
-              </tr>
+    <% else %>
+      <% @risks_by_workspace.each do |workspace, risks| %>
+        <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-6">
+          <div class="p-4 border-b border-[#E3E3E3] flex items-center justify-between">
+            <h2 class="text-lg font-semibold text-[#0D1120]">
+              <%= workspace ? workspace.name : t('uncategorized') %>
+            </h2>
+            <% if workspace %>
+              <%= link_to t('view_workspace'), dashboard_risk_workspace_path(workspace), class: "text-sm text-[#5C3984] hover:underline" %>
             <% end %>
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+                <tr>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Title</span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Category</span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Owner</span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Inherent Score</span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Residual Score</span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Status</span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Action</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% risks.each do |risk| %>
+                  <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                    <td class="p-4 text-sm font-medium text-[#0D1120]"><%= risk.title %></td>
+                    <td class="p-4 text-sm text-[#797C81]"><%= risk.category.presence || "-" %></td>
+                    <td class="p-4 text-sm text-[#797C81]"><%= risk.owner&.user&.name || "Unassigned" %></td>
+                    <td class="p-4">
+                      <span class="px-2 py-1 text-xs font-medium rounded-full <%= risk.inherent_level == 'low' ? 'bg-green-100 text-green-800' : risk.inherent_level == 'medium' ? 'bg-yellow-100 text-yellow-800' : risk.inherent_level == 'high' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800' %>">
+                        <%= risk.inherent_score %> (<%= risk.inherent_level %>)
+                      </span>
+                    </td>
+                    <td class="p-4 text-sm text-[#797C81]">
+                      <% if risk.residual_score.present? %>
+                        <%= risk.residual_score %> (<%= risk.residual_level %>)
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                    <td class="p-4 text-sm text-[#797C81]"><%= risk.status.titleize %></td>
+                    <td class="p-4">
+                      <%= link_to "View", dashboard_risk_management_path(risk), class: "text-blue-500 hover:text-blue-700 text-sm" %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
   </div>
 </div>

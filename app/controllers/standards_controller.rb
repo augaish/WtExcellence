@@ -1,4 +1,5 @@
 class StandardsController < Dashboard::BaseController
+  before_action :ensure_not_risk_manager_only
   before_action :require_platform_admin, only: [
     :upload_standard,
     :edit,

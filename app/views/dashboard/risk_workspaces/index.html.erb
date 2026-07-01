@@ -1,0 +1,46 @@
+<%= content_for :title, t('risk_workspaces') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('risk_workspaces') %></h1>
+        <p class="text-[#797C81]"><%= t('risk_workspaces_subtitle') %></p>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= link_to t('back_to_risk_register'), dashboard_risk_management_index_path, class: "px-4 py-2 text-sm text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors" %>
+        <%= link_to t('new_workspace'), new_dashboard_risk_workspace_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
+      </div>
+    </div>
+
+    <% if @risk_workspaces.any? %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @risk_workspaces.each do |workspace| %>
+          <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+            <div class="flex items-start justify-between mb-2">
+              <h2 class="text-lg font-semibold text-[#0D1120]"><%= workspace.name %></h2>
+              <% if workspace.framework.present? %>
+                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#5C3984]">
+                  <%= workspace.framework %>
+                </span>
+              <% end %>
+            </div>
+            <% if workspace.description.present? %>
+              <p class="text-sm text-gray-600 mb-3"><%= workspace.description %></p>
+            <% end %>
+            <p class="text-sm text-[#797C81] mb-4"><%= workspace.risks.active.count %> <%= t('risks') %></p>
+            <div class="flex items-center gap-3 text-sm">
+              <%= link_to t('view'), dashboard_risk_workspace_path(workspace), class: "text-[#5C3984] hover:underline" %>
+              <%= link_to t('edit'), edit_dashboard_risk_workspace_path(workspace), class: "text-[#5C3984] hover:underline" %>
+              <%= link_to t('delete'), dashboard_risk_workspace_path(workspace), data: { turbo_method: :delete, turbo_confirm: t('are_you_sure') }, class: "text-red-600 hover:underline" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-8 text-center text-sm text-[#797C81]">
+        <%= t('no_workspaces_yet') %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 class Dashboard::CapaManagementController < Dashboard::BaseController
   before_action :ensure_company_selected, except: [ :select_company, :set_company ]
   before_action :prevent_viewer_action
+  before_action :ensure_not_risk_manager_only
 
   helper_method :can_create_capa?, :can_manage_capa?, :can_close_capa?, :can_link_documents_to_capa?, :assignee_of_capa_action?, :can_view_capa_activity_log?, :can_link_documents_to_capa_action?, :can_upload_evidence_to_capa_action?, :can_update_capa_action?, :can_delete_capa_action_comment?, :capa_actions_visible_to_current_user, :can_assign_to_capa_action?
 
@@ -90,10 +91,10 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
     # Generate ZIP containing CSVs using service
     service = CapaExportService.new(capas, language)
     zip_data = service.generate_zip
-    
-    send_data zip_data, 
-              type: 'application/zip',
-              disposition: 'attachment',
+
+    send_data zip_data,
+              type: "application/zip",
+              disposition: "attachment",
               filename: service.filename
   end
 
@@ -108,7 +109,7 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
     @capas = if current_company
       capa_visible_scope(base: Capa.where(company_id: current_company.id).not_archived)
           .includes(:standard, :company_users, :users)
-          .order('capas.created_at DESC')
+          .order("capas.created_at DESC")
     else
       Capa.none
     end
@@ -126,7 +127,7 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
           .where(capa_assignments: { company_user_id: current_user.company_user.id })
           .includes(:standard, :company_users, :users)
           .order(due_date: :asc)
-          .order('capas.created_at DESC')
+          .order("capas.created_at DESC")
           .limit(4)
           .distinct
     else
@@ -142,7 +143,7 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
           .not_archived)
           .includes(:standard, :company_users, :users)
           .order(due_date: :asc)
-          .order('capas.created_at DESC')
+          .order("capas.created_at DESC")
           .limit(4)
     else
       Capa.none
@@ -1084,7 +1085,7 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
         end
         questionnaire.root_cause = nil
       end
-      
+
       # If this is question 5, regenerate root cause summary from updated answers
       if question_number == 5
         service = CapaQuestionnaireService.new(capa)
@@ -1919,9 +1920,9 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
       notification_html = render_to_string(partial: "shared/notification", locals: { message: "CAPA not found", type: :error, animated: true }, formats: [ :html ])
       render json: { success: false, message: "CAPA not found", notification_html: notification_html }, status: :not_found and return
     end
-    
 
-    
+
+
     unless can_link_documents_to_capa?(@capa)
       notification_html = render_to_string(partial: "shared/notification", locals: { message: "You do not have permission to link documents to this CAPA.", type: :error, animated: true }, formats: [ :html ])
       render json: { success: false, message: "You do not have permission to link documents to this CAPA.", notification_html: notification_html }, status: :forbidden and return
@@ -2414,11 +2415,11 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
       notification_html = render_to_string(partial: "shared/notification", locals: { message: message, type: :success, animated: true }, formats: [ :html ])
       render json: { message: message, notification_html: notification_html, archived_count: archived_count }
     elsif archived_count > 0
-      message = I18n.t("capa_management_ui.notifications.bulk_archive_partial", count: archived_count, errors: errors.join(', '))
+      message = I18n.t("capa_management_ui.notifications.bulk_archive_partial", count: archived_count, errors: errors.join(", "))
       notification_html = render_to_string(partial: "shared/notification", locals: { message: message, type: :success, animated: true }, formats: [ :html ])
       render json: { message: message, notification_html: notification_html, archived_count: archived_count, errors: errors }
     else
-      error_message = I18n.t("capa_management_ui.notifications.bulk_archive_error", errors: errors.join(', '))
+      error_message = I18n.t("capa_management_ui.notifications.bulk_archive_error", errors: errors.join(", "))
       notification_html = render_to_string(partial: "shared/notification", locals: { message: error_message, type: :error, animated: true }, formats: [ :html ])
       render json: { error: error_message, notification_html: notification_html }, status: :unprocessable_entity
     end
@@ -2465,11 +2466,11 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
       notification_html = render_to_string(partial: "shared/notification", locals: { message: message, type: :success, animated: true }, formats: [ :html ])
       render json: { message: message, notification_html: notification_html, unarchived_count: unarchived_count }
     elsif unarchived_count > 0
-      message = I18n.t("capa_management_ui.notifications.bulk_unarchive_partial", count: unarchived_count, errors: errors.join(', '))
+      message = I18n.t("capa_management_ui.notifications.bulk_unarchive_partial", count: unarchived_count, errors: errors.join(", "))
       notification_html = render_to_string(partial: "shared/notification", locals: { message: message, type: :success, animated: true }, formats: [ :html ])
       render json: { message: message, notification_html: notification_html, unarchived_count: unarchived_count, errors: errors }
     else
-      error_message = I18n.t("capa_management_ui.notifications.bulk_unarchive_error", errors: errors.join(', '))
+      error_message = I18n.t("capa_management_ui.notifications.bulk_unarchive_error", errors: errors.join(", "))
       notification_html = render_to_string(partial: "shared/notification", locals: { message: error_message, type: :error, animated: true }, formats: [ :html ])
       render json: { error: error_message, notification_html: notification_html }, status: :unprocessable_entity
     end
@@ -2518,11 +2519,11 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
       notification_html = render_to_string(partial: "shared/notification", locals: { message: message, type: :success, animated: true }, formats: [ :html ])
       render json: { message: message, notification_html: notification_html, deleted_count: deleted_count }
     elsif deleted_count > 0
-      message = I18n.t("capa_management_ui.notifications.bulk_delete_partial", count: deleted_count, errors: errors.join(', '))
+      message = I18n.t("capa_management_ui.notifications.bulk_delete_partial", count: deleted_count, errors: errors.join(", "))
       notification_html = render_to_string(partial: "shared/notification", locals: { message: message, type: :success, animated: true }, formats: [ :html ])
       render json: { message: message, notification_html: notification_html, deleted_count: deleted_count, errors: errors }
     else
-      error_message = I18n.t("capa_management_ui.notifications.bulk_delete_error", errors: errors.join(', '))
+      error_message = I18n.t("capa_management_ui.notifications.bulk_delete_error", errors: errors.join(", "))
       notification_html = render_to_string(partial: "shared/notification", locals: { message: error_message, type: :error, animated: true }, formats: [ :html ])
       render json: { error: error_message, notification_html: notification_html }, status: :unprocessable_entity
     end
