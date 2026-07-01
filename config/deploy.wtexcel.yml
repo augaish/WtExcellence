@@ -34,7 +34,7 @@ servers:
       - 74.208.192.18
     cmd: bundle exec sidekiq -q cron_small -c 1
     options:
-      memory: "128m"
+      memory: "256m"
 
 proxy:
   ssl: true
