@@ -1,0 +1,57 @@
+<%= form_with model: @commitment, url: (@commitment.new_record? ? dashboard_customer_commitments_path : dashboard_customer_commitment_path(@commitment)), method: (@commitment.new_record? ? :post : :patch), class: "space-y-6" do |f| %>
+
+  <% if @commitment.errors.any? %>
+    <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6">
+      <div class="flex items-start gap-3">
+        <div class="flex-1">
+          <h3 class="text-sm font-medium text-red-800 mb-2">
+            <%= pluralize(@commitment.errors.count, "error") %> prohibited this commitment from being saved:
+          </h3>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+            <% @commitment.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 space-y-4">
+    <div>
+      <%= f.label :title, t('title'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_field :title, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div>
+      <%= f.label :customer_name, t('customer'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_field :customer_name, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div>
+      <%= f.label :description, t('description'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_area :description, rows: 3, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :due_date, t('due_date'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.date_field :due_date, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      </div>
+      <div>
+        <%= f.label :owner_id, t('owner'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= f.collection_select :owner_id, current_company&.company_users&.includes(:user) || [], :id, ->(cu) { cu.user.name }, { include_blank: t('unassigned') }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :status, t('status'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.select :status, CustomerCommitment.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3">
+    <%= link_to t('cancel'), dashboard_customer_commitments_path, class: "px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50" %>
+    <%= f.submit (@commitment.new_record? ? t('log_commitment') : t('save_changes')), class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
+  </div>
+<% end %>

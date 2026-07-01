@@ -72,6 +72,14 @@ class User < ApplicationRecord
     company_user&.can_manage_risks? || platform_admin?
   end
 
+  def can_manage_commitments?
+    company_user&.has_admin_privileges? || platform_admin?
+  end
+
+  def can_manage_vendors?
+    company_user&.has_admin_privileges? || platform_admin?
+  end
+
   # A user whose only company role is Risk Manager — scoped to risk
   # management only, with no access to CAPA, Standards, or Library.
   def risk_manager_only?

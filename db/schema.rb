@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_01_090744) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_01_123824) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -408,6 +408,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_090744) do
     t.index ["user_id"], name: "index_company_users_on_user_id"
   end
 
+  create_table "customer_commitments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "customer_name"
+    t.date "due_date"
+    t.string "status", default: "open", null: false
+    t.uuid "owner_id"
+    t.uuid "created_by_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_customer_commitments_on_company_id"
+    t.index ["created_by_id"], name: "index_customer_commitments_on_created_by_id"
+    t.index ["deleted_at"], name: "index_customer_commitments_on_deleted_at"
+    t.index ["owner_id"], name: "index_customer_commitments_on_owner_id"
+    t.index ["status"], name: "index_customer_commitments_on_status"
+  end
+
   create_table "evidence_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "upload_id", null: false
     t.uuid "attachable_id", null: false
@@ -729,6 +748,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_090744) do
     t.index ["status"], name: "index_users_on_status"
   end
 
+  create_table "vendors", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "name", null: false
+    t.string "category"
+    t.string "risk_level", default: "unassessed", null: false
+    t.string "contact_email"
+    t.uuid "owner_id"
+    t.uuid "created_by_id"
+    t.text "notes"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_vendors_on_company_id"
+    t.index ["created_by_id"], name: "index_vendors_on_created_by_id"
+    t.index ["deleted_at"], name: "index_vendors_on_deleted_at"
+    t.index ["owner_id"], name: "index_vendors_on_owner_id"
+    t.index ["risk_level"], name: "index_vendors_on_risk_level"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "assessment_scores", "assessments"
@@ -789,6 +827,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_090744) do
   add_foreign_key "company_standards", "users", column: "assigned_by"
   add_foreign_key "company_users", "companies"
   add_foreign_key "company_users", "users"
+  add_foreign_key "customer_commitments", "companies"
+  add_foreign_key "customer_commitments", "company_users", column: "owner_id"
+  add_foreign_key "customer_commitments", "users", column: "created_by_id"
   add_foreign_key "evidence_attachments", "uploads"
   add_foreign_key "folders", "companies"
   add_foreign_key "folders", "folders", column: "parent_id"
@@ -817,4 +858,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_090744) do
   add_foreign_key "uploads", "companies"
   add_foreign_key "uploads", "folders"
   add_foreign_key "users", "users", column: "invited_by_id"
+  add_foreign_key "vendors", "companies"
+  add_foreign_key "vendors", "company_users", column: "owner_id"
+  add_foreign_key "vendors", "users", column: "created_by_id"
 end

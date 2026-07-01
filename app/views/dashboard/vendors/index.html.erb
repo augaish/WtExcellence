@@ -1,0 +1,53 @@
+<%= content_for :title, t('vendor_management') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('vendor_management') %></h1>
+        <p class="text-[#797C81]"><%= t('vendor_management_subtitle') %></p>
+      </div>
+      <%= link_to t('new_vendor'), new_dashboard_vendor_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
+    </div>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+            <tr>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('vendor_name') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('category') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('risk_level') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('owner') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('actions') %></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @vendors.any? %>
+              <% @vendors.each do |vendor| %>
+                <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                  <td class="p-4 text-sm font-medium text-[#0D1120]"><%= vendor.name %></td>
+                  <td class="p-4 text-sm text-[#797C81]"><%= vendor.category.presence || "-" %></td>
+                  <td class="p-4">
+                    <% level_color = { "unassessed" => "bg-gray-100 text-gray-700", "low" => "bg-green-100 text-green-800", "medium" => "bg-yellow-100 text-yellow-800", "high" => "bg-orange-100 text-orange-800", "critical" => "bg-red-100 text-red-800" }[vendor.risk_level] %>
+                    <span class="px-2 py-1 text-xs font-medium rounded-full <%= level_color %>">
+                      <%= vendor.risk_level.titleize %>
+                    </span>
+                  </td>
+                  <td class="p-4 text-sm text-[#797C81]"><%= vendor.owner&.user&.name || t('unassigned') %></td>
+                  <td class="p-4">
+                    <%= link_to t('view'), dashboard_vendor_path(vendor), class: "text-blue-500 hover:text-blue-700 text-sm" %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="5" class="p-8 text-center text-sm text-[#797C81]"><%= t('no_vendors_yet') %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

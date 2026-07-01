@@ -1,0 +1,62 @@
+<%= content_for :title, t('customer_commitments') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('customer_commitments') %></h1>
+        <p class="text-[#797C81]"><%= t('customer_commitments_subtitle') %></p>
+      </div>
+      <%= link_to t('new_commitment'), new_dashboard_customer_commitment_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
+    </div>
+
+    <% if @past_due_count > 0 %>
+      <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-800">
+        <%= t('past_due_warning', count: @past_due_count) %>
+      </div>
+    <% end %>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+            <tr>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('title') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('customer') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('due_date') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('owner') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('status') %></span></th>
+              <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('actions') %></span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @commitments.any? %>
+              <% @commitments.each do |commitment| %>
+                <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
+                  <td class="p-4 text-sm font-medium text-[#0D1120]"><%= commitment.title %></td>
+                  <td class="p-4 text-sm text-[#797C81]"><%= commitment.customer_name %></td>
+                  <td class="p-4 text-sm <%= commitment.past_due? ? 'text-red-600 font-medium' : 'text-[#797C81]' %>">
+                    <%= commitment.due_date&.strftime('%b %d, %Y') || "-" %>
+                  </td>
+                  <td class="p-4 text-sm text-[#797C81]"><%= commitment.owner&.user&.name || t('unassigned') %></td>
+                  <td class="p-4">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full <%= commitment.status == 'fulfilled' ? 'bg-green-100 text-green-800' : commitment.past_due? ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' %>">
+                      <%= commitment.status.titleize %>
+                    </span>
+                  </td>
+                  <td class="p-4">
+                    <%= link_to t('view'), dashboard_customer_commitment_path(commitment), class: "text-blue-500 hover:text-blue-700 text-sm" %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="6" class="p-8 text-center text-sm text-[#797C81]"><%= t('no_commitments_yet') %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

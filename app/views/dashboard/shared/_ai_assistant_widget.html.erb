@@ -1,0 +1,27 @@
+<% if current_user&.company_user.present? && !current_user&.company_contributor? %>
+  <div data-controller="ai-assistant" data-ai-assistant-ask-url-value="<%= dashboard_ai_assistant_ask_path %>" class="fixed bottom-6 <%= rtl? ? 'left-6' : 'right-6' %> z-40">
+    <button type="button" data-action="click->ai-assistant#toggle" class="w-14 h-14 rounded-full bg-[#5C3984] hover:bg-[#4A2F6B] text-white shadow-lg flex items-center justify-center transition-colors" aria-label="<%= t('ask_ai') %>">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z"></path>
+      </svg>
+    </button>
+
+    <div data-ai-assistant-target="panel" class="hidden absolute bottom-20 <%= rtl? ? 'left-0' : 'right-0' %> w-80 sm:w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+      <div class="p-4 border-b border-gray-200 flex items-center justify-between bg-[#5C3984] text-white">
+        <span class="font-semibold text-sm"><%= t('ask_ai') %></span>
+        <button type="button" data-action="click->ai-assistant#toggle" class="text-white/80 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div data-ai-assistant-target="messages" class="p-4 max-h-80 overflow-y-auto space-y-3 text-sm text-gray-700">
+        <p class="text-gray-400"><%= t('ask_ai_placeholder_text') %></p>
+      </div>
+      <form data-action="submit->ai-assistant#submit" class="p-3 border-t border-gray-200 flex items-center gap-2">
+        <input type="text" data-ai-assistant-target="input" placeholder="<%= t('ask_ai_input_placeholder') %>" class="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" />
+        <button type="submit" class="px-3 py-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white rounded-lg text-sm font-medium"><%= t('send') %></button>
+      </form>
+    </div>
+  </div>
+<% end %>

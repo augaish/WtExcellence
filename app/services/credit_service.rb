@@ -7,7 +7,8 @@ class CreditService
     "GENERATE_CAPA_ACTIONS" => 5,
     "GENERATE_CAPA_QUESTIONNAIRE" => 0,
     "SUGGEST_CAPA_CLAUSES" => 7,
-    "REGENERATE_ROOT_CAUSE" => 0
+    "REGENERATE_ROOT_CAUSE" => 0,
+    "PLATFORM_ASSISTANT_QUERY" => 2
   }.freeze
 
   CACHE_KEY = "credit_costs_cache"
@@ -129,4 +130,3 @@ class CreditService
     end
   end
 end
-

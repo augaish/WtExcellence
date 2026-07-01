@@ -82,6 +82,9 @@ Rails.application.routes.draw do
     end
 
     resources :risk_workspaces, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
+    resources :customer_commitments, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
+    resources :vendors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
+    post "ai_assistant/ask", to: "ai_assistant#ask", as: :ai_assistant_ask
 
     resources :companies, only: [ :index ], controller: :companies
 

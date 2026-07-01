@@ -1,0 +1,47 @@
+<%= content_for :title, @commitment.title %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <%= link_to t('back_to_commitments'), dashboard_customer_commitments_path, class: "text-sm text-[#5C3984] hover:underline mb-2 inline-block" %>
+        <h1 class="text-2xl font-bold text-[#0D1120]"><%= @commitment.title %></h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <%= link_to t('edit'), edit_dashboard_customer_commitment_path(@commitment), class: "px-4 py-2 text-sm text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors" %>
+        <%= link_to t('delete'), dashboard_customer_commitment_path(@commitment), data: { turbo_method: :delete, turbo_confirm: t('are_you_sure') }, class: "px-4 py-2 text-sm text-red-600 border border-red-600 hover:bg-red-50 rounded-lg transition-colors" %>
+      </div>
+    </div>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 space-y-4">
+      <div>
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('customer') %></p>
+        <p class="text-sm text-[#0D1120]"><%= @commitment.customer_name %></p>
+      </div>
+      <% if @commitment.description.present? %>
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('description') %></p>
+          <p class="text-sm text-[#0D1120]"><%= @commitment.description %></p>
+        </div>
+      <% end %>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('due_date') %></p>
+          <p class="text-sm <%= @commitment.past_due? ? 'text-red-600 font-medium' : 'text-[#0D1120]' %>">
+            <%= @commitment.due_date&.strftime('%b %d, %Y') || "-" %>
+          </p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('owner') %></p>
+          <p class="text-sm text-[#0D1120]"><%= @commitment.owner&.user&.name || t('unassigned') %></p>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('status') %></p>
+        <span class="inline-flex mt-1 px-2 py-1 text-xs font-medium rounded-full <%= @commitment.status == 'fulfilled' ? 'bg-green-100 text-green-800' : @commitment.past_due? ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' %>">
+          <%= @commitment.status.titleize %>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
