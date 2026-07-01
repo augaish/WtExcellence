@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_06_18_161356) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_01_085338) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -322,6 +322,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_06_18_161356) do
     t.integer "credits", default: 1000, null: false
     t.string "status", default: "active"
     t.string "company_size"
+    t.boolean "trust_center_enabled", default: false, null: false
     t.index ["status"], name: "index_companies_on_status"
   end
 

@@ -923,6 +923,55 @@ export default class extends Controller {
     link.disabled = false
   }
 
+  toggleTrustCenter(event) {
+    event.preventDefault()
+    const link = event.currentTarget
+    const url = new URL(link.href, window.location.origin)
+    const pathParts = url.pathname.split('/')
+    const companyId = pathParts[pathParts.length - 2]
+
+    if (!companyId) {
+      this.dispatchToast("Invalid company", "error")
+      return
+    }
+
+    link.style.pointerEvents = "none"
+    link.style.opacity = "0.6"
+    const originalText = link.textContent.trim()
+    link.textContent = "..."
+
+    const apiUrl = `/dashboard/account_management/companies/${companyId}/trust_center`
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content
+
+    fetch(apiUrl, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        "Accept": "application/json"
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          this.dispatchToast(data.message || "Trust Center updated", "success")
+          setTimeout(() => window.location.reload(), 800)
+        } else {
+          this.dispatchToast(data.message || "Failed to update Trust Center", "error")
+          link.style.pointerEvents = "auto"
+          link.style.opacity = "1"
+          link.textContent = originalText
+        }
+      })
+      .catch(error => {
+        console.error("Error toggling Trust Center:", error)
+        this.dispatchToast("An error occurred while updating Trust Center", "error")
+        link.style.pointerEvents = "auto"
+        link.style.opacity = "1"
+        link.textContent = originalText
+      })
+  }
+
   updateCompanyStatusUI(companyId, status, isActive) {
     // Update status badge in companies table
     const statusBadge = document.querySelector(`.status-badge-${companyId}`)

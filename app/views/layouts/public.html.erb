@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html dir="<%= text_direction %>" lang="<%= current_locale %>">
+    <head>
+        <title><%= content_for(:title) || "Trust Center - Way To Excellence" %></title>
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <%= csrf_meta_tags %>
+        <%= csp_meta_tag %>
+
+        <%= yield :head %>
+
+        <%= favicon_link_tag asset_path('logo.png') %>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&display=swap" rel="stylesheet">
+
+        <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+        <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+        <%= javascript_importmap_tags %>
+    </head>
+
+    <body class="bg-gray-50">
+        <%= yield %>
+    </body>
+</html>

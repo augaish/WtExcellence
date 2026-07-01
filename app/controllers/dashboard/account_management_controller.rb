@@ -282,13 +282,13 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
         if new_status == "active"
           company.status = "active"
           company.is_active = true
-          
+
           # Activate all users in this company when company is activated
           company.users.update_all(is_active: true, status: "active")
         else
           company.status = "pending"
           company.is_active = false
-          
+
           # Deactivate all users in this company when company is deactivated
           company.users.update_all(is_active: false)
         end
@@ -337,6 +337,41 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
         message: e.record.errors.full_messages.join(", ")
       }, status: :unprocessable_entity
     end
+  end
+
+  def toggle_trust_center
+    company = Company.find_by(id: params[:id])
+    unless company
+      render json: { success: false, message: "Company not found." }, status: :not_found
+      return
+    end
+
+    allowed = current_user&.super_admin? || current_user&.delegated_admin? ||
+      (current_user&.company_user&.has_admin_privileges? && current_company&.id == company.id)
+
+    unless allowed
+      render json: { success: false, message: "You don't have permission to update this company's Trust Center." }, status: :forbidden
+      return
+    end
+
+    company.update!(trust_center_enabled: !company.trust_center_enabled)
+
+    AuditLogService.log_action(
+      actor_user: current_user,
+      company: company,
+      action: company.trust_center_enabled? ? "ENABLE_TRUST_CENTER" : "DISABLE_TRUST_CENTER",
+      entity_type: "company",
+      entity_id: company.id,
+      payload: { company_id: company.id, trust_center_enabled: company.trust_center_enabled }
+    )
+
+    render json: {
+      success: true,
+      trust_center_enabled: company.trust_center_enabled,
+      message: company.trust_center_enabled? ? "Trust Center enabled." : "Trust Center disabled."
+    }
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { success: false, message: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
   end
 
   def change_password

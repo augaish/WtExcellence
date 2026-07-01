@@ -10,6 +10,9 @@ Rails.application.routes.draw do
   get "invitations/:token/accept", to: "user_invitations#show", as: :accept_invitation
   post "invitations/:token/accept", to: "user_invitations#accept", as: :submit_invitation
 
+  # Trust Center (public compliance page, accessible without authentication)
+  get "trust/:company_id", to: "trust_center#show", as: :trust_center
+
   get "standards/index"
   get "dashboard/index"
   get "home/index"
@@ -90,6 +93,7 @@ Rails.application.routes.draw do
       post "/companies", action: :create_company, as: :create_company
       patch "/companies/:id/license_seats", action: :update_license_seats, as: :update_company_license_seats
       patch "/companies/:id/status", action: :update_company_status, as: :update_company_status
+      patch "/companies/:id/trust_center", action: :toggle_trust_center, as: :toggle_company_trust_center
       patch "/users/:id/permissions", action: :update_permissions, as: :update_user_permissions
       patch "/users/:id/status", action: :update_user_status, as: :update_user_status
       patch "/users/:id/change_password", action: :change_password, as: :change_user_password

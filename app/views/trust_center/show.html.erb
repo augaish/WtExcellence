@@ -1,0 +1,52 @@
+<%= content_for :title, "#{@company.name} - Trust Center" %>
+
+<div class="max-w-4xl mx-auto px-4 py-12 sm:py-16">
+  <div class="text-center mb-12">
+    <h1 class="text-3xl sm:text-4xl font-bold text-[#0D1120]"><%= @company.name %></h1>
+    <p class="mt-3 text-lg text-gray-600"><%= t('trust_center_subtitle') %></p>
+  </div>
+
+  <% if @company_standards.any? %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <% @company_standards.each do |company_standard| %>
+        <% standard = company_standard.standard %>
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold text-[#0D1120]">
+              <%= standard.display_name('en') || standard.code %>
+            </h2>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#5C3984]">
+              <%= standard.code %>
+            </span>
+          </div>
+
+          <% if company_standard.cached_compliance_percentage.present? %>
+            <div class="mb-2">
+              <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                <span><%= t('compliance') %></span>
+                <span class="font-semibold text-[#0D1120]"><%= company_standard.cached_compliance_percentage.round(1) %>%</span>
+              </div>
+              <div class="w-full bg-gray-100 rounded-full h-2">
+                <div class="bg-[#5C3984] h-2 rounded-full" style="width: <%= [ company_standard.cached_compliance_percentage.to_f, 100 ].min %>%"></div>
+              </div>
+            </div>
+          <% else %>
+            <p class="text-sm text-gray-500"><%= t('compliance_pending') %></p>
+          <% end %>
+
+          <% if company_standard.notes.present? %>
+            <p class="mt-4 text-sm text-gray-600"><%= company_standard.notes %></p>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center text-gray-500 py-12">
+      <%= t('no_standards_published') %>
+    </div>
+  <% end %>
+
+  <div class="text-center mt-16 text-sm text-gray-400">
+    <%= t('powered_by_wte') %>
+  </div>
+</div>

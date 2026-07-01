@@ -36,6 +36,14 @@
           <% end %>
         <% end %>
 
+        <% if current_user&.super_admin? || current_user&.delegated_admin? || (current_user&.company_user&.has_admin_privileges? && current_company&.id == @company.id) %>
+          <%= link_to (@company.trust_center_enabled? ? t('disable_trust_center') : t('enable_trust_center')),
+                      dashboard_toggle_company_trust_center_path(@company),
+                      method: :patch,
+                      data: { action: "click->account-management#toggleTrustCenter" },
+                      class: "inline-flex items-center justify-center flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 border border-[#5C3984] text-[#5C3984] rounded-lg hover:bg-[#F6EEFF] text-xs sm:text-sm font-medium min-h-[44px]" %>
+        <% end %>
+
         <% if current_user&.can_add_users? %>
           <button type="button"
                   class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] text-xs sm:text-sm font-medium min-h-[44px] text-center"
