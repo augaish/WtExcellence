@@ -1581,6 +1581,12 @@ en:
     no_permission_risks: "You don't have permission to manage risks."
     no_permission_vendors: "You don't have permission to manage vendors."
     no_permission_commitments: "You don't have permission to manage customer commitments."
+    no_permission_ai_instructions: "You don't have permission to manage AI instructions."
+  activerecord:
+    errors:
+      models:
+        ai_instruction:
+          content_required: "Provide content in at least one language (English or Arabic)."
   ai_assistant:
     blank_question: "Please enter a question."
     insufficient_credits: "Insufficient AI credits."
@@ -1613,3 +1619,17 @@ en:
   residual_likelihood_label: "Residual Likelihood (after mitigation)"
   residual_impact_label: "Residual Impact (after mitigation)"
   log_risk: "Log Risk"
+  ai_instructions: "AI Instructions"
+  ai_instructions_subtitle: "Feed the AI company-specific knowledge and terminology"
+  ai_instructions_help: "Active instructions are added to every AI request for your company — questionnaire generation, clause suggestions, action generation, and the Ask AI assistant. Use them to teach the AI your standards, terminology, and domain rules."
+  new_ai_instruction: "New Instruction"
+  edit_ai_instruction: "Edit Instruction"
+  no_ai_instructions_yet: "No AI instructions yet. Add one to steer the AI with your domain knowledge."
+  ai_instruction_created: "AI instruction created."
+  ai_instruction_updated: "AI instruction updated."
+  ai_instruction_deleted: "AI instruction deleted."
+  ai_instruction_title_placeholder: "e.g. KAQA terminology, Scoring conventions"
+  ai_instruction_content_en: "Content (English)"
+  ai_instruction_content_ar: "Content (Arabic)"
+  ai_instruction_active_label: "Active (include in AI requests)"
+  inactive: "Inactive"

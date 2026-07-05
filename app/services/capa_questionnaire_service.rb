@@ -186,6 +186,7 @@ class CapaQuestionnaireService
 
   def call_openrouter_api(prompt)
     begin
+      prompt = AiInstructionContext.decorate(prompt, company: @capa&.company, locale: I18n.locale)
       Rails.logger.info "Calling OpenRouter API for questionnaire generation"
       Rails.logger.info "Prompt length: #{prompt.length} chars"
 
@@ -233,9 +234,10 @@ class CapaQuestionnaireService
 
   def call_ollama_api(prompt, model_name = nil)
     begin
+      prompt = AiInstructionContext.decorate(prompt, company: @capa&.company, locale: I18n.locale)
       model_name ||= @ollama_model
       client = OllamaClient.new(model: model_name, base_url: @ollama_url)
-      
+
       Rails.logger.info "Calling Ollama API for questionnaire generation with model: #{model_name}"
       Rails.logger.info "Prompt length: #{prompt.length} chars"
 

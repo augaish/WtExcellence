@@ -1,0 +1,39 @@
+<%= form_with model: @ai_instruction, url: (@ai_instruction.new_record? ? dashboard_ai_instructions_path : dashboard_ai_instruction_path(@ai_instruction)), method: (@ai_instruction.new_record? ? :post : :patch), class: "space-y-6" do |f| %>
+
+  <% if @ai_instruction.errors.any? %>
+    <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6">
+      <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+        <% @ai_instruction.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 space-y-4">
+    <div>
+      <%= f.label :title, t('title'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_field :title, placeholder: t('ai_instruction_title_placeholder'), class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div>
+      <%= f.label :content_en, t('ai_instruction_content_en'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_area :content_en, rows: 6, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div>
+      <%= f.label :content_ar, t('ai_instruction_content_ar'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+      <%= f.text_area :content_ar, rows: 6, dir: "rtl", class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= f.check_box :active, class: "w-4 h-4 rounded border-gray-300 text-[#5C3984] focus:ring-[#5C3984]" %>
+      <%= f.label :active, t('ai_instruction_active_label'), class: "text-sm text-gray-700" %>
+    </div>
+  </div>
+
+  <div class="flex justify-end gap-3">
+    <%= link_to t('cancel'), dashboard_ai_instructions_path, class: "px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50" %>
+    <%= f.submit (@ai_instruction.new_record? ? t('create') : t('save_changes')), class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
+  </div>
+<% end %>

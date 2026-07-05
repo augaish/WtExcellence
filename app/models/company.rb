@@ -6,6 +6,7 @@ class Company < ApplicationRecord
   has_many :risk_workspaces, dependent: :destroy
   has_many :customer_commitments, dependent: :destroy
   has_many :vendors, dependent: :destroy
+  has_many :ai_instructions, dependent: :destroy
   has_many :folders, dependent: :destroy
   has_many :uploads, dependent: :destroy
   has_many :clause_score_caches, class_name: "ClauseScoreCache", dependent: :destroy

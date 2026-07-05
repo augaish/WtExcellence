@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_01_123824) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_05_231147) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -51,6 +51,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_123824) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["action_type"], name: "index_ai_action_credits_on_action_type", unique: true
+  end
+
+  create_table "ai_instructions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "title", null: false
+    t.text "content_en"
+    t.text "content_ar"
+    t.boolean "active", default: true, null: false
+    t.uuid "created_by_id"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_ai_instructions_on_company_id"
+    t.index ["created_by_id"], name: "index_ai_instructions_on_created_by_id"
+    t.index ["deleted_at"], name: "index_ai_instructions_on_deleted_at"
   end
 
   create_table "assessment_scores", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -769,6 +784,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_01_123824) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ai_instructions", "companies"
+  add_foreign_key "ai_instructions", "users", column: "created_by_id"
   add_foreign_key "assessment_scores", "assessments"
   add_foreign_key "assessment_scores", "tool_subcheckpoints"
   add_foreign_key "assessment_users", "assessments"

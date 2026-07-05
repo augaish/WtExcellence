@@ -136,6 +136,7 @@ class CapaActionGenerationService
 
   def call_openrouter_api(prompt)
     begin
+      prompt = AiInstructionContext.decorate(prompt, company: @capa&.company, locale: I18n.locale)
       Rails.logger.info "Calling OpenRouter API for action generation"
       Rails.logger.info "Prompt length: #{prompt.length} chars"
 
@@ -183,6 +184,7 @@ class CapaActionGenerationService
 
   def call_ollama_api(prompt)
     begin
+      prompt = AiInstructionContext.decorate(prompt, company: @capa&.company, locale: I18n.locale)
       Rails.logger.info "Calling Ollama API for action generation"
       Rails.logger.info "Prompt length: #{prompt.length} chars"
 

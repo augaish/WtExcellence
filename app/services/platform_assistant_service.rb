@@ -100,6 +100,8 @@ class PlatformAssistantService
       Question: #{question}
     PROMPT
 
+    prompt = AiInstructionContext.decorate(prompt, company: @company, locale: I18n.locale)
+
     answer =
       if @provider == "openrouter"
         OpenRouter.configure do |config|

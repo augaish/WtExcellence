@@ -92,6 +92,17 @@
     <div class="mb-6">
         <h2 class="text-sm sm:text-md font-semibold text-[#0D1120]-500 tracking-wider mb-4"><%= t('settings') %></h2>
         <nav class="space-y-2">
+            <% if current_user&.can_manage_ai_instructions? %>
+                <%= link_to dashboard_ai_instructions_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('ai_instructions')}" do %>
+                    <% if rtl? %>
+                        <span><%= t('ai_instructions') %></span>
+                        <%= image_tag asset_path('AI_logo.png'), class: "w-5 h-5 max-w-full h-auto" %>
+                    <% else %>
+                        <%= image_tag asset_path('AI_logo.png'), class: "w-5 h-5 max-w-full h-auto" %>
+                        <span><%= t('ai_instructions') %></span>
+                    <% end %>
+                <% end %>
+            <% end %>
             <% if current_user&.can_manage_tools? %>
                 <%= link_to tools_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('tools')}" do %>
                     <% if rtl? %>

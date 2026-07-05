@@ -84,6 +84,9 @@ Rails.application.routes.draw do
     resources :risk_workspaces, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
     resources :customer_commitments, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
     resources :vendors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
+    resources :ai_instructions, only: [ :index, :new, :create, :edit, :update, :destroy ] do
+      member { patch :toggle }
+    end
     post "ai_assistant/ask", to: "ai_assistant#ask", as: :ai_assistant_ask
 
     resources :companies, only: [ :index ], controller: :companies

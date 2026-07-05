@@ -1565,6 +1565,12 @@ ar:
     no_permission_risks: "ليس لديك إذن لإدارة المخاطر."
     no_permission_vendors: "ليس لديك إذن لإدارة الموردين."
     no_permission_commitments: "ليس لديك إذن لإدارة التزامات العملاء."
+    no_permission_ai_instructions: "ليس لديك إذن لإدارة تعليمات الذكاء الاصطناعي."
+  activerecord:
+    errors:
+      models:
+        ai_instruction:
+          content_required: "أدخل المحتوى بلغة واحدة على الأقل (الإنجليزية أو العربية)."
   ai_assistant:
     blank_question: "الرجاء إدخال سؤال."
     insufficient_credits: "رصيد الذكاء الاصطناعي غير كافٍ."
@@ -1597,3 +1603,17 @@ ar:
   residual_likelihood_label: "الاحتمالية المتبقية (بعد التخفيف)"
   residual_impact_label: "التأثير المتبقي (بعد التخفيف)"
   log_risk: "تسجيل المخاطرة"
+  ai_instructions: "تعليمات الذكاء الاصطناعي"
+  ai_instructions_subtitle: "زوّد الذكاء الاصطناعي بمعرفة ومصطلحات خاصة بشركتك"
+  ai_instructions_help: "تُضاف التعليمات النشطة إلى كل طلب ذكاء اصطناعي لشركتك — توليد الاستبيانات واقتراح البنود وتوليد الإجراءات ومساعد اسأل الذكاء الاصطناعي. استخدمها لتعليم الذكاء الاصطناعي معاييرك ومصطلحاتك وقواعد مجالك."
+  new_ai_instruction: "تعليمة جديدة"
+  edit_ai_instruction: "تعديل التعليمة"
+  no_ai_instructions_yet: "لا توجد تعليمات ذكاء اصطناعي بعد. أضف واحدة لتوجيه الذكاء الاصطناعي بمعرفة مجالك."
+  ai_instruction_created: "تم إنشاء تعليمة الذكاء الاصطناعي."
+  ai_instruction_updated: "تم تحديث تعليمة الذكاء الاصطناعي."
+  ai_instruction_deleted: "تم حذف تعليمة الذكاء الاصطناعي."
+  ai_instruction_title_placeholder: "مثال: مصطلحات قياس، اصطلاحات التقييم"
+  ai_instruction_content_en: "المحتوى (الإنجليزية)"
+  ai_instruction_content_ar: "المحتوى (العربية)"
+  ai_instruction_active_label: "نشط (تضمين في طلبات الذكاء الاصطناعي)"
+  inactive: "غير نشط"

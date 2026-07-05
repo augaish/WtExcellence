@@ -30,9 +30,11 @@ class CapaClauseSuggestionService
     begin
       if @provider == "openrouter"
         prompt = build_prompt
+        prompt = AiInstructionContext.decorate(prompt, company: @company, locale: I18n.locale)
         raw_text = call_openrouter_api(prompt)
       else
         prompt = build_user_prompt
+        prompt = AiInstructionContext.decorate(prompt, company: @company, locale: I18n.locale)
         raw_text = call_ollama_api(prompt)
       end
       cleaned_text = clean_response_text(raw_text)
@@ -137,7 +139,7 @@ class CapaClauseSuggestionService
       clauses_text = "Available Clauses (select the most relevant ones):\n"
       available_clauses.each do |clause|
         standard = clause.standard_version&.standard
-        title = clause.title('en') || clause.code
+        title = clause.title("en") || clause.code
         clauses_text += "- Code: #{clause.code}, Title: #{title}, Standard: #{standard&.display_name || 'N/A'}\n"
       end
       clauses_text += "\n"
@@ -285,7 +287,7 @@ class CapaClauseSuggestionService
       user_prompt += "Available Clauses (select the most relevant ones):\n"
       available_clauses.each do |clause|
         standard = clause.standard_version&.standard
-        title = clause.title('en') || clause.code
+        title = clause.title("en") || clause.code
         user_prompt += "- Code: #{clause.code}, Title: #{title}, Standard: #{standard&.display_name || 'N/A'}\n"
       end
       user_prompt += "\n"
@@ -334,4 +336,3 @@ class CapaClauseSuggestionService
     end
   end
 end
-
