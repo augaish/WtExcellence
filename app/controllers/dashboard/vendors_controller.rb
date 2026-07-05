@@ -5,7 +5,14 @@ class Dashboard::VendorsController < Dashboard::BaseController
   before_action :set_vendor, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @vendors = Vendor.active.where(company_id: current_company&.id).includes(:owner).order(risk_level: :desc, name: :asc)
+    # Order by real severity (critical first), not alphabetically — the string
+    # enum would otherwise sort "critical" last and "unassessed" first.
+    severity_order = Arel.sql(
+      "CASE risk_level " \
+      "WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 " \
+      "WHEN 'low' THEN 3 ELSE 4 END"
+    )
+    @vendors = Vendor.active.where(company_id: current_company&.id).includes(:owner).order(severity_order, name: :asc)
   end
 
   def show
@@ -19,9 +26,10 @@ class Dashboard::VendorsController < Dashboard::BaseController
     @vendor = Vendor.new(vendor_params)
     @vendor.company = current_company
     @vendor.created_by = current_user
+    sanitize_company_owner!(@vendor)
 
     if @vendor.save
-      redirect_to dashboard_vendor_path(@vendor), notice: "Vendor added successfully."
+      redirect_to dashboard_vendor_path(@vendor), notice: t("vendor_added")
     else
       render :new, status: :unprocessable_entity
     end
@@ -31,8 +39,11 @@ class Dashboard::VendorsController < Dashboard::BaseController
   end
 
   def update
-    if @vendor.update(vendor_params)
-      redirect_to dashboard_vendor_path(@vendor), notice: "Vendor updated successfully."
+    @vendor.assign_attributes(vendor_params)
+    sanitize_company_owner!(@vendor)
+
+    if @vendor.save
+      redirect_to dashboard_vendor_path(@vendor), notice: t("vendor_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -40,7 +51,7 @@ class Dashboard::VendorsController < Dashboard::BaseController
 
   def destroy
     @vendor.soft_delete!
-    redirect_to dashboard_vendors_path, notice: "Vendor deleted successfully."
+    redirect_to dashboard_vendors_path, notice: t("vendor_deleted")
   end
 
   private
@@ -51,14 +62,5 @@ class Dashboard::VendorsController < Dashboard::BaseController
 
   def vendor_params
     params.require(:vendor).permit(:name, :category, :risk_level, :contact_email, :owner_id, :notes)
-  end
-
-  def ensure_can_manage_vendors
-    unless current_user&.can_manage_vendors?
-      respond_to do |format|
-        format.html { redirect_to dashboard_capa_management_path, alert: "You don't have permission to manage vendors.", status: :forbidden }
-        format.json { render json: { success: false, error: "You don't have permission to manage vendors." }, status: :forbidden }
-      end
-    end
   end
 end

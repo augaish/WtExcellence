@@ -68,7 +68,8 @@ class LibraryController < DashboardController
 
     # Evidence reuse dashboard — top 10 most-linked documents for this company
     if @company
-      @top_reused_uploads = Upload.for_company(@company.id)
+      @top_reused_uploads = Upload.visible_to_user(current_user)
+        .for_company(@company.id)
         .with_reuse_count
         .order("reuse_count DESC")
         .limit(10)

@@ -1,18 +1,27 @@
 class PlatformAssistantService
   MAX_RESULTS_PER_TYPE = 5
 
-  def initialize(company)
+  # Raised when the LLM call fails, so the caller can avoid charging credits
+  # for a query that produced no real answer.
+  class AssistantError < StandardError; end
+
+  def initialize(company, user: nil)
     @company = company
+    @user = user
     @provider = ENV.fetch("CAPA_QUESTIONNAIRE_PROVIDER", "ollama").downcase
   end
 
+  # Returns { answer:, sources: } on success. Raises AssistantError on failure
+  # so the controller can skip/refund the credit charge.
   def ask(question)
     context = gather_context(question)
     answer = call_llm(question, context)
     { answer: answer, sources: context.map { |c| c[:label] } }
+  rescue AssistantError
+    raise
   rescue => e
     Rails.logger.error "PlatformAssistantService error: #{e.class} - #{e.message}"
-    { answer: "Sorry, I couldn't process that question right now. Please try again.", sources: [] }
+    raise AssistantError, e.message
   end
 
   private
@@ -56,7 +65,9 @@ class PlatformAssistantService
     when Capa
       searchable.company_id == @company&.id
     when Upload
-      searchable.company_id == @company&.id
+      # Company-scoped AND respects per-upload visibility so private uploads
+      # owned by other members never appear in AI answers/sources.
+      searchable.company_id == @company&.id && searchable.visible_to_user?(@user)
     else
       true
     end
@@ -89,22 +100,27 @@ class PlatformAssistantService
       Question: #{question}
     PROMPT
 
-    if @provider == "openrouter"
-      OpenRouter.configure do |config|
-        config.access_token = ENV.fetch("OPENROUTER_API_KEY")
-        config.site_name = "Way to Excellence"
-        config.site_url = ENV.fetch("APP_URL", "http://localhost:3000")
+    answer =
+      if @provider == "openrouter"
+        OpenRouter.configure do |config|
+          config.access_token = ENV.fetch("OPENROUTER_API_KEY")
+          config.site_name = "Way to Excellence"
+          config.site_url = ENV.fetch("APP_URL", "http://localhost:3000")
+        end
+
+        client = OpenRouter::Client.new
+        model = ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
+        response = client.complete(
+          [ { role: "user", content: prompt } ],
+          model: model
+        )
+        response.dig("choices", 0, "message", "content").to_s.strip
+      else
+        OllamaClient.new(model: ENV.fetch("CAPA_QUESTIONNAIRE_OLLAMA_MODEL", "qwen-capa-questionnaire")).generate(prompt).to_s.strip
       end
 
-      client = OpenRouter::Client.new
-      model = ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
-      response = client.complete(
-        [ { role: "user", content: prompt } ],
-        model: model
-      )
-      response.dig("choices", 0, "message", "content").to_s.strip
-    else
-      OllamaClient.new(model: ENV.fetch("CAPA_QUESTIONNAIRE_OLLAMA_MODEL", "qwen-capa-questionnaire")).generate(prompt)
-    end
+    raise AssistantError, "Empty response from language model" if answer.blank?
+
+    answer
   end
 end

@@ -20,9 +20,10 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
     @commitment = CustomerCommitment.new(commitment_params)
     @commitment.company = current_company
     @commitment.created_by = current_user
+    sanitize_company_owner!(@commitment)
 
     if @commitment.save
-      redirect_to dashboard_customer_commitment_path(@commitment), notice: "Commitment logged successfully."
+      redirect_to dashboard_customer_commitment_path(@commitment), notice: t("commitment_logged")
     else
       render :new, status: :unprocessable_entity
     end
@@ -32,8 +33,11 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   end
 
   def update
-    if @commitment.update(commitment_params)
-      redirect_to dashboard_customer_commitment_path(@commitment), notice: "Commitment updated successfully."
+    @commitment.assign_attributes(commitment_params)
+    sanitize_company_owner!(@commitment)
+
+    if @commitment.save
+      redirect_to dashboard_customer_commitment_path(@commitment), notice: t("commitment_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -41,7 +45,7 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
 
   def destroy
     @commitment.soft_delete!
-    redirect_to dashboard_customer_commitments_path, notice: "Commitment deleted successfully."
+    redirect_to dashboard_customer_commitments_path, notice: t("commitment_deleted")
   end
 
   private
@@ -52,14 +56,5 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
 
   def commitment_params
     params.require(:customer_commitment).permit(:title, :description, :customer_name, :due_date, :status, :owner_id)
-  end
-
-  def ensure_can_manage_commitments
-    unless current_user&.can_manage_commitments?
-      respond_to do |format|
-        format.html { redirect_to dashboard_capa_management_path, alert: "You don't have permission to manage customer commitments.", status: :forbidden }
-        format.json { render json: { success: false, error: "You don't have permission to manage customer commitments." }, status: :forbidden }
-      end
-    end
   end
 end

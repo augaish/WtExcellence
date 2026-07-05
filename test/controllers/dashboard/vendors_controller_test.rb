@@ -43,6 +43,6 @@ class Dashboard::VendorsControllerTest < ActionDispatch::IntegrationTest
 
     get dashboard_vendors_path
 
-    assert_response :forbidden
+    assert_response :see_other
   end
 end

@@ -114,8 +114,38 @@ class Dashboard::BaseController < ApplicationController
       return unless current_user&.risk_manager_only?
 
       respond_to do |format|
-        format.html { redirect_to dashboard_risk_management_index_path, alert: "Your role is limited to Risk Management.", status: :forbidden }
+        format.html { redirect_to dashboard_risk_management_index_path, alert: "Your role is limited to Risk Management.", status: :see_other }
         format.json { render json: { success: false, error: "Your role is limited to Risk Management." }, status: :forbidden }
+      end
+    end
+
+    # Null out an owner_id that doesn't belong to the current company, so a
+    # crafted request can't attach another tenant's CompanyUser as owner.
+    def sanitize_company_owner!(record)
+      return unless record.respond_to?(:owner_id) && record.owner_id.present?
+
+      valid = current_company&.company_users&.exists?(id: record.owner_id)
+      record.owner_id = nil unless valid
+    end
+
+    # Shared permission guards for the GRC modules. Each denies with a proper
+    # 303 redirect (browsers/Turbo follow 3xx, not 403+Location) or 403 JSON.
+    def ensure_can_manage_risks
+      deny_grc_access(t("grc.no_permission_risks")) unless current_user&.can_manage_risks?
+    end
+
+    def ensure_can_manage_vendors
+      deny_grc_access(t("grc.no_permission_vendors")) unless current_user&.can_manage_vendors?
+    end
+
+    def ensure_can_manage_commitments
+      deny_grc_access(t("grc.no_permission_commitments")) unless current_user&.can_manage_commitments?
+    end
+
+    def deny_grc_access(message)
+      respond_to do |format|
+        format.html { redirect_to dashboard_capa_management_path, alert: message, status: :see_other }
+        format.json { render json: { success: false, error: message }, status: :forbidden }
       end
     end
 

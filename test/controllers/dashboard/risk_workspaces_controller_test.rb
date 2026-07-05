@@ -44,19 +44,19 @@ class Dashboard::RiskWorkspacesControllerTest < ActionDispatch::IntegrationTest
 
     get dashboard_risk_workspaces_path
 
-    assert_response :forbidden
+    assert_response :see_other
   end
 
   test "risk manager is blocked from CAPA management, Standards, and Library" do
     sign_in @risk_manager_user, scope: :user
 
     get dashboard_capa_management_path
-    assert_response :forbidden
+    assert_response :see_other
 
     get standards_path
-    assert_response :forbidden
+    assert_response :see_other
 
     get library_path
-    assert_response :forbidden
+    assert_response :see_other
   end
 end

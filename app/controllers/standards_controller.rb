@@ -276,7 +276,7 @@ class StandardsController < Dashboard::BaseController
 
     # Uploads available for evidence linking (company-scoped)
     company = current_company || current_user&.company
-    @linkable_uploads = company ? Upload.for_company(company.id).order(:filename).limit(200) : Upload.none
+    @linkable_uploads = company ? Upload.visible_to_user(current_user).for_company(company.id).order(:filename).limit(200) : Upload.none
     @linked_upload_ids = @standard.evidence_attachments.pluck(:upload_id)
 
     # Check if version_id is provided in params (for version selector)

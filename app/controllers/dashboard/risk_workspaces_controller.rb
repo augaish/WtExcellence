@@ -20,7 +20,7 @@ class Dashboard::RiskWorkspacesController < Dashboard::BaseController
     @risk_workspace.company = current_company
 
     if @risk_workspace.save
-      redirect_to dashboard_risk_workspace_path(@risk_workspace), notice: "Risk workspace created successfully."
+      redirect_to dashboard_risk_workspace_path(@risk_workspace), notice: t("workspace_created")
     else
       render :new, status: :unprocessable_entity
     end
@@ -31,7 +31,7 @@ class Dashboard::RiskWorkspacesController < Dashboard::BaseController
 
   def update
     if @risk_workspace.update(risk_workspace_params)
-      redirect_to dashboard_risk_workspace_path(@risk_workspace), notice: "Risk workspace updated successfully."
+      redirect_to dashboard_risk_workspace_path(@risk_workspace), notice: t("workspace_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -39,7 +39,7 @@ class Dashboard::RiskWorkspacesController < Dashboard::BaseController
 
   def destroy
     @risk_workspace.soft_delete!
-    redirect_to dashboard_risk_workspaces_path, notice: "Risk workspace deleted successfully."
+    redirect_to dashboard_risk_workspaces_path, notice: t("workspace_deleted")
   end
 
   private
@@ -50,14 +50,5 @@ class Dashboard::RiskWorkspacesController < Dashboard::BaseController
 
   def risk_workspace_params
     params.require(:risk_workspace).permit(:name, :framework, :description, :department_scope)
-  end
-
-  def ensure_can_manage_risks
-    unless current_user&.can_manage_risks?
-      respond_to do |format|
-        format.html { redirect_to dashboard_capa_management_path, alert: "You don't have permission to manage risks.", status: :forbidden }
-        format.json { render json: { success: false, error: "You don't have permission to manage risks." }, status: :forbidden }
-      end
-    end
   end
 end

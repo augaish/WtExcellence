@@ -5,19 +5,19 @@
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('risk_management') %></h1>
-        <p class="text-[#797C81]">Track, score, and mitigate organizational risk</p>
+        <p class="text-[#797C81]"><%= t('risk_management_subtitle') %></p>
       </div>
       <div class="flex items-center gap-3">
         <%= link_to t('manage_workspaces'), dashboard_risk_workspaces_path, class: "px-4 py-2 text-sm text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors" %>
         <%= link_to dashboard_new_risk_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" do %>
-          Log New Risk
+          <%= t('log_new_risk') %>
         <% end %>
       </div>
     </div>
 
     <!-- Risk Matrix Heatmap -->
     <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mb-8 overflow-x-auto">
-      <h2 class="text-lg font-semibold text-[#0D1120] mb-4">Risk Matrix</h2>
+      <h2 class="text-lg font-semibold text-[#0D1120] mb-4"><%= t('risk_matrix') %></h2>
       <table class="border-collapse">
         <tbody>
           <% (5).downto(1) do |impact| %>
@@ -73,13 +73,13 @@
             <table class="w-full">
               <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
                 <tr>
-                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Title</span></th>
-                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Category</span></th>
-                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Owner</span></th>
-                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Inherent Score</span></th>
-                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Residual Score</span></th>
-                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Status</span></th>
-                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]">Action</span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('title') %></span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('category') %></span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('owner') %></span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('inherent_score') %></span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('residual_score') %></span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('status') %></span></th>
+                  <th class="text-left p-4"><span class="text-xs font-semibold text-[#797C81]"><%= t('action') %></span></th>
                 </tr>
               </thead>
               <tbody>

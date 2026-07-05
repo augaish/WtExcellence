@@ -23,9 +23,10 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     @risk.company = current_company
     @risk.created_by = current_user
     reject_cross_company_workspace(@risk)
+    sanitize_company_owner!(@risk)
 
     if @risk.save
-      redirect_to dashboard_risk_management_path(@risk), notice: "Risk logged successfully."
+      redirect_to dashboard_risk_management_path(@risk), notice: t("risk_logged")
     else
       render :new, status: :unprocessable_entity
     end
@@ -38,9 +39,10 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   def update
     @risk.assign_attributes(risk_params)
     reject_cross_company_workspace(@risk)
+    sanitize_company_owner!(@risk)
 
     if @risk.save
-      redirect_to dashboard_risk_management_path(@risk), notice: "Risk updated successfully."
+      redirect_to dashboard_risk_management_path(@risk), notice: t("risk_updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -48,7 +50,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
 
   def destroy
     @risk.soft_delete!
-    redirect_to dashboard_risk_management_index_path, notice: "Risk deleted successfully."
+    redirect_to dashboard_risk_management_index_path, notice: t("risk_deleted")
   end
 
   private
@@ -61,7 +63,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     params.require(:risk).permit(
       :title, :description, :category, :owner_id, :status,
       :likelihood, :impact, :residual_likelihood, :residual_impact,
-      :riskable_type, :riskable_id, :risk_workspace_id
+      :risk_workspace_id
     )
   end
 
@@ -71,14 +73,5 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
 
     valid = RiskWorkspace.active.where(company_id: current_company&.id).exists?(id: risk.risk_workspace_id)
     risk.risk_workspace_id = nil unless valid
-  end
-
-  def ensure_can_manage_risks
-    unless current_user&.can_manage_risks?
-      respond_to do |format|
-        format.html { redirect_to dashboard_capa_management_path, alert: "You don't have permission to manage risks.", status: :forbidden }
-        format.json { render json: { success: false, error: "You don't have permission to manage risks." }, status: :forbidden }
-      end
-    end
   end
 end

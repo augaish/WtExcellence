@@ -185,7 +185,9 @@ class SearchController < ApplicationController
         when "Capa"
           format_capa_result(searchable, formatted_results, seen_checkpoint_ids)
         when "Upload"
-          format_upload_result(searchable, formatted_results)
+          # Respect per-upload visibility so private uploads owned by other
+          # company members are never surfaced through search.
+          format_upload_result(searchable, formatted_results) if searchable.visible_to_user?(current_user)
         end
       end
 

@@ -45,6 +45,6 @@ class Dashboard::CustomerCommitmentsControllerTest < ActionDispatch::Integration
 
     get dashboard_customer_commitments_path
 
-    assert_response :forbidden
+    assert_response :see_other
   end
 end
