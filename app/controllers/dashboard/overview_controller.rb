@@ -137,6 +137,11 @@ class Dashboard::OverviewController < Dashboard::BaseController
     load_governance_metrics(current_company&.id)
     mark.call(:governance_metrics)
 
+    # Customizable layout (which widgets show, in what order) — admins can edit,
+    # everyone in the scope renders the active layout.
+    load_dashboard_layout
+    mark.call(:dashboard_layout)
+
     # AI Usage Overview (credits over time) - full period
     @tokens_over_time = calculate_credits_over_time(@date_from, @date_to)
 
@@ -210,6 +215,24 @@ class Dashboard::OverviewController < Dashboard::BaseController
   end
 
   private
+
+  # Load the active customizable layout for the current scope (platform for
+  # platform admins, otherwise the company's shared layout). Exposes the active
+  # layout for rendering, all three slots for the switcher, and whether the
+  # current user may customize.
+  def load_dashboard_layout
+    scope = current_user&.platform_admin? ? "platform" : "company"
+    company_id = scope == "platform" ? nil : current_company&.id
+
+    @dashboard_scope = scope
+    @can_customize = current_user&.platform_admin? || current_user&.company_user&.company_admin? || false
+    @active_slot = DashboardLayout.active_slot(scope: scope, company_id: company_id)
+    @dashboard_layout = DashboardLayout.resolve(scope: scope, company_id: company_id, slot: @active_slot)
+    @layout_slots = DashboardLayout::SLOTS.map do |slot|
+      layout = DashboardLayout.resolve(scope: scope, company_id: company_id, slot: slot)
+      { slot: slot, name: layout.name.presence || "#{t('layout', default: 'Layout')} #{slot}", active: slot == @active_slot }
+    end
+  end
 
   # Governance (Risk / Vendor / Customer Commitment) metrics for the overview.
   # Company-scoped; leaves the ivars nil when there is no company context.

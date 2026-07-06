@@ -492,3 +492,35 @@
   border-left: 2px solid #e5e7eb;
   padding-left: 1rem;
 }
+/* ── Overview customizable widgets ─────────────────────────────── */
+/* Drag handles + hidden-widget affordances only appear in customize mode. */
+.overview-widget .widget-handle {
+  display: none;
+}
+.overview-widget.is-hidden .widget-body {
+  display: none;
+}
+
+/* Customize mode: reveal handles, keep hidden widgets visible but dimmed. */
+.is-customizing .overview-widget .widget-handle {
+  display: block;
+  cursor: grab;
+}
+.is-customizing .overview-widget {
+  outline: 1px dashed #D6C4ED;
+  outline-offset: 4px;
+  border-radius: 0.75rem;
+  margin-bottom: 0.75rem;
+  transition: outline-color 150ms ease;
+}
+.is-customizing .overview-widget.is-hidden {
+  opacity: 0.55;
+}
+.is-customizing .overview-widget.is-hidden .widget-body {
+  display: block;
+  filter: grayscale(0.6);
+}
+.widget-ghost {
+  opacity: 0.4;
+  background: #F6EEFF;
+}

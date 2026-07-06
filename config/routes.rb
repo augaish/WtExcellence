@@ -29,6 +29,10 @@ Rails.application.routes.draw do
     get "overview/avg_compliance", to: "overview#avg_compliance", as: :overview_avg_compliance
     get "overview/standards_compliance", to: "overview#standards_compliance", as: :overview_standards_compliance
 
+    # Customizable overview layouts (admins only)
+    patch "overview/layout", to: "dashboard_layouts#update", as: :overview_layout
+    post "overview/layout/activate", to: "dashboard_layouts#activate", as: :activate_overview_layout
+
     # Quality Manager Dashboard
     get "quality_manager", to: "quality_manager#index", as: :quality_manager
 

@@ -1,7 +1,55 @@
-<div class="bg-[#F9FAFC] min-h-screen px-4 py-4 sm:px-6 sm:py-6">
-  <%= render partial: "top_metrics" %>
-  <%= render partial: "second_metrics" %>
-  <%= render partial: "charts_section" %>
-  <%= render partial: "tables_section" %>
-</div>
+<%#
+  Widget-based overview. Each section is a movable/hideable "widget". Admins can
+  enter customize mode (drag to reorder, hide/show, save into one of three slots).
+  Everyone in the scope renders the active slot's stored order/visibility.
+%>
+<% widget_partials = {
+     "top_metrics"    => { partial: "top_metrics",       label: t("widget_top_metrics", default: "Key metrics") },
+     "second_metrics" => { partial: "second_metrics",    label: t("widget_capa_metrics", default: "CAPA metrics") },
+     "charts"         => { partial: "charts_section",    label: t("widget_charts", default: "Charts") },
+     "governance"     => { partial: "governance_section", label: t("governance", default: "Governance") },
+     "tables"         => { partial: "tables_section",    label: t("widget_tables", default: "Tables") }
+   } %>
 
+<div class="bg-[#F9FAFC] min-h-screen px-4 py-4 sm:px-6 sm:py-6"
+     data-controller="overview-customize"
+     data-overview-customize-slot-value="<%= @active_slot %>"
+     data-overview-customize-url-value="<%= dashboard_overview_layout_path %>">
+
+  <% if @can_customize %>
+    <%= render partial: "layout_toolbar" %>
+  <% end %>
+
+  <div data-overview-customize-target="list" class="space-y-0">
+    <% @dashboard_layout.ordered_widgets.each do |key| %>
+      <% meta = widget_partials[key] %>
+      <% next unless meta %>
+      <% hidden = !@dashboard_layout.widget_visible?(key) %>
+      <div class="overview-widget <%= "is-hidden" if hidden %>"
+           data-overview-customize-target="widget"
+           data-widget-key="<%= key %>"
+           data-widget-hidden="<%= hidden %>">
+        <div class="widget-handle" data-overview-customize-target="handle" aria-hidden="true">
+          <div class="flex items-center justify-between rounded-t-xl bg-[#F1EAFB] px-3 py-1.5 mb-2">
+            <span class="inline-flex items-center gap-2 text-xs font-semibold text-[#5C3984]">
+              <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path d="M7 4a1 1 0 100 2 1 1 0 000-2zM7 9a1 1 0 100 2 1 1 0 000-2zM7 14a1 1 0 100 2 1 1 0 000-2zM13 4a1 1 0 100 2 1 1 0 000-2zM13 9a1 1 0 100 2 1 1 0 000-2zM13 14a1 1 0 100 2 1 1 0 000-2z"/>
+              </svg>
+              <%= meta[:label] %>
+            </span>
+            <button type="button"
+                    data-action="overview-customize#toggleHidden"
+                    class="inline-flex items-center gap-1 text-xs font-medium text-[#5C3984] hover:text-[#4A2F6B] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] rounded px-2 py-1"
+                    data-toggle-label-hide="<%= t('hide', default: 'Hide') %>"
+                    data-toggle-label-show="<%= t('show', default: 'Show') %>">
+              <span data-overview-customize-target="toggleLabel"><%= hidden ? t('show', default: 'Show') : t('hide', default: 'Hide') %></span>
+            </button>
+          </div>
+        </div>
+        <div class="widget-body">
+          <%= render partial: meta[:partial] %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
