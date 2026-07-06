@@ -38,7 +38,7 @@
               <% end %>
             <% else %>
               <tr>
-                <td colspan="5" class="p-8 text-center text-sm text-[#797C81]"><%= t('no_vendors_yet') %></td>
+                <td colspan="5"><%= render "dashboard/shared/empty_state", icon: 'account-management-icon.svg', title: t('no_vendors_yet'), subtitle: t('vendor_management_subtitle') %></td>
               </tr>
             <% end %>
           </tbody>

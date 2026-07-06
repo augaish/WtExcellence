@@ -1667,3 +1667,5 @@ en:
   logout: "Logout"
   governance: "Governance"
   trust_center_public_link: "Public Trust Center link"
+  no_risks_yet: "No risks logged yet"
+  no_risks_hint: "Log your first risk to score it on the matrix and track mitigation."

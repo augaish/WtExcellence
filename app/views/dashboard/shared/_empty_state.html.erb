@@ -1,0 +1,10 @@
+<%# Teaching empty state (product.md). Locals: icon (asset), title, subtitle (optional), action (optional block via layout). %>
+<div class="flex flex-col items-center justify-center text-center py-16 px-6">
+  <div class="w-12 h-12 rounded-full bg-[#F6EEFF] flex items-center justify-center mb-4">
+    <%= image_tag asset_path(icon), alt: "", "aria-hidden": true, class: "w-6 h-6 opacity-70" %>
+  </div>
+  <p class="text-sm font-semibold text-[#0D1120]"><%= title %></p>
+  <% if local_assigns[:subtitle].present? %>
+    <p class="mt-1 text-sm text-[#797C81] max-w-sm"><%= subtitle %></p>
+  <% end %>
+</div>

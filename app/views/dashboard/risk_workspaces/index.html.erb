@@ -32,8 +32,8 @@
         <% end %>
       </div>
     <% else %>
-      <div class="bg-white border border-[#E3E3E3] rounded-xl p-8 text-center text-sm text-[#797C81]">
-        <%= t('no_workspaces_yet') %>
+      <div class="bg-white border border-[#E3E3E3] rounded-xl">
+        <%= render "dashboard/shared/empty_state", icon: 'score-start-icon.svg', title: t('no_workspaces_yet'), subtitle: t('risk_workspaces_subtitle') %>
       </div>
     <% end %>
   </div>

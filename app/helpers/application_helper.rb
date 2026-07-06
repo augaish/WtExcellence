@@ -18,14 +18,18 @@ module ApplicationHelper
   end
 
   # Shared UI button vocabulary for consistent affordances across the dashboard.
+  # Includes accessible focus-visible rings (ui-ux-pro-max) and a subtle press
+  # feedback (emil-design-eng) at product-appropriate 150ms.
+  UI_BTN_BASE = "inline-flex items-center justify-center gap-2 px-4 h-10 rounded-lg text-sm font-semibold " \
+                "transition-[transform,background-color,border-color] duration-150 active:scale-[0.98] " \
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5C3984]".freeze
+
   def ui_btn_primary
-    "inline-flex items-center justify-center gap-2 px-4 h-10 rounded-lg text-sm font-semibold " \
-    "text-white bg-[#5C3984] hover:bg-[#4A2F6B] transition-colors"
+    "#{UI_BTN_BASE} text-white bg-[#5C3984] hover:bg-[#4A2F6B]"
   end
 
   def ui_btn_secondary
-    "inline-flex items-center justify-center gap-2 px-4 h-10 rounded-lg text-sm font-semibold " \
-    "text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] transition-colors"
+    "#{UI_BTN_BASE} text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF]"
   end
 
   def current_user_credit_balance

@@ -47,7 +47,7 @@
               <% end %>
             <% else %>
               <tr>
-                <td colspan="6" class="p-8 text-center text-sm text-[#797C81]"><%= t('no_commitments_yet') %></td>
+                <td colspan="6"><%= render "dashboard/shared/empty_state", icon: 'calendar-03.png', title: t('no_commitments_yet'), subtitle: t('customer_commitments_subtitle') %></td>
               </tr>
             <% end %>
           </tbody>
