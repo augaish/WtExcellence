@@ -28,7 +28,7 @@
                 <%= f.text_field :search, 
                     value: params[:search], 
                     placeholder: t('start_searching'), 
-                    class: "w-full md:w-64 px-4 py-3 sm:py-2 ps-10 pe-4 text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-colors duration-200",
+                    class: "w-full md:w-64 px-4 py-3 sm:py-2 ps-10 pe-4 text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-[transform,background-color] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5C3984]",
                     data: { library_search_target: "input", action: "input->library-search#handleSearch" } %>
                 <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                     <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
@@ -39,7 +39,7 @@
 
             <!-- Upload Document Button -->
             <% unless @show_companies || viewer? %>
-                <button data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="upload_document_dialog" class="flex items-center justify-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors duration-200 whitespace-nowrap min-h-[44px] text-xs sm:text-sm">
+                <button data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="upload_document_dialog" class="flex items-center justify-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-[transform,background-color] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5C3984] whitespace-nowrap min-h-[44px] text-xs sm:text-sm">
                     <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                     </svg>
@@ -92,7 +92,7 @@
             class="flex items-center gap-2 sm:gap-3 flex-wrap">
             <!-- Create New Folder Button -->
             <% unless viewer? %>
-              <button data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="create_folder_dialog" class="flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#D6C4ED] hover:bg-[#CEBCE5] text-[#0D1120] px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-xs sm:text-sm">
+              <button data-controller="modal" data-action="click->modal#open" data-modal-dialog-param="create_folder_dialog" class="flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#D6C4ED] hover:bg-[#CEBCE5] text-[#0D1120] px-3 sm:px-4 py-3 sm:py-2 rounded-lg font-medium transition-[transform,background-color] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5C3984] min-h-[44px] text-xs sm:text-sm">
                   <svg class="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                   </svg>

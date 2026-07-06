@@ -10,7 +10,7 @@
                     <div class="relative">
                         <%= form.text_field :search, placeholder: t('search_standards'), 
                             value: params[:search], 
-                            class: "w-full sm:w-64 px-4 py-3 sm:py-2 pl-10 pr-4 text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-colors duration-200",
+                            class: "w-full sm:w-64 px-4 py-3 sm:py-2 pl-10 pr-4 text-[16px] sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-[transform,background-color] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5C3984]",
                             data: { search_frame_target: "searchInput", action: "input->search-frame#perform" } %>
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
@@ -22,7 +22,7 @@
             </div>
 
             <% if current_user&.platform_admin? %>
-                <button class="flex items-center justify-center space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-5 py-3 sm:px-4 sm:py-2 rounded-lg font-medium transition-colors duration-200 min-h-[44px] text-[16px] sm:text-sm" data-controller="modal" data-action="click->modal#show" data-modal-dialog-param="new_standard_dialog">
+                <button class="flex items-center justify-center space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-5 py-3 sm:px-4 sm:py-2 rounded-lg font-medium transition-[transform,background-color] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5C3984] min-h-[44px] text-[16px] sm:text-sm" data-controller="modal" data-action="click->modal#show" data-modal-dialog-param="new_standard_dialog">
                     <div class="text-[#5C3984] flex items-center justify-center">
                         <%= image_tag asset_path('plus-icon.svg'), class: "w-4 h-4 max-w-full h-auto" %>
                     </div>
@@ -102,7 +102,7 @@
                     <% end %>
                 </p>
                 <% if current_user&.super_admin? || current_user&.delegated_admin? %>
-                    <button class="flex items-center justify-center space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 mx-auto min-h-[44px] text-[16px] sm:text-sm" data-controller="modal" data-action="click->modal#show" data-modal-dialog-param="new_standard_dialog">
+                    <button class="flex items-center justify-center space-x-2 bg-[#5C3984] hover:bg-[#4A2F6B] text-white px-6 py-3 rounded-lg font-medium transition-[transform,background-color] duration-150 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#5C3984] mx-auto min-h-[44px] text-[16px] sm:text-sm" data-controller="modal" data-action="click->modal#show" data-modal-dialog-param="new_standard_dialog">
                         <div class="text-white flex items-center justify-center">
                             <%= image_tag asset_path('plus-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
                         </div>
