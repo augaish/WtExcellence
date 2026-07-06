@@ -52,6 +52,16 @@ module ApplicationHelper
   end
   alias_method :ui_textarea, :ui_input
 
+  # Segmented filter/tab pill (e.g. CAPA status filters). Consistent focus-visible
+  # ring + subtle press feedback, active state uses the brand purple.
+  def ui_filter_pill(active)
+    base = "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] " \
+           "flex items-center transition-[transform,background-color] duration-150 active:scale-[0.98] " \
+           "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#5C3984]"
+    state = active ? "bg-[#5C3984] text-white" : "bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]"
+    "#{base} #{state}"
+  end
+
   def current_user_credit_balance
     if current_user&.company_user
       current_user.company_user.assigned_credits || 0

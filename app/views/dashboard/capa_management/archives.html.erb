@@ -11,24 +11,24 @@
           <% current_status = params[:status] || 'all' %>
           <% all_link_params = { priority: params[:priority], assignee_id: params[:assignee_id], due_date_to: params[:due_date_to], search: params[:search] }.compact %>
           <%= link_to dashboard_capa_management_archives_path(all_link_params), 
-                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'all' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+                      class: ui_filter_pill(current_status == 'all') do %>
             <%= t("all") %>
           <% end %>
           <% status_link_params = { priority: params[:priority], assignee_id: params[:assignee_id], due_date_to: params[:due_date_to], search: params[:search] }.compact %>
           <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'open')), 
-                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'open' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+                      class: ui_filter_pill(current_status == 'open') do %>
             <%= t("capa_management_ui.statuses.open") %>
           <% end %>
           <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'assigned')), 
-                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'assigned' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+                      class: ui_filter_pill(current_status == 'assigned') do %>
             <%= t("capa_management_ui.statuses.assigned") %>
           <% end %>
           <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'in_progress')), 
-                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'in_progress' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+                      class: ui_filter_pill(current_status == 'in_progress') do %>
             <%= t("capa_management_ui.statuses.in_progress") %>
           <% end %>
           <%= link_to dashboard_capa_management_archives_path(status_link_params.merge(status: 'closed')), 
-                      class: "px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium whitespace-nowrap min-h-[40px] flex items-center #{current_status == 'closed' ? 'bg-[#5C3984] text-white' : 'bg-[#F7F7FD] text-[#797C81] hover:bg-[#E9E9F9]'}" do %>
+                      class: ui_filter_pill(current_status == 'closed') do %>
             <%= t("capa_management_ui.statuses.closed") %>
           <% end %>
         </div>
