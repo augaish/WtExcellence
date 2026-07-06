@@ -19,61 +19,61 @@
 
   <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 space-y-4">
     <div>
-      <%= f.label :title, t('title'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-      <%= f.text_field :title, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+      <%= f.label :title, t('title'), class: ui_label %>
+      <%= f.text_field :title, class: ui_input %>
     </div>
 
     <div>
-      <%= f.label :description, t('description'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-      <%= f.text_area :description, rows: 3, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+      <%= f.label :description, t('description'), class: ui_label %>
+      <%= f.text_area :description, rows: 3, class: ui_input %>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= f.label :category, t('category'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.text_field :category, class: "w-full px-4 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2" %>
+        <%= f.label :category, t('category'), class: ui_label %>
+        <%= f.text_field :category, class: ui_input %>
       </div>
       <div>
-        <%= f.label :owner_id, t('owner'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.collection_select :owner_id, current_company&.company_users&.includes(:user) || [], :id, ->(cu) { cu.user.name }, { include_blank: t('unassigned') }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+        <%= f.label :owner_id, t('owner'), class: ui_label %>
+        <%= f.collection_select :owner_id, current_company&.company_users&.includes(:user) || [], :id, ->(cu) { cu.user.name }, { include_blank: t('unassigned') }, class: ui_input %>
       </div>
     </div>
 
     <div>
-      <%= f.label :risk_workspace_id, t('risk_workspace'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-      <%= f.collection_select :risk_workspace_id, @risk_workspaces || [], :id, :name, { include_blank: t('uncategorized') }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      <%= f.label :risk_workspace_id, t('risk_workspace'), class: ui_label %>
+      <%= f.collection_select :risk_workspace_id, @risk_workspaces || [], :id, :name, { include_blank: t('uncategorized') }, class: ui_input %>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= f.label :likelihood, t('likelihood_1_5'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.select :likelihood, (1..5), {}, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+        <%= f.label :likelihood, t('likelihood_1_5'), class: ui_label %>
+        <%= f.select :likelihood, (1..5), {}, class: ui_input %>
       </div>
       <div>
-        <%= f.label :impact, t('impact_1_5'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.select :impact, (1..5), {}, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+        <%= f.label :impact, t('impact_1_5'), class: ui_label %>
+        <%= f.select :impact, (1..5), {}, class: ui_input %>
       </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= f.label :residual_likelihood, t('residual_likelihood_label'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.select :residual_likelihood, (1..5), { include_blank: true }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+        <%= f.label :residual_likelihood, t('residual_likelihood_label'), class: ui_label %>
+        <%= f.select :residual_likelihood, (1..5), { include_blank: true }, class: ui_input %>
       </div>
       <div>
-        <%= f.label :residual_impact, t('residual_impact_label'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-        <%= f.select :residual_impact, (1..5), { include_blank: true }, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+        <%= f.label :residual_impact, t('residual_impact_label'), class: ui_label %>
+        <%= f.select :residual_impact, (1..5), { include_blank: true }, class: ui_input %>
       </div>
     </div>
 
     <div>
-      <%= f.label :status, t('status'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-      <%= f.select :status, Risk.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+      <%= f.label :status, t('status'), class: ui_label %>
+      <%= f.select :status, Risk.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: ui_input %>
     </div>
   </div>
 
   <div class="flex justify-end gap-3">
-    <%= link_to "Cancel", dashboard_risk_management_index_path, class: "px-4 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50" %>
-    <%= f.submit (@risk.new_record? ? t('log_risk') : t('save_changes')), class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
+    <%= link_to t('cancel'), dashboard_risk_management_index_path, class: ui_btn_neutral %>
+    <%= f.submit (@risk.new_record? ? t('log_risk') : t('save_changes')), class: ui_btn_primary %>
   </div>
 <% end %>

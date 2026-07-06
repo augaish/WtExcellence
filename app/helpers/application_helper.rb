@@ -32,6 +32,26 @@ module ApplicationHelper
     "#{UI_BTN_BASE} text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF]"
   end
 
+  def ui_btn_neutral
+    "#{UI_BTN_BASE} text-gray-700 border border-gray-300 hover:bg-gray-50"
+  end
+
+  def ui_btn_danger
+    "#{UI_BTN_BASE} text-red-600 border border-red-300 hover:bg-red-50"
+  end
+
+  # Consistent form-field vocabulary.
+  def ui_label
+    "block text-sm font-medium text-gray-700 mb-1.5"
+  end
+
+  # Padding-based height so it's safe for text inputs, selects, and textareas.
+  def ui_input
+    "w-full px-4 py-3 border border-gray-300 rounded-lg text-sm text-[#0D1120] " \
+    "focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-shadow"
+  end
+  alias_method :ui_textarea, :ui_input
+
   def current_user_credit_balance
     if current_user&.company_user
       current_user.company_user.assigned_credits || 0
