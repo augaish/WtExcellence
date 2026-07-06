@@ -33,6 +33,44 @@ class Dashboard::DashboardLayoutsControllerTest < ActionDispatch::IntegrationTes
     assert_response :success
   end
 
+  test "overview renders for super admin (platform-wide governance rollup)" do
+    super_admin = User.create!(
+      email: "layout.super.#{SecureRandom.hex(4)}@example.com",
+      password: "password123",
+      password_confirmation: "password123",
+      name: "Layout Super",
+      role: "super_admin",
+      is_active: true
+    )
+    sign_in super_admin, scope: :user
+    get dashboard_overview_path
+    assert_response :success
+  end
+
+  test "super admin saves layouts under the platform scope" do
+    super_admin = User.create!(
+      email: "layout.super2.#{SecureRandom.hex(4)}@example.com",
+      password: "password123",
+      password_confirmation: "password123",
+      name: "Layout Super 2",
+      role: "super_admin",
+      is_active: true
+    )
+    sign_in super_admin, scope: :user
+
+    patch dashboard_overview_layout_path, params: {
+      slot: 1,
+      order: %w[governance top_metrics second_metrics charts tables],
+      hidden: []
+    }, as: :json
+    assert_response :success
+
+    layout = DashboardLayout.platform.find_by(slot: 1)
+    assert_not_nil layout
+    assert_nil layout.company_id
+    assert_equal 1, DashboardLayout.active_slot(scope: "platform", company_id: nil)
+  end
+
   test "admin can save a layout with order and hidden widgets" do
     sign_in @admin_user, scope: :user
 

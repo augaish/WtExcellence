@@ -133,8 +133,9 @@ class Dashboard::OverviewController < Dashboard::BaseController
 
     mark.call(:capa_metrics_and_charts)
 
-    # GOVERNANCE METRICS (Risk / Vendor / Customer Commitment) — company-scoped
-    load_governance_metrics(current_company&.id)
+    # GOVERNANCE METRICS (Risk / Vendor / Customer Commitment).
+    # Platform admins see a cross-company rollup; everyone else is company-scoped.
+    load_governance_metrics(@filter_by_company ? @company_id : nil)
     mark.call(:governance_metrics)
 
     # Customizable layout (which widgets show, in what order) — admins can edit,
@@ -235,11 +236,11 @@ class Dashboard::OverviewController < Dashboard::BaseController
   end
 
   # Governance (Risk / Vendor / Customer Commitment) metrics for the overview.
-  # Company-scoped; leaves the ivars nil when there is no company context.
+  # Pass a company_id to scope to one company; pass nil for a platform-wide
+  # rollup across every company (super admin view).
   def load_governance_metrics(company_id)
-    return unless company_id
-
-    risks = Risk.active.where(company_id: company_id)
+    risks = Risk.active
+    risks = risks.where(company_id: company_id) if company_id
     @risk_total = risks.count
     @risk_open = risks.where.not(status: "closed").count
     level_counts = Hash.new(0)
@@ -251,12 +252,14 @@ class Dashboard::OverviewController < Dashboard::BaseController
     @risk_by_level = level_counts
     @risk_matrix = matrix
 
-    vendors = Vendor.active.where(company_id: company_id)
+    vendors = Vendor.active
+    vendors = vendors.where(company_id: company_id) if company_id
     @vendor_total = vendors.count
     @vendor_by_level = vendors.group(:risk_level).count
     @vendor_high = vendors.where(risk_level: %w[high critical]).count
 
-    commitments = CustomerCommitment.active.where(company_id: company_id)
+    commitments = CustomerCommitment.active
+    commitments = commitments.where(company_id: company_id) if company_id
     @commitment_total = commitments.count
     @commitment_overdue = commitments.select(&:past_due?).size
     @commitment_due_soon = commitments.due_soon.count
