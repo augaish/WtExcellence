@@ -5,21 +5,21 @@
       <% unless viewer? %>
         <div class="hidden items-center gap-2 flex-wrap" data-capas--select-all-target="bulkActions">
           <% if current_page?(dashboard_capa_management_archives_path) %>
-            <button type="button" class="bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="bulkUnarchiveCapas()">
+            <button type="button" class="bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto <%= ui_press %>" onclick="bulkUnarchiveCapas()">
               <span><%= t("capa_management_ui.tabs.bulk.unarchive_selected") %></span>
             </button>
           <% else %>
-            <button type="button" class="bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="bulkArchiveCapas()">
+            <button type="button" class="bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto <%= ui_press %>" onclick="bulkArchiveCapas()">
               <span><%= t("capa_management_ui.tabs.bulk.archive_selected") %></span>
             </button>
           <% end %>
-          <button type="button" class="bg-[#EA4034] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="bulkDeleteCapas()">
+          <button type="button" class="bg-[#EA4034] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto <%= ui_press('EA4034') %>" onclick="bulkDeleteCapas()">
             <span><%= t("capa_management_ui.tabs.bulk.delete_selected") %></span>
           </button>
         </div>
       <% end %>
       <% if can_create_capa? && !viewer? %>
-        <button class="flex-1 sm:flex-none bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto" onclick="document.getElementById('newActionModal').showModal()">
+        <button class="flex-1 sm:flex-none bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm font-medium min-h-[44px] sm:min-h-auto <%= ui_press %>" onclick="document.getElementById('newActionModal').showModal()">
           <%= image_tag asset_path('plus-icon.svg'), class: "w-4 h-4 max-w-full h-auto flex-shrink-0" %>
           <span><%= t("capa_management_ui.tabs.add_non_conformity") %></span>
         </button>
@@ -78,7 +78,7 @@
     <% elsif current_page?(dashboard_capa_management_path) %>
       <button 
         type="button" 
-        class="flex items-center justify-center gap-2 bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl font-medium text-xs sm:text-sm min-h-[44px] sm:min-h-auto w-full lg:w-auto lg:ml-auto"
+        class="flex items-center justify-center gap-2 bg-[#5C3984] text-white px-3 sm:px-4 py-3 sm:py-2 rounded-xl font-medium text-xs sm:text-sm min-h-[44px] sm:min-h-auto w-full lg:w-auto lg:ml-auto <%= ui_press %>"
         data-controller="modal"
         data-action="click->modal#open"
         data-modal-dialog-param="export_capas_dialog">

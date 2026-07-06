@@ -62,6 +62,14 @@ module ApplicationHelper
     "#{base} #{state}"
   end
 
+  # Interaction/a11y utilities to append to bespoke buttons that keep their own
+  # layout classes: subtle press feedback (emil-design-eng) + focus-visible ring
+  # (ui-ux-pro-max). Pass a ring color for non-brand (e.g. danger) buttons.
+  def ui_press(ring = "#5C3984")
+    "transition-transform duration-150 active:scale-[0.98] focus:outline-none " \
+    "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#{ring}]"
+  end
+
   def current_user_credit_balance
     if current_user&.company_user
       current_user.company_user.assigned_credits || 0
