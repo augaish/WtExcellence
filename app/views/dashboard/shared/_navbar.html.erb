@@ -93,6 +93,7 @@
             <!-- Dropdown Menu -->
             <div id="profileDropdown" class="hidden absolute end-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                 <div class="py-1">
+                    <%= link_to t('help.title'), help_path, class: "w-full text-start flex items-center px-4 py-2 min-h-[44px] text-sm text-gray-700 hover:bg-purple-100 hover:text-purple-900" %>
                     <%= button_to t('logout'), destroy_user_session_path, method: :delete, data: { turbo: false }, class: "w-full text-start flex items-center px-4 py-2 min-h-[44px] text-sm text-gray-700 hover:bg-purple-100 hover:text-purple-900" %>
                 </div>
             </div>

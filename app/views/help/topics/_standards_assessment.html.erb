@@ -1,0 +1,45 @@
+<% if rtl? %>
+  <p>تتيح وحدة المعايير تقييم مدى امتثال شركتك لمعيار مثل EFQM أو ISO 9001 أو KAQA على مستوى البنود.</p>
+
+  <h2>فتح معيار</h2>
+  <p>من الشريط الجانبي اختر «المعايير»، ثم اختر المعيار المطلوب. ستظهر نسخ المعيار وشجرة البنود.</p>
+
+  <h2>تقييم بند نهائي</h2>
+  <ol>
+    <li>انتقل إلى شجرة البنود واختر بنداً نهائياً (مثل 1.1).</li>
+    <li>تفتح صفحة التقييم المخصصة للبند، وتعرض في الأعلى تعريف البند ثم صناديق نقاط التقييم (Checkpoints).</li>
+    <li>لكل نقطة تقييم: اكتب ملاحظاتك، وأرفق الأدلة، وحدّد المسؤول عند الحاجة.</li>
+    <li>في أسفل الصفحة يوجد قسم التقييم المرتبط بأداة التقييم المهيّأة للمعيار.</li>
+  </ol>
+
+  <h2>واجهة التقييم حسب نوع المعيار</h2>
+  <ul>
+    <li><strong>EFQM:</strong> مؤشرات انزلاقية لكل سمة (النهج، التطبيق، التقييم والتحسين) مع درجة إجمالية.</li>
+    <li><strong>ISO 9001:</strong> خيارات نعم/لا.</li>
+    <li><strong>معايير أخرى:</strong> اختيار متعدد أو أداة مخصّصة.</li>
+  </ul>
+
+  <div class="tip">تُحتسب الدرجة الإجمالية تلقائياً من الأوزان والحدود القصوى المهيأة في الأداة، وتظهر في ملخص البند الأب.</div>
+<% else %>
+  <p>The Standards module lets you assess how well your company complies with a standard such as EFQM, ISO 9001, or KAQA, at the clause level.</p>
+
+  <h2>Opening a standard</h2>
+  <p>From the sidebar choose <em>Standards</em>, then select the standard. You'll see its versions and the clause tree.</p>
+
+  <h2>Assessing a terminal clause</h2>
+  <ol>
+    <li>Open the clause tree and pick a terminal clause (e.g. 1.1).</li>
+    <li>The dedicated assessment page opens, showing the clause definition at the top followed by checkpoint boxes.</li>
+    <li>For each checkpoint: write your comments, attach evidence, and set an owner if needed.</li>
+    <li>At the bottom is the scoring section, linked to the evaluation tool configured for that standard.</li>
+  </ol>
+
+  <h2>Scoring UI by standard type</h2>
+  <ul>
+    <li><strong>EFQM:</strong> sliders per attribute (Approach, Deployment, Assessment &amp; Refinement) with an overall score.</li>
+    <li><strong>ISO 9001:</strong> Yes/No selections.</li>
+    <li><strong>Other standards:</strong> multiple choice or a custom tool.</li>
+  </ul>
+
+  <div class="tip">The overall score is calculated automatically from the weights and caps configured in the tool, and appears in the parent clause summary.</div>
+<% end %>

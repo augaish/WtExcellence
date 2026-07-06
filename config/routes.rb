@@ -13,6 +13,10 @@ Rails.application.routes.draw do
   # Trust Center (public compliance page, accessible without authentication)
   get "trust/:company_id", to: "trust_center#show", as: :trust_center
 
+  # Help Center / User Manual (in-app, authenticated)
+  get "help", to: "help#index", as: :help
+  get "help/:slug", to: "help#show", as: :help_topic
+
   get "standards/index"
   get "dashboard/index"
   get "home/index"

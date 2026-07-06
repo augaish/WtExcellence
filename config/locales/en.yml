@@ -1633,3 +1633,35 @@ en:
   ai_instruction_content_ar: "Content (Arabic)"
   ai_instruction_active_label: "Active (include in AI requests)"
   inactive: "Inactive"
+  help:
+    title: "User Manual"
+    subtitle: "Guides for every workflow in Way to Excellence."
+    save_as_pdf: "Save as PDF"
+    back_to_index: "← All topics"
+    topic_not_found: "That help topic doesn't exist."
+    topics:
+      getting_started:
+        title: "Getting Started"
+        summary: "Navigation, roles, and the basics"
+      standards_assessment:
+        title: "Assessing Standards"
+        summary: "Terminal clauses, checkpoints, and scoring"
+      evidence:
+        title: "Evidence & Documents"
+        summary: "Upload, link, and reuse evidence"
+      capa:
+        title: "CAPA Management"
+        summary: "Corrective actions and AI assistance"
+      risk_grc:
+        title: "Risk & GRC"
+        summary: "Risks, workspaces, vendors, commitments"
+      ai_features:
+        title: "AI Features"
+        summary: "Assistant, custom instructions, credits"
+      trust_center:
+        title: "Trust Center"
+        summary: "Your public compliance page"
+      user_management:
+        title: "User Management"
+        summary: "Users, roles, and licenses"
+  logout: "Logout"

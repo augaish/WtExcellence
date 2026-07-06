@@ -1,0 +1,35 @@
+<% if rtl? %>
+  <p>يدير مسؤولو الشركة المستخدمين والأدوار والتراخيص من قسم «إدارة الحسابات».</p>
+
+  <h2>إضافة مستخدم</h2>
+  <ol>
+    <li>من ملف الشركة اضغط «إضافة مستخدم جديد».</li>
+    <li>أدخل البريد الإلكتروني وحدّد الدور داخل الشركة.</li>
+    <li>يتلقى المستخدم دعوة لإنشاء كلمة المرور وتفعيل حسابه.</li>
+  </ol>
+
+  <h2>الأدوار</h2>
+  <p>اختر الدور المناسب لكل مستخدم (مدير شركة، مدير جودة، مدير مخاطر، مدقق، مساهم، مشاهد). يحدّد الدور ما يمكن للمستخدم رؤيته والقيام به.</p>
+
+  <h2>التراخيص</h2>
+  <p>يحدّد عدد المقاعد (License Seats) الحد الأقصى للمستخدمين النشطين. يمكن للمسؤول تعديل عدد المقاعد وتفعيل أو تعطيل المستخدمين.</p>
+
+  <div class="tip">يظل المستخدم الجديد غير نشط حتى يقبل الدعوة أو يفعّله المسؤول.</div>
+<% else %>
+  <p>Company admins manage users, roles, and licenses from the <em>Account Management</em> area.</p>
+
+  <h2>Adding a user</h2>
+  <ol>
+    <li>From the company profile, click <em>Add New User</em>.</li>
+    <li>Enter the email and choose the company role.</li>
+    <li>The user receives an invitation to set a password and activate their account.</li>
+  </ol>
+
+  <h2>Roles</h2>
+  <p>Pick the right role for each user (Company Admin, Quality Manager, Risk Manager, Auditor, Contributor, Viewer). The role determines what the user can see and do.</p>
+
+  <h2>Licenses</h2>
+  <p>License seats cap the number of active users. Admins can adjust the seat count and activate or deactivate users.</p>
+
+  <div class="tip">A new user stays inactive until they accept the invitation or an admin activates them.</div>
+<% end %>

@@ -1,0 +1,49 @@
+<%= content_for :title, "#{t("help.topics.#{@slug}.title")} — #{t('help.title')}" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-6xl mx-auto px-6 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Side nav -->
+      <aside class="no-print lg:w-64 flex-shrink-0">
+        <%= link_to t('help.back_to_index'), help_path, class: "text-sm text-[#5C3984] hover:underline mb-4 inline-block" %>
+        <nav class="space-y-1">
+          <% @topics.each do |slug| %>
+            <%= link_to help_topic_path(slug),
+                class: "block px-3 py-2 rounded-lg text-sm #{slug == @slug ? 'bg-[#F6EEFF] text-[#5C3984] font-medium' : 'text-gray-700 hover:bg-gray-100'}" do %>
+              <%= t("help.topics.#{slug}.title") %>
+            <% end %>
+          <% end %>
+        </nav>
+      </aside>
+
+      <!-- Content -->
+      <article class="flex-1 min-w-0 bg-white border border-[#E3E3E3] rounded-xl p-6 sm:p-8">
+        <div class="flex items-start justify-between gap-4 mb-6">
+          <h1 class="text-2xl font-bold text-[#0D1120]"><%= t("help.topics.#{@slug}.title") %></h1>
+          <button type="button" onclick="window.print()" class="no-print flex-shrink-0 px-3 py-2 text-xs text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors">
+            <%= t('help.save_as_pdf') %>
+          </button>
+        </div>
+
+        <div class="help-content space-y-4 text-[15px] leading-relaxed text-[#28303F]">
+          <%= render "help/topics/#{@slug}" %>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<style>
+  .help-content h2 { font-size: 1.15rem; font-weight: 600; color: #0D1120; margin-top: 1.5rem; }
+  .help-content h3 { font-size: 1rem; font-weight: 600; color: #0D1120; margin-top: 1rem; }
+  .help-content ul { list-style: disc; padding-inline-start: 1.5rem; }
+  .help-content ol { list-style: decimal; padding-inline-start: 1.5rem; }
+  .help-content li { margin-top: 0.25rem; }
+  .help-content .tip { background: #F6EEFF; border-inline-start: 4px solid #5C3984; padding: 0.75rem 1rem; border-radius: 0.5rem; }
+  @media print {
+    .no-print { display: none !important; }
+    aside { display: none !important; }
+    body { background: #fff !important; }
+    article { border: 0 !important; box-shadow: none !important; }
+  }
+</style>

@@ -1617,3 +1617,34 @@ ar:
   ai_instruction_content_ar: "المحتوى (العربية)"
   ai_instruction_active_label: "نشط (تضمين في طلبات الذكاء الاصطناعي)"
   inactive: "غير نشط"
+  help:
+    title: "دليل المستخدم"
+    subtitle: "أدلة لكل سير عمل في منصة Way to Excellence."
+    save_as_pdf: "حفظ كـ PDF"
+    back_to_index: "← كل المواضيع"
+    topic_not_found: "موضوع المساعدة هذا غير موجود."
+    topics:
+      getting_started:
+        title: "البداية"
+        summary: "التنقل والأدوار والأساسيات"
+      standards_assessment:
+        title: "تقييم المعايير"
+        summary: "البنود النهائية ونقاط التقييم والتقييم"
+      evidence:
+        title: "الأدلة والمستندات"
+        summary: "رفع الأدلة وربطها وإعادة استخدامها"
+      capa:
+        title: "إدارة الإجراءات التصحيحية"
+        summary: "الإجراءات التصحيحية ومساعدة الذكاء الاصطناعي"
+      risk_grc:
+        title: "المخاطر والحوكمة"
+        summary: "المخاطر ومساحات العمل والموردون والالتزامات"
+      ai_features:
+        title: "ميزات الذكاء الاصطناعي"
+        summary: "المساعد والتعليمات المخصّصة والأرصدة"
+      trust_center:
+        title: "مركز الثقة"
+        summary: "صفحة الامتثال العامة"
+      user_management:
+        title: "إدارة المستخدمين"
+        summary: "المستخدمون والأدوار والتراخيص"

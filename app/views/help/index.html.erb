@@ -1,0 +1,29 @@
+<%= content_for :title, t('help.title') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    <div class="flex items-start justify-between gap-4 mb-2">
+      <div>
+        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('help.title') %></h1>
+        <p class="text-[#797C81]"><%= t('help.subtitle') %></p>
+      </div>
+      <button type="button" onclick="window.print()" class="no-print flex-shrink-0 px-4 py-2 text-sm text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors">
+        <%= t('help.save_as_pdf') %>
+      </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+      <% @topics.each_with_index do |slug, i| %>
+        <%= link_to help_topic_path(slug), class: "block bg-white border border-[#E3E3E3] rounded-xl p-5 hover:border-[#5C3984] hover:shadow-sm transition" do %>
+          <div class="flex items-center gap-3">
+            <span class="flex items-center justify-center w-9 h-9 rounded-lg bg-[#F6EEFF] text-[#5C3984] font-semibold text-sm flex-shrink-0"><%= i + 1 %></span>
+            <div class="min-w-0">
+              <h2 class="text-base font-semibold text-[#0D1120]"><%= t("help.topics.#{slug}.title") %></h2>
+              <p class="text-sm text-gray-500 truncate"><%= t("help.topics.#{slug}.summary") %></p>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
