@@ -115,7 +115,7 @@ class PlatformAssistantService
   end
 
   def call_openrouter(prompt)
-    model = ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.5")
+    model = ENV["OPENROUTER_MODEL"].presence || "anthropic/claude-sonnet-4.5"
     Rails.logger.info "PlatformAssistant: provider=openrouter model=#{model}"
 
     OpenRouter.configure do |config|

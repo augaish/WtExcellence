@@ -12,7 +12,7 @@ class CapaQuestionnaireService
       end
 
       @client = OpenRouter::Client.new
-      @model = ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
+      @model = ENV["OPENROUTER_MODEL"].presence || "anthropic/claude-sonnet-4.5"
       Rails.logger.info "Using OpenRouter with model: #{@model} for CAPA questionnaire generation"
     else
       # Use Ollama
