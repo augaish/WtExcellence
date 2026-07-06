@@ -81,6 +81,15 @@
       </div>
     </div>
 
+    <!-- Trust Center public link (shown when enabled) -->
+    <% if @company.trust_center_enabled? %>
+      <% trust_url = "#{ENV['ROOT_URL']}/trust/#{@company.id}" %>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 bg-[#F6EEFF] border border-[#E3D5F5] rounded-lg px-4 py-3 mb-6 text-sm">
+        <span class="font-medium text-[#5C3984] flex-shrink-0"><%= t('trust_center_public_link') %>:</span>
+        <a href="<%= trust_url %>" target="_blank" rel="noopener" class="text-[#5C3984] underline break-all hover:text-[#4A2F6B]"><%= trust_url %></a>
+      </div>
+    <% end %>
+
     <!-- Summary cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
       <!-- Status -->

@@ -104,25 +104,51 @@ class PlatformAssistantService
 
     answer =
       if @provider == "openrouter"
-        OpenRouter.configure do |config|
-          config.access_token = ENV.fetch("OPENROUTER_API_KEY")
-          config.site_name = "Way to Excellence"
-          config.site_url = ENV.fetch("APP_URL", "http://localhost:3000")
-        end
-
-        client = OpenRouter::Client.new
-        model = ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4-20250514")
-        response = client.complete(
-          [ { role: "user", content: prompt } ],
-          model: model
-        )
-        response.dig("choices", 0, "message", "content").to_s.strip
+        call_openrouter(prompt)
       else
-        OllamaClient.new(model: ENV.fetch("CAPA_QUESTIONNAIRE_OLLAMA_MODEL", "qwen-capa-questionnaire")).generate(prompt).to_s.strip
+        call_ollama(prompt)
       end
 
     raise AssistantError, "Empty response from language model" if answer.blank?
 
     answer
+  end
+
+  def call_openrouter(prompt)
+    model = ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.5")
+    Rails.logger.info "PlatformAssistant: provider=openrouter model=#{model}"
+
+    OpenRouter.configure do |config|
+      config.access_token = ENV.fetch("OPENROUTER_API_KEY")
+      config.site_name = "Way to Excellence"
+      config.site_url = ENV.fetch("APP_URL", "http://localhost:3000")
+    end
+
+    response = OpenRouter::Client.new.complete(
+      [ { role: "user", content: prompt } ],
+      model: model
+    )
+
+    # Surface the real provider error instead of a generic "empty response".
+    raise AssistantError, "OpenRouter returned nil" if response.nil?
+    if response.is_a?(Hash) && response["error"]
+      message = response.dig("error", "message") || response["error"].inspect
+      Rails.logger.error "PlatformAssistant OpenRouter error: #{message}"
+      raise AssistantError, "OpenRouter error: #{message}"
+    end
+
+    content = response.dig("choices", 0, "message", "content").to_s.strip
+    if content.blank?
+      Rails.logger.error "PlatformAssistant OpenRouter empty content. Raw: #{response.inspect.truncate(500)}"
+      raise AssistantError, "OpenRouter returned no content"
+    end
+    content
+  end
+
+  def call_ollama(prompt)
+    model = ENV.fetch("CAPA_QUESTIONNAIRE_OLLAMA_MODEL", "qwen-capa-questionnaire")
+    url = ENV["OLLAMA_URL"]
+    Rails.logger.info "PlatformAssistant: provider=ollama model=#{model} url=#{url.presence || '(unset)'}"
+    OllamaClient.new(model: model).generate(prompt).to_s.strip
   end
 end
