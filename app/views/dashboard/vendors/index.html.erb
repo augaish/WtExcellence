@@ -2,13 +2,9 @@
 
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('vendor_management') %></h1>
-        <p class="text-[#797C81]"><%= t('vendor_management_subtitle') %></p>
-      </div>
-      <%= link_to t('new_vendor'), new_dashboard_vendor_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
-    </div>
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('vendor_management'), subtitle: t('vendor_management_subtitle') } do %>
+      <%= link_to t('new_vendor'), new_dashboard_vendor_path, class: ui_btn_primary %>
+    <% end %>
 
     <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
       <div class="overflow-x-auto">

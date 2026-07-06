@@ -2,16 +2,10 @@
 
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('risk_workspaces') %></h1>
-        <p class="text-[#797C81]"><%= t('risk_workspaces_subtitle') %></p>
-      </div>
-      <div class="flex items-center gap-3">
-        <%= link_to t('back_to_risk_register'), dashboard_risk_management_index_path, class: "px-4 py-2 text-sm text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors" %>
-        <%= link_to t('new_workspace'), new_dashboard_risk_workspace_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
-      </div>
-    </div>
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('risk_workspaces'), subtitle: t('risk_workspaces_subtitle') } do %>
+      <%= link_to t('back_to_risk_register'), dashboard_risk_management_index_path, class: ui_btn_secondary %>
+      <%= link_to t('new_workspace'), new_dashboard_risk_workspace_path, class: ui_btn_primary %>
+    <% end %>
 
     <% if @risk_workspaces.any? %>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -2,18 +2,10 @@
 
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('risk_management') %></h1>
-        <p class="text-[#797C81]"><%= t('risk_management_subtitle') %></p>
-      </div>
-      <div class="flex items-center gap-3">
-        <%= link_to t('manage_workspaces'), dashboard_risk_workspaces_path, class: "px-4 py-2 text-sm text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] rounded-lg transition-colors" %>
-        <%= link_to dashboard_new_risk_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" do %>
-          <%= t('log_new_risk') %>
-        <% end %>
-      </div>
-    </div>
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('risk_management'), subtitle: t('risk_management_subtitle') } do %>
+      <%= link_to t('manage_workspaces'), dashboard_risk_workspaces_path, class: ui_btn_secondary %>
+      <%= link_to t('log_new_risk'), dashboard_new_risk_path, class: ui_btn_primary %>
+    <% end %>
 
     <!-- Risk Matrix Heatmap -->
     <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mb-8 overflow-x-auto">

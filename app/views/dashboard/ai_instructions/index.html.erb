@@ -2,13 +2,9 @@
 
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-5xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-2">
-      <div>
-        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('ai_instructions') %></h1>
-        <p class="text-[#797C81]"><%= t('ai_instructions_subtitle') %></p>
-      </div>
-      <%= link_to t('new_ai_instruction'), new_dashboard_ai_instruction_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
-    </div>
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('ai_instructions'), subtitle: t('ai_instructions_subtitle') } do %>
+      <%= link_to t('new_ai_instruction'), new_dashboard_ai_instruction_path, class: ui_btn_primary %>
+    <% end %>
 
     <div class="bg-[#F6EEFF] border border-[#E3D5F5] rounded-lg p-4 mb-6 text-sm text-[#5C3984]">
       <%= t('ai_instructions_help') %>

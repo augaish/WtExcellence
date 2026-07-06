@@ -17,6 +17,17 @@ module ApplicationHelper
     rtl? ? "rtl" : "ltr"
   end
 
+  # Shared UI button vocabulary for consistent affordances across the dashboard.
+  def ui_btn_primary
+    "inline-flex items-center justify-center gap-2 px-4 h-10 rounded-lg text-sm font-semibold " \
+    "text-white bg-[#5C3984] hover:bg-[#4A2F6B] transition-colors"
+  end
+
+  def ui_btn_secondary
+    "inline-flex items-center justify-center gap-2 px-4 h-10 rounded-lg text-sm font-semibold " \
+    "text-[#5C3984] border border-[#5C3984] hover:bg-[#F6EEFF] transition-colors"
+  end
+
   def current_user_credit_balance
     if current_user&.company_user
       current_user.company_user.assigned_credits || 0

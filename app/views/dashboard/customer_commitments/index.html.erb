@@ -2,13 +2,9 @@
 
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('customer_commitments') %></h1>
-        <p class="text-[#797C81]"><%= t('customer_commitments_subtitle') %></p>
-      </div>
-      <%= link_to t('new_commitment'), new_dashboard_customer_commitment_path, class: "px-4 py-2 text-sm text-white bg-[#5C3984] hover:bg-[#4A2F6B] rounded-lg transition-colors" %>
-    </div>
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('customer_commitments'), subtitle: t('customer_commitments_subtitle') } do %>
+      <%= link_to t('new_commitment'), new_dashboard_customer_commitment_path, class: ui_btn_primary %>
+    <% end %>
 
     <% if @past_due_count > 0 %>
       <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-800">
