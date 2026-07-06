@@ -133,6 +133,10 @@ class Dashboard::OverviewController < Dashboard::BaseController
 
     mark.call(:capa_metrics_and_charts)
 
+    # GOVERNANCE METRICS (Risk / Vendor / Customer Commitment) — company-scoped
+    load_governance_metrics(current_company&.id)
+    mark.call(:governance_metrics)
+
     # AI Usage Overview (credits over time) - full period
     @tokens_over_time = calculate_credits_over_time(@date_from, @date_to)
 
@@ -206,6 +210,34 @@ class Dashboard::OverviewController < Dashboard::BaseController
   end
 
   private
+
+  # Governance (Risk / Vendor / Customer Commitment) metrics for the overview.
+  # Company-scoped; leaves the ivars nil when there is no company context.
+  def load_governance_metrics(company_id)
+    return unless company_id
+
+    risks = Risk.active.where(company_id: company_id)
+    @risk_total = risks.count
+    @risk_open = risks.where.not(status: "closed").count
+    level_counts = Hash.new(0)
+    matrix = Hash.new(0)
+    risks.select(:likelihood, :impact, :inherent_score).each do |r|
+      level_counts[r.inherent_level] += 1
+      matrix[[ r.likelihood, r.impact ]] += 1
+    end
+    @risk_by_level = level_counts
+    @risk_matrix = matrix
+
+    vendors = Vendor.active.where(company_id: company_id)
+    @vendor_total = vendors.count
+    @vendor_by_level = vendors.group(:risk_level).count
+    @vendor_high = vendors.where(risk_level: %w[high critical]).count
+
+    commitments = CustomerCommitment.active.where(company_id: company_id)
+    @commitment_total = commitments.count
+    @commitment_overdue = commitments.select(&:past_due?).size
+    @commitment_due_soon = commitments.due_soon.count
+  end
 
   # Compute one standard's compliance, routing by role. Shared by `index` (top 10)
   # and `avg_compliance` (all). Uses the (standard, company) cache when possible.
@@ -366,5 +398,4 @@ class Dashboard::OverviewController < Dashboard::BaseController
     end
     result
   end
-
 end

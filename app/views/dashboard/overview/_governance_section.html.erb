@@ -1,0 +1,51 @@
+<% unless @risk_total.nil? %>
+  <div class="flex items-center gap-2 mt-2 mb-3">
+    <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('governance') %></h2>
+    <span class="h-px flex-1 bg-[#E3E3E3]"></span>
+  </div>
+
+  <!-- Governance KPI tiles -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+    <%= render "dashboard/overview/kpi_tile", label: t('open_risks'), value: @risk_open,
+        accent: "#F97316", icon: :flag, hint: "#{@risk_total} #{t('total')}" %>
+    <%= render "dashboard/overview/kpi_tile", label: t('high_risk_vendors'), value: @vendor_high,
+        accent: "#DC2626", icon: :building, hint: "#{@vendor_total} #{t('total')}",
+        value_color: (@vendor_high.to_i.positive? ? "#DC2626" : "#0D1120") %>
+    <%= render "dashboard/overview/kpi_tile", label: t('overdue_commitments'), value: @commitment_overdue,
+        accent: "#C73636", icon: :clock, hint: "#{@commitment_due_soon} #{t('due_soon')}",
+        value_color: (@commitment_overdue.to_i.positive? ? "#C73636" : "#0D1120") %>
+  </div>
+
+  <!-- Governance charts -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+    <!-- Risks by level (donut) -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+      <h3 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('risks_by_level') %></h3>
+      <% level_colors = { "low" => "#16A34A", "medium" => "#EAB308", "high" => "#F97316", "critical" => "#DC2626" } %>
+      <% risk_data = %w[low medium high critical].filter_map { |l| c = @risk_by_level[l].to_i; [t("risk_level_#{l}"), c] if c.positive? }.to_h %>
+      <div class="h-[200px] flex items-center justify-center">
+        <% if risk_data.any? %>
+          <%= pie_chart risk_data, donut: true, legend: "bottom", height: "200px",
+              colors: %w[low medium high critical].select { |l| @risk_by_level[l].to_i.positive? }.map { |l| level_colors[l] } %>
+        <% else %>
+          <p class="text-sm text-[#797C81]"><%= t('no_risks_yet') %></p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Vendors by risk level (bar) -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+      <h3 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('vendors_by_level') %></h3>
+      <% vlevel_colors = { "unassessed" => "#9CA3AF", "low" => "#16A34A", "medium" => "#EAB308", "high" => "#F97316", "critical" => "#DC2626" } %>
+      <% vendor_data = %w[unassessed low medium high critical].filter_map { |l| c = @vendor_by_level[l].to_i; [t("risk_level_#{l}", default: l.titleize), c] if c.positive? }.to_h %>
+      <div class="h-[200px] flex items-center justify-center">
+        <% if vendor_data.any? %>
+          <%= column_chart vendor_data, height: "200px", legend: false,
+              colors: %w[unassessed low medium high critical].select { |l| @vendor_by_level[l].to_i.positive? }.map { |l| vlevel_colors[l] } %>
+        <% else %>
+          <p class="text-sm text-[#797C81]"><%= t('no_vendors_yet') %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

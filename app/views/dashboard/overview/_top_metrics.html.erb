@@ -1,66 +1,35 @@
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-  <!-- Total Active Standards (Company Admin & Quality Manager only) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-4">
   <% if @show_admin_metrics %>
-    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
-      <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('total_active_standards') %></p>
-      <div class="flex items-baseline gap-2">
-        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @total_active_standards %></p>
-        <% if @active_standards_added_in_period.to_i > 0 %>
-          <p class="text-xs text-[#79BE52]">
-            +<%= @active_standards_added_in_period %> <%= t('in_period') %>
-          </p>
-        <% end %>
-      </div>
-    </div>
+    <%= render "dashboard/overview/kpi_tile", label: t('total_active_standards'), value: @total_active_standards,
+        accent: "#5C3984", icon: :standards,
+        hint: (@active_standards_added_in_period.to_i.positive? ? "+#{@active_standards_added_in_period} #{t('in_period')}" : nil) %>
   <% end %>
 
-  <!-- Total Companies (Platform Admin) or Total Users (Company Admin & Quality Manager only) -->
   <% if current_user&.platform_admin? %>
-    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
-      <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('total_companies') %></p>
-      <div class="flex items-baseline gap-2">
-        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @total_companies %></p>
-        <%= link_to dashboard_companies_path, class: "text-xs sm:text-[11px] text-[#5C3984] underline" do %>
-          <%= t('view_list') %>
-        <% end %>
-      </div>
-    </div>
+    <%= render "dashboard/overview/kpi_tile", label: t('total_companies'), value: @total_companies, accent: "#1D5CE5", icon: :building %>
   <% elsif @total_users.present? %>
-    <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
-      <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('total_users') %></p>
-      <div class="flex items-baseline gap-2">
-        <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]"><%= @total_users %></p>
-      </div>
-    </div>
+    <%= render "dashboard/overview/kpi_tile", label: t('total_users'), value: @total_users, accent: "#1D5CE5", icon: :users %>
   <% end %>
 
   <!-- Avg. Compliance (loaded asynchronously) -->
-  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4"
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 flex items-start gap-3.5"
        data-controller="async-metric"
        data-async-metric-url-value="<%= dashboard_overview_avg_compliance_path %>"
        data-async-metric-key-value="avg_compliance"
        data-async-metric-suffix-value="%">
-    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('avg_compliance') %></p>
-    <div class="flex items-baseline gap-2">
-      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984] flex items-center gap-2" data-async-metric-target="value">
-        <span class="inline-block w-5 h-5 border-2 border-[#5C3984]/30 border-t-[#5C3984] rounded-full animate-spin" role="status" aria-label="Loading"></span>
+    <span class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: #16A34A18">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 100-6 3 3 0 000 6zM12 3v2m0 14v2m9-9h-2M5 12H3"></path></svg>
+    </span>
+    <div class="min-w-0">
+      <p class="text-xs font-medium text-[#797C81] mb-1"><%= t('avg_compliance') %></p>
+      <p class="text-2xl font-bold leading-none text-[#16A34A] flex items-center gap-2" data-async-metric-target="value">
+        <span class="inline-block w-5 h-5 border-2 border-[#16A34A]/30 border-t-[#16A34A] rounded-full animate-spin" role="status" aria-label="Loading"></span>
       </p>
     </div>
   </div>
 
-  <!-- Credits/Tokens Used -->
-  <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
-    <p class="text-sm sm:text-xs font-medium text-[#0D1120] mb-2 sm:mb-3"><%= t('credits_used') %></p>
-    <div class="flex items-baseline gap-2">
-      <p class="text-xl sm:text-2xl font-semibold text-[#5C3984]">
-        <% if @credits_data[:limit].present? %>
-          <%= number_with_delimiter(@credits_data[:used]) %>/<%= number_with_delimiter(@credits_data[:limit]) %>
-        <% else %>
-          <%= number_with_delimiter(@credits_data[:used]) %>
-        <% end %>
-      </p>
-    </div>
-    <p class="text-xs text-[#797C81] mt-1"><%= number_with_delimiter(@credits_data[:used_in_period]) %> <%= t('used_in_period') %></p>
-  </div>
+  <%= render "dashboard/overview/kpi_tile",
+      label: t('credits_used'), accent: "#D97706", icon: :coin,
+      value: (@credits_data[:limit].present? ? "#{number_with_delimiter(@credits_data[:used])}/#{number_with_delimiter(@credits_data[:limit])}" : number_with_delimiter(@credits_data[:used])),
+      hint: "#{number_with_delimiter(@credits_data[:used_in_period])} #{t('used_in_period')}" %>
 </div>
-
