@@ -1,0 +1,14 @@
+<%#
+  Reusable sidebar nav item.
+  locals: label (String), path (String), icon (asset filename), active (Boolean)
+  RTL is handled by the aside's dir attribute + logical properties.
+%>
+<%= link_to path,
+    class: "group relative flex items-center gap-3 rounded-lg px-3 h-11 text-sm font-medium transition-colors duration-150 #{active ? 'bg-[#F1EAFB] text-[#5C3984]' : 'text-gray-600 hover:bg-gray-100 hover:text-[#0D1120]'}" do %>
+  <% if active %>
+    <span class="absolute inset-block-2 inset-inline-start-0 w-1 rounded-full bg-[#5C3984]"></span>
+  <% end %>
+  <%= image_tag asset_path(icon), alt: "", "aria-hidden": true,
+      class: "w-5 h-5 flex-none #{active ? '' : 'opacity-70 group-hover:opacity-100'}" %>
+  <span class="truncate"><%= label %></span>
+<% end %>
