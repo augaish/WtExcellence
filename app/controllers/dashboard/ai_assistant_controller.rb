@@ -11,10 +11,16 @@ class Dashboard::AiAssistantController < Dashboard::BaseController
       return
     end
 
+    # Platform admins operate above company credit accounting, so they aren't
+    # gated or charged. Company members are checked against their balance.
+    platform_admin = current_user&.platform_admin?
     company_user = current_company_user
-    unless company_user && CreditService.has_sufficient_credits?(current_company, "PLATFORM_ASSISTANT_QUERY", company_user: company_user)
-      render json: { success: false, error: t("ai_assistant.insufficient_credits") }, status: :payment_required
-      return
+
+    unless platform_admin
+      unless company_user && CreditService.has_sufficient_credits?(current_company, "PLATFORM_ASSISTANT_QUERY", company_user: company_user)
+        render json: { success: false, error: t("ai_assistant.insufficient_credits") }, status: :payment_required
+        return
+      end
     end
 
     # Run the query first; only charge credits once the LLM actually answers,
@@ -26,7 +32,7 @@ class Dashboard::AiAssistantController < Dashboard::BaseController
       return
     end
 
-    CreditService.deduct_credits(current_company, "PLATFORM_ASSISTANT_QUERY", company_user: company_user)
+    CreditService.deduct_credits(current_company, "PLATFORM_ASSISTANT_QUERY", company_user: company_user) unless platform_admin
 
     AuditLogService.log_action(
       actor_user: current_user,
@@ -42,10 +48,10 @@ class Dashboard::AiAssistantController < Dashboard::BaseController
 
   private
 
-  # Mirror the widget's visibility: only company members that are not
-  # contributors may use the assistant (which summarizes CAPA/Standard/Upload
-  # data the contributor role isn't meant to browse platform-wide).
+  # Mirror the widget's visibility: platform admins (who have no company_user)
+  # and any non-contributor company member may use the assistant.
   def ensure_assistant_access
+    return if current_user&.platform_admin?
     return if current_user&.company_user.present? && !current_user&.company_contributor?
 
     render json: { success: false, error: t("ai_assistant.no_access") }, status: :forbidden

@@ -1,4 +1,4 @@
-<% if current_user&.company_user.present? && !current_user&.company_contributor? %>
+<% if current_user&.platform_admin? || (current_user&.company_user.present? && !current_user&.company_contributor?) %>
   <div data-controller="ai-assistant" data-ai-assistant-ask-url-value="<%= dashboard_ai_assistant_ask_path %>" class="fixed bottom-6 <%= rtl? ? 'left-6' : 'right-6' %> z-40">
     <button type="button" data-action="click->ai-assistant#toggle" class="w-14 h-14 rounded-full bg-[#5C3984] hover:bg-[#4A2F6B] text-white shadow-lg flex items-center justify-center transition-colors" aria-label="<%= t('ask_ai') %>">
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

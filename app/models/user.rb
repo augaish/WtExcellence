@@ -81,7 +81,7 @@ class User < ApplicationRecord
   end
 
   def can_manage_ai_instructions?
-    company_user&.has_admin_privileges? || platform_admin?
+    platform_admin?
   end
 
   # A user whose only company role is Risk Manager — scoped to risk

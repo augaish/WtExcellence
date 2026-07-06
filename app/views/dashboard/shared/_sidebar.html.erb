@@ -48,9 +48,6 @@
                         <span><%= t('risk_management') %></span>
                     <% end %>
                 <% end %>
-                <%= link_to dashboard_risk_workspaces_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-2 ps-10 pe-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-600 font-medium text-xs sm:text-sm min-h-[36px] #{'bg-purple-100 text-purple-900' if request.path.include?('risk_workspaces')}" do %>
-                    <span><%= t('risk_workspaces') %></span>
-                <% end %>
             <% end %>
             <% if current_user&.can_manage_vendors? %>
                 <%= link_to dashboard_vendors_path, class: "flex items-center #{rtl? ? 'flex-row-reverse' : 'flex-row'} gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 hover:text-purple-900 text-gray-700 font-medium text-sm sm:text-base min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('vendors')}" do %>

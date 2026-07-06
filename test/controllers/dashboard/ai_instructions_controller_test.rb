@@ -4,15 +4,16 @@ class Dashboard::AiInstructionsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @company = Company.create!(name: "AI Instr Co #{SecureRandom.hex(4)}", license_seats: 5, is_active: true)
 
-    @admin = create_user("instr.admin")
-    CompanyUser.create!(company: @company, user: @admin, role: CompanyUser::ROLES[:company_admin])
+    # Custom AI Instructions are restricted to platform admins.
+    @super = create_user("instr.super")
+    @super.update!(role: "super_admin")
 
-    @viewer = create_user("instr.viewer")
-    CompanyUser.create!(company: @company, user: @viewer, role: CompanyUser::ROLES[:company_viewer])
+    @company_admin = create_user("instr.cadmin")
+    CompanyUser.create!(company: @company, user: @company_admin, role: CompanyUser::ROLES[:company_admin])
   end
 
-  test "admin can list and create instructions" do
-    sign_in @admin, scope: :user
+  test "platform admin can list and create instructions" do
+    sign_in @super, scope: :user
 
     get dashboard_ai_instructions_path
     assert_response :success
@@ -26,7 +27,7 @@ class Dashboard::AiInstructionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "invalid instruction (no content) is rejected" do
-    sign_in @admin, scope: :user
+    sign_in @super, scope: :user
 
     assert_no_difference "AiInstruction.count" do
       post dashboard_ai_instructions_path, params: { ai_instruction: { title: "Empty" } }
@@ -35,7 +36,7 @@ class Dashboard::AiInstructionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "toggle flips active" do
-    sign_in @admin, scope: :user
+    sign_in @super, scope: :user
     instruction = AiInstruction.create!(company: @company, title: "T", content_en: "x", active: true)
 
     patch toggle_dashboard_ai_instruction_path(instruction)
@@ -43,23 +44,12 @@ class Dashboard::AiInstructionsControllerTest < ActionDispatch::IntegrationTest
     refute instruction.reload.active
   end
 
-  test "viewer without admin privileges is redirected" do
-    sign_in @viewer, scope: :user
+  test "company admin is denied (platform admins only)" do
+    sign_in @company_admin, scope: :user
 
     get dashboard_ai_instructions_path
 
     assert_response :see_other
-  end
-
-  test "cannot access another company's instruction" do
-    other = Company.create!(name: "Other #{SecureRandom.hex(4)}", license_seats: 5, is_active: true)
-    foreign = AiInstruction.create!(company: other, title: "Foreign", content_en: "secret", active: true)
-
-    sign_in @admin, scope: :user
-
-    get edit_dashboard_ai_instruction_path(foreign)
-
-    assert_response :not_found
   end
 
   private

@@ -181,6 +181,7 @@
     }
   </style>
 </head>
+<% app_sign_in = "#{ENV['ROOT_URL']}/users/sign_in" %>
 <body>
   <header>
     <div class="wrap nav">
@@ -199,7 +200,7 @@
         <% else %>
           <a class="lang-switch" href="<%= switch_language_path(:ar) %>"><%= t("home.header.switch_to_ar") %></a>
         <% end %>
-        <a class="btn btn-ghost" href="<%= new_user_session_path %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
+        <a class="btn btn-ghost" href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
         <a class="btn btn-primary" href="<%= new_waitlist_path %>"><%= rtl? ? "انضم للقائمة" : "Join the waitlist" %></a>
       </div>
     </div>
@@ -226,7 +227,7 @@
         </p>
         <div class="hero-cta reveal in" data-d="3">
           <a class="btn btn-primary btn-lg" href="<%= new_waitlist_path %>"><%= rtl? ? "انضم للقائمة" : "Join the waitlist" %></a>
-          <a class="btn btn-ghost btn-lg" href="<%= new_user_session_path %>"><%= rtl? ? "لديك حساب؟ سجّل الدخول" : "Sign in to your workspace" %></a>
+          <a class="btn btn-ghost btn-lg" href="<%= app_sign_in %>"><%= rtl? ? "لديك حساب؟ سجّل الدخول" : "Sign in to your workspace" %></a>
         </div>
         <p class="hero-note reveal in" data-d="3">
           <%= rtl? ? "مصمّم للمؤسسات في المملكة العربية السعودية ومنطقة الخليج." : "Built for enterprises across Saudi Arabia and the Gulf." %>
@@ -420,7 +421,7 @@
       <p class="lead"><%= rtl? ? "انضم إلى قائمة الانتظار، أو سجّل الدخول إذا كان لديك حساب بالفعل." : "Join the waitlist, or sign in if you already have a workspace." %></p>
       <div class="hero-cta" style="justify-content:center">
         <a class="btn btn-primary btn-lg" href="<%= new_waitlist_path %>"><%= rtl? ? "انضم للقائمة" : "Join the waitlist" %></a>
-        <a class="btn btn-ghost btn-lg" href="<%= new_user_session_path %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
+        <a class="btn btn-ghost btn-lg" href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
       </div>
     </div>
   </section>
@@ -432,7 +433,7 @@
       </div>
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
         <a href="mailto:info@wtexcellence.com">info@wtexcellence.com</a>
-        <a href="<%= new_user_session_path %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
+        <a href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
         <% if rtl? %><a href="<%= switch_language_path(:en) %>">English</a><% else %><a href="<%= switch_language_path(:ar) %>">العربية</a><% end %>
         <span>© <%= Time.current.year %> Way to Excellence</span>
       </div>
