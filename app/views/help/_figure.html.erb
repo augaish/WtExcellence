@@ -1,0 +1,7 @@
+<%# Reusable captioned screenshot for manual topics.
+    Locals: image (asset filename under images/manual/), caption (String). %>
+<figure class="help-figure">
+  <%= image_tag "manual/#{image}", alt: caption, loading: "lazy",
+        class: "w-full h-auto rounded-lg border border-[#E3E3E3]" %>
+  <figcaption><%= caption %></figcaption>
+</figure>
