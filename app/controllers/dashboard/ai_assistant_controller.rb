@@ -27,8 +27,12 @@ class Dashboard::AiAssistantController < Dashboard::BaseController
     # so an outage never silently bills the user.
     begin
       result = PlatformAssistantService.new(current_company, user: current_user).ask(question)
-    rescue PlatformAssistantService::AssistantError
-      render json: { success: false, error: t("ai_assistant.failed") }, status: :bad_gateway
+    rescue PlatformAssistantService::AssistantError => e
+      # Show the underlying provider error to platform admins so AI config
+      # issues (402 / invalid model / unreachable Ollama) are diagnosable in-app;
+      # ordinary users still get the generic message.
+      error_message = platform_admin ? "#{t('ai_assistant.failed')} (#{e.message})" : t("ai_assistant.failed")
+      render json: { success: false, error: error_message }, status: :bad_gateway
       return
     end
 
