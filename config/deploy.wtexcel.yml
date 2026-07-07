@@ -13,7 +13,12 @@ builder:
   arch: amd64
 
 volumes:
-  - "/var/lib/wtexcel/storage:/rails/storage"
+  # Mount the persistent storage volume where Active Storage actually writes.
+  # The app runs at /docker/app (Dockerfile WORKDIR), so local disk storage is
+  # Rails.root/storage = /docker/app/storage — NOT /rails/storage. Mounting
+  # elsewhere left uploads on each container's ephemeral disk, so the job
+  # container couldn't find files the web container saved (FileNotFoundError).
+  - "/var/lib/wtexcel/storage:/docker/app/storage"
 
 servers:
   web:
