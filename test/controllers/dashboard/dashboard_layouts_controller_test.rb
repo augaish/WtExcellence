@@ -84,7 +84,7 @@ class Dashboard::DashboardLayoutsControllerTest < ActionDispatch::IntegrationTes
 
     layout = DashboardLayout.for_company(@company.id).find_by(slot: 2)
     assert_not_nil layout
-    assert_equal %w[governance top_metrics second_metrics charts tables], layout.ordered_widgets
+    assert_equal %w[governance top_metrics second_metrics charts tables risk_matrix commitments], layout.ordered_widgets
     assert_equal %w[tables], layout.hidden_widgets
     assert layout.is_active, "saved slot should become active"
     assert_equal 2, DashboardLayout.active_slot(scope: "company", company_id: @company.id)
@@ -101,7 +101,7 @@ class Dashboard::DashboardLayoutsControllerTest < ActionDispatch::IntegrationTes
 
     assert_response :success
     layout = DashboardLayout.for_company(@company.id).find_by(slot: 1)
-    assert_equal %w[governance top_metrics second_metrics charts tables], layout.ordered_widgets
+    assert_equal %w[governance top_metrics second_metrics charts risk_matrix commitments tables], layout.ordered_widgets
     assert_empty layout.hidden_widgets
   end
 

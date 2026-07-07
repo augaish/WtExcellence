@@ -5,7 +5,7 @@ class DashboardLayout < ApplicationRecord
   # config records the user's chosen order and which widgets are hidden; any
   # widget not present in the stored order falls back to this canonical order
   # (so newly-shipped widgets appear automatically).
-  WIDGET_KEYS = %w[top_metrics second_metrics charts governance tables].freeze
+  WIDGET_KEYS = %w[top_metrics second_metrics charts governance risk_matrix commitments tables].freeze
   SLOTS = (1..3).to_a.freeze
 
   scope :platform, -> { where(scope: "platform") }

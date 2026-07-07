@@ -1,0 +1,53 @@
+<% unless @risk_matrix.nil? %>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('widget_risk_matrix', default: 'Risk matrix') %></h3>
+      <span class="text-xs text-[#797C81]"><%= @risk_total %> <%= t('total', default: 'total') %></span>
+    </div>
+
+    <%
+      # Tinted cell styling by inherent risk level (likelihood × impact).
+      cell_style = ->(score) do
+        case score
+        when 1..4   then "bg-[#DCFCE7] text-[#166534]"
+        when 5..10  then "bg-[#FEF9C3] text-[#854D0E]"
+        when 11..15 then "bg-[#FFEDD5] text-[#9A3412]"
+        else "bg-[#FEE2E2] text-[#991B1B]"
+        end
+      end
+    %>
+
+    <div class="flex gap-2">
+      <!-- Y axis label -->
+      <div class="flex items-center">
+        <span class="text-[10px] font-semibold text-[#797C81] tracking-wide -rotate-90 whitespace-nowrap"><%= t('likelihood', default: 'Likelihood') %></span>
+      </div>
+
+      <div class="flex-1">
+        <div class="space-y-1">
+          <% (5).downto(1) do |likelihood| %>
+            <div class="flex gap-1 items-center">
+              <span class="w-4 text-[10px] text-[#797C81] text-center flex-shrink-0"><%= likelihood %></span>
+              <% (1..5).each do |impact| %>
+                <% score = likelihood * impact %>
+                <% count = @risk_matrix[[ likelihood, impact ]].to_i %>
+                <div class="flex-1 aspect-square min-h-[36px] rounded-md flex items-center justify-center text-sm font-semibold <%= cell_style.call(score) %> <%= 'opacity-40' if count.zero? %>"
+                     title="L<%= likelihood %> × I<%= impact %> = <%= score %>">
+                  <%= count.positive? ? count : "" %>
+                </div>
+              <% end %>
+            </div>
+          <% end %>
+          <!-- X axis ticks -->
+          <div class="flex gap-1 items-center">
+            <span class="w-4 flex-shrink-0"></span>
+            <% (1..5).each do |impact| %>
+              <span class="flex-1 text-[10px] text-[#797C81] text-center"><%= impact %></span>
+            <% end %>
+          </div>
+        </div>
+        <p class="text-[10px] font-semibold text-[#797C81] tracking-wide text-center mt-1"><%= t('impact', default: 'Impact') %></p>
+      </div>
+    </div>
+  </div>
+<% end %>

@@ -263,6 +263,8 @@ class Dashboard::OverviewController < Dashboard::BaseController
     @commitment_total = commitments.count
     @commitment_overdue = commitments.select(&:past_due?).size
     @commitment_due_soon = commitments.due_soon.count
+    @commitment_fulfilled = commitments.where(status: "fulfilled").count
+    @commitment_open = @commitment_total - @commitment_fulfilled - @commitment_overdue
   end
 
   # Compute one standard's compliance, routing by role. Shared by `index` (top 10)

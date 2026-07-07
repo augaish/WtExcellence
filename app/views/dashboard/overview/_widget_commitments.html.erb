@@ -1,0 +1,39 @@
+<% unless @commitment_total.nil? %>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('widget_commitments', default: 'Commitments') %></h3>
+      <span class="text-xs text-[#797C81]"><%= @commitment_total %> <%= t('total', default: 'total') %></span>
+    </div>
+
+    <% if @commitment_total.to_i.positive? %>
+      <div class="grid grid-cols-3 gap-3 mb-4">
+        <div class="rounded-lg bg-[#F0FDF4] p-3 text-center">
+          <p class="text-xl font-bold text-[#166534]"><%= @commitment_fulfilled %></p>
+          <p class="text-xs text-[#166534] mt-0.5"><%= t('commitment_fulfilled', default: 'Fulfilled') %></p>
+        </div>
+        <div class="rounded-lg bg-[#FFF7ED] p-3 text-center">
+          <p class="text-xl font-bold text-[#9A3412]"><%= @commitment_due_soon %></p>
+          <p class="text-xs text-[#9A3412] mt-0.5"><%= t('due_soon', default: 'Due soon') %></p>
+        </div>
+        <div class="rounded-lg bg-[#FEF2F2] p-3 text-center">
+          <p class="text-xl font-bold text-[#991B1B]"><%= @commitment_overdue %></p>
+          <p class="text-xs text-[#991B1B] mt-0.5"><%= t('overdue_commitments', default: 'Overdue') %></p>
+        </div>
+      </div>
+
+      <%
+        segments = {
+          t('commitment_fulfilled', default: 'Fulfilled') => @commitment_fulfilled.to_i,
+          t('commitment_open', default: 'Open') => @commitment_open.to_i,
+          t('overdue_commitments', default: 'Overdue') => @commitment_overdue.to_i
+        }.select { |_, v| v.positive? }
+      %>
+      <% if segments.any? %>
+        <%= pie_chart segments, donut: true, height: "180px", legend: "bottom",
+              colors: %w[#16A34A #5C3984 #DC2626].first(segments.size) %>
+      <% end %>
+    <% else %>
+      <p class="text-sm text-[#797C81]"><%= t('no_commitments_yet', default: 'No customer commitments logged yet.') %></p>
+    <% end %>
+  </div>
+<% end %>
