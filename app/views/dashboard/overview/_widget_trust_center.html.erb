@@ -1,0 +1,36 @@
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+  <h3 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('widget_trust_center', default: 'Trust Center') %></h3>
+
+  <% if @filter_by_company %>
+    <% enabled = @trust_center_enabled %>
+    <div class="flex items-center gap-3">
+      <span class="flex items-center justify-center w-10 h-10 rounded-lg <%= enabled ? 'bg-[#DCFCE7] text-[#166534]' : 'bg-[#F3F4F6] text-[#797C81]' %>">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/>
+        </svg>
+      </span>
+      <div>
+        <p class="text-sm font-semibold <%= enabled ? 'text-[#166534]' : 'text-[#797C81]' %>">
+          <%= enabled ? t('trust_center_enabled', default: 'Enabled') : t('trust_center_disabled', default: 'Not enabled') %>
+        </p>
+        <% if enabled && @trust_center_company_id %>
+          <%= link_to t('trust_center_public_link', default: 'Public Trust Center link'),
+                trust_center_path(@trust_center_company_id), target: "_blank", rel: "noopener",
+                class: "text-xs text-[#5C3984] hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] rounded" %>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <% total = @trust_center_total.to_i %>
+    <% enabled_count = @trust_center_enabled_count.to_i %>
+    <% pct = total.positive? ? (enabled_count * 100.0 / total).round : 0 %>
+    <div class="flex items-baseline gap-2 mb-2">
+      <span class="text-3xl font-bold text-[#5C3984]"><%= enabled_count %></span>
+      <span class="text-sm text-[#797C81]">/ <%= total %> <%= t('companies', default: 'companies') %></span>
+    </div>
+    <div class="w-full h-2 rounded-full bg-[#EDEDF2] overflow-hidden">
+      <div class="h-full rounded-full bg-[#5C3984]" style="width: <%= pct %>%;"></div>
+    </div>
+    <p class="text-xs text-[#797C81] mt-2"><%= t('trust_center_enabled_ratio', default: 'Trust Center enabled') %></p>
+  <% end %>
+</div>

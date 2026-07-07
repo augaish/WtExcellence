@@ -138,6 +138,10 @@ class Dashboard::OverviewController < Dashboard::BaseController
     load_governance_metrics(@filter_by_company ? @company_id : nil)
     mark.call(:governance_metrics)
 
+    # Compliance gauge, compliance-by-standard, and Trust Center status widgets.
+    load_overview_catalog_metrics
+    mark.call(:catalog_metrics)
+
     # Customizable layout (which widgets show, in what order) — admins can edit,
     # everyone in the scope renders the active layout.
     load_dashboard_layout
@@ -235,6 +239,39 @@ class Dashboard::OverviewController < Dashboard::BaseController
     end
   end
 
+  # Reads cached compliance (cheap column average — no recompute) plus Trust
+  # Center status for the catalog widgets. Company-scoped for company users,
+  # platform-wide for super admins.
+  def load_overview_catalog_metrics
+    cs_scope = CompanyStandard.active
+    cs_scope = cs_scope.where(company_id: @company_id) if @filter_by_company
+
+    # Average compliance across active standards (gauge).
+    vals = cs_scope.where.not(cached_compliance_percentage: nil).pluck(:cached_compliance_percentage)
+    @avg_compliance_value = vals.any? ? (vals.sum.to_f / vals.size).round(1) : nil
+
+    # Compliance per standard for the top standards already loaded (bar chart).
+    @compliance_by_standard = {}
+    Array(@standards_compliance).each do |row|
+      std = row[:standard]
+      scope = cs_scope.where(standard_id: std.id).where.not(cached_compliance_percentage: nil)
+      avg = scope.average(:cached_compliance_percentage)
+      next unless avg
+
+      label = std.display_name(I18n.locale.to_s).presence || std.display_name("en")
+      @compliance_by_standard[label] = avg.to_f.round(1)
+    end
+
+    # Trust Center status.
+    if @filter_by_company
+      @trust_center_enabled = current_company&.trust_center_enabled
+      @trust_center_company_id = current_company&.id
+    else
+      @trust_center_total = Company.active.count
+      @trust_center_enabled_count = Company.active.where(trust_center_enabled: true).count
+    end
+  end
+
   # Governance (Risk / Vendor / Customer Commitment) metrics for the overview.
   # Pass a company_id to scope to one company; pass nil for a platform-wide
   # rollup across every company (super admin view).
@@ -251,6 +288,8 @@ class Dashboard::OverviewController < Dashboard::BaseController
     end
     @risk_by_level = level_counts
     @risk_matrix = matrix
+    @risk_by_workspace = risks.left_joins(:risk_workspace).group("risk_workspaces.name").count
+      .transform_keys { |name| name.presence || t("unassigned", default: "Unassigned") }
 
     vendors = Vendor.active
     vendors = vendors.where(company_id: company_id) if company_id

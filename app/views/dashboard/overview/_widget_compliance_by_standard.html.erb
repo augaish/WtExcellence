@@ -1,0 +1,9 @@
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+  <h3 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('widget_compliance_by_standard', default: 'Compliance by standard') %></h3>
+  <% if @compliance_by_standard.present? && @compliance_by_standard.any? %>
+    <%= bar_chart @compliance_by_standard, height: "260px", max: 100, suffix: "%",
+          colors: [ "#5C3984" ], library: { scales: { x: { max: 100 } } } %>
+  <% else %>
+    <p class="text-sm text-[#797C81]"><%= t('no_compliance_data', default: 'No compliance data yet.') %></p>
+  <% end %>
+</div>

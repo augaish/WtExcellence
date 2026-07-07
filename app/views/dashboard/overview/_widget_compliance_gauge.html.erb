@@ -1,0 +1,24 @@
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+  <h3 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('widget_compliance_gauge', default: 'Compliance gauge') %></h3>
+  <% if @avg_compliance_value.nil? %>
+    <p class="text-sm text-[#797C81]"><%= t('no_compliance_data', default: 'No compliance data yet.') %></p>
+  <% else %>
+    <%
+      pct = [ [ @avg_compliance_value.to_f, 0 ].max, 100 ].min
+      # Semicircular gauge: sweep 0..180deg. Colour by band.
+      arc = (pct / 100.0 * 180).round
+      color = if pct >= 80 then "#16A34A" elsif pct >= 50 then "#EAB308" else "#DC2626" end
+    %>
+    <div class="flex flex-col items-center">
+      <div class="relative w-[220px] h-[120px] overflow-hidden">
+        <div class="absolute inset-0 rounded-t-full"
+             style="background: conic-gradient(from -90deg, <%= color %> <%= arc %>deg, #EDEDF2 <%= arc %>deg 180deg, transparent 180deg);"></div>
+        <div class="absolute bg-white rounded-t-full" style="left:26px; right:26px; top:26px; height:94px;"></div>
+        <div class="absolute inset-x-0 bottom-0 flex flex-col items-center">
+          <span class="text-3xl font-bold" style="color: <%= color %>;"><%= pct.round %>%</span>
+          <span class="text-xs text-[#797C81]"><%= t('avg_compliance', default: 'Average compliance') %></span>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

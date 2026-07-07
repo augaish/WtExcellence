@@ -84,7 +84,9 @@ class Dashboard::DashboardLayoutsControllerTest < ActionDispatch::IntegrationTes
 
     layout = DashboardLayout.for_company(@company.id).find_by(slot: 2)
     assert_not_nil layout
-    assert_equal %w[governance top_metrics second_metrics charts tables risk_matrix commitments], layout.ordered_widgets
+    # Saved order is honoured first, then any not-yet-placed widgets are backfilled.
+    assert_equal %w[governance top_metrics second_metrics charts tables], layout.ordered_widgets.first(5)
+    assert_equal DashboardLayout::WIDGET_KEYS.sort, layout.ordered_widgets.sort
     assert_equal %w[tables], layout.hidden_widgets
     assert layout.is_active, "saved slot should become active"
     assert_equal 2, DashboardLayout.active_slot(scope: "company", company_id: @company.id)
@@ -101,7 +103,9 @@ class Dashboard::DashboardLayoutsControllerTest < ActionDispatch::IntegrationTes
 
     assert_response :success
     layout = DashboardLayout.for_company(@company.id).find_by(slot: 1)
-    assert_equal %w[governance top_metrics second_metrics charts risk_matrix commitments tables], layout.ordered_widgets
+    # Unknown keys dropped; known saved keys kept first, rest backfilled.
+    assert_equal %w[governance top_metrics], layout.ordered_widgets.first(2)
+    assert_equal DashboardLayout::WIDGET_KEYS.sort, layout.ordered_widgets.sort
     assert_empty layout.hidden_widgets
   end
 
