@@ -1623,6 +1623,10 @@ ar:
     save_as_pdf: "حفظ كـ PDF"
     back_to_index: "← كل المواضيع"
     topic_not_found: "موضوع المساعدة هذا غير موجود."
+    welcome_title: "مرحبًا بك في Way to Excellence"
+    welcome_body: "هذا هو دليل المستخدم الخاص بك. خذ دقيقة لاستكشاف الأدلة أدناه، أو تخطَّ وابدأ باستخدام التطبيق مباشرة — لن نعرض هذا مرة أخرى."
+    welcome_skip: "تخطٍّ الآن"
+    welcome_start: "ابدأ القراءة"
     topics:
       getting_started:
         title: "البداية"

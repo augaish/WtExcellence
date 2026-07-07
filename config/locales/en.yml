@@ -1639,6 +1639,10 @@ en:
     save_as_pdf: "Save as PDF"
     back_to_index: "← All topics"
     topic_not_found: "That help topic doesn't exist."
+    welcome_title: "Welcome to Way to Excellence"
+    welcome_body: "Here's your user manual. Take a minute to explore the guides below, or skip and jump straight into the app — we won't show this again."
+    welcome_skip: "Skip for now"
+    welcome_start: "Start reading"
     topics:
       getting_started:
         title: "Getting Started"

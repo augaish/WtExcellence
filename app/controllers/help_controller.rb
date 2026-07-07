@@ -14,6 +14,20 @@ class HelpController < Dashboard::BaseController
 
   def index
     @topics = TOPICS
+    # First-run welcome banner (shown only when arriving from the post-login
+    # redirect and the user hasn't dismissed the manual yet).
+    @welcome = params[:welcome].present? && !current_user.user_manual_seen?
+  end
+
+  # Marks the manual as seen so it stops auto-showing on future logins, then
+  # returns the user to the dashboard.
+  def dismiss
+    current_user.mark_user_manual_seen!
+
+    respond_to do |format|
+      format.html { redirect_to dashboard_overview_path, status: :see_other }
+      format.json { render json: { ok: true } }
+    end
   end
 
   def show

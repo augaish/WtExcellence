@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_06_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_06_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -766,6 +766,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_120000) do
     t.string "desired_role"
     t.boolean "receive_notifications_on_email", default: true, null: false
     t.datetime "deleted_at"
+    t.datetime "user_manual_seen_at"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email"
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true

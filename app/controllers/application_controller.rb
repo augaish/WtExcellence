@@ -83,6 +83,11 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource)
     role_display = get_user_role_display(resource)
     flash[:notice] = "Welcome back #{resource.name}!#{role_display}"
+
+    # On first login (until the user skips/closes it) send them straight to the
+    # user manual so they get oriented before using the app.
+    return help_path(welcome: 1) if resource.is_a?(User) && !resource.user_manual_seen?
+
     dashboard_overview_path
   end
 

@@ -42,6 +42,16 @@ class User < ApplicationRecord
     role == "super_admin"
   end
 
+  # Whether the user has already dismissed the first-run user manual. Until they
+  # skip/close it, the manual is shown automatically after each sign-in.
+  def user_manual_seen?
+    user_manual_seen_at.present?
+  end
+
+  def mark_user_manual_seen!
+    update_column(:user_manual_seen_at, Time.current) unless user_manual_seen?
+  end
+
   def company_admin?
     company_user&.company_admin?
   end

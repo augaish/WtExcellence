@@ -2,6 +2,31 @@
 
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-5xl mx-auto px-6 py-8">
+    <% if @welcome %>
+      <div class="no-print mb-6 rounded-2xl border border-[#E0D3F2] bg-gradient-to-br from-[#F6EEFF] to-white p-5 sm:p-6"
+           data-controller="help-welcome"
+           data-help-welcome-url-value="<%= dismiss_help_path %>">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+          <span class="flex items-center justify-center w-12 h-12 rounded-xl bg-[#5C3984] text-white flex-shrink-0">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.5C10.5 5.3 8.7 5 6.5 5H4v12h2.5c2.2 0 4 .3 5.5 1.5 1.5-1.2 3.3-1.5 5.5-1.5H20V5h-2.5c-2.2 0-4 .3-5.5 1.5zm0 0V18"/>
+            </svg>
+          </span>
+          <div class="min-w-0 flex-1">
+            <h2 class="text-lg font-semibold text-[#0D1120]"><%= t('help.welcome_title') %></h2>
+            <p class="text-sm text-[#5A5A66] mt-1"><%= t('help.welcome_body') %></p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <%= button_to t('help.welcome_skip'), dismiss_help_path, method: :post,
+                  form_class: "contents",
+                  class: ui_btn_neutral %>
+            <a href="#help-topics" class="<%= ui_btn_primary %>"
+               data-action="help-welcome#start"><%= t('help.welcome_start') %></a>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <div class="flex items-start justify-between gap-4 mb-2">
       <div>
         <h1 class="text-3xl font-bold text-[#0D1120] mb-2"><%= t('help.title') %></h1>
@@ -12,7 +37,7 @@
       </button>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+    <div id="help-topics" class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 scroll-mt-6">
       <% @topics.each_with_index do |slug, i| %>
         <%= link_to help_topic_path(slug), class: "block bg-white border border-[#E3E3E3] rounded-xl p-5 hover:border-[#5C3984] hover:shadow-sm transition" do %>
           <div class="flex items-center gap-3">

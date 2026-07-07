@@ -15,6 +15,7 @@ Rails.application.routes.draw do
 
   # Help Center / User Manual (in-app, authenticated)
   get "help", to: "help#index", as: :help
+  post "help/dismiss", to: "help#dismiss", as: :dismiss_help
   get "help/:slug", to: "help#show", as: :help_topic
 
   get "standards/index"
