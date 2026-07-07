@@ -50,6 +50,9 @@
       </div>
     </div>
 
+    <%= render "dashboard/shared/governance_capas", origin: @risk,
+          create_path: dashboard_create_risk_capa_path(@risk) %>
+
     <div class="mt-6">
       <%= link_to "Back to Risk Register", dashboard_risk_management_index_path, class: "text-sm text-blue-500 hover:text-blue-700" %>
     </div>

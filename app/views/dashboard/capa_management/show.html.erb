@@ -156,7 +156,23 @@
                 <%= @capa.title %>
               </h1>
             </div>
-            
+
+            <!-- Governance origin (raised from a Risk / Vendor / Customer Commitment) -->
+            <% if @capa.origin.present? %>
+              <% origin_meta = case @capa.origin_type
+                   when "Risk" then { label: t("origin_risk"), path: dashboard_risk_management_path(@capa.origin_id), name: @capa.origin.title }
+                   when "Vendor" then { label: t("origin_vendor"), path: dashboard_vendor_path(@capa.origin_id), name: @capa.origin.name }
+                   when "CustomerCommitment" then { label: t("origin_commitment"), path: dashboard_customer_commitment_path(@capa.origin_id), name: @capa.origin.title }
+                 end %>
+              <% if origin_meta %>
+                <div class="flex items-center gap-2 w-full">
+                  <span class="text-xs sm:text-sm font-medium text-[#797C81] sm:w-[90px] flex-shrink-0"><%= t("raised_from") %></span>
+                  <%= link_to "#{origin_meta[:label]}: #{origin_meta[:name]}", origin_meta[:path],
+                        class: "inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-[#F1EAFB] text-[#5C3984] hover:bg-[#E7DAF7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984]" %>
+                </div>
+              <% end %>
+            <% end %>
+
             <!-- Description Row -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
               <span class="text-xs sm:text-sm font-medium text-[#797C81] sm:w-[90px] flex-shrink-0"><%= t("capa_management_ui.header.description_label") %></span>

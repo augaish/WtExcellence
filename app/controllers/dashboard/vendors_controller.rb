@@ -2,7 +2,7 @@ class Dashboard::VendorsController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_not_risk_manager_only
   before_action :ensure_can_manage_vendors
-  before_action :set_vendor, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_vendor, only: [ :show, :edit, :update, :destroy, :create_capa ]
 
   def index
     # Order by real severity (critical first), not alphabetically — the string
@@ -52,6 +52,14 @@ class Dashboard::VendorsController < Dashboard::BaseController
   def destroy
     @vendor.soft_delete!
     redirect_to dashboard_vendors_path, notice: t("vendor_deleted")
+  end
+
+  # Raise a linked CAPA from this vendor and hand off to the CAPA workflow.
+  def create_capa
+    capa = GovernanceCapaService.create_from(origin: @vendor, company: current_company, user: current_user)
+    redirect_to dashboard_capa_management_show_path(capa), notice: t("capa_raised_from_governance")
+  rescue GovernanceCapaService::UnsupportedOriginError, ActiveRecord::RecordInvalid
+    redirect_to dashboard_vendor_path(@vendor), alert: t("capa_raise_failed")
   end
 
   private

@@ -2,6 +2,9 @@ class Capa < ApplicationRecord
   belongs_to :company, optional: true
   belongs_to :standard, optional: true
   belongs_to :created_by, class_name: "User", foreign_key: "created_by_id", optional: true
+  # Governance origin (Risk / Vendor / CustomerCommitment) this CAPA was raised
+  # from, when it came out of the GRC modules rather than being created directly.
+  belongs_to :origin, polymorphic: true, optional: true
 
   has_many :capa_assignments, dependent: :destroy
   has_many :company_users, through: :capa_assignments

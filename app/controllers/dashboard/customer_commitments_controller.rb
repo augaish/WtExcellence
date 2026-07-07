@@ -2,7 +2,7 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_not_risk_manager_only
   before_action :ensure_can_manage_commitments
-  before_action :set_commitment, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_commitment, only: [ :show, :edit, :update, :destroy, :create_capa ]
 
   def index
     @commitments = CustomerCommitment.active.where(company_id: current_company&.id).includes(:owner).order(due_date: :asc)
@@ -46,6 +46,14 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   def destroy
     @commitment.soft_delete!
     redirect_to dashboard_customer_commitments_path, notice: t("commitment_deleted")
+  end
+
+  # Raise a linked CAPA from this commitment and hand off to the CAPA workflow.
+  def create_capa
+    capa = GovernanceCapaService.create_from(origin: @commitment, company: current_company, user: current_user)
+    redirect_to dashboard_capa_management_show_path(capa), notice: t("capa_raised_from_governance")
+  rescue GovernanceCapaService::UnsupportedOriginError, ActiveRecord::RecordInvalid
+    redirect_to dashboard_customer_commitment_path(@commitment), alert: t("capa_raise_failed")
   end
 
   private

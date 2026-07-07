@@ -44,5 +44,8 @@
         </div>
       <% end %>
     </div>
+
+    <%= render "dashboard/shared/governance_capas", origin: @vendor,
+          create_path: create_capa_dashboard_vendor_path(@vendor) %>
   </div>
 </div>

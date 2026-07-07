@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_06_130000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_06_140000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -208,10 +208,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_130000) do
     t.boolean "archived", default: false, null: false
     t.integer "friendly_id"
     t.uuid "created_by_id"
+    t.string "origin_type"
+    t.uuid "origin_id"
     t.index ["archived"], name: "index_capas_on_archived"
     t.index ["company_id", "friendly_id"], name: "index_capas_on_company_id_and_friendly_id", unique: true
     t.index ["company_id"], name: "index_capas_on_company_id"
     t.index ["created_by_id"], name: "index_capas_on_created_by_id"
+    t.index ["origin_type", "origin_id"], name: "index_capas_on_origin_type_and_origin_id"
     t.index ["standard_id"], name: "index_capas_on_standard_id"
   end
 

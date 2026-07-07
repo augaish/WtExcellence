@@ -1,4 +1,6 @@
 class Vendor < ApplicationRecord
+  include GovernanceCapaLinkable
+
   belongs_to :company
   belongs_to :owner, class_name: "CompanyUser", optional: true
   belongs_to :created_by, class_name: "User", optional: true

@@ -88,11 +88,16 @@ Rails.application.routes.draw do
       get "/:id/edit", action: :edit, as: :edit_risk
       patch "/:id", action: :update, as: :update_risk
       delete "/:id", action: :destroy, as: :destroy_risk
+      post "/:id/create_capa", action: :create_capa, as: :create_risk_capa
     end
 
     resources :risk_workspaces, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
-    resources :customer_commitments, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
-    resources :vendors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
+    resources :customer_commitments, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
+      member { post :create_capa }
+    end
+    resources :vendors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
+      member { post :create_capa }
+    end
     resources :ai_instructions, only: [ :index, :new, :create, :edit, :update, :destroy ] do
       member { patch :toggle }
     end

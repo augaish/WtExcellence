@@ -1,7 +1,7 @@
 class Dashboard::RiskManagementController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_can_manage_risks
-  before_action :set_risk, only: [ :show, :edit, :update, :destroy ]
+  before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa ]
 
   def index
     @risks = Risk.active.where(company_id: current_company&.id).includes(:owner, :riskable, :risk_workspace).order(inherent_score: :desc)
@@ -51,6 +51,14 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   def destroy
     @risk.soft_delete!
     redirect_to dashboard_risk_management_index_path, notice: t("risk_deleted")
+  end
+
+  # Raise a linked CAPA from this risk and hand off to the CAPA workflow.
+  def create_capa
+    capa = GovernanceCapaService.create_from(origin: @risk, company: current_company, user: current_user)
+    redirect_to dashboard_capa_management_show_path(capa), notice: t("capa_raised_from_governance")
+  rescue GovernanceCapaService::UnsupportedOriginError, ActiveRecord::RecordInvalid
+    redirect_to dashboard_risk_management_path(@risk), alert: t("capa_raise_failed")
   end
 
   private

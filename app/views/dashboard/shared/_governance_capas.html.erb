@@ -1,0 +1,35 @@
+<%# GRC → QMS integration: linked CAPAs for a governance record (Risk / Vendor /
+    CustomerCommitment). Locals: origin, create_path. %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6">
+  <div class="flex items-center justify-between gap-3 mb-4">
+    <div>
+      <h2 class="text-base font-semibold text-[#0D1120]"><%= t('linked_capas') %></h2>
+      <p class="text-xs text-[#797C81] mt-0.5"><%= t('linked_capas_hint') %></p>
+    </div>
+    <%= button_to t('raise_capa'), create_path, method: :post,
+          form_class: "contents",
+          class: ui_btn_primary,
+          data: { turbo_confirm: t('raise_capa_confirm') } %>
+  </div>
+
+  <% capas = origin.linked_capas.order(created_at: :desc) %>
+  <% if capas.any? %>
+    <ul class="divide-y divide-[#F0F0F0]">
+      <% capas.each do |capa| %>
+        <li class="py-3 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <%= link_to capa.title, dashboard_capa_management_show_path(capa),
+                  class: "text-sm font-medium text-[#5C3984] hover:underline truncate block" %>
+            <span class="text-xs text-[#797C81]"><%= capa.friendly_code %></span>
+          </div>
+          <% closed = capa.status == "Closed" %>
+          <span class="inline-flex flex-shrink-0 px-2 py-1 text-xs font-medium rounded-full <%= closed ? 'bg-green-100 text-green-800' : 'bg-[#F1EAFB] text-[#5C3984]' %>">
+            <%= capa.status %>
+          </span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="text-sm text-[#797C81]"><%= t('no_linked_capas') %></p>
+  <% end %>
+</div>

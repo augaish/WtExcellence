@@ -43,5 +43,8 @@
         </span>
       </div>
     </div>
+
+    <%= render "dashboard/shared/governance_capas", origin: @commitment,
+          create_path: create_capa_dashboard_customer_commitment_path(@commitment) %>
   </div>
 </div>
