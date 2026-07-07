@@ -2,7 +2,7 @@ class CapaClauseSuggestionService
   def initialize(capa, company)
     @capa = capa
     @company = company
-    @provider = ENV.fetch("CAPA_CLAUSE_PROVIDER", "ollama").downcase
+    @provider = ENV.fetch("CAPA_CLAUSE_PROVIDER", "openrouter").downcase
 
     if @provider == "openrouter"
       # Configure OpenRouter

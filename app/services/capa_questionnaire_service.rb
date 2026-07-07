@@ -1,7 +1,7 @@
 class CapaQuestionnaireService
   def initialize(capa)
     @capa = capa
-    @provider = ENV.fetch("CAPA_QUESTIONNAIRE_PROVIDER", "ollama").downcase
+    @provider = ENV.fetch("CAPA_QUESTIONNAIRE_PROVIDER", "openrouter").downcase
 
     if @provider == "openrouter"
       # Configure OpenRouter

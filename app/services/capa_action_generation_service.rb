@@ -1,7 +1,7 @@
 class CapaActionGenerationService
   def initialize(capa)
     @capa = capa
-    @provider = ENV.fetch("CAPA_ACTION_PROVIDER", "ollama").downcase
+    @provider = ENV.fetch("CAPA_ACTION_PROVIDER", "openrouter").downcase
 
     if @provider == "openrouter"
       # Configure OpenRouter

@@ -8,7 +8,7 @@ class PlatformAssistantService
   def initialize(company, user: nil)
     @company = company
     @user = user
-    @provider = ENV.fetch("CAPA_QUESTIONNAIRE_PROVIDER", "ollama").downcase
+    @provider = ENV.fetch("CAPA_QUESTIONNAIRE_PROVIDER", "openrouter").downcase
   end
 
   # Returns { answer:, sources: } on success. Raises AssistantError on failure
