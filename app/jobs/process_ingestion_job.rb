@@ -21,115 +21,118 @@ class ProcessIngestionJob
     Rails.logger.info "Processing ingestion job: #{ingestion_job_id}"
 
 
-    ActiveRecord::Base.transaction do
-      ingestion_job.start_processing!
+    # Mark the job as processing OUTSIDE any transaction, so the status is
+    # committed immediately and visible to the UI and monitoring while the long
+    # OCR/LLM work runs. Only the database writes below are wrapped in a
+    # transaction — never the external OCR/LLM calls, which could otherwise hold
+    # a DB connection open for minutes.
+    ingestion_job.start_processing!
 
-      begin
-        upload = ingestion_job.input_pdf
-        standard = ingestion_job.standard
+    begin
+      upload = ingestion_job.input_pdf
+      standard = ingestion_job.standard
 
-        Rails.logger.info "Upload ID: #{upload.id}, file attached: #{upload.file.attached?}"
+      Rails.logger.info "Upload ID: #{upload.id}, file attached: #{upload.file.attached?}"
 
-        unless upload.file.attached?
-          Rails.logger.error "No file attached to upload #{upload.id}"
-          raise "No file attached to upload #{upload.id}"
-        end
+      unless upload.file.attached?
+        Rails.logger.error "No file attached to upload #{upload.id}"
+        raise "No file attached to upload #{upload.id}"
+      end
 
-        Rails.logger.info "Processing PDF file: #{upload.filename} for standard: #{standard.code}"
+      Rails.logger.info "Processing PDF file: #{upload.filename} for standard: #{standard.code}"
 
-        # Find existing version with this source PDF
-        standard_version = StandardVersion.find_by(source_pdf_id: upload.id)
+      # Find existing version with this source PDF
+      standard_version = StandardVersion.find_by(source_pdf_id: upload.id)
 
-        unless standard_version
-          Rails.logger.error "No standard version found for source_pdf_id: #{upload.id}"
-          raise "No standard version found for source PDF"
-        end
+      unless standard_version
+        Rails.logger.error "No standard version found for source_pdf_id: #{upload.id}"
+        raise "No standard version found for source PDF"
+      end
 
-        Rails.logger.info "Using existing standard version: #{standard_version.id}, label: #{standard_version.version_label}"
+      Rails.logger.info "Using existing standard version: #{standard_version.id}, label: #{standard_version.version_label}"
 
-        # If this version already has clauses (e.g. re-run or retry), skip LLM
-        if standard_version.clauses.exists?
-          Rails.logger.info "Version #{standard_version.id} already has clauses. Skipping LLM."
-          ingestion_job.complete!("Version already had clauses. No processing needed.")
+      # If this version already has clauses (e.g. re-run or retry), skip LLM
+      if standard_version.clauses.exists?
+        Rails.logger.info "Version #{standard_version.id} already has clauses. Skipping LLM."
+        ingestion_job.complete!("Version already had clauses. No processing needed.")
+        return
+      end
+
+      # For EFQM/KAQA family (code or name contains "efqm" or "kaqa"): don't process again — copy from any
+      # already-processed EFQM/KAQA standard. E.g. superadmin uploads EFQM (we process once), then EFQM2
+      # an hour later: we copy EFQM's clause tree to EFQM2 and skip the LLM.
+      if efqm_or_kaqa_standard?(standard)
+        source_version = find_existing_version_with_clauses(standard, standard_version)
+        source_version ||= find_any_efqm_kaqa_version_with_clauses(standard, standard_version)
+
+        if source_version
+          Rails.logger.info "EFQM/KAQA cache hit: copying clauses from version #{source_version.id} (#{source_version.version_label}). Skipping LLM."
+          ActiveRecord::Base.transaction { copy_clauses_from_version!(source_version, standard_version) }
+          ingestion_job.complete!("Clause tree copied from existing version (EFQM/KAQA cache).")
           return
         end
 
-        # For EFQM/KAQA family (code or name contains "efqm" or "kaqa"): don't process again — copy from any
-        # already-processed EFQM/KAQA standard. E.g. superadmin uploads EFQM (we process once), then EFQM2
-        # an hour later: we copy EFQM's clause tree to EFQM2 and skip the LLM.
-        if efqm_or_kaqa_standard?(standard)
-          source_version = find_existing_version_with_clauses(standard, standard_version)
-          source_version ||= find_any_efqm_kaqa_version_with_clauses(standard, standard_version)
-
-          if source_version
-            Rails.logger.info "EFQM/KAQA cache hit: copying clauses from version #{source_version.id} (#{source_version.version_label}). Skipping LLM."
-            copy_clauses_from_version!(source_version, standard_version)
-            ingestion_job.complete!("Clause tree copied from existing version (EFQM/KAQA cache).")
-            return
-          end
-
-          Rails.logger.info "EFQM/KAQA cache miss: no existing version with clauses (code=#{standard.code}, display_name=#{standard.display_name('en')}). Will run LLM."
-        end
-
-        # Choose service based on configuration (LLM runs only when cache was not used)
-        # - MultiStagePdfPipeline: Uses Ollama models (qwen-extract-structure, qwen-extract-checkpoints, qwen-translator)
-        # - StandardIngestionService: Uses OpenRouter API (OpenAI/Anthropic models)
-        service_type = ENV.fetch("INGESTION_SERVICE", "multi_stage") # Options: "multi_stage" or "openrouter"
-
-        if service_type == "multi_stage" && ENV["OLLAMA_URL"].present?
-          Rails.logger.info "Using MultiStagePdfPipeline with Ollama (#{ENV['OLLAMA_URL']})"
-          pipeline_type = standard.pipeline_type.presence || standard.code
-          Rails.logger.info "Pipeline type: #{pipeline_type}"
-
-          service = MultiStagePdfPipeline.new(
-            upload.file,
-            standard_type: pipeline_type,
-            standard_name: standard.display_name("en"),
-            ollama_url: ENV["OLLAMA_URL"]
-          )
-          parsed_data = service.process
-
-          # Save output to file for debugging/backup
-          timestamp = Time.current.strftime("%Y%m%d_%H%M%S")
-          output_path = Rails.root.join(
-            "tmp", "ollama_responses", "t4_optimized",
-            "standard_t4_#{standard.code.downcase}_#{timestamp}.json"
-          )
-          FileUtils.mkdir_p(output_path.dirname)
-          File.write(output_path, JSON.pretty_generate(parsed_data))
-          Rails.logger.info "Output saved to: #{output_path}"
-
-          # Convert multi-stage format to database format and save
-          convert_and_save_multi_stage_data(standard_version, parsed_data)
-
-          Rails.logger.info "Multi-stage pipeline completed and saved to database."
-          ingestion_job.complete!("PDF processed successfully using multi-stage pipeline (Ollama). Output: #{output_path.basename}")
-
-        elsif service_type == "openrouter" || ENV["OLLAMA_URL"].blank?
-          Rails.logger.info "Using StandardIngestionService with OpenRouter"
-
-          service = StandardIngestionService.new(upload.file)
-          parsed_data = service.process_pdf
-
-          # Save data using old format
-          process_extracted_clauses(standard_version, parsed_data["clauses"])
-
-          Rails.logger.info "OpenRouter service completed and saved to database."
-          ingestion_job.complete!("PDF processed successfully using StandardIngestionService (OpenRouter).")
-
-        else
-          raise "Unknown INGESTION_SERVICE type: #{service_type}. Use 'multi_stage' or 'openrouter'"
-        end
-
-      rescue => e
-        Rails.logger.error "Error processing ingestion job #{ingestion_job_id}: #{e.message}"
-        Rails.logger.error "Backtrace: #{e.backtrace.first(5)}"
-
-        ingestion_job.fail!("Processing failed: #{e.message}")
-
-        # Re-raise the error to trigger Sidekiq retry mechanism
-        raise e
+        Rails.logger.info "EFQM/KAQA cache miss: no existing version with clauses (code=#{standard.code}, display_name=#{standard.display_name('en')}). Will run LLM."
       end
+
+      # Choose service based on configuration (LLM runs only when cache was not used)
+      # - MultiStagePdfPipeline: Uses Ollama models (qwen-extract-structure, qwen-extract-checkpoints, qwen-translator)
+      # - StandardIngestionService: Uses OpenRouter API (OpenAI/Anthropic models)
+      service_type = ENV.fetch("INGESTION_SERVICE", "multi_stage") # Options: "multi_stage" or "openrouter"
+
+      if service_type == "multi_stage" && ENV["OLLAMA_URL"].present?
+        Rails.logger.info "Using MultiStagePdfPipeline with Ollama (#{ENV['OLLAMA_URL']})"
+        pipeline_type = standard.pipeline_type.presence || standard.code
+        Rails.logger.info "Pipeline type: #{pipeline_type}"
+
+        service = MultiStagePdfPipeline.new(
+          upload.file,
+          standard_type: pipeline_type,
+          standard_name: standard.display_name("en"),
+          ollama_url: ENV["OLLAMA_URL"]
+        )
+        parsed_data = service.process
+
+        # Save output to file for debugging/backup
+        timestamp = Time.current.strftime("%Y%m%d_%H%M%S")
+        output_path = Rails.root.join(
+          "tmp", "ollama_responses", "t4_optimized",
+          "standard_t4_#{standard.code.downcase}_#{timestamp}.json"
+        )
+        FileUtils.mkdir_p(output_path.dirname)
+        File.write(output_path, JSON.pretty_generate(parsed_data))
+        Rails.logger.info "Output saved to: #{output_path}"
+
+        # Convert multi-stage format to database format and save
+        ActiveRecord::Base.transaction { convert_and_save_multi_stage_data(standard_version, parsed_data) }
+
+        Rails.logger.info "Multi-stage pipeline completed and saved to database."
+        ingestion_job.complete!("PDF processed successfully using multi-stage pipeline (Ollama). Output: #{output_path.basename}")
+
+      elsif service_type == "openrouter" || ENV["OLLAMA_URL"].blank?
+        Rails.logger.info "Using StandardIngestionService with OpenRouter"
+
+        service = StandardIngestionService.new(upload.file)
+        parsed_data = service.process_pdf
+
+        # Save data using old format
+        ActiveRecord::Base.transaction { process_extracted_clauses(standard_version, parsed_data["clauses"]) }
+
+        Rails.logger.info "OpenRouter service completed and saved to database."
+        ingestion_job.complete!("PDF processed successfully using StandardIngestionService (OpenRouter).")
+
+      else
+        raise "Unknown INGESTION_SERVICE type: #{service_type}. Use 'multi_stage' or 'openrouter'"
+      end
+
+    rescue => e
+      Rails.logger.error "Error processing ingestion job #{ingestion_job_id}: #{e.message}"
+      Rails.logger.error "Backtrace: #{e.backtrace.first(5)}"
+
+      ingestion_job.fail!("Processing failed: #{e.message}")
+
+      # Re-raise the error to trigger Sidekiq retry mechanism
+      raise e
     end
   end
 
