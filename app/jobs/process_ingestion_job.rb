@@ -1,7 +1,11 @@
 class ProcessIngestionJob
   include Sidekiq::Job
 
-  sidekiq_options queue: :default, retry: 5
+  # Dedicated single-threaded queue (see the "ingestion" capsule in
+  # config/initializers/sidekiq.rb) so heavy OCR/LLM work runs one-at-a-time and
+  # never thrashes memory alongside other ingestion or light jobs. Fewer retries
+  # because each attempt is minutes long — 5 retries of a stuck job storm a small box.
+  sidekiq_options queue: :ingestion, retry: 2
 
   # Custom retry logic for rate limits
   sidekiq_retry_in do |count, exception|

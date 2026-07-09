@@ -30,7 +30,13 @@ servers:
   job:
     hosts:
       - 74.208.192.18
-    cmd: bundle exec sidekiq -q default -c 5
+    # -q default handles light jobs concurrently; the dedicated single-threaded
+    # "ingestion" capsule (enabled via SIDEKIQ_INGESTION_CAPSULE) processes heavy
+    # OCR/LLM standard ingestion one-at-a-time so they never thrash memory.
+    cmd: bundle exec sidekiq -q default -c 3
+    env:
+      clear:
+        SIDEKIQ_INGESTION_CAPSULE: "1"
     options:
       memory: "512m"
 
