@@ -32,11 +32,58 @@ class StandardIngestionService
   end
 
   def extract_chunks(pdf_file)
-    # Extract text from PDF using Tesseract OCR (convert to images first)
-    text = extract_text_from_pdf_images(pdf_file)
+    # Prefer the embedded text layer (instant) and only fall back to slow OCR
+    # for scanned/image PDFs — see extract_text_smart.
+    text = extract_text_smart(pdf_file)
 
     # Return as a single chunk (no chunking - process entire document at once)
     [ text ]
+  end
+
+  # Digital PDFs already carry a selectable text layer that PDF::Reader can pull
+  # out in milliseconds; only scanned/image PDFs actually need OCR. OCR
+  # (rasterize every page at high DPI + run Tesseract) is the slow path, so we
+  # use it ONLY when the text layer is missing or unusable. Set
+  # INGESTION_FORCE_OCR=1 to always OCR (e.g. for a scan with a garbage layer).
+  def extract_text_smart(pdf_file)
+    if ENV["INGESTION_FORCE_OCR"] == "1"
+      Rails.logger.info "INGESTION_FORCE_OCR=1 — skipping text-layer check, running OCR"
+      return extract_text_from_pdf_images(pdf_file)
+    end
+
+    layer = begin
+      extract_text_from_pdf_reader(pdf_file)
+    rescue => e
+      Rails.logger.warn "Text-layer extraction failed: #{e.message}"
+      ""
+    end
+
+    pages = pdf_page_count(pdf_file)
+    if usable_text_layer?(layer, pages)
+      Rails.logger.info "Using embedded PDF text layer (#{layer.gsub(/\s/, '').length} chars over ~#{pages} pages) — skipping OCR"
+      return layer
+    end
+
+    Rails.logger.info "Text layer sparse/unusable — falling back to OCR"
+    extract_text_from_pdf_images(pdf_file)
+  end
+
+  # True when the text layer has enough real letters to trust as a digital PDF
+  # (avoids trusting a near-empty or garbage layer, which would feed the LLM junk).
+  def usable_text_layer?(text, pages)
+    return false if text.blank? || pages.to_i <= 0
+    dense = text.gsub(/\s/, "")
+    return false if dense.length < 200
+    return false if dense.length < 40 * pages
+    letters = dense.scan(/[A-Za-z؀-ۿ]/).length
+    (letters.to_f / dense.length) >= 0.5
+  end
+
+  def pdf_page_count(pdf_file)
+    PDF::Reader.new(StringIO.new(pdf_file.blob.download)).page_count
+  rescue => e
+    Rails.logger.warn "Could not count PDF pages: #{e.message}"
+    0
   end
 
   def extract_text_from_pdf_images(pdf_file)
@@ -64,10 +111,15 @@ class StandardIngestionService
     # Convert PDF pages to images using pdftoppm (from poppler-utils)
     images_dir = Dir.mktmpdir
     begin
-      # Convert PDF to PNG images (one per page) at 300 DPI for better OCR quality
+      # Convert PDF to PNG images (one per page). DPI drives both OCR speed and
+      # memory: 300 DPI produces ~8.7MP images per A4 page (slow, RAM-heavy on a
+      # small box). 200 is a good speed/accuracy balance for printed standards;
+      # drop to 150 via INGESTION_OCR_DPI if uploads still crawl.
+      dpi = ENV.fetch("INGESTION_OCR_DPI", "200").to_i
+      dpi = 200 unless dpi.positive?
       pdf_path = Shellwords.escape(temp_pdf.path)
       output_prefix = Shellwords.escape(File.join(images_dir, "page"))
-      success = system("pdftoppm -png -r 300 #{pdf_path} #{output_prefix}")
+      success = system("pdftoppm -png -r #{dpi} #{pdf_path} #{output_prefix}")
 
       unless success
         Rails.logger.error "Failed to convert PDF to images"
@@ -84,11 +136,15 @@ class StandardIngestionService
 
       Rails.logger.info "Converted PDF to #{page_images.length} page images"
 
+      # Detect available OCR languages ONCE (not once per page — that spawned a
+      # `tesseract --list-langs` subprocess for every page).
+      lang_string = tesseract_lang_string
+
       # Extract text from each page image using Tesseract OCR
       all_text = ""
       page_images.each_with_index do |image_path, index|
-        Rails.logger.info "Extracting text from page #{index + 1}/#{page_images.length} using Tesseract..."
-        page_text = extract_text_from_image_with_tesseract(image_path)
+        Rails.logger.info "Extracting text from page #{index + 1}/#{page_images.length} using Tesseract (#{lang_string})..."
+        page_text = extract_text_from_image_with_tesseract(image_path, lang_string)
         all_text += page_text + "\n"
       end
 
@@ -129,25 +185,28 @@ class StandardIngestionService
     text
   end
 
-  def extract_text_from_image_with_tesseract(image_path)
-    # Use Tesseract OCR to extract text from image
-    # Support both English and Arabic
-    # Check available languages
-    lang_check = `tesseract --list-langs 2>&1`
-    available_langs = lang_check.scan(/^([a-z_]+)$/).flatten
+  # Detect the Tesseract language string once. Honors INGESTION_OCR_LANGS
+  # (e.g. "ara" for an Arabic-only doc — single language is ~2x faster than
+  # "eng+ara"); otherwise auto-detects installed languages.
+  def tesseract_lang_string
+    return @tesseract_lang_string if defined?(@tesseract_lang_string)
 
-    # Determine language(s) to use
+    override = ENV["INGESTION_OCR_LANGS"].to_s.strip
+    if override.present?
+      return @tesseract_lang_string = override
+    end
+
+    available_langs = `tesseract --list-langs 2>&1`.scan(/^([a-z_]+)$/).flatten
     languages = []
     languages << "eng" if available_langs.include?("eng")
     languages << "ara" if available_langs.include?("ara") || available_langs.include?("ara_script")
+    languages = [ "eng" ] if languages.empty?
 
-    if languages.empty?
-      Rails.logger.warn "No supported languages found. Using default (eng)"
-      languages = [ "eng" ]
-    end
+    @tesseract_lang_string = languages.join("+")
+  end
 
-    lang_string = languages.join("+")
-    Rails.logger.info "Using Tesseract with languages: #{lang_string}"
+  def extract_text_from_image_with_tesseract(image_path, lang_string = nil)
+    lang_string ||= tesseract_lang_string
 
     # Run Tesseract OCR
     # -l: specify languages
