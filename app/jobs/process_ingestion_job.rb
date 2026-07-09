@@ -115,8 +115,16 @@ class ProcessIngestionJob
         service = StandardIngestionService.new(upload.file)
         parsed_data = service.process_pdf
 
-        # Save data using old format
-        ActiveRecord::Base.transaction { process_extracted_clauses(standard_version, parsed_data["clauses"]) }
+        # process_pdf returns the { "model" => { "criteria" => [...] } } schema —
+        # the SAME shape as the multi-stage pipeline — so convert it the same way.
+        # (The old process_extracted_clauses expected a "clauses" key that no
+        # longer exists, which crashed with "undefined method 'length' for nil".)
+        # Surface an extraction/parse failure instead of saving an empty tree.
+        if parsed_data["error"].present?
+          raise "Standard extraction failed: #{parsed_data['error']}"
+        end
+
+        ActiveRecord::Base.transaction { convert_and_save_multi_stage_data(standard_version, parsed_data) }
 
         Rails.logger.info "OpenRouter service completed and saved to database."
         ingestion_job.complete!("PDF processed successfully using StandardIngestionService (OpenRouter).")
