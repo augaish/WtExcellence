@@ -92,7 +92,9 @@ class StandardsController < Dashboard::BaseController
           tool_compliance_data: [],
           company_count: company_count,
           average_company_compliance: nil,
-          is_processing: active_job.present? && standard.standard_versions.count <= 1 || (clause_count == 0 && standard.ingestion_jobs.where(status: [ "queued", "processing" ]).exists?)
+          is_processing: active_job.present? && standard.standard_versions.count <= 1 || (clause_count == 0 && standard.ingestion_jobs.where(status: [ "queued", "processing" ]).exists?),
+          progress_stage: active_job&.progress_stage,
+          failed_message: (standard.ingestion_jobs.failed.order(created_at: :desc).first&.message if clause_count.zero? && active_job.nil?)
         }
       else
         {
@@ -105,7 +107,9 @@ class StandardsController < Dashboard::BaseController
           tool_compliance_data: [],
           company_count: nil,
           average_company_compliance: nil,
-          is_processing: active_job.present?
+          is_processing: active_job.present?,
+          progress_stage: active_job&.progress_stage,
+          failed_message: (standard.ingestion_jobs.failed.order(created_at: :desc).first&.message if active_job.nil?)
         }
       end
     end
@@ -1417,7 +1421,8 @@ class StandardsController < Dashboard::BaseController
               tool_compliance_data: compliance_data[:tool_data],
               company_count: company_stats&.[](:company_count),
               average_company_compliance: company_stats&.[](:average_compliance),
-              is_processing: false  # Job is completed/failed, no longer processing
+              is_processing: false,  # Job is completed/failed, no longer processing
+              failed_message: (ingestion_job.message if ingestion_job.failed?)
             }
           else
             stats = {
@@ -1430,7 +1435,8 @@ class StandardsController < Dashboard::BaseController
               tool_compliance_data: [],
               company_count: nil,
               average_company_compliance: nil,
-              is_processing: false
+              is_processing: false,
+              failed_message: (ingestion_job.message if ingestion_job.failed?)
             }
           end
 
@@ -1444,12 +1450,16 @@ class StandardsController < Dashboard::BaseController
             message: ingestion_job.message
           }
         else
-          # Job still processing, return status only
+          # Job still processing — expose the live pipeline stage so the card
+          # can show real progress instead of a static "Processing".
+          stage = ingestion_job.progress_stage.presence || "queued"
           render json: {
             status: ingestion_job.status,
             completed: false,
             failed: false,
-            message: ingestion_job.message
+            message: ingestion_job.message,
+            stage: stage,
+            stage_label: I18n.t("ingestion_stages.#{stage}", default: I18n.t("processing", default: "Processing"))
           }
         end
       end

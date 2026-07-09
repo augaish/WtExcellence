@@ -10,8 +10,12 @@ class StandardIngestionService
   # Larger chunks = fewer API calls + better context for complete Criterion extraction
   MAX_CHUNK_SIZE = 35_000
 
-  def initialize(pdf_file)
+  # on_progress: optional callback invoked with a stage key ("extracting_text",
+  # "ai_analysis") as the pipeline advances, so callers (the ingestion job) can
+  # surface live progress to the UI.
+  def initialize(pdf_file, on_progress: nil)
     @pdf_file = pdf_file
+    @on_progress = on_progress
 
     # Configure OpenRouter
     OpenRouter.configure do |config|
@@ -226,7 +230,9 @@ class StandardIngestionService
 
   def process_pdf
     # Extract text from PDF (or test file)
+    @on_progress&.call("extracting_text")
     chunks = extract_chunks(@pdf_file)
+    @on_progress&.call("ai_analysis")
 
     # For testing: Process as single prompt (no chunking)
     if chunks.length == 1

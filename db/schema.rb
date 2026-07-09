@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_06_140000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_09_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -498,6 +498,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_06_140000) do
     t.uuid "created_by"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "progress_stage"
   end
 
   create_table "languages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

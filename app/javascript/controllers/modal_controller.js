@@ -700,7 +700,15 @@ export default class extends Controller {
             // Card updates silently without alert notification
             return; // Exit early since we're done
           }
-          // If not completed, continue polling
+
+          // Still processing: surface the live pipeline stage on the card badge
+          if (result.stage_label) {
+            const stageEl = document.querySelector(`[data-standard-id="${standardId}"] [data-ingestion-stage]`);
+            if (stageEl && stageEl.textContent !== result.stage_label) {
+              stageEl.textContent = result.stage_label;
+            }
+          }
+          // Continue polling
         } else {
           console.error('Failed to poll job status:', response.status);
           // Stop polling on error

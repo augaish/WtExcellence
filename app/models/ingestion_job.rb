@@ -33,11 +33,22 @@ class IngestionJob < ApplicationRecord
     status == "failed"
   end
 
+  # Pipeline stages surfaced to the UI while status is "processing".
+  # Keys map to i18n: ingestion_stages.<stage>
+  STAGES = %w[queued extracting_text ai_analysis saving_clauses].freeze
+
   def start_processing!
     update!(
       status: "processing",
-      started_at: Time.current
+      started_at: Time.current,
+      progress_stage: "extracting_text"
     )
+  end
+
+  # Fast stage update (single column, committed immediately) so UI polling can
+  # see progress while the long OCR/LLM work runs.
+  def set_stage!(stage)
+    update_column(:progress_stage, stage) if STAGES.include?(stage.to_s)
   end
 
   def complete!(message = nil)

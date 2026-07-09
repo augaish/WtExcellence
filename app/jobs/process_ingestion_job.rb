@@ -95,6 +95,7 @@ class ProcessIngestionJob
           standard_name: standard.display_name("en"),
           ollama_url: ENV["OLLAMA_URL"]
         )
+        ingestion_job.set_stage!("ai_analysis")
         parsed_data = service.process
 
         # Save output to file for debugging/backup
@@ -108,6 +109,7 @@ class ProcessIngestionJob
         Rails.logger.info "Output saved to: #{output_path}"
 
         # Convert multi-stage format to database format and save
+        ingestion_job.set_stage!("saving_clauses")
         ActiveRecord::Base.transaction { convert_and_save_multi_stage_data(standard_version, parsed_data) }
 
         Rails.logger.info "Multi-stage pipeline completed and saved to database."
@@ -116,7 +118,10 @@ class ProcessIngestionJob
       elsif service_type == "openrouter" || ENV["OLLAMA_URL"].blank?
         Rails.logger.info "Using StandardIngestionService with OpenRouter"
 
-        service = StandardIngestionService.new(upload.file)
+        service = StandardIngestionService.new(
+          upload.file,
+          on_progress: ->(stage) { ingestion_job.set_stage!(stage) }
+        )
         parsed_data = service.process_pdf
 
         # process_pdf returns the { "model" => { "criteria" => [...] } } schema —
@@ -128,6 +133,7 @@ class ProcessIngestionJob
           raise "Standard extraction failed: #{parsed_data['error']}"
         end
 
+        ingestion_job.set_stage!("saving_clauses")
         ActiveRecord::Base.transaction { convert_and_save_multi_stage_data(standard_version, parsed_data) }
 
         Rails.logger.info "OpenRouter service completed and saved to database."
