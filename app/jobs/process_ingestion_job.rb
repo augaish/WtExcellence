@@ -132,6 +132,9 @@ class ProcessIngestionJob
         if parsed_data["error"].present?
           raise "Standard extraction failed: #{parsed_data['error']}"
         end
+        unless extraction_has_titles?(parsed_data)
+          raise "Detected the document structure but the clause titles came back empty — the source text was likely unreadable (e.g. an Arabic PDF whose text layer is garbled). Re-upload the PDF; set INGESTION_FORCE_OCR=1 if it's a scan."
+        end
 
         ingestion_job.set_stage!("saving_clauses")
         ActiveRecord::Base.transaction { convert_and_save_multi_stage_data(standard_version, parsed_data) }
@@ -156,6 +159,19 @@ class ProcessIngestionJob
 
   private
 
+  # Guards against the "empty skeleton" failure: the LLM returned criteria (the
+  # numbering structure) but every title is blank, which means the extracted
+  # text was empty/garbage. Returns false so the job fails with a clear reason
+  # instead of silently saving titleless clauses.
+  def extraction_has_titles?(parsed_data)
+    criteria = parsed_data.dig("model", "criteria")
+    return true unless criteria.is_a?(Array) && criteria.any?
+
+    criteria.any? do |c|
+      c["name_en"].to_s.strip.present? || c["name_ar"].to_s.strip.present?
+    end
+  end
+
   def efqm_or_kaqa_standard?(standard)
     return true if standard.pipeline_type == "efqm"
     name_for_check = [standard.code, standard.display_name("en")].compact.join(" ").downcase
@@ -168,7 +184,16 @@ class ProcessIngestionJob
       .joins(:clauses)
       .distinct
       .reorder(id: :asc)
-      .first
+      .detect { |v| version_has_titled_clauses?(v) }
+  end
+
+  # Only versions whose clauses actually have titles are valid cache sources —
+  # never copy a previously-saved empty/garbage skeleton onto a new upload.
+  def version_has_titled_clauses?(version)
+    ClauseTranslation.joins(:clause)
+      .where(clauses: { standard_version_id: version.id })
+      .where.not(title: [ nil, "" ])
+      .exists?
   end
 
   # Fallback: another standard in the *same* sub-family (EFQM with EFQM, KAQA with KAQA) that has a version with clauses.
@@ -211,7 +236,7 @@ class ProcessIngestionJob
       .joins(:clauses)
       .distinct
       .reorder(id: :asc)
-      .first
+      .detect { |v| version_has_titled_clauses?(v) }
   end
 
   def copy_clauses_from_version!(source_version, target_version)

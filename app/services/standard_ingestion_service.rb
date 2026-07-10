@@ -75,8 +75,19 @@ class StandardIngestionService
     dense = text.gsub(/\s/, "")
     return false if dense.length < 200
     return false if dense.length < 40 * pages
-    letters = dense.scan(/[A-Za-z؀-ۿ]/).length
-    (letters.to_f / dense.length) >= 0.5
+
+    latin = dense.scan(/[A-Za-z]/).length
+    arabic = dense.scan(/[؀-ۿ]/).length
+    letters = latin + arabic
+    return false if (letters.to_f / dense.length) < 0.5
+
+    # PDF::Reader frequently mangles Arabic/RTL text (visual order, wrong glyphs)
+    # even for digital PDFs — trusting it feeds the LLM garbage and yields
+    # empty clause titles. Only trust the embedded layer for Latin-dominant
+    # documents; Arabic-heavy PDFs always go through OCR for correct extraction.
+    return false if arabic > latin
+
+    true
   end
 
   def pdf_page_count(pdf_file)
@@ -291,6 +302,15 @@ class StandardIngestionService
     # Extract text from PDF (or test file)
     @on_progress&.call("extracting_text")
     chunks = extract_chunks(@pdf_file)
+
+    # Fail loudly if extraction produced (almost) nothing — otherwise the LLM
+    # receives an empty prompt and invents an empty skeleton, which used to be
+    # saved as clauses with blank titles.
+    meaningful = chunks.join(" ").gsub(/\s/, "").length
+    if meaningful < 100
+      raise "Extracted text is too short (#{meaningful} characters). The PDF may be empty, corrupt, or an image-only scan that OCR could not read. Re-upload the file; for scans set INGESTION_FORCE_OCR=1."
+    end
+
     @on_progress&.call("ai_analysis")
 
     # For testing: Process as single prompt (no chunking)
