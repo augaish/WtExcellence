@@ -120,7 +120,13 @@ class ProcessIngestionJob
 
         service = StandardIngestionService.new(
           upload.file,
-          on_progress: ->(stage) { ingestion_job.set_stage!(stage) }
+          # stage transitions update the stage; every call refreshes the
+          # heartbeat + per-page detail (e.g. "12/80") for the live UI and the
+          # stale-job reaper.
+          on_progress: lambda { |stage, detail = nil|
+            ingestion_job.set_stage!(stage) if ingestion_job.progress_stage != stage.to_s
+            ingestion_job.heartbeat!(detail)
+          }
         )
         parsed_data = service.process_pdf
 

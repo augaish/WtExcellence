@@ -17,6 +17,20 @@ Sidekiq.configure_server do |config|
       cap.queues = %w[ingestion]
     end
   end
+
+  # Reaper for crashed ingestion workers: marks stale "processing" jobs as
+  # failed with a clear reason (see IngestionReaperJob). Registered on boot;
+  # create is idempotent by name. Runs on the cron_small queue.
+  config.on(:startup) do
+    Sidekiq::Cron::Job.create(
+      name: "ingestion_reaper",
+      cron: "*/5 * * * *",
+      class: "IngestionReaperJob",
+      queue: "cron_small"
+    )
+  rescue => e
+    Rails.logger.error "Failed to register ingestion_reaper cron: #{e.class}: #{e.message}"
+  end
 end
 
 Sidekiq.configure_client do |config|

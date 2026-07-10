@@ -41,14 +41,29 @@ class IngestionJob < ApplicationRecord
     update!(
       status: "processing",
       started_at: Time.current,
-      progress_stage: "extracting_text"
+      progress_stage: "extracting_text",
+      heartbeat_at: Time.current
     )
   end
 
   # Fast stage update (single column, committed immediately) so UI polling can
-  # see progress while the long OCR/LLM work runs.
+  # see progress while the long OCR/LLM work runs. Stage changes clear the
+  # per-page detail and refresh the heartbeat.
   def set_stage!(stage)
-    update_column(:progress_stage, stage) if STAGES.include?(stage.to_s)
+    return unless STAGES.include?(stage.to_s)
+    update_columns(progress_stage: stage, progress_detail: nil, heartbeat_at: Time.current)
+  end
+
+  # Liveness signal updated as work advances (e.g. every OCR'd page). detail is
+  # a short human string like "12/80". A processing job whose heartbeat goes
+  # stale is dead (worker crashed) — the reaper marks it failed.
+  def heartbeat!(detail = nil)
+    update_columns(heartbeat_at: Time.current, progress_detail: detail)
+  end
+
+  def heartbeat_stale?(threshold = 15.minutes)
+    return false unless processing?
+    (heartbeat_at || started_at || created_at) < threshold.ago
   end
 
   def complete!(message = nil)

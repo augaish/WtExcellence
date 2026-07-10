@@ -95,6 +95,35 @@ export default class extends Controller {
     }
   }
 
+  // Re-enqueue a failed standard import (PDF is still stored server-side),
+  // then reload so the card flips to processing and live polling resumes.
+  async retryIngestion(event) {
+    const button = event.currentTarget
+    const standardId = button.dataset.standardId
+    if (!standardId) return
+
+    button.disabled = true
+    try {
+      const response = await fetch(`/standards/${standardId}/retry_ingestion`, {
+        method: "POST",
+        headers: {
+          "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]').content,
+          "Accept": "application/json"
+        }
+      })
+      const data = await response.json()
+      if (response.ok && data.success) {
+        window.location.reload()
+      } else {
+        button.disabled = false
+        this.showNotification(data.error || "Could not retry the import", "error")
+      }
+    } catch (e) {
+      button.disabled = false
+      this.showNotification("Could not retry the import", "error")
+    }
+  }
+
   showNotification(message, type = "success") {
     // Dispatch custom event for toast controller to handle
     const event = new CustomEvent("toast:show", {

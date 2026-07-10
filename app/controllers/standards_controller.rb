@@ -2,6 +2,7 @@ class StandardsController < Dashboard::BaseController
   before_action :ensure_not_risk_manager_only
   before_action :require_platform_admin, only: [
     :upload_standard,
+    :retry_ingestion,
     :edit,
     :create_clause,
     :update_clause,
@@ -94,6 +95,7 @@ class StandardsController < Dashboard::BaseController
           average_company_compliance: nil,
           is_processing: active_job.present? && standard.standard_versions.count <= 1 || (clause_count == 0 && standard.ingestion_jobs.where(status: [ "queued", "processing" ]).exists?),
           progress_stage: active_job&.progress_stage,
+          progress_detail: active_job&.progress_detail,
           failed_message: (standard.ingestion_jobs.failed.order(created_at: :desc).first&.message if clause_count.zero? && active_job.nil?)
         }
       else
@@ -109,6 +111,7 @@ class StandardsController < Dashboard::BaseController
           average_company_compliance: nil,
           is_processing: active_job.present?,
           progress_stage: active_job&.progress_stage,
+          progress_detail: active_job&.progress_detail,
           failed_message: (standard.ingestion_jobs.failed.order(created_at: :desc).first&.message if active_job.nil?)
         }
       end
@@ -1453,17 +1456,58 @@ class StandardsController < Dashboard::BaseController
           # Job still processing — expose the live pipeline stage so the card
           # can show real progress instead of a static "Processing".
           stage = ingestion_job.progress_stage.presence || "queued"
+          stage_label = I18n.t("ingestion_stages.#{stage}", default: I18n.t("processing", default: "Processing"))
+          # progress_detail is "page/total" during OCR — append a localized
+          # "Page N of M" so slow is visibly slow, not frozen.
+          if ingestion_job.progress_detail.present? && ingestion_job.progress_detail.include?("/")
+            page, total = ingestion_job.progress_detail.split("/", 2)
+            stage_label = "#{stage_label} #{I18n.t('ingestion_page_progress', page: page, total: total, default: "Page %{page} of %{total}")}"
+          end
           render json: {
             status: ingestion_job.status,
             completed: false,
             failed: false,
             message: ingestion_job.message,
             stage: stage,
-            stage_label: I18n.t("ingestion_stages.#{stage}", default: I18n.t("processing", default: "Processing"))
+            stage_label: stage_label
           }
         end
       end
     end
+  end
+
+  # Re-enqueue the most recent FAILED ingestion job for a standard without
+  # requiring a fresh upload (the PDF is still attached on the persistent
+  # storage volume).
+  def retry_ingestion
+    standard = Standard.find_by(id: params[:id])
+    unless standard
+      render json: { success: false, error: "Standard not found" }, status: :not_found
+      return
+    end
+
+    failed_job = standard.ingestion_jobs.failed.order(created_at: :desc).first
+    unless failed_job
+      render json: { success: false, error: "No failed import to retry." }, status: :unprocessable_entity
+      return
+    end
+    unless failed_job.input_pdf&.file&.attached?
+      render json: { success: false, error: "The original PDF is no longer available — please upload it again." }, status: :unprocessable_entity
+      return
+    end
+
+    failed_job.update!(
+      status: "queued",
+      message: nil,
+      progress_stage: nil,
+      progress_detail: nil,
+      heartbeat_at: nil,
+      started_at: nil,
+      finished_at: nil
+    )
+    ProcessIngestionJob.perform_async(failed_job.id)
+
+    render json: { success: true }
   end
 
   def new_version

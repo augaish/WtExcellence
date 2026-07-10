@@ -119,53 +119,64 @@ class StandardIngestionService
     temp_pdf.rewind
     temp_pdf.close
 
-    # Convert PDF pages to images using pdftoppm (from poppler-utils)
+    # Rasterize and OCR ONE PAGE AT A TIME: constant memory/disk regardless of
+    # document size, OCR starts immediately, and we can report "page N of TOTAL"
+    # progress after every page.
     images_dir = Dir.mktmpdir
     begin
-      # Convert PDF to PNG images (one per page). DPI drives both OCR speed and
-      # memory: 300 DPI produces ~8.7MP images per A4 page (slow, RAM-heavy on a
-      # small box). 200 is a good speed/accuracy balance for printed standards;
-      # drop to 150 via INGESTION_OCR_DPI if uploads still crawl.
-      dpi = ENV.fetch("INGESTION_OCR_DPI", "200").to_i
-      dpi = 200 unless dpi.positive?
+      # DPI drives OCR speed and memory (pixels scale with DPI^2). 150 is
+      # sufficient for cleanly printed standards and ~1.8x faster than 200;
+      # raise via INGESTION_OCR_DPI for poor-quality scans.
+      dpi = ENV.fetch("INGESTION_OCR_DPI", "150").to_i
+      dpi = 150 unless dpi.positive?
+
+      total_pages = pdf_page_count(pdf_file)
+      total_pages = 1 if total_pages <= 0
+      Rails.logger.info "OCR starting: #{total_pages} pages at #{dpi} DPI"
+
       pdf_path = Shellwords.escape(temp_pdf.path)
-      output_prefix = Shellwords.escape(File.join(images_dir, "page"))
-      success = system("pdftoppm -png -r #{dpi} #{pdf_path} #{output_prefix}")
-
-      unless success
-        Rails.logger.error "Failed to convert PDF to images"
-        return extract_text_from_pdf_reader(pdf_file)
-      end
-
-      # Get all page images
-      page_images = Dir.glob(File.join(images_dir, "page-*.png")).sort
-
-      if page_images.empty?
-        Rails.logger.error "No images generated from PDF"
-        return extract_text_from_pdf_reader(pdf_file)
-      end
-
-      Rails.logger.info "Converted PDF to #{page_images.length} page images"
-
-      # Detect available OCR languages ONCE (not once per page — that spawned a
-      # `tesseract --list-langs` subprocess for every page).
-      lang_string = tesseract_lang_string
-
-      # Extract text from each page image using Tesseract OCR
+      lang_string = nil
       all_text = ""
-      page_images.each_with_index do |image_path, index|
-        Rails.logger.info "Extracting text from page #{index + 1}/#{page_images.length} using Tesseract (#{lang_string})..."
-        page_text = extract_text_from_image_with_tesseract(image_path, lang_string)
-        all_text += page_text + "\n"
+      processed = 0
+
+      (1..total_pages).each do |page_no|
+        output_prefix = File.join(images_dir, "page")
+        ok = system("pdftoppm -png -r #{dpi} -f #{page_no} -l #{page_no} #{pdf_path} #{Shellwords.escape(output_prefix)}")
+        image_path = Dir.glob("#{output_prefix}*.png").first
+
+        unless ok && image_path
+          Rails.logger.warn "Failed to rasterize page #{page_no}; skipping"
+          next
+        end
+
+        # Detect the OCR language from the FIRST page (dual-language probe),
+        # then run all remaining pages in the single detected language —
+        # roughly 2x faster than eng+ara on every page.
+        if lang_string.nil?
+          probe_text = extract_text_from_image_with_tesseract(image_path, tesseract_lang_string)
+          lang_string = detect_ocr_language(probe_text)
+          Rails.logger.info "OCR language for remaining pages: #{lang_string}"
+          all_text += probe_text + "\n"
+        else
+          all_text += extract_text_from_image_with_tesseract(image_path, lang_string) + "\n"
+        end
+
+        File.delete(image_path) rescue nil
+        processed += 1
+        @on_progress&.call("extracting_text", "#{processed}/#{total_pages}")
+        Rails.logger.info "OCR page #{processed}/#{total_pages} done (#{all_text.length} chars so far)"
       end
 
-      # Log a sample of the extracted text
-      sample_text = all_text[0..500]
-      arabic_chars = sample_text.scan(/[\u0600-\u06FF]/).length
-      Rails.logger.info "Extracted text from #{page_images.length} pages (#{all_text.length} chars, #{arabic_chars} Arabic characters in first 500 chars)"
+      if all_text.strip.empty?
+        Rails.logger.error "OCR produced no text"
+        return extract_text_from_pdf_reader(pdf_file)
+      end
+
+      arabic_chars = all_text[0..500].scan(/[\u0600-\u06FF]/).length
+      Rails.logger.info "Extracted text from #{processed} pages (#{all_text.length} chars, #{arabic_chars} Arabic chars in first 500)"
 
       # Save extracted text to file for debugging
-      save_extracted_text(all_text, page_images.length)
+      save_extracted_text(all_text, processed)
 
       all_text
     ensure
@@ -214,6 +225,26 @@ class StandardIngestionService
     languages = [ "eng" ] if languages.empty?
 
     @tesseract_lang_string = languages.join("+")
+  end
+
+  # Pick a single OCR language from the first page's dual-language probe text.
+  # Single-language OCR is ~2x faster than eng+ara. When the mix is ambiguous
+  # (bilingual documents), keep both. INGESTION_OCR_LANGS still overrides all.
+  def detect_ocr_language(probe_text)
+    return ENV["INGESTION_OCR_LANGS"].strip if ENV["INGESTION_OCR_LANGS"].to_s.strip.present?
+
+    dense = probe_text.to_s.gsub(/\s/, "")
+    arabic = dense.scan(/[\u0600-\u06FF]/).length
+    latin  = dense.scan(/[A-Za-z]/).length
+
+    available = tesseract_lang_string # e.g. "eng+ara" or "eng"
+    if arabic > latin * 3 && available.include?("ara")
+      "ara"
+    elsif latin > arabic * 3 && available.include?("eng")
+      "eng"
+    else
+      available
+    end
   end
 
   def extract_text_from_image_with_tesseract(image_path, lang_string = nil)

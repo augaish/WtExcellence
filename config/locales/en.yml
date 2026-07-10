@@ -1676,6 +1676,8 @@ en:
     ai_analysis: "AI analysis…"
     saving_clauses: "Saving clauses…"
   ingestion_failed: "Import failed"
+  ingestion_page_progress: "— Page %{page} of %{total}"
+  ingestion_retry: "Retry import"
   ingestion_failed_reason: "Why it failed"
   ingestion_failed_hint: "Fix the issue and upload the PDF again to retry."
   no_version_yet: "No version yet"

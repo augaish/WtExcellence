@@ -58,13 +58,15 @@ namespace :ingestion do
       rescue
         "?"
       end
-      puts "  ##{j.id}  #{j.status.ljust(10)}  #{j.duration_formatted.to_s.ljust(12)}  standard=#{code}  created=#{j.created_at&.strftime('%Y-%m-%d %H:%M')}"
+      hb = j.heartbeat_at ? "hb #{((Time.current - j.heartbeat_at) / 60).round(1)}m ago" : "no heartbeat"
+      detail = j.progress_detail.present? ? " page #{j.progress_detail}" : ""
+      puts "  ##{j.id}  #{j.status.ljust(10)}  #{j.duration_formatted.to_s.ljust(12)}  stage=#{j.progress_stage || '-'}#{detail}  #{hb}  standard=#{code}  created=#{j.created_at&.strftime('%Y-%m-%d %H:%M')}"
       puts "      message: #{j.message}" if j.message.present?
     end
     puts "  (none)" if IngestionJob.count.zero?
     puts
 
-    stuck = IngestionJob.processing.where("started_at < ?", 15.minutes.ago)
+    stuck = IngestionJob.processing.select { |j| j.heartbeat_stale?(15.minutes) }
     if stuck.any?
       puts "⚠️  #{stuck.count} job(s) stuck in 'processing' for >15 min (likely an OOM-killed worker or a hung call)."
       puts "    Re-run one with:"

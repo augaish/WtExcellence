@@ -1659,6 +1659,8 @@ ar:
     ai_analysis: "التحليل بالذكاء الاصطناعي…"
     saving_clauses: "حفظ البنود…"
   ingestion_failed: "فشل الاستيراد"
+  ingestion_page_progress: "— صفحة %{page} من %{total}"
+  ingestion_retry: "إعادة محاولة الاستيراد"
   ingestion_failed_reason: "سبب الفشل"
   ingestion_failed_hint: "عالج المشكلة ثم ارفع ملف PDF مرة أخرى لإعادة المحاولة."
   no_version_yet: "لا توجد نسخة بعد"

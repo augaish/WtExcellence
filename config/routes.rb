@@ -196,6 +196,7 @@ Rails.application.routes.draw do
 
   post "standards/upload_standard", to: "standards#upload_standard"
   get "standards/:id/job_status", to: "standards#job_status", as: :standard_job_status
+  post "standards/:id/retry_ingestion", to: "standards#retry_ingestion", as: :retry_standard_ingestion
   get "standards/test_client", to: "standards#test_client"
   get "standards/test_tree", to: "standards#test_tree"
   get "standards/:id", to: "standards#show", as: :standard
