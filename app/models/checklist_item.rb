@@ -45,14 +45,22 @@ class ChecklistItem < ApplicationRecord
     item_type == "note"
   end
 
+  # Requested language first, then any other language with content — an
+  # Arabic-only extraction must still show checkpoints in the English UI.
   def text(language_code = "en")
-    translation = checklist_item_translations.find_by(language_code: language_code)
-    translation&.text
+    own = checklist_item_translations.find_by(language_code: language_code)&.text
+    return own if own.present?
+
+    checklist_item_translations.where.not(language_code: language_code)
+                               .where.not(text: [ nil, "" ]).first&.text
   end
 
   def guidance(language_code = "en")
-    translation = checklist_item_translations.find_by(language_code: language_code)
-    translation&.guidance
+    own = checklist_item_translations.find_by(language_code: language_code)&.guidance
+    return own if own.present?
+
+    checklist_item_translations.where.not(language_code: language_code)
+                               .where.not(guidance: [ nil, "" ]).first&.guidance
   end
 
   # Build searchable content from code and all translations

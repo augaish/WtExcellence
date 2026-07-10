@@ -55,11 +55,19 @@ class ProcessIngestionJob
 
       Rails.logger.info "Using existing standard version: #{standard_version.id}, label: #{standard_version.version_label}"
 
-      # If this version already has clauses (e.g. re-run or retry), skip LLM
+      # If this version already has USABLE clauses (e.g. re-run or retry), skip
+      # the LLM. A tree whose titles are all empty (saved by a run that fed the
+      # LLM unreadable text) is NOT usable — purge it and reprocess, otherwise
+      # every retry would instantly "complete" while the tree stays empty.
       if standard_version.clauses.exists?
-        Rails.logger.info "Version #{standard_version.id} already has clauses. Skipping LLM."
-        ingestion_job.complete!("Version already had clauses. No processing needed.")
-        return
+        if version_has_titled_clauses?(standard_version)
+          Rails.logger.info "Version #{standard_version.id} already has titled clauses. Skipping LLM."
+          ingestion_job.complete!("Version already had clauses. No processing needed.")
+          return
+        else
+          Rails.logger.warn "Version #{standard_version.id} has clauses but ALL titles are empty — purging and reprocessing."
+          ActiveRecord::Base.transaction { standard_version.clauses.where(parent_id: nil).destroy_all }
+        end
       end
 
       # For EFQM/KAQA family (code or name contains "efqm" or "kaqa"): don't process again — copy from any
@@ -395,7 +403,7 @@ class ProcessIngestionJob
       clauses_by_code[clause.code] = clause
 
       # Create or update English translation
-      if clause_data["title_en"]
+      if clause_data["title_en"].present?
         ClauseTranslation.find_or_create_by(
           clause: clause,
           language_code: "en"
@@ -407,7 +415,7 @@ class ProcessIngestionJob
       end
 
       # Create or update Arabic translation
-      if clause_data["title_ar"]
+      if clause_data["title_ar"].present?
         ClauseTranslation.find_or_create_by(
           clause: clause,
           language_code: "ar"
@@ -439,7 +447,7 @@ class ProcessIngestionJob
       end
 
       # Create or update English translation
-      if checkpoint_data["text_en"]
+      if checkpoint_data["text_en"].present?
         ChecklistItemTranslation.find_or_create_by(
           checklist_item: checklist_item,
           language_code: "en"
@@ -450,7 +458,7 @@ class ProcessIngestionJob
       end
 
       # Create or update Arabic translation
-      if checkpoint_data["text_ar"]
+      if checkpoint_data["text_ar"].present?
         ChecklistItemTranslation.find_or_create_by(
           checklist_item: checklist_item,
           language_code: "ar"

@@ -82,19 +82,33 @@ class Clause < ApplicationRecord
     calculate_score(tool)
   end
 
+  # Prefer the requested language, then FALL BACK to any other language with
+  # real content, then the bare code. Without the cross-language fallback an
+  # Arabic-only extraction renders as an "empty" tree in the English UI (the
+  # code shown twice), even though the content exists.
   def title(language_code = "en")
-    translation = clause_translations.find_by(language_code: language_code)
-    translation&.title || code
+    own = clause_translations.find_by(language_code: language_code)&.title
+    return own if own.present?
+
+    other = clause_translations.where.not(language_code: language_code)
+                               .where.not(title: [ nil, "" ]).first&.title
+    other.presence || code
   end
 
   def summary(language_code = "en")
-    translation = clause_translations.find_by(language_code: language_code)
-    translation&.summary
+    own = clause_translations.find_by(language_code: language_code)&.summary
+    return own if own.present?
+
+    clause_translations.where.not(language_code: language_code)
+                       .where.not(summary: [ nil, "" ]).first&.summary
   end
 
   def body(language_code = "en")
-    translation = clause_translations.find_by(language_code: language_code)
-    translation&.body
+    own = clause_translations.find_by(language_code: language_code)&.body
+    return own if own.present?
+
+    clause_translations.where.not(language_code: language_code)
+                       .where.not(body: [ nil, "" ]).first&.body
   end
 
   def full_code

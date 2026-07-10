@@ -91,3 +91,56 @@ namespace :ingestion do
     end
   end
 end
+
+namespace :ingestion do
+  # Ground-truth inspector for "the clause tree looks empty":
+  #
+  #   bin/kamal app exec -d wtexcel --reuse "bin/rails ingestion:inspect"
+  #
+  # Prints, for the most recent standards: per-language translation coverage
+  # (how many clauses actually have titles in en/ar, with samples), checkpoint
+  # coverage, plus tails of the latest extracted-text and LLM-response debug
+  # files so we can see what OCR fed the model and what came back.
+  desc "Inspect clause translation coverage + latest OCR/LLM debug output"
+  task inspect: :environment do
+    Standard.order(created_at: :desc).limit(3).each do |std|
+      puts "== Standard #{std.code} (#{std.display_name('en')}) =="
+      std.standard_versions.order(created_at: :desc).limit(2).each do |v|
+        clauses = v.clauses
+        puts "  Version #{v.version_label} (#{v.status}) — #{clauses.count} clauses"
+        %w[en ar].each do |lang|
+          total = ClauseTranslation.joins(:clause).where(clauses: { standard_version_id: v.id }, language_code: lang).count
+          titled = ClauseTranslation.joins(:clause).where(clauses: { standard_version_id: v.id }, language_code: lang).where.not(title: [ nil, "" ]).count
+          samples = ClauseTranslation.joins(:clause).where(clauses: { standard_version_id: v.id }, language_code: lang).where.not(title: [ nil, "" ]).limit(3).pluck(:title)
+          puts "    [#{lang}] translations=#{total} with_title=#{titled} samples=#{samples.map { |t| t.to_s[0, 40] }.inspect}"
+        end
+        cp_total = ChecklistItemTranslation.joins(checklist_item: :clause).where(clauses: { standard_version_id: v.id }).count
+        cp_texted = ChecklistItemTranslation.joins(checklist_item: :clause).where(clauses: { standard_version_id: v.id }).where.not(text: [ nil, "" ]).count
+        puts "    checkpoints: translations=#{cp_total} with_text=#{cp_texted}"
+      end
+    end
+
+    puts
+    puts "== Latest OCR extracted text (tmp/chunks) =="
+    latest_txt = Dir.glob(Rails.root.join("tmp", "chunks", "extracted_text*ature*.txt").to_s).max_by { |f| File.mtime(f) }
+    latest_txt ||= Dir.glob(Rails.root.join("tmp", "chunks", "extracted_text*.txt").to_s).max_by { |f| File.mtime(f) }
+    if latest_txt
+      content = File.read(latest_txt)
+      puts "  #{File.basename(latest_txt)} (#{content.length} chars) — first 400:"
+      puts "  " + content[0, 400].to_s.gsub("\n", " ")
+    else
+      puts "  (no extracted-text debug file — OCR may not have run in this container since boot)"
+    end
+
+    puts
+    puts "== Latest LLM response (tmp/chunks) =="
+    latest_llm = Dir.glob(Rails.root.join("tmp", "chunks", "llm_response*.txt").to_s).max_by { |f| File.mtime(f) }
+    if latest_llm
+      content = File.read(latest_llm)
+      puts "  #{File.basename(latest_llm)} (#{content.length} chars) — first 600:"
+      puts "  " + content[0, 600].to_s.gsub("\n", " ")
+    else
+      puts "  (no LLM response debug file found)"
+    end
+  end
+end
