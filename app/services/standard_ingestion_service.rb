@@ -17,11 +17,14 @@ class StandardIngestionService
     @pdf_file = pdf_file
     @on_progress = on_progress
 
-    # Configure OpenRouter
+    # Configure OpenRouter. The default HTTP timeout is 120s, but Claude reading
+    # a multi-page PDF (native vision on scanned/Arabic pages) routinely takes
+    # longer — raise it so large standards don't fail with a timeout.
     OpenRouter.configure do |config|
       config.access_token = ENV.fetch("OPENROUTER_API_KEY")
       config.site_name = "Way to Excellence"
       config.site_url = ENV.fetch("APP_URL", "http://localhost:3000")
+      config.request_timeout = ENV.fetch("INGESTION_REQUEST_TIMEOUT", "300").to_i
     end
 
     @client = OpenRouter::Client.new
@@ -391,10 +394,20 @@ class StandardIngestionService
     Rails.logger.info "Claude-native PDF: extracted #{criteria.length} criteria"
     parsed
   rescue => e
-    Rails.logger.error "Claude-native PDF ingestion failed: #{e.class} - #{e.message}"
+    # Faraday errors (raise_error middleware) carry the OpenRouter HTTP status +
+    # body — surface it so the failure message names the real cause (unsupported
+    # file input, bad plugin, 402, timeout, …) instead of a bare class name.
+    detail = ""
+    if e.respond_to?(:response) && e.response.is_a?(Hash)
+      status = e.response[:status]
+      body = e.response[:body]
+      body = body.to_json if body.is_a?(Hash) || body.is_a?(Array)
+      detail = " (HTTP #{status}: #{body.to_s[0, 400]})"
+    end
+    Rails.logger.error "Claude-native PDF ingestion failed: #{e.class} - #{e.message}#{detail}"
     {
       "model" => { "name_ar" => "", "name_en" => "", "criteria" => [] },
-      "error" => e.message,
+      "error" => "#{e.class}: #{e.message}#{detail}",
       "processing_method" => "claude_pdf_failed"
     }
   end

@@ -144,3 +144,47 @@ namespace :ingestion do
     end
   end
 end
+
+namespace :ingestion do
+  # Runs the Claude-native PDF path directly against a standard's already-
+  # uploaded PDF and prints the full result — the exact error if it fails, or
+  # the extracted criteria if it works. No re-upload needed.
+  #
+  #   bin/kamal app exec -d wtexcel --reuse "bin/rails 'ingestion:test_pdf[KAQA]'"
+  desc "Run Claude-native PDF extraction against a standard's uploaded PDF and print the result"
+  task :test_pdf, [ :code ] => :environment do |_t, args|
+    std = args[:code] ? Standard.find_by(code: args[:code]) : Standard.order(created_at: :desc).first
+    unless std
+      puts "No standard found (code=#{args[:code].inspect})"
+      next
+    end
+
+    job = std.ingestion_jobs.order(created_at: :desc).first
+    upload = job&.input_pdf
+    upload ||= std.standard_versions.order(created_at: :desc).map(&:source_pdf).compact.first
+    unless upload&.file&.attached?
+      puts "No attached PDF found for standard #{std.code}"
+      next
+    end
+
+    puts "Standard: #{std.code} — PDF: #{upload.file.filename} (#{(upload.file.blob.byte_size / 1_048_576.0).round(2)} MB)"
+    puts "Model: #{ENV['OPENROUTER_MODEL'].presence || 'default'}  Engine: #{ENV.fetch('INGESTION_PDF_ENGINE', 'native')}  Timeout: #{ENV.fetch('INGESTION_REQUEST_TIMEOUT', '300')}s"
+    puts "Running Claude-native extraction… (this calls the live API)"
+
+    t0 = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    result = StandardIngestionService.new(upload.file).process_pdf_via_claude
+    secs = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - t0).round(1)
+
+    puts "Elapsed: #{secs}s"
+    if result["error"].present?
+      puts "RESULT: FAILED"
+      puts "ERROR: #{result['error']}"
+    else
+      criteria = result.dig("model", "criteria") || []
+      puts "RESULT: OK — #{criteria.length} criteria"
+      criteria.first(3).each do |c|
+        puts "  - id=#{c['id']} en=#{c['name_en'].to_s[0, 50].inspect} ar=#{c['name_ar'].to_s[0, 50].inspect} subs=#{(c['subcriteria'] || []).length}"
+      end
+    end
+  end
+end
