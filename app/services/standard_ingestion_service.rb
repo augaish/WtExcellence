@@ -329,7 +329,77 @@ class StandardIngestionService
     cleaned
   end
 
+  # Entry point. Default: send the PDF directly to Claude (native document
+  # understanding — no local OCR). Set INGESTION_USE_OCR=1 to fall back to the
+  # legacy Tesseract-then-LLM path.
   def process_pdf
+    if ENV["INGESTION_USE_OCR"] == "1"
+      process_pdf_via_ocr
+    else
+      process_pdf_via_claude
+    end
+  end
+
+  # Claude-native PDF ingestion: hand the raw PDF to Claude, which reads text
+  # AND scanned pages (vision) — including Arabic — far more reliably than OCR,
+  # and returns the same { "model" => { "criteria" => [...] } } schema the save
+  # pipeline expects. No Tesseract/poppler, so it is fast and memory-light.
+  def process_pdf_via_claude
+    @on_progress&.call("ai_analysis")
+
+    pages = pdf_page_count(@pdf_file)
+    max_pages = ENV.fetch("INGESTION_PDF_MAX_PAGES", "100").to_i
+    if pages.positive? && pages > max_pages
+      raise "This PDF has #{pages} pages, above the #{max_pages}-page limit for direct ingestion. Split it into smaller files and upload each part."
+    end
+
+    pdf_data = @pdf_file.blob.download
+    size_mb = (pdf_data.bytesize / 1_048_576.0).round(1)
+    if size_mb > 30
+      raise "This PDF is #{size_mb} MB, above the 30 MB limit for direct ingestion. Compress or split it and re-upload."
+    end
+
+    filename = @pdf_file.blob.filename.to_s.presence || "standard.pdf"
+    engine = ENV.fetch("INGESTION_PDF_ENGINE", "native") # native | mistral-ocr | pdf-text
+    Rails.logger.info "Claude-native PDF ingestion: #{pages} pages, #{size_mb} MB, model=#{@model}, engine=#{engine}"
+
+    messages = [
+      { role: "system", content: build_system_prompt },
+      { role: "user", content: [
+        { type: "text", text: build_pdf_prompt },
+        { type: "file", file: { filename: filename, file_data: "data:application/pdf;base64,#{Base64.strict_encode64(pdf_data)}" } }
+      ] }
+    ]
+
+    response = @client.complete(
+      messages,
+      model: @model,
+      extras: { plugins: [ { id: "file-parser", pdf: { engine: engine } } ] }
+    )
+
+    raw = response&.dig("choices", 0, "message", "content")
+    raise "Claude returned an empty response for the PDF" if raw.blank?
+
+    save_llm_response(raw)
+    parsed = JSON.parse(clean_response_text(raw))
+
+    unless parsed["model"] && parsed["model"]["criteria"].is_a?(Array)
+      raise "Claude response did not contain model.criteria"
+    end
+
+    criteria = parsed["model"]["criteria"]
+    Rails.logger.info "Claude-native PDF: extracted #{criteria.length} criteria"
+    parsed
+  rescue => e
+    Rails.logger.error "Claude-native PDF ingestion failed: #{e.class} - #{e.message}"
+    {
+      "model" => { "name_ar" => "", "name_en" => "", "criteria" => [] },
+      "error" => e.message,
+      "processing_method" => "claude_pdf_failed"
+    }
+  end
+
+  def process_pdf_via_ocr
     # Extract text from PDF (or test file)
     @on_progress&.call("extracting_text")
     chunks = extract_chunks(@pdf_file)
@@ -1165,6 +1235,26 @@ class StandardIngestionService
         parent_code: clause["parent_code"]
       }
     end
+  end
+
+  # User prompt for Claude-native PDF ingestion. All extraction/numbering/
+  # translation rules and the JSON schema live in build_system_prompt; here we
+  # just point Claude at the attached PDF and restate the highest-value rules.
+  def build_pdf_prompt
+    <<~PROMPT
+      Read the ATTACHED quality-management standard PDF and extract its full
+      hierarchy of criteria, subcriteria, and checkpoints as JSON, strictly
+      following the schema and rules in the system prompt.
+
+      Read the PDF directly, including scanned/image pages and Arabic
+      (right-to-left) text. Key reminders:
+      - Skip the table of contents; extract from the actual content sections.
+      - Extract EVERY criterion and subcriterion, in order, from the whole document.
+      - Preserve the source numbering (KAQA uses dashes: "1-1", "1-1-1").
+      - Populate BOTH languages: extract the source language and translate to the
+        other so name_ar/name_en and text_ar/text_en are never left empty.
+      - Output valid JSON only — no explanations, no markdown code fences.
+    PROMPT
   end
 
   def build_single_prompt(text)
