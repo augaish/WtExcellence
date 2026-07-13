@@ -28,7 +28,13 @@ class StandardIngestionServiceTest < ActiveSupport::TestCase
       }.to_json } } ]
     }
     client = Object.new
-    client.define_singleton_method(:complete) { |_messages, **_opts| canned }
+    client.define_singleton_method(:complete) do |_messages, **opts|
+      # Drive the streaming proc with the JSON split across two chunks.
+      json = canned.dig("choices", 0, "message", "content")
+      opts[:stream].call({ "choices" => [ { "delta" => { "content" => json[0, 20] } } ] })
+      opts[:stream].call({ "choices" => [ { "delta" => { "content" => json[20..] } } ] })
+      nil
+    end
 
     svc = build_service(client: client)
     result = svc.process_pdf_via_claude
@@ -41,6 +47,7 @@ class StandardIngestionServiceTest < ActiveSupport::TestCase
   test "native PDF path returns error hash when Claude errors" do
     client = Object.new
     client.define_singleton_method(:complete) { |_messages, **_opts| raise "402 Payment Required" }
+    # (raises before any streaming)
 
     svc = build_service(client: client)
     result = svc.process_pdf_via_claude

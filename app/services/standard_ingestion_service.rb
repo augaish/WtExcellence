@@ -374,14 +374,30 @@ class StandardIngestionService
       ] }
     ]
 
-    response = @client.complete(
+    # STREAM the response. A full standard extraction is a very large generation;
+    # a single buffered (non-streamed) call returns an empty body after minutes.
+    # Streaming assembles the output incrementally and lets us heartbeat so the
+    # UI/reaper see progress. max_tokens is raised so the JSON isn't truncated.
+    raw = +""
+    last_beat = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    @client.complete(
       messages,
       model: @model,
-      extras: { plugins: [ { id: "file-parser", pdf: { engine: engine } } ] }
+      extras: {
+        max_tokens: ENV.fetch("INGESTION_MAX_TOKENS", "32000").to_i,
+        plugins: [ { id: "file-parser", pdf: { engine: engine } } ]
+      },
+      stream: proc do |chunk|
+        delta = chunk.dig("choices", 0, "delta", "content")
+        raw << delta if delta
+        now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+        if now - last_beat > 5
+          @on_progress&.call("ai_analysis", "#{(raw.length / 1000.0).round(1)}k chars")
+          last_beat = now
+        end
+      end
     )
-
-    raw = response&.dig("choices", 0, "message", "content")
-    raise "Claude returned an empty response for the PDF" if raw.blank?
+    raise "Claude returned an empty response for the PDF" if raw.strip.empty?
 
     save_llm_response(raw)
     parsed = JSON.parse(clean_response_text(raw))
