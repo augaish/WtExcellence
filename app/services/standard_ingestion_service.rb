@@ -29,7 +29,10 @@ class StandardIngestionService
 
     @client = OpenRouter::Client.new
 
-    @model = ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.5")
+    # Ingestion can use a dedicated (cheaper) model without affecting the rest
+    # of the app (CAPA services keep using OPENROUTER_MODEL). Set INGESTION_MODEL
+    # e.g. to "anthropic/claude-haiku-4.5" to cut per-standard cost.
+    @model = ENV["INGESTION_MODEL"].presence || ENV.fetch("OPENROUTER_MODEL", "anthropic/claude-sonnet-4.5")
 
     Rails.logger.info "Using OpenRouter with model: #{@model}"
   end
@@ -379,15 +382,18 @@ class StandardIngestionService
     # Streaming assembles the output incrementally and lets us heartbeat so the
     # UI/reaper see progress. max_tokens is raised so the JSON isn't truncated.
     raw = +""
+    usage = nil
     last_beat = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     @client.complete(
       messages,
       model: @model,
       extras: {
         max_tokens: ENV.fetch("INGESTION_MAX_TOKENS", "32000").to_i,
+        usage: { include: true }, # ask OpenRouter to stream token counts for cost visibility
         plugins: [ { id: "file-parser", pdf: { engine: engine } } ]
       },
       stream: proc do |chunk|
+        usage = chunk["usage"] if chunk["usage"]
         delta = chunk.dig("choices", 0, "delta", "content")
         raw << delta if delta
         now = Process.clock_gettime(Process::CLOCK_MONOTONIC)
@@ -398,6 +404,13 @@ class StandardIngestionService
       end
     )
     raise "Claude returned an empty response for the PDF" if raw.strip.empty?
+
+    if usage
+      cost = usage["cost"] || usage["total_cost"]
+      Rails.logger.info "Ingestion token usage (model=#{@model}, engine=#{engine}): " \
+        "prompt=#{usage['prompt_tokens']} completion=#{usage['completion_tokens']} " \
+        "total=#{usage['total_tokens']}#{cost ? " cost=$#{cost}" : ''}"
+    end
 
     save_llm_response(raw)
     parsed = JSON.parse(clean_response_text(raw))
