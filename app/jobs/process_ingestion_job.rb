@@ -338,6 +338,16 @@ class ProcessIngestionJob
 
     # Save to database using existing method
     process_extracted_clauses(standard_version, clauses_data)
+
+    # Assurance guard: never let the job report success with a blank tree. If not
+    # a single title persisted, the mapping or the source data was broken — raise
+    # so the job is marked failed (UI shows the error + Retry) instead of silently
+    # displaying an empty clause tree with only ID numbers.
+    standard_version.clauses.reset
+    unless version_has_titled_clauses?(standard_version)
+      raise "Saved #{clauses_data.length} clauses but NO titles persisted — aborting so an empty tree isn't shown as success."
+    end
+    Rails.logger.info "Post-save check OK: #{standard_version.clauses.count} clauses saved with titles."
   end
 
   # Recursively process subcriteria and nested subcriteria
@@ -402,28 +412,25 @@ class ProcessIngestionJob
 
       clauses_by_code[clause.code] = clause
 
-      # Create or update English translation
+      # Create or update English translation. Use find_or_initialize + save so
+      # an EXISTING row (e.g. a blank title from an earlier import) is actually
+      # overwritten — find_or_create_by's block runs only on create and would
+      # silently leave old empty titles in place.
       if clause_data["title_en"].present?
-        ClauseTranslation.find_or_create_by(
-          clause: clause,
-          language_code: "en"
-        ) do |ct|
-          ct.title = clause_data["title_en"]
-          ct.summary = clause_data["summary_en"]
-          ct.body = clause_data["summary_en"]
-        end
+        ct = ClauseTranslation.find_or_initialize_by(clause: clause, language_code: "en")
+        ct.title = clause_data["title_en"]
+        ct.summary = clause_data["summary_en"]
+        ct.body = clause_data["summary_en"]
+        ct.save!
       end
 
       # Create or update Arabic translation
       if clause_data["title_ar"].present?
-        ClauseTranslation.find_or_create_by(
-          clause: clause,
-          language_code: "ar"
-        ) do |ct|
-          ct.title = clause_data["title_ar"]
-          ct.summary = clause_data["summary_ar"]
-          ct.body = clause_data["summary_ar"]
-        end
+        ct = ClauseTranslation.find_or_initialize_by(clause: clause, language_code: "ar")
+        ct.title = clause_data["title_ar"]
+        ct.summary = clause_data["summary_ar"]
+        ct.body = clause_data["summary_ar"]
+        ct.save!
       end
 
       if clause_data["checkpoints"] && clause_data["checkpoints"].is_a?(Array)
@@ -446,26 +453,20 @@ class ProcessIngestionJob
         ci.stable_key = checkpoint_data["stable_key"]
       end
 
-      # Create or update English translation
+      # Create or update English translation (overwrite existing rows too).
       if checkpoint_data["text_en"].present?
-        ChecklistItemTranslation.find_or_create_by(
-          checklist_item: checklist_item,
-          language_code: "en"
-        ) do |cit|
-          cit.text = checkpoint_data["text_en"]
-          cit.guidance = checkpoint_data["guidance_en"]
-        end
+        cit = ChecklistItemTranslation.find_or_initialize_by(checklist_item: checklist_item, language_code: "en")
+        cit.text = checkpoint_data["text_en"]
+        cit.guidance = checkpoint_data["guidance_en"]
+        cit.save!
       end
 
       # Create or update Arabic translation
       if checkpoint_data["text_ar"].present?
-        ChecklistItemTranslation.find_or_create_by(
-          checklist_item: checklist_item,
-          language_code: "ar"
-        ) do |cit|
-          cit.text = checkpoint_data["text_ar"]
-          cit.guidance = checkpoint_data["guidance_ar"]
-        end
+        cit = ChecklistItemTranslation.find_or_initialize_by(checklist_item: checklist_item, language_code: "ar")
+        cit.text = checkpoint_data["text_ar"]
+        cit.guidance = checkpoint_data["guidance_ar"]
+        cit.save!
       end
     end
   end
