@@ -1,5 +1,28 @@
 class Company < ApplicationRecord
+  # Toggleable per-company modules. Keys are stable identifiers; label_key is the
+  # i18n key for the human name. A module with a :column is stored on the
+  # companies table (e.g. trust_center) rather than in company_modules, so the
+  # existing feature keeps its single source of truth. Core areas (Overview,
+  # Account Management, General Settings) are intentionally NOT listed — they are
+  # always available.
+  MODULES = {
+    standards:       { label_key: "standards" },
+    library:         { label_key: "library" },
+    capa:            { label_key: "capa_management" },
+    risk:            { label_key: "risk_management" },
+    vendors:         { label_key: "vendor_management" },
+    commitments:     { label_key: "customer_commitments" },
+    trust_center:    { label_key: "trust_center", column: :trust_center_enabled },
+    ai_instructions: { label_key: "ai_instructions" },
+    tools:           { label_key: "tool_setup" }
+  }.freeze
+
+  def self.module_keys
+    MODULES.keys.map(&:to_s)
+  end
+
   has_many :company_users, dependent: :destroy
+  has_many :company_modules, dependent: :destroy
   has_many :users, through: :company_users
   has_many :capas, dependent: :nullify
   has_many :company_standards, dependent: :destroy
@@ -27,11 +50,52 @@ class Company < ApplicationRecord
     company_users.find_by(user: admin_user)
   end
 
+  # True unless a super admin has explicitly disabled the module. Unknown keys
+  # are treated as enabled (never gate on a typo). Column-backed modules
+  # (trust_center) read their boolean column.
+  def module_enabled?(key)
+    meta = MODULES[key.to_sym]
+    return true if meta.nil?
+    return !!public_send(meta[:column]) if meta[:column]
+
+    module_settings.fetch(key.to_s, true)
+  end
+
+  # Enable/disable a module for this company. Column-backed modules update their
+  # column; the rest upsert a company_modules row.
+  def set_module!(key, enabled)
+    meta = MODULES[key.to_sym]
+    raise ArgumentError, "Unknown module: #{key}" if meta.nil?
+
+    if meta[:column]
+      update!(meta[:column] => enabled)
+    else
+      record = company_modules.find_or_initialize_by(module_key: key.to_s)
+      record.update!(enabled: enabled)
+    end
+    @module_settings = nil
+    enabled
+  end
+
   def pending?
     status == "pending"
   end
 
   def active_status?
     status == "active"
+  end
+
+  # Clear the memoized module settings when the record is reloaded, so a
+  # module_enabled? call after reload reflects the database.
+  def reload(*)
+    @module_settings = nil
+    super
+  end
+
+  private
+
+  # One query per request, memoized: { "capa" => false, ... } for rows that exist.
+  def module_settings
+    @module_settings ||= company_modules.pluck(:module_key, :enabled).to_h
   end
 end

@@ -923,6 +923,42 @@ export default class extends Controller {
     link.disabled = false
   }
 
+  toggleModule(event) {
+    event.preventDefault()
+    const link = event.currentTarget
+    const url = link.href
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content
+
+    link.style.pointerEvents = "none"
+    link.style.opacity = "0.6"
+
+    fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": csrfToken,
+        "Accept": "application/json"
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          this.dispatchToast(data.enabled ? "Module enabled" : "Module disabled", "success")
+          setTimeout(() => window.location.reload(), 500)
+        } else {
+          this.dispatchToast(data.message || "Failed to update module", "error")
+          link.style.pointerEvents = "auto"
+          link.style.opacity = "1"
+        }
+      })
+      .catch(error => {
+        console.error("Error toggling module:", error)
+        this.dispatchToast("An error occurred while updating the module", "error")
+        link.style.pointerEvents = "auto"
+        link.style.opacity = "1"
+      })
+  }
+
   toggleTrustCenter(event) {
     event.preventDefault()
     const link = event.currentTarget

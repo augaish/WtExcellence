@@ -374,6 +374,42 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     render json: { success: false, message: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
   end
 
+  # Toggle a per-company module on/off (super/delegated admins only).
+  def toggle_module
+    unless current_user&.super_admin? || current_user&.delegated_admin?
+      render json: { success: false, message: "You don't have permission to change company modules." }, status: :forbidden
+      return
+    end
+
+    company = Company.find_by(id: params[:id])
+    unless company
+      render json: { success: false, message: "Company not found." }, status: :not_found
+      return
+    end
+
+    key = params[:module_key].to_s
+    unless Company.module_keys.include?(key)
+      render json: { success: false, message: "Unknown module." }, status: :unprocessable_entity
+      return
+    end
+
+    new_state = !company.module_enabled?(key)
+    company.set_module!(key, new_state)
+
+    AuditLogService.log_action(
+      actor_user: current_user,
+      company: company,
+      action: new_state ? "ENABLE_MODULE" : "DISABLE_MODULE",
+      entity_type: "company",
+      entity_id: company.id,
+      payload: { company_id: company.id, module_key: key, enabled: new_state }
+    )
+
+    render json: { success: true, module_key: key, enabled: new_state }
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { success: false, message: e.record.errors.full_messages.join(", ") }, status: :unprocessable_entity
+  end
+
   def change_password
     unless current_user&.super_admin?
       render json: { success: false, message: "Only Super Admins can change user passwords." }, status: :forbidden

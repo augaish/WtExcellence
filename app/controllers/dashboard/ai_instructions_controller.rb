@@ -1,5 +1,6 @@
 class Dashboard::AiInstructionsController < Dashboard::BaseController
   before_action :authenticate_user!
+  requires_module :ai_instructions
   before_action :ensure_not_risk_manager_only
   before_action :ensure_can_manage_ai_instructions
   before_action :set_ai_instruction, only: [ :edit, :update, :destroy, :toggle ]

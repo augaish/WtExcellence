@@ -1,5 +1,6 @@
 class Dashboard::RiskManagementController < Dashboard::BaseController
   before_action :authenticate_user!
+  requires_module :risk
   before_action :ensure_can_manage_risks
   before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa ]
 

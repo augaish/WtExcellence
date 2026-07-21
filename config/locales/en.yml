@@ -255,6 +255,13 @@ en:
   day: "Day"
   days: "Days"
   standards: "Standards"
+  trust_center: "Trust Center"
+  modules:
+    title: "Modules"
+    subtitle: "Enable or disable features for this company. Disabled modules are hidden from and blocked for its users."
+    on_label: "On"
+    off_label: "Off"
+    disabled_flash: "This section isn't enabled for your account. Please contact your administrator."
   capa_management: "CAPA Management"
   risk_management: "Risk Management"
   library: "Library"

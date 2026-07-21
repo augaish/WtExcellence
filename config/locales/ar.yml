@@ -275,6 +275,13 @@ ar:
   day: يوم
   days: أيام
   standards: المعايير
+  trust_center: "مركز الثقة"
+  modules:
+    title: "الوحدات"
+    subtitle: "تفعيل أو تعطيل الميزات لهذه الشركة. الوحدات المعطّلة تكون مخفية ومحجوبة عن مستخدميها."
+    on_label: "مفعّل"
+    off_label: "معطّل"
+    disabled_flash: "هذا القسم غير مفعّل لحسابك. يرجى التواصل مع المسؤول."
   capa_management: إدارة حالات عدم الالتزام
   risk_management: إدارة المخاطر
   library: المكتبة

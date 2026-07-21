@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_120000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_19_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -374,6 +374,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_120000) do
     t.index ["company_standard_id", "clause_id"], name: "idx_on_company_standard_id_clause_id_1870072648", unique: true
     t.index ["company_standard_id"], name: "index_company_clause_instances_on_company_standard_id"
     t.index ["version_id"], name: "index_company_clause_instances_on_version_id"
+  end
+
+  create_table "company_modules", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "module_key", limit: 50, null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "module_key"], name: "index_company_modules_on_company_id_and_module_key", unique: true
+    t.index ["company_id"], name: "index_company_modules_on_company_id"
   end
 
   create_table "company_standard_version_history", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -854,6 +864,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_120000) do
   add_foreign_key "company_clause_instances", "clauses"
   add_foreign_key "company_clause_instances", "company_standards"
   add_foreign_key "company_clause_instances", "standard_versions", column: "version_id"
+  add_foreign_key "company_modules", "companies"
   add_foreign_key "company_standard_version_history", "company_standards"
   add_foreign_key "company_standard_version_history", "standard_versions", column: "from_version_id"
   add_foreign_key "company_standard_version_history", "standard_versions", column: "to_version_id"

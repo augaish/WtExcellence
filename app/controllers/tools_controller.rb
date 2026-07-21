@@ -1,4 +1,5 @@
 class ToolsController < Dashboard::BaseController
+  requires_module :tools
   # Tools section is only for super admins and delegated admins with manage_tools permission
   # Assignment-related actions are also allowed for company admins (e.g. when assigning from standards clause hierarchy)
   before_action :require_tools_access, except: [

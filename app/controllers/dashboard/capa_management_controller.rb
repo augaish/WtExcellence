@@ -1,4 +1,5 @@
 class Dashboard::CapaManagementController < Dashboard::BaseController
+  requires_module :capa
   before_action :ensure_company_selected, except: [ :select_company, :set_company ]
   before_action :prevent_viewer_action
   before_action :ensure_not_risk_manager_only

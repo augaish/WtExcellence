@@ -35,9 +35,47 @@ class Dashboard::BaseController < ApplicationController
         end
     end
 
-    helper_method :current_company, :current_company_user, :viewer?
+    helper_method :current_company, :current_company_user, :viewer?, :module_enabled_for_current?
+
+    # Class macro: gate an entire controller (or a subset via before_action
+    # options) behind a per-company module. Platform admins always pass.
+    #
+    #   requires_module :capa
+    #   requires_module :standards, except: [ :public_action ]
+    def self.requires_module(key, **opts)
+      before_action(**opts) { ensure_module_enabled(key) }
+    end
 
     protected
+
+    # Whether the current user's company has the module enabled. Platform admins
+    # (super/delegated) and users without a company are never gated (true).
+    def module_enabled_for_current?(key)
+      return true if current_user&.platform_admin?
+
+      company = current_user&.company
+      company.nil? || company.module_enabled?(key)
+    end
+
+    # before_action guard: block access to a disabled module server-side, so a
+    # hidden sidebar link can't be bypassed by typing the URL.
+    def ensure_module_enabled(key)
+      return if module_enabled_for_current?(key)
+
+      respond_to do |format|
+        format.html do
+          redirect_to dashboard_overview_path,
+            alert: t("modules.disabled_flash"), status: :see_other
+        end
+        format.json do
+          render json: { success: false, error: "module_disabled", message: t("modules.disabled_flash") },
+            status: :forbidden
+        end
+        format.any do
+          redirect_to dashboard_overview_path, alert: t("modules.disabled_flash"), status: :see_other
+        end
+      end
+    end
 
     # Role-based CAPA visibility (shared by Overview and CAPA Management).
     # Contributor: only CAPAs assigned to them.

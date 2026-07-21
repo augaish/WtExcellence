@@ -1,4 +1,5 @@
 class LibraryController < DashboardController
+  requires_module :library
   before_action :ensure_not_risk_manager_only
 
   def index

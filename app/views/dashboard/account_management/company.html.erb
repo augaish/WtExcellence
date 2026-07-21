@@ -36,14 +36,6 @@
           <% end %>
         <% end %>
 
-        <% if current_user&.super_admin? || current_user&.delegated_admin? || (current_user&.company_user&.has_admin_privileges? && current_company&.id == @company.id) %>
-          <%= link_to (@company.trust_center_enabled? ? t('disable_trust_center') : t('enable_trust_center')),
-                      dashboard_toggle_company_trust_center_path(@company),
-                      method: :patch,
-                      data: { action: "click->account-management#toggleTrustCenter" },
-                      class: "inline-flex items-center justify-center flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 border border-[#5C3984] text-[#5C3984] rounded-lg hover:bg-[#F6EEFF] text-xs sm:text-sm font-medium min-h-[44px]" %>
-        <% end %>
-
         <% if current_user&.can_add_users? %>
           <button type="button"
                   class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] text-xs sm:text-sm font-medium min-h-[44px] text-center"
@@ -180,6 +172,27 @@
         <p class="mt-2 text-xl sm:text-2xl font-semibold text-[#0D1120]"><%= @company.company_standards.count %></p>
       </div>
     </div>
+
+    <!-- Modules: per-company entitlements (super/delegated admins only) -->
+    <% if current_user&.super_admin? || current_user&.delegated_admin? %>
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 sm:p-6 mb-6 sm:mb-8" data-controller="account-management">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('modules.title') %></h2>
+        <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('modules.subtitle') %></p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <% Company::MODULES.each do |key, meta| %>
+            <% on = @company.module_enabled?(key) %>
+            <div class="flex items-center justify-between border border-[#E3E3E3] rounded-lg px-3 py-2.5">
+              <span class="text-sm text-[#0D1120] truncate mr-2"><%= t(meta[:label_key]) %></span>
+              <%= link_to (on ? t('modules.on_label') : t('modules.off_label')),
+                          dashboard_toggle_company_module_path(@company, key),
+                          method: :patch,
+                          data: { action: "click->account-management#toggleModule" },
+                          class: "flex-shrink-0 inline-flex items-center justify-center min-w-[64px] min-h-[36px] px-3 py-1.5 rounded-lg text-xs font-semibold #{on ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}" %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
 
     <!-- 2-column layout: Accounts + Licenses / Documents -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-10">
