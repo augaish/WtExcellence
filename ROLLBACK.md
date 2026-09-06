@@ -1,0 +1,28 @@
+# Rollback checkpoints
+
+Tag pushes are rejected by this git proxy, so use the **commit SHA** — every one
+of these is on `origin/claude/determined-euler-gkr9sv`.
+
+| Checkpoint | SHA | What it is |
+|---|---|---|
+| `baseline-before-pp` | `669e0e3` | Before any P&P work. Module entitlements shipped. |
+| `pp-phase1-complete` | `7b1af0c` | Phase 0 (nav) + Phase 1 (Org Structure, Process Architecture). |
+
+## Roll the code back
+```bash
+ssh wtexcel
+cd /root && rm -rf wtdeploy \
+  && git clone https://github.com/augaish/wtexcellence.git wtdeploy \
+  && cd wtdeploy && git checkout <SHA> \
+  && bash scripts/server_deploy.sh
+```
+
+## Back up the database (do this BEFORE every deploy)
+```bash
+bash scripts/backup_db.sh <label>     # writes /root/backups/wtexcel_<label>_<stamp>.sql.gz
+```
+
+## Restore a database dump
+```bash
+gunzip -c /root/backups/<file>.sql.gz | docker exec -i wtexcel-db psql -U postgres -d way_to_excellence
+```
