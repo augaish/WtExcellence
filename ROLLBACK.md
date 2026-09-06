@@ -8,7 +8,8 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `baseline-before-pp` | `669e0e3` | Before any P&P work. Module entitlements shipped. |
 | `pp-phase1-complete` | `7b1af0c` | Phase 0 (nav) + Phase 1 (Org Structure, Process Architecture). |
 | `suite-green` | `b1a721c` | Audit-log savepoint fix; whole test suite green for the first time. |
-| `pp-phase2-complete` | *(this commit)* | Phase 2 (Records + Packages). |
+| `pp-phase2-complete` | `d8c37c6` | Phase 2 (Records + Packages). |
+| `pp-phase3-complete` | *(this commit)* | Phase 3 (Documenter: 17-stage lifecycle). |
 
 ## Roll the code back
 ```bash

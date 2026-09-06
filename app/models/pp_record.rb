@@ -31,6 +31,12 @@ class PpRecord < ApplicationRecord
   has_many :evidence_attachments, as: :attachable, dependent: :destroy
   has_many :uploads, through: :evidence_attachments
 
+  has_many :stage_transitions, class_name: "PpStageTransition", dependent: :destroy
+  has_many :stage_approvals, class_name: "PpStageApproval", dependent: :destroy
+  has_many :stage_assignees, class_name: "PpStageAssignee", dependent: :destroy
+  belongs_to :previous_version, class_name: "PpRecord", optional: true
+  has_one :next_version, class_name: "PpRecord", foreign_key: "previous_version_id", dependent: :nullify
+
   validates :record_type, presence: true, inclusion: { in: TYPES }
   validates :code, length: { maximum: 50 }, allow_blank: true
   validates :code, uniqueness: { scope: :company_id }, allow_blank: true
@@ -98,6 +104,69 @@ class PpRecord < ApplicationRecord
 
   def remove_from_package!
     update!(package: nil)
+  end
+
+  # ---- Lifecycle (Documenter) -------------------------------------------
+
+  def stage_key
+    current_stage.presence || PpStage::FIRST_KEY
+  end
+
+  def stage_label(locale = I18n.locale)
+    PpStage.label(stage_key, locale)
+  end
+
+  def stage_phase
+    PpStage.phase_of(stage_key)
+  end
+
+  def terminal_stage?
+    PpStage.terminal?(stage_key)
+  end
+
+  # The one legal forward destination for THIS record, computed from its type
+  # and its intersections answer. nil at the end of the route.
+  def next_stage_key
+    PpStage.next_key(stage_key, record_type: record_type, has_intersections: has_intersections?)
+  end
+
+  def route
+    PpStage.route_for(record_type: record_type, has_intersections: has_intersections?)
+  end
+
+  # How far along the route the record is, 0..1 — used by the funnel.
+  def route_position
+    route.index(stage_key)
+  end
+
+  # Working days sitting in the current stage, from the system timestamp of the
+  # transition that put it here.
+  def working_days_in_stage(now = Time.current)
+    WorkingDaysService.between(company, stage_entered_at || created_at, now)
+  end
+
+  def stage_target_days
+    PpStageTarget.days_for(company, stage_key)
+  end
+
+  # Late = sitting longer than this stage's target. Approval stages are judged
+  # on the chain (the slowest outstanding unit), never on a typed date.
+  def stage_late?(now = Time.current)
+    return false if terminal_stage?
+
+    target = stage_target_days
+    return false if target <= 0
+
+    working_days_in_stage(now) > target
+  end
+
+  def approvals_for_current_stage
+    stage_approvals.for_stage(stage_key)
+  end
+
+  def approvals_complete?(key = stage_key)
+    scope = stage_approvals.for_stage(key)
+    scope.any? && scope.pending.none?
   end
 
   private

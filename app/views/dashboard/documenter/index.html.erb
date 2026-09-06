@@ -1,0 +1,34 @@
+<%= content_for :title, t('documenter.title') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('documenter.title'), subtitle: t('documenter.subtitle') } do %>
+      <% if can_manage_documenter? %>
+        <%= link_to t('documenter.settings'), dashboard_documenter_settings_path, class: ui_btn_neutral %>
+      <% end %>
+    <% end %>
+
+    <!-- One screen per lifecycle phase -->
+    <div class="border-b border-[#E3E3E3] mb-6 overflow-x-auto">
+      <nav class="flex items-center gap-1 min-w-max" aria-label="<%= t('documenter.title') %>">
+        <% PpStage::PHASES.each do |phase| %>
+          <% active = (@phase == phase) %>
+          <%= link_to dashboard_documenter_path(phase: phase),
+                class: "px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#5C3984] #{active ? 'border-[#5C3984] text-[#5C3984]' : 'border-transparent text-[#797C81] hover:text-[#0D1120] hover:border-[#E3E3E3]'}" do %>
+            <%= PpStage.phase_label(phase) %>
+            <span class="ms-1 text-xs text-[#797C81]">(<%= @counts_by_phase[phase] %>)</span>
+          <% end %>
+        <% end %>
+      </nav>
+    </div>
+
+    <% @stages.each do |stage| %>
+      <%= render "dashboard/documenter/stage_section",
+            stage: stage,
+            records: (@by_stage[stage[:key]] || []),
+            org_units: @org_units,
+            company_users: @company_users,
+            phase: @phase %>
+    <% end %>
+  </div>
+</div>

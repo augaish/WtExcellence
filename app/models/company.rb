@@ -31,6 +31,8 @@ class Company < ApplicationRecord
   has_many :pp_processes, dependent: :destroy
   has_many :pp_packages, dependent: :destroy
   has_many :pp_records, dependent: :destroy
+  has_many :pp_stage_targets, dependent: :destroy
+  has_many :company_holidays, -> { order(:start_date) }, dependent: :destroy
   has_many :users, through: :company_users
   has_many :capas, dependent: :nullify
   has_many :company_standards, dependent: :destroy
@@ -93,10 +95,16 @@ class Company < ApplicationRecord
     status == "active"
   end
 
+  # { "s2_prep" => 10, ... } for the stages this company has configured.
+  def stage_target_days
+    @stage_target_days ||= pp_stage_targets.pluck(:stage_key, :target_days).to_h
+  end
+
   # Clear the memoized module settings when the record is reloaded, so a
   # module_enabled? call after reload reflects the database.
   def reload(*)
     @module_settings = nil
+    @stage_target_days = nil
     super
   end
 

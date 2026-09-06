@@ -118,6 +118,24 @@ Rails.application.routes.draw do
     end
     resources :org_groups, only: [ :create, :update, :destroy ]
 
+    # Documenter — the lifecycle worklist (P&P)
+    scope :documenter, controller: :documenter do
+      get "/", action: :index, as: :documenter
+      post "/advance", action: :advance, as: :documenter_advance
+      post "/return", action: :return_to, as: :documenter_return
+      patch "/:id/intersections", action: :update_intersections, as: :documenter_intersections
+      post "/:id/approvals", action: :add_approval, as: :documenter_add_approval
+      patch "/approvals/:approval_id/receive", action: :receive_approval, as: :documenter_receive_approval
+      delete "/approvals/:approval_id", action: :remove_approval, as: :documenter_remove_approval
+      post "/:id/assignees", action: :add_assignee, as: :documenter_add_assignee
+      delete "/:id/assignees/:assignee_id", action: :remove_assignee, as: :documenter_remove_assignee
+      post "/:id/reopen", action: :reopen, as: :documenter_reopen
+      get "/settings", action: :settings, as: :documenter_settings
+      patch "/settings", action: :update_settings, as: :update_documenter_settings
+      post "/holidays", action: :create_holiday, as: :documenter_holidays
+      delete "/holidays/:holiday_id", action: :destroy_holiday, as: :documenter_holiday
+    end
+
     # Records + Packages (P&P)
     resources :pp_records do
       member do

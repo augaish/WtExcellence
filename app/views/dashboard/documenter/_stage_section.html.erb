@@ -1,0 +1,99 @@
+<%# One stage section: checklist + stage-specific fields + bulk move.
+    Locals: stage, records, org_units, company_users, phase %>
+<% stage_key = stage[:key] %>
+<% target = stage_target_for(stage_key) %>
+<% is_approval = PpStage.approval_stage?(stage_key) %>
+<% is_branch = PpStage.branch_stage?(stage_key) %>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-4"
+     data-controller="bulk-select">
+  <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 border-b border-[#E3E3E3] bg-[#F7F7FD]">
+    <div class="min-w-0">
+      <h2 class="text-sm font-semibold text-[#0D1120]"><%= PpStage.label(stage_key) %></h2>
+      <p class="mt-0.5 text-xs text-[#797C81]">
+        <%= t('documenter.records_here', count: records.size) %>
+        <% if target.to_i.positive? %> · <%= t('documenter.target_days', days: target) %><% end %>
+        <% if is_approval %> · <%= t('documenter.approval_stage') %><% end %>
+      </p>
+    </div>
+    <% if records.any? %>
+      <span class="text-xs text-[#797C81]">
+        <span data-bulk-select-target="count">0</span> <%= t('documenter.selected') %>
+      </span>
+    <% end %>
+  </div>
+
+  <% if records.any? %>
+    <%= form_with url: dashboard_documenter_advance_path, method: :post, data: { turbo: false } do %>
+      <%= hidden_field_tag :phase, phase %>
+
+      <table class="w-full">
+        <thead class="border-b border-[#E3E3E3]">
+          <tr>
+            <th class="w-10 p-3">
+              <%# TRUE toggle: ticking selects all, unticking clears all. %>
+              <input type="checkbox"
+                     data-bulk-select-target="header"
+                     data-action="change->bulk-select#toggleAll"
+                     aria-label="<%= t('documenter.select_all') %>"
+                     class="rounded border-[#E3E3E3] text-[#5C3984] focus:ring-[#5C3984]">
+            </th>
+            <th class="text-start p-3"><span class="text-xs font-semibold text-[#797C81]"><%= t('pp_records.record_title') %></span></th>
+            <th class="text-start p-3"><span class="text-xs font-semibold text-[#797C81]"><%= t('pp_records.type') %></span></th>
+            <th class="text-start p-3"><span class="text-xs font-semibold text-[#797C81]"><%= t('documenter.time_in_stage') %></span></th>
+            <th class="text-start p-3"><span class="text-xs font-semibold text-[#797C81]"><%= t('documenter.stage_details') %></span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% records.each do |record| %>
+            <% elapsed = working_days_for(record) %>
+            <% late = record.stage_late? %>
+            <tr class="border-b border-[#E3E3E3] last:border-b-0 hover:bg-[#F7F7FD] align-top">
+              <td class="p-3">
+                <%= check_box_tag "record_ids[]", record.id, false,
+                      id: "sel_#{stage_key}_#{record.id}",
+                      data: { bulk_select_target: "row", action: "change->bulk-select#rowChanged" },
+                      class: "rounded border-[#E3E3E3] text-[#5C3984] focus:ring-[#5C3984]" %>
+              </td>
+              <td class="p-3">
+                <%= link_to record.display_title, dashboard_pp_record_path(record),
+                      class: "text-sm font-medium text-[#5C3984] hover:underline focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+                <% if record.code.present? %>
+                  <span class="ms-1 text-xs font-mono text-[#797C81]"><%= record.code %></span>
+                <% end %>
+                <% if record.owner_org_unit %>
+                  <p class="mt-0.5 text-xs text-[#797C81] truncate"><%= record.owner_org_unit.display_name %></p>
+                <% end %>
+              </td>
+              <td class="p-3 text-sm text-[#797C81]"><%= record.type_label %></td>
+              <td class="p-3">
+                <% if late %>
+                  <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-red-100 text-red-700">
+                    <%= t('documenter.late_by', days: elapsed - target.to_i) %>
+                  </span>
+                <% else %>
+                  <span class="text-sm text-[#797C81]"><%= t('documenter.working_days', count: elapsed) %></span>
+                <% end %>
+              </td>
+              <td class="p-3">
+                <%= render "dashboard/documenter/stage_fields",
+                      record: record, stage_key: stage_key, phase: phase,
+                      is_approval: is_approval, is_branch: is_branch,
+                      org_units: org_units, target: target %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <div class="flex items-center justify-end gap-2 px-4 py-3 border-t border-[#E3E3E3] bg-[#F7F7FD]">
+        <button type="submit" data-bulk-select-target="submit" disabled
+                class="<%= ui_btn_primary %> opacity-50 cursor-not-allowed">
+          <%= t('documenter.move_forward') %>
+        </button>
+      </div>
+    <% end %>
+  <% else %>
+    <p class="px-4 py-6 text-sm text-[#797C81] text-center"><%= t('documenter.no_records_here') %></p>
+  <% end %>
+</div>

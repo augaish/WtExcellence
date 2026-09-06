@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_19_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -341,6 +341,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
     t.string "status", default: "active"
     t.string "company_size"
     t.boolean "trust_center_enabled", default: false, null: false
+    t.jsonb "weekend_days", default: [5, 6], null: false
     t.index ["status"], name: "index_companies_on_status"
   end
 
@@ -374,6 +375,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
     t.index ["company_standard_id", "clause_id"], name: "idx_on_company_standard_id_clause_id_1870072648", unique: true
     t.index ["company_standard_id"], name: "index_company_clause_instances_on_company_standard_id"
     t.index ["version_id"], name: "index_company_clause_instances_on_version_id"
+  end
+
+  create_table "company_holidays", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "name", limit: 200
+    t.date "start_date", null: false
+    t.date "end_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "start_date"], name: "index_company_holidays_on_company_id_and_start_date"
+    t.index ["company_id"], name: "index_company_holidays_on_company_id"
   end
 
   create_table "company_modules", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -667,6 +679,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "has_intersections", default: false, null: false
+    t.datetime "stage_entered_at"
+    t.integer "version_number", default: 1, null: false
+    t.uuid "previous_version_id"
     t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"
     t.index ["company_id"], name: "index_pp_records_on_company_id"
@@ -674,7 +690,61 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
     t.index ["owner_user_id"], name: "index_pp_records_on_owner_user_id"
     t.index ["package_id"], name: "index_pp_records_on_package_id"
     t.index ["pp_process_id"], name: "index_pp_records_on_pp_process_id"
+    t.index ["previous_version_id"], name: "index_pp_records_on_previous_version_id"
     t.index ["review_date"], name: "index_pp_records_on_review_date"
+  end
+
+  create_table "pp_stage_approvals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.string "stage_key", limit: 50, null: false
+    t.uuid "org_unit_id", null: false
+    t.datetime "requested_at", null: false
+    t.datetime "received_at"
+    t.uuid "requested_by_id"
+    t.uuid "received_by_id"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_unit_id"], name: "index_pp_stage_approvals_on_org_unit_id"
+    t.index ["pp_record_id", "stage_key", "org_unit_id"], name: "idx_pp_stage_approvals_unique", unique: true
+    t.index ["pp_record_id"], name: "index_pp_stage_approvals_on_pp_record_id"
+    t.index ["received_by_id"], name: "index_pp_stage_approvals_on_received_by_id"
+    t.index ["requested_by_id"], name: "index_pp_stage_approvals_on_requested_by_id"
+  end
+
+  create_table "pp_stage_assignees", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.string "stage_key", limit: 50, null: false
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_record_id", "stage_key", "user_id"], name: "idx_pp_stage_assignees_unique", unique: true
+    t.index ["pp_record_id"], name: "index_pp_stage_assignees_on_pp_record_id"
+    t.index ["user_id"], name: "index_pp_stage_assignees_on_user_id"
+  end
+
+  create_table "pp_stage_targets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "stage_key", limit: 50, null: false
+    t.integer "target_days", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "stage_key"], name: "index_pp_stage_targets_on_company_id_and_stage_key", unique: true
+    t.index ["company_id"], name: "index_pp_stage_targets_on_company_id"
+  end
+
+  create_table "pp_stage_transitions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.string "from_stage", limit: 50
+    t.string "to_stage", limit: 50, null: false
+    t.string "direction", limit: 10, default: "forward", null: false
+    t.uuid "actor_user_id"
+    t.text "reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actor_user_id"], name: "index_pp_stage_transitions_on_actor_user_id"
+    t.index ["pp_record_id", "created_at"], name: "index_pp_stage_transitions_on_pp_record_id_and_created_at"
+    t.index ["pp_record_id"], name: "index_pp_stage_transitions_on_pp_record_id"
   end
 
   create_table "questionnaires", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -991,6 +1061,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
   add_foreign_key "company_clause_instances", "clauses"
   add_foreign_key "company_clause_instances", "company_standards"
   add_foreign_key "company_clause_instances", "standard_versions", column: "version_id"
+  add_foreign_key "company_holidays", "companies"
   add_foreign_key "company_modules", "companies"
   add_foreign_key "company_standard_version_history", "company_standards"
   add_foreign_key "company_standard_version_history", "standard_versions", column: "from_version_id"
@@ -1028,7 +1099,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
   add_foreign_key "pp_records", "org_units", column: "owner_org_unit_id"
   add_foreign_key "pp_records", "pp_packages", column: "package_id"
   add_foreign_key "pp_records", "pp_processes"
+  add_foreign_key "pp_records", "pp_records", column: "previous_version_id"
   add_foreign_key "pp_records", "users", column: "owner_user_id"
+  add_foreign_key "pp_stage_approvals", "org_units"
+  add_foreign_key "pp_stage_approvals", "pp_records"
+  add_foreign_key "pp_stage_approvals", "users", column: "received_by_id"
+  add_foreign_key "pp_stage_approvals", "users", column: "requested_by_id"
+  add_foreign_key "pp_stage_assignees", "pp_records"
+  add_foreign_key "pp_stage_assignees", "users"
+  add_foreign_key "pp_stage_targets", "companies"
+  add_foreign_key "pp_stage_transitions", "pp_records"
+  add_foreign_key "pp_stage_transitions", "users", column: "actor_user_id"
   add_foreign_key "questionnaires", "capas"
   add_foreign_key "risk_workspaces", "companies"
   add_foreign_key "risks", "companies"

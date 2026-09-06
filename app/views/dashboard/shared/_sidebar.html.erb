@@ -52,6 +52,8 @@
               icon: 'standards-icon.svg', active: path.include?('pp_processes') %>
           <%= render "dashboard/shared/nav_item", label: t('pp_records.title'), path: dashboard_pp_records_path,
               icon: 'library-icon.svg', active: path.include?('pp_records') || path.include?('pp_packages') %>
+          <%= render "dashboard/shared/nav_item", label: t('documenter.title'), path: dashboard_documenter_path,
+              icon: 'calendar-03.png', active: path.include?('documenter') %>
         </nav>
       </div>
     <% end %>
