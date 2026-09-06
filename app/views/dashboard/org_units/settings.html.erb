@@ -1,0 +1,58 @@
+<%= content_for :title, t('org_structure.settings') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('org_structure.settings'), subtitle: t('org_structure.settings_subtitle') } do %>
+      <%= link_to t('back'), dashboard_org_units_path, class: ui_btn_neutral %>
+    <% end %>
+
+    <!-- Level names -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+      <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('org_structure.level_names') %></h2>
+      <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('org_structure.level_names_hint') %></p>
+
+      <%= form_with url: settings_dashboard_org_units_path, method: :patch, class: "space-y-3" do %>
+        <% @level_definitions.each do |definition| %>
+          <div class="grid grid-cols-1 sm:grid-cols-[80px_1fr_1fr] gap-3 items-center">
+            <span class="text-xs font-semibold text-[#797C81]"><%= t('org_structure.level') %> <%= definition.level %></span>
+            <input type="text" name="levels[<%= definition.level %>][name_en]" value="<%= definition.name_en %>"
+                   placeholder="<%= t('org_structure.name_en') %>"
+                   class="w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]">
+            <input type="text" name="levels[<%= definition.level %>][name_ar]" value="<%= definition.name_ar %>" dir="rtl"
+                   placeholder="<%= t('org_structure.name_ar') %>"
+                   class="w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]">
+          </div>
+        <% end %>
+        <div class="flex justify-end pt-2">
+          <%= submit_tag t('save'), class: ui_btn_primary %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Colour groups -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+      <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('org_structure.groups') %></h2>
+      <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('org_structure.groups_hint') %></p>
+
+      <div class="space-y-2 mb-4">
+        <% @groups.each do |group| %>
+          <%= form_with model: group, url: dashboard_org_group_path(group), method: :patch,
+                class: "grid grid-cols-1 sm:grid-cols-[1fr_1fr_100px_auto_auto] gap-2 items-center" do |f| %>
+            <%= f.text_field :name_en, placeholder: t('org_structure.name_en'), class: "px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+            <%= f.text_field :name_ar, dir: "rtl", placeholder: t('org_structure.name_ar'), class: "px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+            <%= f.color_field :color, class: "h-9 w-full border border-[#E3E3E3] rounded-lg" %>
+            <%= f.submit t('save'), class: "px-3 py-2 text-xs font-medium text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#F6EEFF] cursor-pointer" %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <%= form_with model: OrgGroup.new, url: dashboard_org_groups_path, method: :post,
+            class: "grid grid-cols-1 sm:grid-cols-[1fr_1fr_100px_auto] gap-2 items-center border-t border-[#E3E3E3] pt-4" do |f| %>
+        <%= f.text_field :name_en, placeholder: t('org_structure.name_en'), class: "px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+        <%= f.text_field :name_ar, dir: "rtl", placeholder: t('org_structure.name_ar'), class: "px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+        <%= f.color_field :color, value: "#5C3984", class: "h-9 w-full border border-[#E3E3E3] rounded-lg" %>
+        <%= f.submit t('org_structure.add_group'), class: ui_btn_primary %>
+      <% end %>
+    </div>
+  </div>
+</div>

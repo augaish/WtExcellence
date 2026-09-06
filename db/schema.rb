@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_130000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_19_140100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -540,6 +540,53 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_130000) do
     t.index ["source_type", "source_id"], name: "index_notifications_on_source_type_and_source_id"
   end
 
+  create_table "org_groups", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "name_en", limit: 150
+    t.string "name_ar", limit: 150
+    t.string "color", limit: 7, default: "#5C3984", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_org_groups_on_company"
+    t.index ["company_id"], name: "index_org_groups_on_company_id"
+  end
+
+  create_table "org_level_definitions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.integer "level", null: false
+    t.string "name_en", limit: 100
+    t.string "name_ar", limit: 100
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "level"], name: "index_org_level_definitions_on_company_id_and_level", unique: true
+    t.index ["company_id"], name: "index_org_level_definitions_on_company_id"
+  end
+
+  create_table "org_units", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.uuid "parent_id"
+    t.uuid "org_group_id"
+    t.integer "level", default: 1, null: false
+    t.string "code", limit: 50
+    t.string "name_en", limit: 250
+    t.string "name_ar", limit: 250
+    t.uuid "head_user_id"
+    t.string "cost_center", limit: 100
+    t.string "email", limit: 255
+    t.jsonb "mandates", default: [], null: false
+    t.integer "sort_order", default: 0, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "code"], name: "index_org_units_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
+    t.index ["company_id", "level"], name: "index_org_units_on_company_id_and_level"
+    t.index ["company_id"], name: "index_org_units_on_company_id"
+    t.index ["head_user_id"], name: "index_org_units_on_head_user_id"
+    t.index ["org_group_id"], name: "index_org_units_on_org_group_id"
+    t.index ["parent_id"], name: "index_org_units_on_parent_id"
+  end
+
   create_table "pg_search_documents", force: :cascade do |t|
     t.text "content"
     t.string "searchable_type"
@@ -550,6 +597,44 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_130000) do
     t.index ["content"], name: "index_pg_search_documents_on_content_gin", opclass: :gin_trgm_ops, using: :gin
     t.index ["searchable_type", "searchable_id"], name: "index_pg_search_documents_on_searchable"
     t.index ["tsvector_content"], name: "index_pg_search_documents_on_tsvector_content_gin", using: :gin
+  end
+
+  create_table "pp_processes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.uuid "parent_id"
+    t.integer "level", default: 1, null: false
+    t.string "category", limit: 30
+    t.string "code", limit: 50
+    t.string "name_en", limit: 250
+    t.string "name_ar", limit: 250
+    t.text "objective"
+    t.uuid "owner_org_unit_id"
+    t.uuid "owner_user_id"
+    t.text "trigger_text"
+    t.text "inputs"
+    t.text "outputs"
+    t.uuid "predecessor_process_id"
+    t.uuid "successor_process_id"
+    t.string "frequency", limit: 50
+    t.decimal "total_time_value", precision: 10, scale: 2
+    t.string "total_time_unit", limit: 20
+    t.string "automation_status", limit: 50
+    t.text "related_policies"
+    t.text "technical_systems"
+    t.text "forms_used"
+    t.text "kpis"
+    t.integer "sort_order", default: 0, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "code"], name: "index_pp_processes_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
+    t.index ["company_id", "level"], name: "index_pp_processes_on_company_id_and_level"
+    t.index ["company_id"], name: "index_pp_processes_on_company_id"
+    t.index ["owner_org_unit_id"], name: "index_pp_processes_on_owner_org_unit_id"
+    t.index ["owner_user_id"], name: "index_pp_processes_on_owner_user_id"
+    t.index ["parent_id"], name: "index_pp_processes_on_parent_id"
+    t.index ["predecessor_process_id"], name: "index_pp_processes_on_predecessor_process_id"
+    t.index ["successor_process_id"], name: "index_pp_processes_on_successor_process_id"
   end
 
   create_table "questionnaires", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -783,10 +868,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_130000) do
     t.boolean "receive_notifications_on_email", default: true, null: false
     t.datetime "deleted_at"
     t.datetime "user_manual_seen_at"
+    t.uuid "org_unit_id"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email"
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
     t.index ["invited_by_id"], name: "index_users_on_invited_by_id"
+    t.index ["org_unit_id"], name: "index_users_on_org_unit_id"
     t.index ["permissions"], name: "index_users_on_permissions", using: :gin
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
@@ -884,6 +971,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_130000) do
   add_foreign_key "folders", "folders", column: "parent_id"
   add_foreign_key "ingestion_jobs", "uploads", column: "input_pdf_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
+  add_foreign_key "org_groups", "companies"
+  add_foreign_key "org_level_definitions", "companies"
+  add_foreign_key "org_units", "companies"
+  add_foreign_key "org_units", "org_groups"
+  add_foreign_key "org_units", "org_units", column: "parent_id"
+  add_foreign_key "org_units", "users", column: "head_user_id"
+  add_foreign_key "pp_processes", "companies"
+  add_foreign_key "pp_processes", "org_units", column: "owner_org_unit_id"
+  add_foreign_key "pp_processes", "pp_processes", column: "parent_id"
+  add_foreign_key "pp_processes", "pp_processes", column: "predecessor_process_id"
+  add_foreign_key "pp_processes", "pp_processes", column: "successor_process_id"
+  add_foreign_key "pp_processes", "users", column: "owner_user_id"
   add_foreign_key "questionnaires", "capas"
   add_foreign_key "risk_workspaces", "companies"
   add_foreign_key "risks", "companies"
@@ -906,6 +1005,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_130000) do
   add_foreign_key "tool_translations", "tools"
   add_foreign_key "uploads", "companies"
   add_foreign_key "uploads", "folders"
+  add_foreign_key "users", "org_units"
   add_foreign_key "users", "users", column: "invited_by_id"
   add_foreign_key "vendors", "companies"
   add_foreign_key "vendors", "company_users", column: "owner_id"

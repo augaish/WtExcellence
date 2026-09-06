@@ -12,6 +12,8 @@ class Company < ApplicationRecord
     risk:            { label_key: "risk_management" },
     vendors:         { label_key: "vendor_management" },
     commitments:     { label_key: "customer_commitments" },
+    org_structure:   { label_key: "org_structure.title" },
+    pp:              { label_key: "pp.title" },
     trust_center:    { label_key: "trust_center", column: :trust_center_enabled },
     ai_instructions: { label_key: "ai_instructions" },
     tools:           { label_key: "tool_setup" }
@@ -23,6 +25,10 @@ class Company < ApplicationRecord
 
   has_many :company_users, dependent: :destroy
   has_many :company_modules, dependent: :destroy
+  has_many :org_level_definitions, -> { order(:level) }, dependent: :destroy
+  has_many :org_groups, -> { order(:sort_order) }, dependent: :destroy
+  has_many :org_units, dependent: :destroy
+  has_many :pp_processes, dependent: :destroy
   has_many :users, through: :company_users
   has_many :capas, dependent: :nullify
   has_many :company_standards, dependent: :destroy

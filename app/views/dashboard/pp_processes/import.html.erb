@@ -1,0 +1,37 @@
+<%= content_for :title, t('process_architecture.import_title') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('process_architecture.import_title'), subtitle: t('process_architecture.import_subtitle') } do %>
+      <%= link_to t('back'), dashboard_pp_processes_path, class: ui_btn_neutral %>
+    <% end %>
+
+    <% if @result && @result.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <p class="text-sm font-semibold text-red-800 mb-2"><%= t('process_architecture.import.failed') %></p>
+        <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5 max-h-64 overflow-y-auto">
+          <% @result.errors.each do |err| %>
+            <li><% if err[:row].to_i.positive? %><%= t('process_architecture.import.row', number: err[:row]) %>: <% end %><%= err[:message] %></li>
+          <% end %>
+        </ul>
+        <p class="mt-2 text-xs text-red-700"><%= t('process_architecture.import.nothing_saved') %></p>
+      </div>
+    <% end %>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+      <h2 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('process_architecture.import.step1') %></h2>
+      <p class="text-xs text-[#797C81] mb-3"><%= t('process_architecture.import.step1_hint') %></p>
+      <%= link_to t('process_architecture.import.download_template'), template_dashboard_pp_processes_path, class: ui_btn_secondary %>
+    </div>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+      <h2 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('process_architecture.import.step2') %></h2>
+      <p class="text-xs text-[#797C81] mb-3"><%= t('process_architecture.import.step2_hint') %></p>
+      <%= form_with url: import_dashboard_pp_processes_path, method: :post, multipart: true, class: "flex flex-col sm:flex-row sm:items-center gap-3" do %>
+        <input type="file" name="file" accept=".xlsx,.csv"
+               class="flex-1 text-sm text-[#0D1120] file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-[#F6EEFF] file:text-[#5C3984] file:text-sm file:font-medium">
+        <%= submit_tag t('process_architecture.import.upload'), class: ui_btn_primary %>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,122 @@
+<%# Org unit drawer form. Locals: org_unit, level_definitions, groups, parent_options %>
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: org_unit.persisted? ? t('org_structure.edit_unit') : t('org_structure.add_unit'),
+          subtitle: t('org_structure.form_subtitle') } do %>
+      <%= link_to t('cancel'), dashboard_org_units_path, class: ui_btn_neutral %>
+    <% end %>
+
+    <%= form_with model: org_unit, url: (org_unit.persisted? ? dashboard_org_unit_path(org_unit) : dashboard_org_units_path),
+          method: (org_unit.persisted? ? :patch : :post), class: "space-y-6" do |f| %>
+
+      <% if org_unit.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-red-800 mb-1"><%= t('org_structure.fix_errors') %></p>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5">
+            <% org_unit.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :name_en, t('org_structure.name_en'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.text_field :name_en, class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+          </div>
+          <div>
+            <%= f.label :name_ar, t('org_structure.name_ar'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.text_field :name_ar, dir: "rtl", class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+          </div>
+          <div>
+            <%= f.label :code, t('org_structure.code'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.text_field :code, class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('org_structure.code_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :level, t('org_structure.level'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.select :level,
+                  (1..OrgLevelDefinition::MAX_LEVEL).map { |lvl|
+                    name = level_definitions.detect { |d| d.level == lvl }&.display_name
+                    [ name.presence || "#{t('org_structure.level')} #{lvl}", lvl ]
+                  },
+                  {}, class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('org_structure.level_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :parent_id, t('org_structure.reports_to'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.select :parent_id,
+                  parent_options.map { |u| [ "#{u.display_name} (#{u.level_name})", u.id ] },
+                  { include_blank: t('org_structure.no_parent') },
+                  class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('org_structure.reports_to_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :org_group_id, t('org_structure.group'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.select :org_group_id, groups.map { |g| [ g.display_name, g.id ] },
+                  { include_blank: t('org_structure.no_group') },
+                  class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('org_structure.details') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :head_user_id, t('org_structure.head'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.collection_select :head_user_id, (current_company&.users&.order(:name) || []), :id, :name,
+                  { include_blank: t('org_structure.no_head') },
+                  class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+          </div>
+          <div>
+            <%= f.label :cost_center, t('org_structure.cost_center'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.text_field :cost_center, class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+          </div>
+          <div class="sm:col-span-2">
+            <%= f.label :email, t('org_structure.email'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= f.email_field :email, class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+          </div>
+        </div>
+
+        <!-- Mandates: repeatable "+ add" list -->
+        <div data-controller="repeatable-field">
+          <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('org_structure.mandates') %></label>
+          <div data-repeatable-field-target="list" class="space-y-2">
+            <% existing = org_unit.mandate_list.presence || [ "" ] %>
+            <% existing.each do |mandate| %>
+              <div class="flex items-center gap-2" data-repeatable-field-target="row">
+                <input type="text" name="org_unit[mandates][]" value="<%= mandate %>"
+                       class="flex-1 px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]"
+                       placeholder="<%= t('org_structure.mandate_placeholder') %>">
+                <button type="button" data-action="click->repeatable-field#remove"
+                        class="px-2 py-2 text-red-600 rounded hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600"
+                        aria-label="<%= t('remove') %>">&times;</button>
+              </div>
+            <% end %>
+          </div>
+          <template data-repeatable-field-target="template">
+            <div class="flex items-center gap-2" data-repeatable-field-target="row">
+              <input type="text" name="org_unit[mandates][]" value=""
+                     class="flex-1 px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]"
+                     placeholder="<%= t('org_structure.mandate_placeholder') %>">
+              <button type="button" data-action="click->repeatable-field#remove"
+                      class="px-2 py-2 text-red-600 rounded hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600"
+                      aria-label="<%= t('remove') %>">&times;</button>
+            </div>
+          </template>
+          <button type="button" data-action="click->repeatable-field#add"
+                  class="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-[#5C3984] border border-[#5C3984] rounded-lg hover:bg-[#F6EEFF] focus-visible:outline-2 focus-visible:outline-[#5C3984]">
+            + <%= t('org_structure.add_mandate') %>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <%= link_to t('cancel'), dashboard_org_units_path, class: ui_btn_neutral %>
+        <%= f.submit (org_unit.persisted? ? t('save') : t('create')), class: ui_btn_primary %>
+      </div>
+    <% end %>
+  </div>
+</div>

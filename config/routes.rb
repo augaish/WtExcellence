@@ -105,6 +105,29 @@ Rails.application.routes.draw do
 
     resources :companies, only: [ :index ], controller: :companies
 
+    # Org Structure (Main Menu) — company org chart used across P&P
+    resources :org_units, except: [ :show ] do
+      collection do
+        get :import
+        post :import, action: :run_import
+        get :template
+        get :settings
+        patch :settings, action: :update_settings
+      end
+      member { patch :toggle_active }
+    end
+    resources :org_groups, only: [ :create, :update, :destroy ]
+
+    # Process Architecture (P&P)
+    resources :pp_processes, except: [ :show ] do
+      collection do
+        get :import
+        post :import, action: :run_import
+        get :template
+      end
+      member { patch :toggle_active }
+    end
+
     # Account Management routes
     scope :account_management, controller: :account_management do
       get "/", action: :index, as: :account_management

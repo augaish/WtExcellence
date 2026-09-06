@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_one_attached :profile_image
   has_one :company_user, dependent: :destroy
   has_one :company, through: :company_user
+  belongs_to :org_unit, optional: true
   has_many :assigned_company_standards, class_name: "CompanyStandard", foreign_key: "assigned_by", dependent: :nullify
   has_many :company_standard_version_changes, class_name: "CompanyStandardVersionHistory", foreign_key: "changed_by", dependent: :nullify
   has_many :assigned_checklist_item_instances, class_name: "CompanyChecklistItemInstance", foreign_key: "assigned_to", dependent: :nullify

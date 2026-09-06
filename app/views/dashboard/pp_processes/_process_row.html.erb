@@ -1,0 +1,75 @@
+<%# One node in the process tree. Locals: process, by_parent, depth, can_manage %>
+<% children = by_parent[process.id] || [] %>
+<% cat = process.effective_category %>
+<% cat_class = { "core" => "bg-[#F6EEFF] text-[#5C3984]", "support" => "bg-blue-50 text-blue-700", "management" => "bg-amber-50 text-amber-700" }[cat] || "bg-gray-100 text-gray-600" %>
+<div class="border-b border-[#E3E3E3] last:border-b-0">
+  <div class="flex items-center gap-3 px-4 py-3 hover:bg-[#F7F7FD]"
+       style="padding-inline-start: <%= 16 + depth * 24 %>px">
+    <% if children.any? %>
+      <button type="button"
+              class="flex-shrink-0 w-5 h-5 flex items-center justify-center rounded text-[#797C81] hover:bg-[#F6EEFF] focus-visible:outline-2 focus-visible:outline-[#5C3984]"
+              data-action="click->org-tree#toggle" data-org-tree-target="toggle"
+              data-node-id="<%= process.id %>" aria-expanded="true"
+              aria-label="<%= t('process_architecture.toggle_children') %>">
+        <span class="text-xs" data-org-tree-target="chevron">▾</span>
+      </button>
+    <% else %>
+      <span class="flex-shrink-0 w-5 h-5"></span>
+    <% end %>
+
+    <div class="min-w-0 flex-1">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-sm font-medium text-[#0D1120] truncate"><%= process.display_name %></span>
+        <% if process.code.present? %>
+          <span class="text-xs text-[#797C81] font-mono"><%= process.code %></span>
+        <% end %>
+        <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-gray-100 text-[#797C81]">
+          <%= t("process_architecture.levels.l#{process.level}") %>
+        </span>
+        <% if cat.present? %>
+          <span class="px-2 py-0.5 text-[11px] font-medium rounded-full <%= cat_class %>">
+            <%= t("process_architecture.categories.#{cat}") %>
+          </span>
+        <% end %>
+        <% unless process.active? %>
+          <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-gray-100 text-gray-500"><%= t('org_structure.inactive') %></span>
+        <% end %>
+      </div>
+      <% if process.owner_org_unit || process.objective.present? %>
+        <p class="mt-0.5 text-xs text-[#797C81] truncate">
+          <% if process.owner_org_unit %><%= t('process_architecture.owner') %>: <%= process.owner_org_unit.display_name %><% end %>
+          <% if process.owner_org_unit && process.objective.present? %> · <% end %>
+          <%= truncate(process.objective, length: 90) %>
+        </p>
+      <% end %>
+    </div>
+
+    <% if can_manage %>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <% if process.level < PpProcess::MAX_LEVEL %>
+          <%= link_to t('process_architecture.add_child'), new_dashboard_pp_process_path(parent_id: process.id),
+                class: "px-2 py-1 text-xs font-medium text-[#5C3984] rounded hover:bg-[#F6EEFF] focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+        <% end %>
+        <%= link_to t('edit'), edit_dashboard_pp_process_path(process),
+              class: "px-2 py-1 text-xs font-medium text-[#5C3984] rounded hover:bg-[#F6EEFF] focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+        <%= button_to (process.active? ? t('org_structure.deactivate') : t('org_structure.activate')),
+              toggle_active_dashboard_pp_process_path(process), method: :patch,
+              class: "px-2 py-1 text-xs font-medium text-[#797C81] rounded hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-[#5C3984]",
+              form: { class: "inline" } %>
+        <% unless children.any? %>
+          <%= button_to t('delete'), dashboard_pp_process_path(process), method: :delete,
+                class: "px-2 py-1 text-xs font-medium text-red-600 rounded hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600",
+                form: { class: "inline", data: { turbo_confirm: t('process_architecture.confirm_delete', name: process.display_name) } } %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if children.any? %>
+    <div data-org-tree-target="children" data-parent-id="<%= process.id %>">
+      <% children.each do |child| %>
+        <%= render "dashboard/pp_processes/process_row", process: child, by_parent: by_parent, depth: depth + 1, can_manage: can_manage %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

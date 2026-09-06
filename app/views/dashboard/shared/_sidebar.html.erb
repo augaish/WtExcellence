@@ -12,20 +12,47 @@
           <%= render "dashboard/shared/nav_item", label: t('overview'), path: dashboard_overview_path,
               icon: 'overview-icon.svg', active: path.include?('overview') %>
         <% end %>
-        <% if module_enabled_for_current?(:standards) && !current_user&.risk_manager_only? %>
-          <%= render "dashboard/shared/nav_item", label: t('standards'), path: standards_path,
-              icon: 'standards-icon.svg', active: path.start_with?('/standards') %>
-        <% end %>
-        <% if module_enabled_for_current?(:capa) && !(current_user&.super_admin? || current_user&.delegated_admin? || current_user&.risk_manager_only?) %>
-          <%= render "dashboard/shared/nav_item", label: t('capa_management'), path: dashboard_capa_management_path,
-              icon: 'capa-management-icon.svg', active: path.include?('capa_management') %>
-        <% end %>
         <% if module_enabled_for_current?(:library) && !current_user&.risk_manager_only? %>
           <%= render "dashboard/shared/nav_item", label: t('library'), path: library_path,
               icon: 'library-icon.svg', active: path.start_with?('/library') %>
         <% end %>
+        <% if module_enabled_for_current?(:org_structure) && !current_user&.risk_manager_only? %>
+          <%= render "dashboard/shared/nav_item", label: t('org_structure.title'), path: dashboard_org_units_path,
+              icon: 'account-management-icon.svg', active: path.include?('org_units') %>
+        <% end %>
       </nav>
     </div>
+
+    <!-- Quality -->
+    <% show_standards = module_enabled_for_current?(:standards) && !current_user&.risk_manager_only? %>
+    <% show_capa = module_enabled_for_current?(:capa) && !(current_user&.super_admin? || current_user&.delegated_admin? || current_user&.risk_manager_only?) %>
+    <% if show_standards || show_capa %>
+      <div>
+        <p class="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400"><%= t('quality') %></p>
+        <nav class="space-y-1">
+          <% if show_standards %>
+            <%= render "dashboard/shared/nav_item", label: t('standards'), path: standards_path,
+                icon: 'standards-icon.svg', active: path.start_with?('/standards') %>
+          <% end %>
+          <% if show_capa %>
+            <%= render "dashboard/shared/nav_item", label: t('capa_management'), path: dashboard_capa_management_path,
+                icon: 'capa-management-icon.svg', active: path.include?('capa_management') %>
+          <% end %>
+        </nav>
+      </div>
+    <% end %>
+
+    <!-- P&P (Policies & Procedures) -->
+    <% show_pp = module_enabled_for_current?(:pp) && !current_user&.risk_manager_only? %>
+    <% if show_pp %>
+      <div>
+        <p class="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400" title="<%= t('pp.full_title') %>"><%= t('pp.title') %></p>
+        <nav class="space-y-1">
+          <%= render "dashboard/shared/nav_item", label: t('process_architecture.title'), path: dashboard_pp_processes_path,
+              icon: 'standards-icon.svg', active: path.include?('pp_processes') %>
+        </nav>
+      </div>
+    <% end %>
 
     <!-- Governance -->
     <% show_risk = current_user&.can_manage_risks? && module_enabled_for_current?(:risk) %>

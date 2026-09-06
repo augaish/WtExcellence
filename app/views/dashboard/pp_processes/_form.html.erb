@@ -1,0 +1,165 @@
+<%# Process card. Mirrors the ministry process form field-for-field.
+    Locals: process, parent_options, org_units, company_users, link_options %>
+<% input_class = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+<% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
+<% hint_class = "mt-1 text-[11px] text-[#797C81]" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: process.persisted? ? t('process_architecture.edit_process') : t('process_architecture.add_process'),
+          subtitle: t('process_architecture.form_subtitle') } do %>
+      <%= link_to t('cancel'), dashboard_pp_processes_path, class: ui_btn_neutral %>
+    <% end %>
+
+    <%= form_with model: process, url: (process.persisted? ? dashboard_pp_process_path(process) : dashboard_pp_processes_path),
+          method: (process.persisted? ? :patch : :post), class: "space-y-6" do |f| %>
+
+      <% if process.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-red-800 mb-1"><%= t('process_architecture.fix_errors') %></p>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5">
+            <% process.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <!-- Identity -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.section_identity') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :name_en, t('process_architecture.name_en'), class: label_class %>
+            <%= f.text_field :name_en, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :name_ar, t('process_architecture.name_ar'), class: label_class %>
+            <%= f.text_field :name_ar, dir: "rtl", class: input_class %>
+          </div>
+          <div>
+            <%= f.label :code, t('process_architecture.code'), class: label_class %>
+            <%= f.text_field :code, class: "#{input_class} font-mono" %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.admin_filled') %></p>
+          </div>
+          <div>
+            <%= f.label :category, t('process_architecture.category'), class: label_class %>
+            <%= f.select :category, PpProcess::CATEGORIES.map { |c| [ t("process_architecture.categories.#{c}"), c ] },
+                  { include_blank: t('process_architecture.inherit_category') }, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.admin_filled') %></p>
+          </div>
+          <div>
+            <%= f.label :parent_id, t('process_architecture.parent'), class: label_class %>
+            <%= f.select :parent_id, parent_options.map { |p| [ "#{p.code} · #{p.display_name}", p.id ] },
+                  { include_blank: t('process_architecture.no_parent') }, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :level, t('process_architecture.level'), class: label_class %>
+            <%= f.select :level, (1..PpProcess::MAX_LEVEL).map { |l| [ t("process_architecture.levels.l#{l}"), l ] }, {}, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.level_hint') %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Purpose & ownership -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.section_purpose') %></h2>
+        <div>
+          <%= f.label :objective, t('process_architecture.objective'), class: label_class %>
+          <%= f.text_area :objective, rows: 3, class: input_class %>
+          <p class="<%= hint_class %>"><%= t('process_architecture.objective_hint') %></p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :owner_org_unit_id, t('process_architecture.owner'), class: label_class %>
+            <%= f.select :owner_org_unit_id, org_units.map { |u| [ u.display_name, u.id ] },
+                  { include_blank: t('process_architecture.no_owner') }, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.owner_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :trigger_text, t('process_architecture.trigger'), class: label_class %>
+            <%= f.text_field :trigger_text, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.trigger_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :inputs, t('process_architecture.inputs'), class: label_class %>
+            <%= f.text_area :inputs, rows: 2, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.inputs_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :outputs, t('process_architecture.outputs'), class: label_class %>
+            <%= f.text_area :outputs, rows: 2, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.outputs_hint') %></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sequence & timing -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.section_sequence') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :predecessor_process_id, t('process_architecture.predecessor'), class: label_class %>
+            <%= f.select :predecessor_process_id, link_options.map { |p| [ "#{p.code} · #{p.display_name}", p.id ] },
+                  { include_blank: t('process_architecture.none') }, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :successor_process_id, t('process_architecture.successor'), class: label_class %>
+            <%= f.select :successor_process_id, link_options.map { |p| [ "#{p.code} · #{p.display_name}", p.id ] },
+                  { include_blank: t('process_architecture.none') }, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :frequency, t('process_architecture.frequency'), class: label_class %>
+            <%= f.select :frequency, PpProcess::FREQUENCIES.map { |v| [ t("process_architecture.frequencies.#{v}"), v ] },
+                  { include_blank: t('process_architecture.none') }, class: input_class %>
+          </div>
+          <div>
+            <label class="<%= label_class %>"><%= t('process_architecture.total_time') %></label>
+            <div class="flex gap-2">
+              <%= f.number_field :total_time_value, step: :any, min: 0, class: "#{input_class} flex-1" %>
+              <%= f.select :total_time_unit, PpProcess::TIME_UNITS.map { |u| [ t("process_architecture.time_units.#{u}"), u ] },
+                    { include_blank: t('process_architecture.unit') }, class: "#{input_class} w-32" %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Automation & references -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.section_references') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :automation_status, t('process_architecture.automation_status'), class: label_class %>
+            <%= f.select :automation_status, PpProcess::AUTOMATION_STATUSES.map { |v| [ t("process_architecture.automation.#{v}"), v ] },
+                  { include_blank: t('process_architecture.none') }, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.admin_filled') %></p>
+          </div>
+          <div>
+            <%= f.label :related_policies, t('process_architecture.related_policies'), class: label_class %>
+            <%= f.text_area :related_policies, rows: 2, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.related_policies_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :technical_systems, t('process_architecture.technical_systems'), class: label_class %>
+            <%= f.text_area :technical_systems, rows: 2, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.technical_systems_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :forms_used, t('process_architecture.forms_used'), class: label_class %>
+            <%= f.text_area :forms_used, rows: 2, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.forms_used_hint') %></p>
+          </div>
+          <div class="sm:col-span-2">
+            <%= f.label :kpis, t('process_architecture.kpis'), class: label_class %>
+            <%= f.text_area :kpis, rows: 2, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.admin_filled') %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <%= link_to t('cancel'), dashboard_pp_processes_path, class: ui_btn_neutral %>
+        <%= f.submit (process.persisted? ? t('save') : t('create')), class: ui_btn_primary %>
+      </div>
+    <% end %>
+  </div>
+</div>
