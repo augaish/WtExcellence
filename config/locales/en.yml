@@ -354,6 +354,141 @@ en:
       no_permission: "You do not have permission to change the org structure."
       not_found: "Unit not found."
       no_company: "Select a company first."
+  evaluation:
+    title: "Efficiency Evaluation"
+    subtitle: "Score a saved process diagram and get a ranked list of fixes."
+    pick_diagram: "Choose a diagram"
+    evaluate: "Evaluate"
+    no_diagrams: "No diagrams to evaluate yet."
+    no_diagrams_hint: "Create a diagram from a record or a process first."
+    overall_score: "Overall score"
+    axes_title: "Scores by dimension"
+    recommendations_title: "Recommended fixes"
+    no_recommendations: "No fixes needed."
+    priority: "Priority"
+    why: "Why"
+    action: "Do this"
+    grounded_in: "Based on"
+    priorities:
+      high: "High"
+      medium: "Medium"
+      low: "Low"
+    axes:
+      bpmn:
+        name: "BPMN 2.0"
+        note: "Diagram discipline: start/end, gateways, external pools kept separate."
+      sipoc:
+        name: "SIPOC / I-O"
+        note: "Clarity of supplier, input, process, output and customer."
+      lean:
+        name: "Lean Efficiency"
+        note: "Waste, manual handoffs, excess decision points."
+      iso:
+        name: "ISO 9001 QMS"
+        note: "Documentability, outputs, records, ownership."
+      raci:
+        name: "RACI / Ownership"
+        note: "Clear performers, no unnecessary sprawl of participants."
+      digital:
+        name: "Digital Readiness"
+        note: "Automation potential, systems, messages, rules."
+    maturity:
+      excellent:
+        title: "Excellent / Institutional"
+        desc: "Clear, publishable, ready for institutional review."
+        tier: "Level 5"
+      very_good:
+        title: "Very Good"
+        desc: "Largely sound; limited improvements before approval."
+        tier: "Level 4"
+      good:
+        title: "Good"
+        desc: "Usable, but needs more data and route improvements."
+        tier: "Level 3"
+      needs_improvement:
+        title: "Needs Improvement"
+        desc: "Understandable, but documentation, BPMN or ownership quality is insufficient."
+        tier: "Level 2"
+      weak:
+        title: "Weak / Initial"
+        desc: "Needs rebuilding before approval or publishing."
+        tier: "Level 1"
+    recommendations:
+      add_start:
+        title: "Add a clear start"
+        why: "BPMN needs an understood entry point."
+        action: "Add a Start Event, e.g. \"Process starts on request receipt\"."
+        method: "BPMN 2.0"
+      add_end:
+        title: "Add a clear end"
+        why: "A process with no end is hard to approve or measure."
+        action: "Add an End Event naming the final output."
+        method: "BPMN 2.0"
+      separate_external:
+        title: "Separate the external party from Sequence Flow"
+        why: "The standard does not use Sequence Flow between different participants."
+        action: "Connect the organisation to the external party using a dashed Message Flow only."
+        method: "BPMN 2.0 Collaboration"
+      add_message_flow:
+        title: "Add a Message Flow for external parties"
+        why: "Communication with external participants must appear as messages, not internal sequence."
+        action: "Add a Send/Receive Task or Message between the org pool and the external pool."
+        method: "BPMN 2.0"
+      name_trigger:
+        title: "Name the trigger"
+        why: "The trigger explains why and when the process starts."
+        action: "Write a clear trigger, e.g. \"request received\" or \"directive issued\"."
+        method: "SIPOC"
+      complete_inputs:
+        title: "Complete the inputs"
+        why: "Missing inputs weaken executability and control."
+        action: "Name an input for each major task."
+        method: "SIPOC / ISO 9001"
+      complete_outputs:
+        title: "Complete the outputs"
+        why: "The output is the evidence the process is complete."
+        action: "Name the final output and the critical step outputs."
+        method: "SIPOC / QMS"
+      complete_performers:
+        title: "Complete the performer for every element"
+        why: "Missing performers weaken accountability and swimlane accuracy."
+        action: "Assign a performer to every step and event: role, department, system, or external party."
+        method: "RACI"
+      improve_descriptions:
+        title: "Improve step descriptions"
+        why: "Short descriptions help audit, training, and knowledge transfer."
+        action: "Add a practical description of what happens and the completion criterion."
+        method: "ISO 9001 Documentation"
+      label_gateways:
+        title: "Label gateway outcomes"
+        why: "Unlabelled gateways hide the decision logic."
+        action: "Write path conditions, e.g. yes/no, complete/incomplete, accepted/rejected."
+        method: "BPMN 2.0 Gateways"
+      reduce_handoffs:
+        title: "Reduce handoffs between roles"
+        why: "Excess handoffs increase cycle time and loss risk."
+        action: "Merge similar consecutive steps or redistribute them to reduce handoff points."
+        method: "Lean Handoffs"
+      raise_automation:
+        title: "Raise automation readiness"
+        why: "A high share of manual steps can raise errors and delay."
+        action: "Convert repetitive registration, notification and verification steps to User, Service or Business Rule Tasks."
+        method: "Digital Transformation"
+      add_records:
+        title: "Add related documents and records"
+        why: "Institutional processes need auditable evidence and references."
+        action: "Add a Data Object for the form used, and a Data Store for the record or database."
+        method: "ISO 9001 / Records"
+      review_participants:
+        title: "Review the participant count"
+        why: "Too many participants can make governance hard."
+        action: "Merge related roles, or split off a sub-process for the specialised part."
+        method: "Process Architecture"
+      maintain_quality:
+        title: "Maintain current quality"
+        why: "The process is balanced across BPMN, documentation, and governance."
+        action: "Move on to reviewing cycle time, SLA, risk, and the approval matrix."
+        method: "Continuous Improvement"
   architect:
     title: "Process Architect"
     new_diagram: "New diagram"

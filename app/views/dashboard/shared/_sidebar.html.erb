@@ -54,6 +54,8 @@
               icon: 'library-icon.svg', active: path.include?('pp_records') || path.include?('pp_packages') %>
           <%= render "dashboard/shared/nav_item", label: t('documenter.title'), path: dashboard_documenter_path,
               icon: 'calendar-03.png', active: path.include?('documenter') %>
+          <%= render "dashboard/shared/nav_item", label: t('evaluation.title'), path: dashboard_process_evaluations_path,
+              icon: 'score-start-icon.svg', active: path.include?('evaluation') %>
         </nav>
       </div>
     <% end %>

@@ -1,0 +1,39 @@
+<%= content_for :title, t('evaluation.title') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('evaluation.title'), subtitle: t('evaluation.subtitle') } do %><% end %>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
+      <% if @diagrams.any? %>
+        <div class="px-4 py-3 border-b border-[#E3E3E3] bg-[#F7F7FD]">
+          <p class="text-xs font-semibold text-[#797C81]"><%= t('evaluation.pick_diagram') %></p>
+        </div>
+        <ul class="divide-y divide-[#E3E3E3]">
+          <% @diagrams.each do |diagram| %>
+            <li class="flex items-center justify-between gap-3 px-4 py-3 hover:bg-[#F7F7FD]">
+              <div class="min-w-0">
+                <%= link_to diagram.display_name, dashboard_process_evaluation_path(diagram),
+                      class: "text-sm font-medium text-[#5C3984] hover:underline focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+                <p class="mt-0.5 text-xs text-[#797C81] truncate">
+                  <%= diagram.owner.is_a?(PpProcess) ? t('process_architecture.title') : t('pp_records.title') %>:
+                  <%= diagram.owner.respond_to?(:display_title) ? diagram.owner.display_title : diagram.owner.display_name %>
+                  · <%= diagram.elements.size %> <%= t('architect.elements').downcase %>
+                </p>
+              </div>
+              <div class="flex items-center gap-3 flex-shrink-0">
+                <% if diagram.last_score.present? %>
+                  <span class="text-xs text-[#797C81]"><%= diagram.last_score %>%</span>
+                <% end %>
+                <%= link_to t('evaluation.evaluate'), dashboard_process_evaluation_path(diagram), class: ui_btn_secondary %>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <%= render "dashboard/shared/empty_state", icon: 'standards-icon.svg',
+              title: t('evaluation.no_diagrams'), subtitle: t('evaluation.no_diagrams_hint') %>
+      <% end %>
+    </div>
+  </div>
+</div>

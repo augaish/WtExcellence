@@ -118,6 +118,12 @@ Rails.application.routes.draw do
     end
     resources :org_groups, only: [ :create, :update, :destroy ]
 
+    # Efficiency Evaluation (P&P)
+    scope :evaluation, controller: :process_evaluations do
+      get "/", action: :index, as: :process_evaluations
+      get "/:id", action: :show, as: :process_evaluation
+    end
+
     # Process Architect — structured diagram editor (P&P)
     resources :pp_diagrams, except: [ :index ] do
       member do

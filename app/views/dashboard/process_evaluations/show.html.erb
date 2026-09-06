@@ -1,0 +1,99 @@
+<%= content_for :title, "#{t('evaluation.title')} — #{@diagram.display_name}" %>
+<% score = @result[:score] %>
+<% maturity = @result[:maturity] %>
+<% ring_colour = score >= 80 ? "#16A34A" : (score >= 55 ? "#D97706" : "#DC2626") %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: @diagram.display_name, subtitle: t('evaluation.subtitle') } do %>
+      <%= link_to t('back'), dashboard_process_evaluations_path, class: ui_btn_neutral %>
+      <%= link_to t('architect.diagram'), dashboard_pp_diagram_path(@diagram), class: ui_btn_secondary %>
+    <% end %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <!-- Score ring -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 flex flex-col items-center justify-center">
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide mb-3"><%= t('evaluation.overall_score') %></p>
+        <% circumference = (2 * Math::PI * 52).round(1) %>
+        <% dash = (circumference * score / 100.0).round(1) %>
+        <svg viewBox="0 0 120 120" width="140" height="140" role="img"
+             aria-label="<%= t('evaluation.overall_score') %>: <%= score %>">
+          <circle cx="60" cy="60" r="52" fill="none" stroke="#F0F0F5" stroke-width="12"/>
+          <circle cx="60" cy="60" r="52" fill="none" stroke="<%= ring_colour %>" stroke-width="12"
+                  stroke-linecap="round" stroke-dasharray="<%= dash %> <%= circumference %>"
+                  transform="rotate(-90 60 60)"/>
+          <text x="60" y="58" text-anchor="middle" dominant-baseline="middle"
+                font-size="26" font-weight="700" fill="#0D1120"><%= score %></text>
+          <text x="60" y="78" text-anchor="middle" font-size="11" fill="#797C81">/ 100</text>
+        </svg>
+      </div>
+
+      <!-- Maturity -->
+      <div class="lg:col-span-2 bg-white border border-[#E3E3E3] rounded-xl p-5 flex flex-col justify-center">
+        <div class="flex items-center gap-2 flex-wrap mb-2">
+          <h2 class="text-lg font-semibold text-[#0D1120]"><%= maturity[:title] %></h2>
+          <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-[#F6EEFF] text-[#5C3984]"><%= maturity[:tier] %></span>
+        </div>
+        <p class="text-sm text-[#797C81]"><%= maturity[:desc] %></p>
+      </div>
+    </div>
+
+    <!-- Axes -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+      <h2 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('evaluation.axes_title') %></h2>
+      <div class="space-y-3">
+        <% @result[:axes].each do |axis| %>
+          <% bar_colour = axis[:score] >= 80 ? "#16A34A" : (axis[:score] >= 55 ? "#D97706" : "#DC2626") %>
+          <div>
+            <div class="flex items-center justify-between mb-1 gap-3">
+              <span class="text-sm font-medium text-[#0D1120]"><%= axis[:name] %></span>
+              <span class="text-sm font-semibold text-[#0D1120]"><%= axis[:score] %></span>
+            </div>
+            <div class="h-2 bg-[#F0F0F5] rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width: <%= axis[:score] %>%; background-color: <%= bar_colour %>"></div>
+            </div>
+            <p class="mt-1 text-[11px] text-[#797C81]"><%= axis[:note] %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Recommendations, high -> medium -> low -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+      <h2 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('evaluation.recommendations_title') %></h2>
+
+      <% if @recommendations.any? %>
+        <ol class="space-y-3">
+          <% @recommendations.each do |rec| %>
+            <% badge = { "high" => "bg-red-100 text-red-700", "medium" => "bg-amber-100 text-amber-800", "low" => "bg-gray-100 text-gray-600" }[rec[:priority]] %>
+            <li class="border border-[#E3E3E3] rounded-lg p-4">
+              <div class="flex items-start justify-between gap-3 mb-2">
+                <h3 class="text-sm font-semibold text-[#0D1120]"><%= rec[:title] %></h3>
+                <span class="flex-shrink-0 px-2 py-0.5 text-[11px] font-semibold rounded-full <%= badge %>">
+                  <%= t("evaluation.priorities.#{rec[:priority]}") %>
+                </span>
+              </div>
+              <dl class="space-y-1.5 text-sm">
+                <div>
+                  <dt class="inline text-xs font-medium text-[#797C81]"><%= t('evaluation.why') %>:</dt>
+                  <dd class="inline text-[#0D1120]"><%= rec[:why] %></dd>
+                </div>
+                <div>
+                  <dt class="inline text-xs font-medium text-[#797C81]"><%= t('evaluation.action') %>:</dt>
+                  <dd class="inline text-[#0D1120]"><%= rec[:action] %></dd>
+                </div>
+                <div>
+                  <dt class="inline text-xs font-medium text-[#797C81]"><%= t('evaluation.grounded_in') %>:</dt>
+                  <dd class="inline text-[#797C81]"><%= rec[:method] %></dd>
+                </div>
+              </dl>
+            </li>
+          <% end %>
+        </ol>
+      <% else %>
+        <p class="text-sm text-[#797C81]"><%= t('evaluation.no_recommendations') %></p>
+      <% end %>
+    </div>
+  </div>
+</div>
