@@ -66,7 +66,7 @@ class AssessmentsControllerTest < ActionDispatch::IntegrationTest
     ToolClause.create!(tool: @tool, clause: @sibling_clause)
 
     # Checklist item
-    ChecklistItem.create!(
+    @checklist_item = ChecklistItem.create!(
       clause: @terminal_clause, item_type: "requirement",
       code: "1.1a", sort_order: 0
     )
@@ -177,19 +177,24 @@ class AssessmentsControllerTest < ActionDispatch::IntegrationTest
     patch update_clause_assessment_path(@terminal_clause), params: {
       assessment: {
         scores: { @sub1.id => "65", @sub2.id => "70" },
-        summaries: { @sub1.id => "Test approach text" },
+        checkpoint_summaries: {
+          @checklist_item.id => { @sub1.tool_checkpoint.id => "Test approach text" }
+        },
         commit: "save_draft"
       }
     }
 
     assert_redirected_to clause_assessment_path(@terminal_clause)
 
-    container = ToolClauseSubcheckpointAssignment.find_by(
-      tool_clause: @tool_clause, tool_subcheckpoint: @sub1, company: @company
+    score = assessment_score_for(@sub1)
+    assert score.present?, "An AssessmentScore should be created"
+    assert_in_delta 65.0, score.percentage_score.to_f, 0.01
+
+    summary = CheckpointSummary.find_by(
+      tool_clause: @tool_clause, checklist_item_id: @checklist_item.id,
+      tool_checkpoint_id: @sub1.tool_checkpoint.id, company: @company
     )
-    assert container.present?, "Assignment container should be created"
-    assert_in_delta 65.0, container.percentage_score.to_f, 0.01
-    assert_equal "Test approach text", container.summary
+    assert_equal "Test approach text", summary&.summary
   end
 
   test "save draft transitions not_started containers to in_drafts" do
@@ -202,10 +207,7 @@ class AssessmentsControllerTest < ActionDispatch::IntegrationTest
       }
     }
 
-    container = ToolClauseSubcheckpointAssignment.find_by(
-      tool_clause: @tool_clause, tool_subcheckpoint: @sub1, company: @company
-    )
-    assert_equal "in_drafts", container.status
+    assert_equal "in_drafts", assessment_record.status
   end
 
   # ========= AC-A12: Submit for Review =========
@@ -222,10 +224,7 @@ class AssessmentsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to clause_assessment_path(@terminal_clause)
 
-    container = ToolClauseSubcheckpointAssignment.find_by(
-      tool_clause: @tool_clause, tool_subcheckpoint: @sub1, company: @company
-    )
-    assert_equal "under_review", container.status
+    assert_equal "under_review", assessment_record.status
   end
 
   # ========= Viewer cannot update =========
@@ -246,11 +245,9 @@ class AssessmentsControllerTest < ActionDispatch::IntegrationTest
     # Viewer should be blocked (redirect for HTML, 403 for JSON format)
     assert_includes [ 302, 403 ], response.status
 
-    # Container may exist (created by page load) but score should remain nil
-    container = ToolClauseSubcheckpointAssignment.find_by(
-      tool_clause: @tool_clause, tool_subcheckpoint: @sub1, company: @company
-    )
-    assert_nil container&.percentage_score, "Viewer should not be able to set scores"
+    # The assessment may exist (created by the page load) but no score may be set.
+    assert_nil assessment_score_for(@sub1)&.percentage_score,
+      "Viewer should not be able to set scores"
   end
 
   # ========= EC-2.5: No tool linked =========
@@ -282,5 +279,17 @@ class AssessmentsControllerTest < ActionDispatch::IntegrationTest
     sign_in @admin_user
     get clause_assessment_path(@terminal_clause)
     assert_select "[data-controller='scoring-calculator']"
+  end
+
+  private
+
+  # Scores and status live on Assessment / AssessmentScore (one assessment per
+  # tool_clause + company); summaries live on CheckpointSummary.
+  def assessment_record
+    Assessment.find_by(tool_clause: @tool_clause, company: @company)
+  end
+
+  def assessment_score_for(subcheckpoint)
+    assessment_record&.assessment_scores&.find_by(tool_subcheckpoint: subcheckpoint)
   end
 end

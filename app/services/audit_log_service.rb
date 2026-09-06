@@ -18,14 +18,20 @@ class AuditLogService
     # Skip if no company can be determined
     return nil unless resolved_company
 
-    AuditLog.create!(
-      actor_user_id: actor_user.id,
-      company_id: resolved_company.id,
-      action: action,
-      entity_type: entity_type,
-      entity_id: entity_id,
-      payload_json: payload
-    )
+    # Wrap the insert in a SAVEPOINT. Audit logging must never break the caller,
+    # but in PostgreSQL any failed statement aborts the WHOLE transaction, so
+    # rescuing without a savepoint would leave the caller's transaction poisoned
+    # and every later statement would fail with InFailedSqlTransaction.
+    ActiveRecord::Base.transaction(requires_new: true) do
+      AuditLog.create!(
+        actor_user_id: actor_user.id,
+        company_id: resolved_company.id,
+        action: action,
+        entity_type: entity_type,
+        entity_id: entity_id,
+        payload_json: payload
+      )
+    end
   rescue => e
     # Log error but don't fail the main operation
     Rails.logger.error "Failed to create audit log: #{e.message}"

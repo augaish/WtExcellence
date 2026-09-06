@@ -17,12 +17,12 @@ class ClauseScoreCalculatorTest < ActiveSupport::TestCase
     @cp_deployment = ToolCheckpoint.create!(tool: @tool, name: "Deployment", display_order: 2)
     @cp_assessment = ToolCheckpoint.create!(tool: @tool, name: "Assessment", display_order: 3)
 
-    @sound = ToolSubcheckpoint.create!(tool_checkpoint: @cp_approach, name: "Sound", scoring_type: "Percentage", weight: 0.2, is_cap: true, display_order: 1)
-    @aligned = ToolSubcheckpoint.create!(tool_checkpoint: @cp_approach, name: "Aligned", scoring_type: "Percentage", weight: 0.2, is_cap: false, display_order: 2)
-    @implemented = ToolSubcheckpoint.create!(tool_checkpoint: @cp_deployment, name: "Implemented", scoring_type: "Percentage", weight: 0.2, is_cap: false, display_order: 1)
-    @flexible = ToolSubcheckpoint.create!(tool_checkpoint: @cp_deployment, name: "Flexible", scoring_type: "Percentage", weight: 0.2, is_cap: false, display_order: 2)
-    @evaluated = ToolSubcheckpoint.create!(tool_checkpoint: @cp_assessment, name: "Evaluated", scoring_type: "Percentage", weight: 0.1, is_cap: false, display_order: 1)
-    @learn = ToolSubcheckpoint.create!(tool_checkpoint: @cp_assessment, name: "Learn", scoring_type: "Percentage", weight: 0.1, is_cap: false, display_order: 2)
+    @sound = ToolSubcheckpoint.create!(tool_checkpoint: @cp_approach, name: "Sound", scoring_type: "Percentage", weight: 20, is_cap: true, display_order: 1)
+    @aligned = ToolSubcheckpoint.create!(tool_checkpoint: @cp_approach, name: "Aligned", scoring_type: "Percentage", weight: 20, is_cap: false, display_order: 2)
+    @implemented = ToolSubcheckpoint.create!(tool_checkpoint: @cp_deployment, name: "Implemented", scoring_type: "Percentage", weight: 20, is_cap: false, display_order: 1)
+    @flexible = ToolSubcheckpoint.create!(tool_checkpoint: @cp_deployment, name: "Flexible", scoring_type: "Percentage", weight: 20, is_cap: false, display_order: 2)
+    @evaluated = ToolSubcheckpoint.create!(tool_checkpoint: @cp_assessment, name: "Evaluated", scoring_type: "Percentage", weight: 10, is_cap: false, display_order: 1)
+    @learn = ToolSubcheckpoint.create!(tool_checkpoint: @cp_assessment, name: "Learn", scoring_type: "Percentage", weight: 10, is_cap: false, display_order: 2)
 
     @tool_clause = ToolClause.create!(tool: @tool, clause: @clause)
   end
@@ -103,7 +103,7 @@ class ClauseScoreCalculatorTest < ActiveSupport::TestCase
 
   test "no weights configured: equal weighting fallback (1/N)" do
     # Remove all weights
-    [@sound, @aligned, @implemented, @flexible, @evaluated, @learn].each { |s| s.update!(weight: nil, is_cap: false) }
+    [ @sound, @aligned, @implemented, @flexible, @evaluated, @learn ].each { |s| s.update!(weight: nil, is_cap: false) }
 
     create_assignment(@sound, 100)
     create_assignment(@aligned, 50)
@@ -278,14 +278,20 @@ class ClauseScoreCalculatorTest < ActiveSupport::TestCase
 
   private
 
+  # ClauseScoreCalculator reads scores through an APPROVED Assessment for the
+  # clause + company, so a score is recorded as an AssessmentScore on that
+  # assessment (one assessment per tool_clause/company pair).
   def create_assignment(subcheckpoint, percentage_score, company = nil)
     company ||= @company
-    ToolClauseSubcheckpointAssignment.create!(
-      tool_clause: @tool_clause,
+    assessment = Assessment.find_or_create_by!(tool_clause: @tool_clause, company: company) do |a|
+      a.status = "approved"
+    end
+    assessment.update!(status: "approved") unless assessment.status == "approved"
+
+    AssessmentScore.create!(
+      assessment: assessment,
       tool_subcheckpoint: subcheckpoint,
-      company: company,
-      percentage_score: percentage_score,
-      status: "approved"
+      percentage_score: percentage_score
     )
   end
 end

@@ -25,7 +25,7 @@ class ToolSubcheckpointWeightTest < ActiveSupport::TestCase
   test "valid with weight at upper bound 1.0" do
     sub = ToolSubcheckpoint.new(
       tool_checkpoint: @checkpoint, name: "Sub1",
-      scoring_type: "Percentage", weight: 1.0, is_cap: false
+      scoring_type: "Percentage", weight: 100, is_cap: false
     )
     assert sub.valid?
   end
@@ -33,15 +33,15 @@ class ToolSubcheckpointWeightTest < ActiveSupport::TestCase
   test "valid with weight at typical value 0.2" do
     sub = ToolSubcheckpoint.new(
       tool_checkpoint: @checkpoint, name: "Sub1",
-      scoring_type: "Percentage", weight: 0.2, is_cap: false
+      scoring_type: "Percentage", weight: 20, is_cap: false
     )
     assert sub.valid?
   end
 
-  test "invalid with weight greater than 1.0" do
+  test "invalid with weight greater than 100" do
     sub = ToolSubcheckpoint.new(
       tool_checkpoint: @checkpoint, name: "Sub1",
-      scoring_type: "Percentage", weight: 1.5, is_cap: false
+      scoring_type: "Percentage", weight: 150, is_cap: false
     )
     refute sub.valid?
     assert sub.errors[:weight].any?
@@ -67,16 +67,26 @@ class ToolSubcheckpointWeightTest < ActiveSupport::TestCase
   test "is_cap can be set to true" do
     sub = ToolSubcheckpoint.create!(
       tool_checkpoint: @checkpoint, name: "Sub1",
-      scoring_type: "Percentage", is_cap: true, weight: 0.5
+      scoring_type: "Percentage", is_cap: true, weight: 50
     )
     assert_equal true, sub.reload.is_cap
   end
 
-  test "weight persists with decimal precision" do
+  # The column is decimal(5,2): percentages keep two decimal places, so 12.34
+  # round-trips exactly and anything finer is rounded to the stored scale.
+  test "weight persists with two decimal places" do
     sub = ToolSubcheckpoint.create!(
       tool_checkpoint: @checkpoint, name: "Sub1",
-      scoring_type: "Percentage", weight: 0.1234
+      scoring_type: "Percentage", weight: 12.34
     )
-    assert_equal 0.1234, sub.reload.weight.to_f
+    assert_equal 12.34, sub.reload.weight.to_f
+  end
+
+  test "weight is rounded to the stored scale" do
+    sub = ToolSubcheckpoint.create!(
+      tool_checkpoint: @checkpoint, name: "Sub2",
+      scoring_type: "Percentage", weight: 12.3456
+    )
+    assert_equal 12.35, sub.reload.weight.to_f
   end
 end

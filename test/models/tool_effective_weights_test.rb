@@ -14,7 +14,7 @@ class ToolEffectiveWeightsTest < ActiveSupport::TestCase
 
     result = @tool.all_subcheckpoints
     assert_equal 3, result.size
-    assert_equal [s1.id, s2.id, s3.id], result.map(&:id)
+    assert_equal [ s1.id, s2.id, s3.id ], result.map(&:id)
   end
 
   test "all_subcheckpoints returns empty array for tool with no checkpoints" do
@@ -34,10 +34,12 @@ class ToolEffectiveWeightsTest < ActiveSupport::TestCase
     end
   end
 
+  # Weights are stored as PERCENTAGES (the form is min=0 max=100) and
+  # effective_weights converts them to fractions by dividing by 100.
   test "effective_weights returns configured weights when set" do
-    s1 = ToolSubcheckpoint.create!(tool_checkpoint: @cp1, name: "S1", scoring_type: "Percentage", weight: 0.5)
-    s2 = ToolSubcheckpoint.create!(tool_checkpoint: @cp1, name: "S2", scoring_type: "Percentage", weight: 0.3)
-    s3 = ToolSubcheckpoint.create!(tool_checkpoint: @cp2, name: "S3", scoring_type: "Percentage", weight: 0.2)
+    s1 = ToolSubcheckpoint.create!(tool_checkpoint: @cp1, name: "S1", scoring_type: "Percentage", weight: 50)
+    s2 = ToolSubcheckpoint.create!(tool_checkpoint: @cp1, name: "S2", scoring_type: "Percentage", weight: 30)
+    s3 = ToolSubcheckpoint.create!(tool_checkpoint: @cp2, name: "S3", scoring_type: "Percentage", weight: 20)
 
     weights = @tool.effective_weights
     assert_in_delta 0.5, weights[s1.id], 0.0001
@@ -46,7 +48,7 @@ class ToolEffectiveWeightsTest < ActiveSupport::TestCase
   end
 
   test "effective_weights treats null weight as 0 when some weights are configured" do
-    s1 = ToolSubcheckpoint.create!(tool_checkpoint: @cp1, name: "S1", scoring_type: "Percentage", weight: 0.5)
+    s1 = ToolSubcheckpoint.create!(tool_checkpoint: @cp1, name: "S1", scoring_type: "Percentage", weight: 50)
     s2 = ToolSubcheckpoint.create!(tool_checkpoint: @cp1, name: "S2", scoring_type: "Percentage", weight: nil)
 
     weights = @tool.effective_weights
