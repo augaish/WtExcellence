@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_140100) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_19_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -599,6 +599,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_140100) do
     t.index ["tsvector_content"], name: "index_pg_search_documents_on_tsvector_content_gin", using: :gin
   end
 
+  create_table "pp_packages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "name", limit: 250, null: false
+    t.date "start_date"
+    t.date "end_date"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "name"], name: "index_pp_packages_on_company_id_and_name"
+    t.index ["company_id"], name: "index_pp_packages_on_company_id"
+  end
+
   create_table "pp_processes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "company_id", null: false
     t.uuid "parent_id"
@@ -635,6 +647,34 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_140100) do
     t.index ["parent_id"], name: "index_pp_processes_on_parent_id"
     t.index ["predecessor_process_id"], name: "index_pp_processes_on_predecessor_process_id"
     t.index ["successor_process_id"], name: "index_pp_processes_on_successor_process_id"
+  end
+
+  create_table "pp_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.uuid "package_id"
+    t.string "record_type", limit: 40, null: false
+    t.string "code", limit: 50
+    t.string "title_en", limit: 300
+    t.string "title_ar", limit: 300
+    t.text "description"
+    t.string "version_label", limit: 50
+    t.date "effective_date"
+    t.date "review_date"
+    t.uuid "owner_user_id"
+    t.uuid "owner_org_unit_id"
+    t.uuid "pp_process_id"
+    t.string "current_stage", limit: 50
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
+    t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"
+    t.index ["company_id"], name: "index_pp_records_on_company_id"
+    t.index ["owner_org_unit_id"], name: "index_pp_records_on_owner_org_unit_id"
+    t.index ["owner_user_id"], name: "index_pp_records_on_owner_user_id"
+    t.index ["package_id"], name: "index_pp_records_on_package_id"
+    t.index ["pp_process_id"], name: "index_pp_records_on_pp_process_id"
+    t.index ["review_date"], name: "index_pp_records_on_review_date"
   end
 
   create_table "questionnaires", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -977,12 +1017,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_140100) do
   add_foreign_key "org_units", "org_groups"
   add_foreign_key "org_units", "org_units", column: "parent_id"
   add_foreign_key "org_units", "users", column: "head_user_id"
+  add_foreign_key "pp_packages", "companies"
   add_foreign_key "pp_processes", "companies"
   add_foreign_key "pp_processes", "org_units", column: "owner_org_unit_id"
   add_foreign_key "pp_processes", "pp_processes", column: "parent_id"
   add_foreign_key "pp_processes", "pp_processes", column: "predecessor_process_id"
   add_foreign_key "pp_processes", "pp_processes", column: "successor_process_id"
   add_foreign_key "pp_processes", "users", column: "owner_user_id"
+  add_foreign_key "pp_records", "companies"
+  add_foreign_key "pp_records", "org_units", column: "owner_org_unit_id"
+  add_foreign_key "pp_records", "pp_packages", column: "package_id"
+  add_foreign_key "pp_records", "pp_processes"
+  add_foreign_key "pp_records", "users", column: "owner_user_id"
   add_foreign_key "questionnaires", "capas"
   add_foreign_key "risk_workspaces", "companies"
   add_foreign_key "risks", "companies"

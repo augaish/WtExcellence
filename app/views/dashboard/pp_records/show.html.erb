@@ -1,0 +1,150 @@
+<%= content_for :title, @record.display_title %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-5xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: @record.display_title, subtitle: "#{@record.type_label}#{@record.code.present? ? " · #{@record.code}" : ''}" } do %>
+      <%= link_to t('back'), dashboard_pp_records_path(record_type: @record.record_type), class: ui_btn_neutral %>
+      <% if can_manage_pp_records? %>
+        <%= link_to t('edit'), edit_dashboard_pp_record_path(@record), class: ui_btn_primary %>
+      <% end %>
+    <% end %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Details -->
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+          <h2 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('pp_records.section_identity') %></h2>
+          <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.type') %></dt>
+              <dd class="mt-0.5 text-[#0D1120]"><%= @record.type_label %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.version') %></dt>
+              <dd class="mt-0.5 text-[#0D1120]"><%= @record.version_label.presence || "—" %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.owner_unit') %></dt>
+              <dd class="mt-0.5 text-[#0D1120]"><%= @record.owner_org_unit&.display_name.presence || "—" %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.owner_user') %></dt>
+              <dd class="mt-0.5 text-[#0D1120]"><%= @record.owner_user&.name.presence || "—" %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.process') %></dt>
+              <dd class="mt-0.5 text-[#0D1120]">
+                <%= @record.pp_process ? "#{@record.pp_process.code} · #{@record.pp_process.display_name}" : "—" %>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.effective_date') %></dt>
+              <dd class="mt-0.5 text-[#0D1120]"><%= @record.effective_date.presence || "—" %></dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.review_date') %></dt>
+              <dd class="mt-0.5">
+                <% if @record.review_date.blank? %>
+                  <span class="text-[#0D1120]">—</span>
+                <% elsif @record.review_overdue? %>
+                  <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-red-100 text-red-700"><%= t('pp_records.overdue') %> · <%= @record.review_date %></span>
+                <% elsif @record.review_due_soon? %>
+                  <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-amber-100 text-amber-800"><%= t('pp_records.due_soon') %> · <%= @record.review_date %></span>
+                <% else %>
+                  <span class="text-[#0D1120]"><%= @record.review_date %></span>
+                <% end %>
+              </dd>
+            </div>
+            <!-- Package: informational only. Composition happens from the package side. -->
+            <div>
+              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.packages.package') %></dt>
+              <dd class="mt-0.5">
+                <% if @record.packaged? %>
+                  <%= link_to @record.package.name, dashboard_pp_package_path(@record.package),
+                        class: "text-[#5C3984] hover:underline focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+                <% else %>
+                  <span class="text-[#797C81]"><%= t('pp_records.packages.unpackaged') %></span>
+                <% end %>
+                <p class="mt-0.5 text-[11px] text-[#797C81]"><%= t('pp_records.packages.read_only_hint') %></p>
+              </dd>
+            </div>
+          </dl>
+
+          <% if @record.description.present? %>
+            <div class="mt-4 pt-4 border-t border-[#E3E3E3]">
+              <dt class="text-xs font-medium text-[#797C81] mb-1"><%= t('pp_records.description') %></dt>
+              <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= @record.description %></p>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Documents -->
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+          <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.documents') %></h2>
+          <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('pp_records.documents_hint') %></p>
+
+          <% if @attachments.any? %>
+            <ul class="divide-y divide-[#E3E3E3] mb-4">
+              <% @attachments.each do |attachment| %>
+                <li class="flex items-center justify-between py-2.5 gap-3">
+                  <span class="text-sm text-[#0D1120] truncate"><%= attachment.upload&.filename %></span>
+                  <% if can_manage_pp_records? %>
+                    <%= button_to t('remove'), detach_document_dashboard_pp_record_path(@record, upload_id: attachment.upload_id),
+                          method: :delete,
+                          class: "flex-shrink-0 px-2 py-1 text-xs font-medium text-red-600 rounded hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600",
+                          form: { class: "inline" } %>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-[#797C81] mb-4"><%= t('pp_records.no_documents') %></p>
+          <% end %>
+
+          <% if can_manage_pp_records? %>
+            <%= form_with url: attach_documents_dashboard_pp_record_path(@record), method: :post, multipart: true, class: "space-y-3 border-t border-[#E3E3E3] pt-4" do %>
+              <div>
+                <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('pp_records.upload_new') %></label>
+                <input type="file" name="files[]" multiple
+                       class="w-full text-sm text-[#0D1120] file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-[#F6EEFF] file:text-[#5C3984] file:text-sm file:font-medium">
+                <p class="mt-1 text-[11px] text-[#797C81]"><%= t('pp_records.upload_new_hint') %></p>
+              </div>
+              <% if @available_uploads.any? %>
+                <div>
+                  <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('pp_records.link_existing') %></label>
+                  <select name="upload_ids[]" multiple size="4"
+                          class="w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]">
+                    <% @available_uploads.each do |upload| %>
+                      <option value="<%= upload.id %>"><%= upload.filename %></option>
+                    <% end %>
+                  </select>
+                </div>
+              <% end %>
+              <div class="flex justify-end">
+                <%= submit_tag t('pp_records.attach'), class: ui_btn_primary %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Side column -->
+      <div class="space-y-6">
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+          <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('pp_records.status') %></h2>
+          <p class="text-sm text-[#797C81]"><%= t('pp_records.stage_pending') %></p>
+        </div>
+
+        <% if can_manage_pp_records? %>
+          <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+            <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('pp_records.danger_zone') %></h2>
+            <%= button_to t('pp_records.delete_record'), dashboard_pp_record_path(@record), method: :delete,
+                  class: "w-full px-3 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600",
+                  form: { data: { turbo_confirm: t('pp_records.confirm_delete', title: @record.display_title) } } %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

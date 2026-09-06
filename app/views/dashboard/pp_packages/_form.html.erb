@@ -1,0 +1,61 @@
+<%# Package form. Locals: package %>
+<% input_class = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+<% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-2xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: package.persisted? ? t('pp_records.packages.edit') : t('pp_records.packages.add'),
+          subtitle: t('pp_records.packages.form_subtitle') } do %>
+      <%= link_to t('cancel'), dashboard_pp_packages_path, class: ui_btn_neutral %>
+    <% end %>
+
+    <%= form_with model: package, url: (package.persisted? ? dashboard_pp_package_path(package) : dashboard_pp_packages_path),
+          method: (package.persisted? ? :patch : :post), class: "space-y-6" do |f| %>
+      <% if package.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-red-800 mb-1"><%= t('pp_records.fix_errors') %></p>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5">
+            <% package.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <div>
+          <%= f.label :name, t('pp_records.packages.name'), class: label_class %>
+          <%= f.text_field :name, class: input_class %>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :start_date, t('pp_records.packages.start_date'), class: label_class %>
+            <%= f.date_field :start_date, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :end_date, t('pp_records.packages.end_date'), class: label_class %>
+            <%= f.date_field :end_date, class: input_class %>
+          </div>
+        </div>
+        <p class="text-[11px] text-[#797C81]"><%= t('pp_records.packages.window_hint') %></p>
+        <div>
+          <%= f.label :notes, t('pp_records.packages.notes'), class: label_class %>
+          <%= f.text_area :notes, rows: 3, class: input_class %>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between gap-2">
+        <div>
+          <% if package.persisted? && can_manage_pp_records? %>
+            <%= button_to t('pp_records.packages.delete'), dashboard_pp_package_path(package), method: :delete,
+                  class: "px-3 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600",
+                  form: { data: { turbo_confirm: t('pp_records.packages.confirm_delete', name: package.name) } } %>
+          <% end %>
+        </div>
+        <div class="flex items-center gap-2">
+          <%= link_to t('cancel'), dashboard_pp_packages_path, class: ui_btn_neutral %>
+          <%= f.submit (package.persisted? ? t('save') : t('create')), class: ui_btn_primary %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

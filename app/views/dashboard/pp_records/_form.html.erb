@@ -1,0 +1,99 @@
+<%# Record form. Locals: record, org_units, company_users, processes %>
+<% input_class = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+<% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: record.persisted? ? t('pp_records.edit_record') : t('pp_records.add_record'),
+          subtitle: t('pp_records.form_subtitle') } do %>
+      <%= link_to t('cancel'), (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path), class: ui_btn_neutral %>
+    <% end %>
+
+    <%= form_with model: record, url: (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path),
+          method: (record.persisted? ? :patch : :post), class: "space-y-6" do |f| %>
+
+      <% if record.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <p class="text-sm font-semibold text-red-800 mb-1"><%= t('pp_records.fix_errors') %></p>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5">
+            <% record.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_identity') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :record_type, t('pp_records.type'), class: label_class %>
+            <%= f.select :record_type, PpRecord::TYPES.map { |t| [ t("pp_records.types.#{t}"), t ] }, {}, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :code, t('pp_records.code'), class: label_class %>
+            <%= f.text_field :code, class: "#{input_class} font-mono" %>
+            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('pp_records.code_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :title_en, t('pp_records.title_en'), class: label_class %>
+            <%= f.text_field :title_en, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :title_ar, t('pp_records.title_ar'), class: label_class %>
+            <%= f.text_field :title_ar, dir: "rtl", class: input_class %>
+          </div>
+          <div class="sm:col-span-2">
+            <%= f.label :description, t('pp_records.description'), class: label_class %>
+            <%= f.text_area :description, rows: 3, class: input_class %>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_ownership') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :owner_org_unit_id, t('pp_records.owner_unit'), class: label_class %>
+            <%= f.select :owner_org_unit_id, org_units.map { |u| [ u.display_name, u.id ] },
+                  { include_blank: t('process_architecture.no_owner') }, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :owner_user_id, t('pp_records.owner_user'), class: label_class %>
+            <%= f.select :owner_user_id, company_users.map { |u| [ u.name, u.id ] },
+                  { include_blank: t('process_architecture.no_owner') }, class: input_class %>
+          </div>
+          <div class="sm:col-span-2">
+            <%= f.label :pp_process_id, t('pp_records.process'), class: label_class %>
+            <%= f.select :pp_process_id, processes.map { |p| [ "#{p.code} · #{p.display_name}", p.id ] },
+                  { include_blank: t('pp_records.no_process') }, class: input_class %>
+            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('pp_records.process_hint') %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_version') %></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <%= f.label :version_label, t('pp_records.version'), class: label_class %>
+            <%= f.text_field :version_label, placeholder: "v1.0", class: input_class %>
+          </div>
+          <div>
+            <%= f.label :effective_date, t('pp_records.effective_date'), class: label_class %>
+            <%= f.date_field :effective_date, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :review_date, t('pp_records.review_date'), class: label_class %>
+            <%= f.date_field :review_date, class: input_class %>
+            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('pp_records.review_date_hint') %></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <%= link_to t('cancel'), (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path), class: ui_btn_neutral %>
+        <%= f.submit (record.persisted? ? t('save') : t('create')), class: ui_btn_primary %>
+      </div>
+    <% end %>
+  </div>
+</div>

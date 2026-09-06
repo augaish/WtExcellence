@@ -21,6 +21,7 @@ class PpProcess < ApplicationRecord
 
   has_many :children, -> { order(:sort_order, :created_at) },
     class_name: "PpProcess", foreign_key: "parent_id", dependent: :restrict_with_error
+  has_many :pp_records, class_name: "PpRecord", foreign_key: "pp_process_id", dependent: :nullify
 
   validates :level, presence: true,
     numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: MAX_LEVEL }

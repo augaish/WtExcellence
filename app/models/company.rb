@@ -29,6 +29,8 @@ class Company < ApplicationRecord
   has_many :org_groups, -> { order(:sort_order) }, dependent: :destroy
   has_many :org_units, dependent: :destroy
   has_many :pp_processes, dependent: :destroy
+  has_many :pp_packages, dependent: :destroy
+  has_many :pp_records, dependent: :destroy
   has_many :users, through: :company_users
   has_many :capas, dependent: :nullify
   has_many :company_standards, dependent: :destroy

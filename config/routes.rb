@@ -118,6 +118,20 @@ Rails.application.routes.draw do
     end
     resources :org_groups, only: [ :create, :update, :destroy ]
 
+    # Records + Packages (P&P)
+    resources :pp_records do
+      member do
+        post :attach_documents
+        delete :detach_document
+      end
+    end
+    resources :pp_packages do
+      member do
+        post :assign_record
+        delete :remove_record
+      end
+    end
+
     # Process Architecture (P&P)
     resources :pp_processes, except: [ :show ] do
       collection do

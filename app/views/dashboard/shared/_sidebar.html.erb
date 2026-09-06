@@ -50,6 +50,8 @@
         <nav class="space-y-1">
           <%= render "dashboard/shared/nav_item", label: t('process_architecture.title'), path: dashboard_pp_processes_path,
               icon: 'standards-icon.svg', active: path.include?('pp_processes') %>
+          <%= render "dashboard/shared/nav_item", label: t('pp_records.title'), path: dashboard_pp_records_path,
+              icon: 'library-icon.svg', active: path.include?('pp_records') || path.include?('pp_packages') %>
         </nav>
       </div>
     <% end %>

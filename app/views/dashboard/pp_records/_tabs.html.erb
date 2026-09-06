@@ -1,0 +1,31 @@
+<%# Record-type tabs plus the top-level Packages tab.
+    Locals: active_type (nil for "all"), counts_by_type, total_count, packages_count, on_packages (bool) %>
+<div class="border-b border-[#E3E3E3] mb-6 overflow-x-auto">
+  <nav class="flex items-center gap-1 min-w-max" aria-label="<%= t('pp_records.title') %>">
+    <% tab_base = "px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+    <% active_cls = "border-[#5C3984] text-[#5C3984]" %>
+    <% idle_cls = "border-transparent text-[#797C81] hover:text-[#0D1120] hover:border-[#E3E3E3]" %>
+
+    <%= link_to dashboard_pp_records_path,
+          class: "#{tab_base} #{(!on_packages && active_type.nil?) ? active_cls : idle_cls}" do %>
+      <%= t('pp_records.tabs.all') %>
+      <span class="ms-1 text-xs text-[#797C81]">(<%= total_count %>)</span>
+    <% end %>
+
+    <% PpRecord::TYPES.each do |type| %>
+      <%= link_to dashboard_pp_records_path(record_type: type),
+            class: "#{tab_base} #{(!on_packages && active_type == type) ? active_cls : idle_cls}" do %>
+        <%= t("pp_records.types_plural.#{type}") %>
+        <span class="ms-1 text-xs text-[#797C81]">(<%= counts_by_type[type].to_i %>)</span>
+      <% end %>
+    <% end %>
+
+    <span class="mx-2 h-5 w-px bg-[#E3E3E3]" aria-hidden="true"></span>
+
+    <%= link_to dashboard_pp_packages_path,
+          class: "#{tab_base} #{on_packages ? active_cls : idle_cls}" do %>
+      <%= t('pp_records.packages.title') %>
+      <span class="ms-1 text-xs text-[#797C81]">(<%= packages_count %>)</span>
+    <% end %>
+  </nav>
+</div>
