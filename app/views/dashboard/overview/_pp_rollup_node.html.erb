@@ -1,0 +1,23 @@
+<%# One node of the roll-up tree. Locals: node, depth %>
+<div class="py-1.5" style="padding-inline-start: <%= depth * 18 %>px">
+  <div class="flex items-center gap-2">
+    <% if node[:colour].present? %>
+      <span class="flex-shrink-0 w-2 h-2 rounded-full" style="background-color: <%= node[:colour] %>"></span>
+    <% end %>
+    <span class="text-sm text-[#0D1120] truncate flex-1 min-w-0"><%= node[:name] %></span>
+    <% if node[:not_started] %>
+      <span class="flex-shrink-0 px-2 py-0.5 text-[11px] font-medium rounded-full bg-gray-100 text-gray-600"><%= t('pp_widgets.status.not_started') %></span>
+    <% elsif node[:completion_pct].present? %>
+      <span class="flex-shrink-0 text-xs font-semibold text-[#0D1120]"><%= node[:completion_pct] %>%</span>
+    <% end %>
+    <span class="flex-shrink-0 text-[11px] text-[#797C81] w-10 text-end"><%= node[:total_records] %></span>
+  </div>
+  <% if node[:completion_pct].present? && !node[:not_started] %>
+    <div class="h-1.5 bg-[#F0F0F5] rounded-full overflow-hidden mt-1">
+      <div class="h-full bg-[#5C3984] rounded-full" style="width: <%= [ node[:completion_pct], 100 ].min %>%"></div>
+    </div>
+  <% end %>
+</div>
+<% node[:children].each do |child| %>
+  <%= render "dashboard/overview/pp_rollup_node", node: child, depth: depth + 1 %>
+<% end %>

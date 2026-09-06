@@ -142,6 +142,10 @@ class Dashboard::OverviewController < Dashboard::BaseController
     load_overview_catalog_metrics
     mark.call(:catalog_metrics)
 
+    # P&P monitoring widgets (lifecycle funnel, work status, org-unit roll-up).
+    load_pp_monitoring_metrics
+    mark.call(:pp_monitoring)
+
     # Customizable layout (which widgets show, in what order) — admins can edit,
     # everyone in the scope renders the active layout.
     load_dashboard_layout
@@ -240,6 +244,25 @@ class Dashboard::OverviewController < Dashboard::BaseController
   end
 
   # Reads cached compliance (cheap column average — no recompute) plus Trust
+  # P&P widgets. Skipped entirely when the module is off for this company, so
+  # the overview never pays for data it will not show.
+  def load_pp_monitoring_metrics
+    @pp_funnel = []
+    @pp_status_breakdown = {}
+    @pp_rollup = []
+
+    company = current_company
+    return if company.nil?
+    return unless company.module_enabled?(:pp)
+
+    monitoring = PpMonitoringService.for(company)
+    @pp_funnel = monitoring.funnel
+    @pp_status_breakdown = monitoring.status_breakdown
+    @pp_rollup = monitoring.rollup
+  rescue => e
+    Rails.logger.warn "P&P monitoring metrics failed: #{e.class}: #{e.message}"
+  end
+
   # Center status for the catalog widgets. Company-scoped for company users,
   # platform-wide for super admins.
   def load_overview_catalog_metrics

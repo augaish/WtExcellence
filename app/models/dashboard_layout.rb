@@ -7,7 +7,8 @@ class DashboardLayout < ApplicationRecord
   # (so newly-shipped widgets appear automatically).
   WIDGET_KEYS = %w[
     top_metrics second_metrics charts governance risk_matrix commitments
-    compliance_gauge compliance_by_standard risks_by_workspace trust_center tables
+    compliance_gauge compliance_by_standard risks_by_workspace trust_center
+    pp_funnel pp_work_status pp_rollup tables
   ].freeze
   SLOTS = (1..3).to_a.freeze
 

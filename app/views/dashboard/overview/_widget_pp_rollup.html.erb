@@ -1,0 +1,21 @@
+<%# Calculation 3: roll-up by org unit — every child weighted equally. %>
+<% rollup = @pp_rollup || [] %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_widgets.rollup.title') %></h2>
+  <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('pp_widgets.rollup.hint') %></p>
+
+  <% if rollup.any? %>
+    <div class="flex items-center gap-2 pb-2 mb-1 border-b border-[#E3E3E3] text-[11px] font-semibold text-[#797C81]">
+      <span class="flex-1"><%= t('org_structure.title') %></span>
+      <span><%= t('pp_widgets.rollup.completion') %></span>
+      <span class="w-10 text-end"><%= t('pp_widgets.rollup.records') %></span>
+    </div>
+    <div class="divide-y divide-[#F0F0F5]">
+      <% rollup.each do |node| %>
+        <%= render "dashboard/overview/pp_rollup_node", node: node, depth: 0 %>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-[#797C81]"><%= t('pp_widgets.rollup.no_units') %></p>
+  <% end %>
+</div>

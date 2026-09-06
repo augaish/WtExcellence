@@ -1,0 +1,38 @@
+<%# Calculation 2: per-record work status as a coloured stat row. %>
+<% breakdown = @pp_status_breakdown || {} %>
+<% total = breakdown.values.sum %>
+<% palette = {
+     "not_started"    => { bg: "bg-gray-100",  text: "text-gray-700",   bar: "#C9C9D1" },
+     "on_track"       => { bg: "bg-green-100", text: "text-green-800",  bar: "#16A34A" },
+     "late"           => { bg: "bg-red-100",   text: "text-red-700",    bar: "#DC2626" },
+     "completed"      => { bg: "bg-[#F6EEFF]", text: "text-[#5C3984]",  bar: "#5C3984" },
+     "completed_late" => { bg: "bg-amber-100", text: "text-amber-800",  bar: "#D97706" }
+   } %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_widgets.status.title') %></h2>
+  <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('pp_widgets.status.hint') %></p>
+
+  <% if total.positive? %>
+    <!-- Proportional bar -->
+    <div class="flex h-2.5 rounded-full overflow-hidden mb-4">
+      <% PpMonitoringService::STATUSES.each do |status| %>
+        <% count = breakdown[status].to_i %>
+        <% next if count.zero? %>
+        <div style="width: <%= (count.to_f / total * 100).round(2) %>%; background-color: <%= palette[status][:bar] %>"
+             title="<%= t("pp_widgets.status.#{status}") %>: <%= count %>"></div>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <% PpMonitoringService::STATUSES.each do |status| %>
+        <% count = breakdown[status].to_i %>
+        <div class="flex items-center justify-between px-3 py-2 rounded-lg <%= palette[status][:bg] %>">
+          <span class="text-xs font-medium <%= palette[status][:text] %> truncate"><%= t("pp_widgets.status.#{status}") %></span>
+          <span class="text-sm font-semibold <%= palette[status][:text] %> ms-2"><%= count %></span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-[#797C81]"><%= t('pp_widgets.no_data') %></p>
+  <% end %>
+</div>

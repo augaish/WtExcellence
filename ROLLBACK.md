@@ -11,7 +11,8 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `pp-phase2-complete` | `d8c37c6` | Phase 2 (Records + Packages). |
 | `pp-phase3-complete` | `fc89941` | Phase 3 (Documenter: 17-stage lifecycle). |
 | `pp-phase4-complete` | `ab95189` | Phase 4 (Process Architect: structured editor + SVG swimlanes). |
-| `pp-phase5-complete` | *(this commit)* | Phase 5 (Efficiency Evaluation). |
+| `pp-phase5-complete` | `e4be5fa` | Phase 5 (Efficiency Evaluation). |
+| `pp-phase6-complete` | *(this commit)* | Phase 6 (Monitoring widgets). P&P module complete. |
 
 ## Roll the code back
 ```bash

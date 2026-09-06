@@ -354,6 +354,26 @@ en:
       no_permission: "You do not have permission to change the org structure."
       not_found: "Unit not found."
       no_company: "Select a company first."
+  pp_widgets:
+    no_data: "No records yet."
+    funnel:
+      title: "P&P lifecycle funnel"
+      hint: "How many records have reached each phase, or gone past it."
+      of_total: "of %{total}"
+    status:
+      title: "P&P work status"
+      hint: "Where every open record stands right now."
+      not_started: "Not started"
+      on_track: "On track"
+      late: "Late"
+      completed: "Completed"
+      completed_late: "Completed late"
+    rollup:
+      title: "P&P by org unit"
+      hint: "Each child unit counts equally, whatever its record count."
+      completion: "Completion"
+      records: "Records"
+      no_units: "No org units yet."
   evaluation:
     title: "Efficiency Evaluation"
     subtitle: "Score a saved process diagram and get a ranked list of fixes."

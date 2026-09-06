@@ -1,0 +1,31 @@
+<%# Calculation 1: lifecycle funnel — one stepped bar per phase. %>
+<% funnel = @pp_funnel || [] %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+  <div class="flex items-baseline justify-between gap-3 mb-1">
+    <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_widgets.funnel.title') %></h2>
+    <% if funnel.any? %>
+      <span class="text-xs text-[#797C81]"><%= t('pp_widgets.funnel.of_total', total: funnel.first[:total]) %></span>
+    <% end %>
+  </div>
+  <p class="mb-4 text-xs text-[#797C81]"><%= t('pp_widgets.funnel.hint') %></p>
+
+  <% if funnel.any? && funnel.first[:total].to_i.positive? %>
+    <div class="space-y-2.5">
+      <% funnel.each do |step| %>
+        <div>
+          <div class="flex items-center justify-between mb-1 gap-3">
+            <span class="text-sm text-[#0D1120] truncate"><%= step[:label] %></span>
+            <span class="text-xs text-[#797C81] flex-shrink-0">
+              <%= step[:reached] %> · <%= step[:pct] %>%
+            </span>
+          </div>
+          <div class="h-2.5 bg-[#F0F0F5] rounded-full overflow-hidden">
+            <div class="h-full bg-[#5C3984] rounded-full" style="width: <%= [ step[:pct], 100 ].min %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p class="text-sm text-[#797C81]"><%= t('pp_widgets.no_data') %></p>
+  <% end %>
+</div>
