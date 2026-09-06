@@ -133,7 +133,37 @@
       <div class="space-y-6">
         <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
           <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('pp_records.status') %></h2>
-          <p class="text-sm text-[#797C81]"><%= t('pp_records.stage_pending') %></p>
+          <p class="text-sm text-[#0D1120]"><%= @record.stage_label %></p>
+          <p class="mt-1 text-xs text-[#797C81]">
+            <%= PpStage.phase_label(@record.stage_phase) %>
+            <% if @record.stage_late? %>
+              · <span class="text-red-700 font-medium"><%= t('pp_records.overdue') %></span>
+            <% end %>
+          </p>
+        </div>
+
+        <!-- Process Architect: open from the record's own card -->
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+          <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('architect.diagrams') %></h2>
+          <% diagrams = @record.diagrams.to_a %>
+          <% if diagrams.any? %>
+            <ul class="space-y-1.5 mb-3">
+              <% diagrams.each do |diagram| %>
+                <li>
+                  <%= link_to diagram.display_name, dashboard_pp_diagram_path(diagram),
+                        class: "text-sm text-[#5C3984] hover:underline focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+                  <span class="ms-1 text-xs text-[#797C81]"><%= diagram.created_at.strftime("%Y-%m-%d") %></span>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="text-sm text-[#797C81] mb-3"><%= t('architect.no_diagrams') %></p>
+          <% end %>
+          <% if can_manage_pp_records? %>
+            <%= link_to t('architect.open_architect'),
+                  new_dashboard_pp_diagram_path(owner_type: "PpRecord", owner_id: @record.id),
+                  class: "#{ui_btn_secondary} w-full justify-center" %>
+          <% end %>
         </div>
 
         <% if can_manage_pp_records? %>

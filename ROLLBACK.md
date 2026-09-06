@@ -9,7 +9,8 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `pp-phase1-complete` | `7b1af0c` | Phase 0 (nav) + Phase 1 (Org Structure, Process Architecture). |
 | `suite-green` | `b1a721c` | Audit-log savepoint fix; whole test suite green for the first time. |
 | `pp-phase2-complete` | `d8c37c6` | Phase 2 (Records + Packages). |
-| `pp-phase3-complete` | *(this commit)* | Phase 3 (Documenter: 17-stage lifecycle). |
+| `pp-phase3-complete` | `fc89941` | Phase 3 (Documenter: 17-stage lifecycle). |
+| `pp-phase4-complete` | *(this commit)* | Phase 4 (Process Architect: structured editor + SVG swimlanes). |
 
 ## Roll the code back
 ```bash

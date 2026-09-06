@@ -1,0 +1,202 @@
+<%= content_for :title, @diagram.display_name %>
+<% input_class = "w-full px-2 py-1.5 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+<% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: @diagram.display_name, subtitle: t('architect.show_subtitle') } do %>
+      <%= link_to t('back'), owner_path(@diagram.owner), class: ui_btn_neutral %>
+      <% if can_manage_diagrams? %>
+        <%= link_to t('edit'), edit_dashboard_pp_diagram_path(@diagram), class: ui_btn_secondary %>
+      <% end %>
+    <% end %>
+
+    <!-- Generated picture -->
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+      <h2 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('architect.diagram') %></h2>
+      <p class="mb-4 text-xs text-[#797C81]"><%= t('architect.diagram_hint') %></p>
+      <div class="overflow-x-auto border border-[#E3E3E3] rounded-lg bg-white">
+        <%= @svg %>
+      </div>
+      <div class="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-[#797C81]">
+        <span class="inline-flex items-center gap-1.5"><span class="w-6 h-0.5 bg-[#797C81]"></span><%= t('architect.legend_sequence') %></span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-6 h-0.5 bg-[#5C3984]" style="background-image: repeating-linear-gradient(90deg,#5C3984 0 4px,transparent 4px 7px); background-color: transparent;"></span><%= t('architect.legend_message') %></span>
+        <span class="inline-flex items-center gap-1.5"><span class="w-6 h-0.5 bg-red-600"></span><%= t('architect.legend_invalid') %></span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Elements -->
+      <div class="lg:col-span-2 bg-white border border-[#E3E3E3] rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('architect.elements') %></h2>
+        <p class="mb-4 text-xs text-[#797C81]"><%= t('architect.elements_hint') %></p>
+
+        <% if @elements.any? %>
+          <ol class="space-y-2 mb-5">
+            <% @elements.each_with_index do |element, index| %>
+              <li class="border border-[#E3E3E3] rounded-lg p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <span class="text-xs font-mono text-[#797C81]"><%= index + 1 %></span>
+                      <span class="text-sm font-medium text-[#0D1120]"><%= element.title.presence || t('architect.untitled_element') %></span>
+                      <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[#F6EEFF] text-[#5C3984]"><%= element.type_label %></span>
+                      <% if element.external? %>
+                        <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-amber-100 text-amber-800"><%= t('architect.external') %></span>
+                      <% end %>
+                    </div>
+                    <p class="mt-1 text-xs text-[#797C81]">
+                      <%= t('architect.performer') %>: <%= element.performer.presence || t('architect.unassigned') %>
+                      <% if element.description.present? %> · <%= truncate(element.description, length: 70) %><% end %>
+                    </p>
+                    <% if element.task? && (element.input.present? || element.output.present?) %>
+                      <p class="mt-0.5 text-[11px] text-[#797C81]">
+                        <%= t('process_architecture.inputs') %>: <%= element.input.presence || "—" %> ·
+                        <%= t('process_architecture.outputs') %>: <%= element.output.presence || "—" %>
+                      </p>
+                    <% end %>
+                  </div>
+                  <% if can_manage_diagrams? %>
+                    <%= button_to t('remove'), destroy_element_dashboard_pp_diagram_path(@diagram, element_id: element.id),
+                          method: :delete, form: { class: "flex-shrink-0" },
+                          class: "px-2 py-1 text-xs font-medium text-red-600 rounded hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-red-600" %>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
+          </ol>
+        <% else %>
+          <p class="text-sm text-[#797C81] mb-5"><%= t('architect.no_elements') %></p>
+        <% end %>
+
+        <% if can_manage_diagrams? %>
+          <%= form_with url: add_element_dashboard_pp_diagram_path(@diagram), method: :post,
+                scope: :pp_diagram_element, class: "border-t border-[#E3E3E3] pt-4 space-y-3" do |f| %>
+            <h3 class="text-xs font-semibold text-[#0D1120]"><%= t('architect.add_element') %></h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <%= f.label :element_type, t('architect.element_type'), class: label_class %>
+                <%= f.select :element_type,
+                      grouped_options_for_select({
+                        t('architect.groups.events') => PpDiagramElement::EVENT_TYPES.map { |v| [ t("architect.element_types.#{v}"), v ] },
+                        t('architect.groups.tasks') => PpDiagramElement::TASK_TYPES.map { |v| [ t("architect.element_types.#{v}"), v ] },
+                        t('architect.groups.flow') => [ [ t("architect.element_types.gateway"), "gateway" ] ],
+                        t('architect.groups.artifacts') => PpDiagramElement::ARTIFACT_TYPES.map { |v| [ t("architect.element_types.#{v}"), v ] }
+                      }), {}, class: input_class %>
+              </div>
+              <div>
+                <%= f.label :title, t('architect.element_title'), class: label_class %>
+                <%= f.text_field :title, class: input_class %>
+              </div>
+              <div>
+                <%= f.label :performer, t('architect.performer'), class: label_class %>
+                <%= f.text_field :performer, placeholder: t('architect.performer_placeholder'), class: input_class %>
+                <p class="mt-1 text-[11px] text-[#797C81]"><%= t('architect.performer_hint') %></p>
+              </div>
+              <div>
+                <%= f.label :scope, t('architect.scope'), class: label_class %>
+                <%= f.select :scope, PpDiagramElement::SCOPES.map { |v| [ t("architect.scopes.#{v}"), v ] }, {}, class: input_class %>
+              </div>
+              <div class="sm:col-span-2">
+                <%= f.label :description, t('architect.description'), class: label_class %>
+                <%= f.text_area :description, rows: 2, class: input_class %>
+              </div>
+              <div>
+                <%= f.label :input, t('process_architecture.inputs'), class: label_class %>
+                <%= f.text_field :input, class: input_class %>
+              </div>
+              <div>
+                <%= f.label :output, t('process_architecture.outputs'), class: label_class %>
+                <%= f.text_field :output, class: input_class %>
+              </div>
+              <div class="sm:col-span-2">
+                <%= f.label :flow_label, t('architect.flow_label'), class: label_class %>
+                <%= f.text_field :flow_label, placeholder: t('architect.flow_label_placeholder'), class: input_class %>
+                <p class="mt-1 text-[11px] text-[#797C81]"><%= t('architect.flow_label_hint') %></p>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <%= f.submit t('architect.add_element'), class: ui_btn_primary %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+
+      <!-- Flows -->
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('architect.flows') %></h2>
+        <p class="mb-4 text-xs text-[#797C81]"><%= t('architect.flows_hint') %></p>
+
+        <% if @flows.any? %>
+          <ul class="space-y-2 mb-4">
+            <% @flows.each do |flow| %>
+              <% invalid = flow.kind == "sequence" && flow.crosses_pools? %>
+              <li class="border <%= invalid ? 'border-red-200 bg-red-50' : 'border-[#E3E3E3]' %> rounded-lg p-2.5">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0 text-xs">
+                    <p class="text-[#0D1120] truncate">
+                      <%= flow.from_element.title.presence || flow.from_element.type_label %>
+                      <span class="mx-1 text-[#797C81]"><%= flow.kind == "message" ? "⇢" : "→" %></span>
+                      <%= flow.to_element.title.presence || flow.to_element.type_label %>
+                    </p>
+                    <p class="mt-0.5 text-[#797C81]"><%= t("architect.flow_kinds.#{flow.kind}") %></p>
+                    <% if invalid %>
+                      <p class="mt-1 text-red-700 font-medium"><%= t('architect.invalid_cross_pool') %></p>
+                    <% end %>
+                  </div>
+                  <% if can_manage_diagrams? %>
+                    <%= button_to "×", destroy_flow_dashboard_pp_diagram_path(@diagram, flow_id: flow.id),
+                          method: :delete, form: { class: "flex-shrink-0" },
+                          class: "px-1.5 py-0.5 text-xs font-medium text-red-600 rounded hover:bg-red-100 focus-visible:outline-2 focus-visible:outline-red-600",
+                          aria: { label: t('remove') } %>
+                  <% end %>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-sm text-[#797C81] mb-4"><%= t('architect.no_flows') %></p>
+        <% end %>
+
+        <% if can_manage_diagrams? && @elements.size >= 2 %>
+          <%= form_with url: add_flow_dashboard_pp_diagram_path(@diagram), method: :post,
+                class: "border-t border-[#E3E3E3] pt-4 space-y-2" do %>
+            <div>
+              <label class="<%= label_class %>"><%= t('architect.from') %></label>
+              <select name="from_element_id" class="<%= input_class %>">
+                <% @elements.each do |element| %>
+                  <option value="<%= element.id %>"><%= element.title.presence || element.type_label %></option>
+                <% end %>
+              </select>
+            </div>
+            <div>
+              <label class="<%= label_class %>"><%= t('architect.to') %></label>
+              <select name="to_element_id" class="<%= input_class %>">
+                <% @elements.each do |element| %>
+                  <option value="<%= element.id %>"><%= element.title.presence || element.type_label %></option>
+                <% end %>
+              </select>
+            </div>
+            <div>
+              <label class="<%= label_class %>"><%= t('architect.flow_kind') %></label>
+              <select name="kind" class="<%= input_class %>">
+                <% PpDiagramFlow::KINDS.each do |kind| %>
+                  <option value="<%= kind %>"><%= t("architect.flow_kinds.#{kind}") %></option>
+                <% end %>
+              </select>
+              <p class="mt-1 text-[11px] text-[#797C81]"><%= t('architect.flow_kind_hint') %></p>
+            </div>
+            <div>
+              <label class="<%= label_class %>"><%= t('architect.flow_condition') %></label>
+              <input type="text" name="label" class="<%= input_class %>" placeholder="<%= t('architect.flow_condition_placeholder') %>">
+            </div>
+            <div class="flex justify-end">
+              <%= submit_tag t('architect.add_flow'), class: ui_btn_primary %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_160000) do
+ActiveRecord::Schema[8.0].define(version: 2026_07_19_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -611,6 +611,55 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_160000) do
     t.index ["tsvector_content"], name: "index_pg_search_documents_on_tsvector_content_gin", using: :gin
   end
 
+  create_table "pp_diagram_elements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_diagram_id", null: false
+    t.integer "position", default: 0, null: false
+    t.string "element_type", limit: 40, null: false
+    t.string "title", limit: 300
+    t.string "performer", limit: 200
+    t.text "description"
+    t.text "input"
+    t.text "output"
+    t.text "trigger_text"
+    t.string "scope", limit: 20, default: "internal", null: false
+    t.string "flow_label", limit: 200
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_diagram_id", "position"], name: "index_pp_diagram_elements_on_pp_diagram_id_and_position"
+    t.index ["pp_diagram_id"], name: "index_pp_diagram_elements_on_pp_diagram_id"
+  end
+
+  create_table "pp_diagram_flows", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_diagram_id", null: false
+    t.uuid "from_element_id", null: false
+    t.uuid "to_element_id", null: false
+    t.string "kind", limit: 20, default: "sequence", null: false
+    t.string "label", limit: 200
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["from_element_id"], name: "index_pp_diagram_flows_on_from_element_id"
+    t.index ["pp_diagram_id", "from_element_id", "to_element_id"], name: "idx_pp_diagram_flows_unique", unique: true
+    t.index ["pp_diagram_id"], name: "index_pp_diagram_flows_on_pp_diagram_id"
+    t.index ["to_element_id"], name: "index_pp_diagram_flows_on_to_element_id"
+  end
+
+  create_table "pp_diagrams", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "owner_type", null: false
+    t.uuid "owner_id", null: false
+    t.string "name", limit: 250
+    t.text "trigger_text"
+    t.text "inputs_summary"
+    t.text "outputs_summary"
+    t.integer "last_score"
+    t.datetime "last_evaluated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_pp_diagrams_on_company_id"
+    t.index ["owner_type", "owner_id", "created_at"], name: "index_pp_diagrams_on_owner_and_created"
+    t.index ["owner_type", "owner_id"], name: "index_pp_diagrams_on_owner"
+  end
+
   create_table "pp_packages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "company_id", null: false
     t.string "name", limit: 250, null: false
@@ -1088,6 +1137,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_160000) do
   add_foreign_key "org_units", "org_groups"
   add_foreign_key "org_units", "org_units", column: "parent_id"
   add_foreign_key "org_units", "users", column: "head_user_id"
+  add_foreign_key "pp_diagram_elements", "pp_diagrams"
+  add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "from_element_id"
+  add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "to_element_id"
+  add_foreign_key "pp_diagram_flows", "pp_diagrams"
+  add_foreign_key "pp_diagrams", "companies"
   add_foreign_key "pp_packages", "companies"
   add_foreign_key "pp_processes", "companies"
   add_foreign_key "pp_processes", "org_units", column: "owner_org_unit_id"

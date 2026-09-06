@@ -1,0 +1,56 @@
+<%# Diagram header form. Locals: diagram, owner %>
+<% input_class = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+<% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: diagram.persisted? ? t('architect.edit_diagram') : t('architect.new_diagram'),
+          subtitle: t('architect.form_subtitle') } do %>
+      <%= link_to t('cancel'), (diagram.persisted? ? dashboard_pp_diagram_path(diagram) : owner_path(owner)), class: ui_btn_neutral %>
+    <% end %>
+
+    <%= form_with model: diagram, url: (diagram.persisted? ? dashboard_pp_diagram_path(diagram) : dashboard_pp_diagrams_path),
+          method: (diagram.persisted? ? :patch : :post), class: "space-y-6" do |f| %>
+      <% unless diagram.persisted? %>
+        <%= hidden_field_tag :owner_type, owner.class.name %>
+        <%= hidden_field_tag :owner_id, owner.id %>
+      <% end %>
+
+      <% if diagram.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5">
+            <% diagram.errors.full_messages.each do |msg| %><li><%= msg %></li><% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+        <div>
+          <%= f.label :name, t('architect.diagram_name'), class: label_class %>
+          <%= f.text_field :name, class: input_class %>
+        </div>
+        <p class="text-xs text-[#797C81]"><%= t('architect.summary_hint') %></p>
+        <div>
+          <%= f.label :trigger_text, t('process_architecture.trigger'), class: label_class %>
+          <%= f.text_field :trigger_text, class: input_class %>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :inputs_summary, t('process_architecture.inputs'), class: label_class %>
+            <%= f.text_area :inputs_summary, rows: 2, class: input_class %>
+          </div>
+          <div>
+            <%= f.label :outputs_summary, t('process_architecture.outputs'), class: label_class %>
+            <%= f.text_area :outputs_summary, rows: 2, class: input_class %>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <%= link_to t('cancel'), (diagram.persisted? ? dashboard_pp_diagram_path(diagram) : owner_path(owner)), class: ui_btn_neutral %>
+        <%= f.submit (diagram.persisted? ? t('save') : t('create')), class: ui_btn_primary %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -34,6 +34,7 @@ class PpRecord < ApplicationRecord
   has_many :stage_transitions, class_name: "PpStageTransition", dependent: :destroy
   has_many :stage_approvals, class_name: "PpStageApproval", dependent: :destroy
   has_many :stage_assignees, class_name: "PpStageAssignee", dependent: :destroy
+  has_many :diagrams, -> { order(created_at: :desc) }, as: :owner, class_name: "PpDiagram", dependent: :destroy
   belongs_to :previous_version, class_name: "PpRecord", optional: true
   has_one :next_version, class_name: "PpRecord", foreign_key: "previous_version_id", dependent: :nullify
 

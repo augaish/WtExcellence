@@ -118,6 +118,17 @@ Rails.application.routes.draw do
     end
     resources :org_groups, only: [ :create, :update, :destroy ]
 
+    # Process Architect — structured diagram editor (P&P)
+    resources :pp_diagrams, except: [ :index ] do
+      member do
+        post :add_element
+        patch "elements/:element_id", action: :update_element, as: :update_element
+        delete "elements/:element_id", action: :destroy_element, as: :destroy_element
+        post :add_flow
+        delete "flows/:flow_id", action: :destroy_flow, as: :destroy_flow
+      end
+    end
+
     # Documenter — the lifecycle worklist (P&P)
     scope :documenter, controller: :documenter do
       get "/", action: :index, as: :documenter
