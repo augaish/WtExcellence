@@ -45,6 +45,30 @@ class ReviewFindingsTest < ActionDispatch::IntegrationTest
     assert_no_match(/upload_title/, response.body)
   end
 
+  # F03 — the mobile menu was a hand-maintained duplicate that omitted
+  # Governance, P&P and Org Structure, and ignored module entitlements.
+  test "every permitted desktop destination is reachable from the mobile menu" do
+    sign_in @admin
+    get dashboard_overview_path
+    assert_response :success
+
+    [ dashboard_pp_records_path, dashboard_documenter_path, dashboard_org_units_path,
+      dashboard_risk_management_index_path, dashboard_vendors_path ].each do |path|
+      assert_select "#mobileMenuPanel a[href=?]", path
+    end
+  end
+
+  # F03 — a disabled module must disappear from both menus, not just the sidebar.
+  test "a disabled module is absent from the mobile menu" do
+    @company.set_module!(:pp, false)
+    sign_in @admin
+    get dashboard_overview_path
+
+    assert_response :success
+    assert_select "#mobileMenuPanel a[href=?]", dashboard_pp_records_path, count: 0
+    assert_select "#sidebar a[href=?]", dashboard_pp_records_path, count: 0
+  end
+
   # F07
   test "a record link appears on the document detail page" do
     sign_in @admin

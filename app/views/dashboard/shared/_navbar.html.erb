@@ -160,76 +160,21 @@
 
             <!-- Mobile Menu Content -->
             <div class="flex-1 overflow-y-auto p-4">
-                <!-- Main Menu Section -->
-                <div class="mb-6">
-                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2"><%= t('main_menu') %></h3>
-                    <nav class="space-y-1">
-                        <% if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user.present? %>
-                            <% overview_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('overview')}" %>
-                            <%= link_to dashboard_overview_path, class: overview_class, onclick: "toggleMobileMenu();" do %>
-                                <%= image_tag asset_path('overview-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                                <span><%= t('overview') %></span>
+                <%# Rendered from the same definition as the desktop sidebar (NavigationHelper#nav_sections) %>
+                <% nav_sections.each do |section| %>
+                    <div class="mb-6">
+                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2"><%= section[:title] %></h3>
+                        <nav class="space-y-1">
+                            <% section[:items].each do |item| %>
+                                <% item_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if item[:active]}" %>
+                                <%= link_to item[:path], class: item_class, onclick: "toggleMobileMenu();" do %>
+                                    <%= image_tag asset_path(item[:icon]), class: "w-5 h-5 flex-shrink-0", alt: "" %>
+                                    <span><%= item[:label] %></span>
+                                <% end %>
                             <% end %>
-                        <% end %>
-                        <% standards_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/standards')}" %>
-                        <%= link_to standards_path, class: standards_class, onclick: "toggleMobileMenu();" do %>
-                            <%= image_tag asset_path('standards-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                            <span><%= t('standards') %></span>
-                        <% end %>
-                        <% unless current_user&.super_admin? || current_user&.delegated_admin? %>
-                            <% capa_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('capa_management')}" %>
-                            <%= link_to dashboard_capa_management_path, class: capa_class, onclick: "toggleMobileMenu();" do %>
-                                <%= image_tag asset_path('capa-management-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                                <span><%= t('capa_management') %></span>
-                            <% end %>
-                        <% end %>
-                        <% library_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/library')}" %>
-                        <%= link_to library_path, class: library_class, onclick: "toggleMobileMenu();" do %>
-                            <%= image_tag asset_path('library-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                            <span><%= t('library') %></span>
-                        <% end %>
-                    </nav>
-                </div>
-
-                <!-- Settings Section -->
-                <div class="mb-6">
-                    <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 px-2"><%= t('settings') %></h3>
-                    <nav class="space-y-1">
-                        <% if current_user&.can_manage_tools? %>
-                            <% tools_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('tools')}" %>
-                            <%= link_to tools_path, class: tools_class, onclick: "toggleMobileMenu();" do %>
-                                <%= image_tag asset_path('tool-setup-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                                <span><%= t('tool_setup') %></span>
-                            <% end %>
-                        <% end %>
-                        <% if current_user&.super_admin? || current_user&.delegated_admin? %>
-                            <% credit_changes_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('credit_changes')}" %>
-                            <%= link_to dashboard_credit_changes_path, class: credit_changes_class, onclick: "toggleMobileMenu();" do %>
-                                <%= image_tag asset_path('account-management-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                                <span><%= t('credit_changes') %></span>
-                            <% end %>
-                        <% end %>
-                        <% if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user&.company_admin? %>
-                            <% account_mgmt_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('account_management')}" %>
-                            <%= link_to dashboard_account_management_path, class: account_mgmt_class, onclick: "toggleMobileMenu();" do %>
-                                <%= image_tag asset_path('account-management-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                                <span><%= t('account_management') %></span>
-                            <% end %>
-                        <% end %>
-                        <% general_settings_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.include?('general_settings')}" %>
-                        <%= link_to dashboard_general_settings_path, class: general_settings_class, onclick: "toggleMobileMenu();" do %>
-                            <%= image_tag asset_path('general-settings-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                            <span><%= t('general_settings') %></span>
-                        <% end %>
-                        <% if current_user&.company_user.present? || current_user&.viewer? %>
-                            <% ai_insights_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if request.path.start_with?('/dashboard/ai_insights')}" %>
-                            <%= link_to dashboard_ai_insights_path, class: ai_insights_class, onclick: "toggleMobileMenu();" do %>
-                                <%= image_tag asset_path('overview-icon.svg'), class: "w-5 h-5 flex-shrink-0" %>
-                                <span><%= t('ai_usage') %></span>
-                            <% end %>
-                        <% end %>
-                    </nav>
-                </div>
+                        </nav>
+                    </div>
+                <% end %>
 
                 <!-- Divider -->
                 <div class="border-t border-gray-200 my-4"></div>
