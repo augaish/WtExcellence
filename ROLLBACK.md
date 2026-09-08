@@ -38,6 +38,10 @@ cd /root && rm -rf wtdeploy \
 ```bash
 bash scripts/backup_db.sh <label>     # writes /root/backups/wtexcel_<label>_<stamp>.sql.gz
 ```
+The script verifies its own output — table count before the dump, then size,
+gzip integrity, pg_dump's completion marker and a CREATE TABLE count after it —
+and exits non-zero rather than leaving an archive that cannot be restored. If it
+prints "Verified", the backup is real. Anything else means you have no backup.
 
 ## Restore a database dump
 ```bash
