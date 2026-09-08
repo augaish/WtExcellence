@@ -22,6 +22,7 @@ class Authority < ApplicationRecord
   scope :in_category, ->(category) { where(authority_category_id: category&.id) }
   scope :without_basis, -> { where(basis_record_id: nil, basis_clause_id: nil) }
 
+  before_validation :assign_stable_key, on: :create
   after_create :ensure_default_band
 
   def display_name(locale = I18n.locale)
@@ -57,6 +58,13 @@ class Authority < ApplicationRecord
   end
 
   private
+
+  # An authority carries one identity across matrix versions, so a diff can tell
+  # a renamed row from a deleted one. A clone copies the key rather than
+  # generating a new one.
+  def assign_stable_key
+    self.stable_key = SecureRandom.hex(8) if stable_key.blank?
+  end
 
   # An authority with no thresholds still needs somewhere to hang its holders,
   # so it gets one unbounded band rather than a special case everywhere else.

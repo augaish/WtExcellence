@@ -122,6 +122,72 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, @matrix.authorities.count
   end
 
+  test "opening the next version copies the matrix and shows no changes yet" do
+    authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+    authority.bands.sole.assignments.create!(level: "authorize", org_unit: @minister)
+
+    sign_in @admin
+    post dashboard_open_next_authority_version_path(matrix_id: @matrix.id)
+
+    successor = @company.pp_records.of_type("executive_doa").order(:version_number).last
+    assert_equal 2, successor.version_number
+    assert_redirected_to dashboard_authorities_path(matrix_id: successor.id)
+
+    follow_redirect!
+    assert_includes response.body, I18n.t("doa.diff.none")
+  end
+
+  test "a change to the new version is reported against the previous one" do
+    @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+    successor = AuthorityMatrixVersionService.open_next(@matrix.reload)
+    successor.authorities.sole.update!(name_en: "Sign contracts and agreements")
+
+    sign_in @admin
+    get dashboard_authorities_path(matrix_id: successor.id)
+
+    assert_includes response.body, I18n.t("doa.diff.amended")
+    assert_includes response.body, I18n.t("doa.diff.aspects.name")
+  end
+
+  test "an objection can be raised and then ruled on" do
+    authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+
+    sign_in @admin
+    post dashboard_create_authority_consultation_path(matrix_id: @matrix.id), params: {
+      authority_consultation: { authority_id: authority.id, org_unit_id: @minister.id,
+                                challenge: "Approval sits with the wrong deputy",
+                                proposal: "Move approval to the concerned agency",
+                                expected_impact: "Confidential data stays with its owner" }
+    }
+
+    consultation = @matrix.consultations.sole
+    assert_equal "open", consultation.status
+    assert_equal @admin, consultation.raised_by
+
+    patch dashboard_rule_authority_consultation_path(consultation, matrix_id: @matrix.id), params: {
+      authority_consultation: { status: "deferred", ruling: "Operational; handle it in the procedure." }
+    }
+
+    consultation.reload
+    assert_equal "deferred", consultation.status
+    assert_equal @admin, consultation.ruled_by
+    assert_not_nil consultation.ruled_at
+  end
+
+  test "an objection cannot be closed without a ruling" do
+    sign_in @admin
+    post dashboard_create_authority_consultation_path(matrix_id: @matrix.id), params: {
+      authority_consultation: { challenge: "Something is wrong" }
+    }
+    consultation = @matrix.consultations.sole
+
+    patch dashboard_rule_authority_consultation_path(consultation, matrix_id: @matrix.id), params: {
+      authority_consultation: { status: "rejected", ruling: "" }
+    }
+
+    assert_equal "open", consultation.reload.status
+  end
+
   test "another company's matrix is not reachable" do
     other = Company.create!(name: "Other #{SecureRandom.hex(4)}", license_seats: 5, credits: 1, is_active: true)
     foreign = other.pp_records.create!(record_type: "executive_doa", title_en: "Foreign DoA")

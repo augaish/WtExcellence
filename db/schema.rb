@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_085444) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_090209) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -150,9 +150,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_085444) do
     t.integer "sort_order", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "stable_key", limit: 64
     t.index ["authority_category_id"], name: "index_authorities_on_authority_category_id"
     t.index ["basis_clause_id"], name: "index_authorities_on_basis_clause_id"
     t.index ["basis_record_id"], name: "index_authorities_on_basis_record_id"
+    t.index ["company_id", "stable_key"], name: "index_authorities_on_company_id_and_stable_key"
     t.index ["company_id"], name: "index_authorities_on_company_id"
     t.index ["matrix_id", "number"], name: "index_authorities_on_matrix_id_and_number"
     t.index ["matrix_id"], name: "index_authorities_on_matrix_id"
@@ -194,6 +196,28 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_085444) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_authority_categories_on_company_id"
+  end
+
+  create_table "authority_consultations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "matrix_id", null: false
+    t.uuid "authority_id"
+    t.uuid "org_unit_id"
+    t.uuid "raised_by_id"
+    t.text "challenge"
+    t.text "proposal"
+    t.text "expected_impact"
+    t.text "ruling"
+    t.string "status", limit: 20, default: "open", null: false
+    t.uuid "ruled_by_id"
+    t.datetime "ruled_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["authority_id"], name: "index_authority_consultations_on_authority_id"
+    t.index ["matrix_id", "status"], name: "index_authority_consultations_on_matrix_id_and_status"
+    t.index ["matrix_id"], name: "index_authority_consultations_on_matrix_id"
+    t.index ["org_unit_id"], name: "index_authority_consultations_on_org_unit_id"
+    t.index ["raised_by_id"], name: "index_authority_consultations_on_raised_by_id"
+    t.index ["ruled_by_id"], name: "index_authority_consultations_on_ruled_by_id"
   end
 
   create_table "capa_action_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -774,6 +798,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_085444) do
     t.integer "sort_order", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "authority_id"
+    t.index ["authority_id"], name: "index_pp_process_authorities_on_authority_id"
     t.index ["pp_process_id"], name: "index_pp_process_authorities_on_pp_process_id"
   end
 
@@ -1235,6 +1261,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_085444) do
   add_foreign_key "authority_assignments", "org_units"
   add_foreign_key "authority_bands", "authorities"
   add_foreign_key "authority_categories", "companies"
+  add_foreign_key "authority_consultations", "authorities"
+  add_foreign_key "authority_consultations", "org_units"
+  add_foreign_key "authority_consultations", "pp_records", column: "matrix_id"
+  add_foreign_key "authority_consultations", "users", column: "raised_by_id"
+  add_foreign_key "authority_consultations", "users", column: "ruled_by_id"
   add_foreign_key "capa_action_assignments", "capa_actions"
   add_foreign_key "capa_action_assignments", "company_users"
   add_foreign_key "capa_actions", "capas"
@@ -1306,6 +1337,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_085444) do
   add_foreign_key "pp_diagram_flows", "pp_diagrams"
   add_foreign_key "pp_diagrams", "companies"
   add_foreign_key "pp_packages", "companies"
+  add_foreign_key "pp_process_authorities", "authorities"
   add_foreign_key "pp_process_authorities", "pp_processes"
   add_foreign_key "pp_process_steps", "org_units", column: "responsible_org_unit_id"
   add_foreign_key "pp_process_steps", "pp_processes"

@@ -20,6 +20,17 @@
       <% end %>
     <% end %>
 
+    <% if can_manage_authorities? %>
+      <div class="flex justify-end">
+        <%= button_to t('doa.versions.open_next'), dashboard_open_next_authority_version_path(matrix_id: @matrix.id),
+            method: :post, class: ui_btn_secondary %>
+      </div>
+    <% end %>
+
+    <% if @diff %>
+      <%= render "dashboard/authorities/changes", diff: @diff %>
+    <% end %>
+
     <!-- Findings -->
     <section class="bg-white border border-[#E3E3E3] rounded-lg p-5">
       <h2 class="text-base font-semibold text-[#0D1120] mb-3"><%= t('doa.findings.title') %></h2>
@@ -137,6 +148,10 @@
         </section>
       <% end %>
     <% end %>
+
+    <%= render "dashboard/authorities/consultation", consultations: @consultations, matrix: @matrix,
+        authorities: @authorities, org_units: @org_units, input: input,
+        can_manage: can_manage_authorities? %>
 
     <% if can_manage_authorities? %>
       <section class="bg-white border border-[#E3E3E3] rounded-lg p-5 grid gap-3 md:grid-cols-2">

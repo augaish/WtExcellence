@@ -24,6 +24,40 @@ ar:
       up_to: حتى %{max}
       above: أكثر من %{min}
       between: أكثر من %{min} وحتى %{max}
+    conformance:
+      title: "المواءمة مع المصفوفة التنفيذية"
+      none: "جميع القرارات المرتبطة متوائمة مع المصفوفة التنفيذية."
+      link: "الصلاحية التنفيذية"
+      authorizes_below_executive: "يتم اعتماد هذا القرار على المستوى التنظيمي %{operational_level}، بينما تضع المصفوفة التنفيذية اعتماده على المستوى %{executive_level}. يمكن ممارسة الصلاحية من مستوى أعلى، ولا يجوز من مستوى أدنى."
+      executive_unresolvable: "لا تحدد المصفوفة التنفيذية وحدة تنظيمية كصاحب اعتماد نهائي لهذه الصلاحية، لذا لا يمكن المقارنة بينهما."
+    diff:
+      title: "التغييرات عن النسخة السابقة"
+      none: "لا توجد تغييرات عن النسخة السابقة."
+      added: "إضافة"
+      removed: "حذف"
+      amended: "تعديل"
+      aspects:
+        name: "الصياغة"
+        basis: "المرجع النظامي"
+        bands: "الشرائح"
+        holders: "أصحاب الصلاحية"
+    consultation:
+      title: "الاستطلاع"
+      none: "لم تُرفع أي ملاحظات على هذه النسخة."
+      challenge: "التحدي"
+      proposal: "المقترح التحسيني"
+      expected_impact: "الأثر المتوقع"
+      ruling: "تعليق التميز المؤسسي"
+      raise: "رفع ملاحظة"
+      rule: "تسجيل القرار"
+      statuses:
+        open: "مفتوحة"
+        accepted: "مقبولة"
+        rejected: "مرفوضة"
+        deferred: "تشغيلية — تُعالج في الإجراء"
+    versions:
+      open_next: "فتح النسخة التالية"
+      opened: "تم فتح نسخة جديدة."
     findings:
       title: الملاحظات
       none: لا توجد ملاحظات. لكل صلاحية صاحب اعتماد واحد ولا يوجد تعارض في المهام.
@@ -49,6 +83,8 @@ ar:
       authority_created: تمت إضافة الصلاحية.
       band_created: تمت إضافة الشريحة.
       assignment_created: تم إسناد الصلاحية.
+      consultation_created: تم تسجيل الملاحظة.
+      consultation_ruled: تم تسجيل القرار.
       deleted: تم الحذف.
       not_found: هذا العنصر لم يعد موجودًا.
       no_permission: ليست لديك صلاحية إدارة الصلاحيات.

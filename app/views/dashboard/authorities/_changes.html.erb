@@ -1,0 +1,32 @@
+<%# The change table this replaces is maintained by hand today, down to a column
+    flagging whether a row changed — which is exactly what a diff computes. %>
+<section class="bg-white border border-[#E3E3E3] rounded-lg p-5">
+  <h2 class="text-base font-semibold text-[#0D1120] mb-3"><%= t('doa.diff.title') %></h2>
+
+  <% if diff.any? %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[#E3E3E3] text-sm">
+        <thead class="bg-[#F7F7FD]">
+          <tr>
+            <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase"><%= t('doa.diff.title') %></th>
+            <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase"><%= t('doa.authority') %></th>
+            <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase"><%= t('record_document.columns.change') %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#E3E3E3]">
+          <% diff.changes.each do |change| %>
+            <tr>
+              <td class="px-3 py-2"><%= t("doa.diff.#{change.kind}") %></td>
+              <td class="px-3 py-2"><%= (change.after || change.before).display_name %></td>
+              <td class="px-3 py-2 text-[#797C81]">
+                <%= Array(change.detail).map { |aspect| t("doa.diff.aspects.#{aspect}") }.to_sentence %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="text-sm text-[#797C81]"><%= t('doa.diff.none') %></p>
+  <% end %>
+</section>

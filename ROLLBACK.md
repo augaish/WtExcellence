@@ -22,6 +22,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `governance-slice-1` | *(this commit)* | Commitment timing vs workflow state, fulfilment basis, locale guard, English audit-log repair. |
 | `phase-c-documents` | *(this commit)* | Governed document assembly and branded print-ready rendering. |
 | `phase-d-executive-doa` | *(this commit)* | Executive authority matrix: categories, authorities, threshold bands, dynamic roles, findings. |
+| `phase-e-intelligence` | *(this commit)* | Conformance check, matrix version diff, consultation rounds. |
 
 ## Roll the code back
 ```bash

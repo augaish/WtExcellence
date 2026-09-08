@@ -39,6 +39,12 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
     @steps = @process.steps.includes(:responsible_org_unit).to_a
     @authorities = @process.authorities.includes(assignments: :org_unit).to_a
     @org_units = company.org_units.active.ordered.to_a
+
+    # The operational matrix must stay consistent with the executive one; today
+    # that is a person reading two spreadsheets side by side.
+    @conformance = AuthorityConformanceCheck.new(@process)
+    @executive_authorities = company.authorities
+      .where(matrix_id: company.pp_records.of_type("executive_doa").select(:id)).ordered.to_a
   end
 
   def new

@@ -92,6 +92,24 @@
       <h2 class="text-base font-semibold text-[#0D1120]"><%= t('process_authorities.title') %></h2>
     </div>
 
+    <%# Conformance with the executive matrix, computed rather than compared by
+        eye across two spreadsheets. %>
+    <div class="px-5 pt-5">
+      <h3 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('doa.conformance.title') %></h3>
+      <% if @conformance.any? %>
+        <ul class="space-y-2">
+          <% @conformance.findings.each do |finding| %>
+            <li class="rounded-lg bg-[#F7F7FD] border border-[#E3E3E3] px-4 py-2 text-sm text-[#0D1120]">
+              <span class="font-medium"><%= finding.operational.decision.presence || finding.operational.item %></span>
+              — <%= finding.message %>
+            </li>
+          <% end %>
+        </ul>
+      <% elsif @conformance.linked_rows.any? %>
+        <p class="text-sm text-[#797C81]"><%= t('doa.conformance.none') %></p>
+      <% end %>
+    </div>
+
     <% if @authorities.any? %>
       <div class="divide-y divide-[#E3E3E3]">
         <% @authorities.each do |authority| %>
@@ -154,6 +172,8 @@
                   scope: :pp_process_authority, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-3" do |f| %>
       <%= f.text_field :item, placeholder: t('process_authorities.item'), class: input %>
       <%= f.text_field :decision, placeholder: t('process_authorities.decision'), class: input %>
+      <%= f.collection_select :authority_id, @executive_authorities, :id, :display_name,
+          { include_blank: t('doa.conformance.link') }, class: input %>
       <%= f.submit t('process_authorities.add'), class: ui_btn_primary %>
     <% end %>
   </section>

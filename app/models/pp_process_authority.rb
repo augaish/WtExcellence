@@ -8,6 +8,11 @@
 class PpProcessAuthority < ApplicationRecord
   belongs_to :pp_process, class_name: "PpProcess"
 
+  # The executive authority this operational decision exercises. Optional: an
+  # operational matrix covers day-to-day decisions the executive one never
+  # mentions.
+  belongs_to :authority, optional: true
+
   has_many :assignments, -> { ordered }, class_name: "PpAuthorityAssignment",
     foreign_key: "pp_process_authority_id", dependent: :destroy
 

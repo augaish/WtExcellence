@@ -163,6 +163,9 @@ Rails.application.routes.draw do
       post "bands/:band_id/assignments", action: :create_assignment, as: :create_authority_assignment
       delete "authorities/:id", action: :destroy_authority, as: :destroy_authority
       delete "assignments/:id", action: :destroy_assignment, as: :destroy_authority_assignment
+      post "versions", action: :open_next_version, as: :open_next_authority_version
+      post "consultations", action: :create_consultation, as: :create_authority_consultation
+      patch "consultations/:id", action: :rule_consultation, as: :rule_authority_consultation
     end
 
     resources :pp_records do

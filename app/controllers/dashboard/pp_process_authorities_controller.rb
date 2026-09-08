@@ -20,6 +20,6 @@ class Dashboard::PpProcessAuthoritiesController < Dashboard::PpProcessDetailCont
   private
 
   def authority_params
-    params.require(:pp_process_authority).permit(:item, :decision)
+    params.require(:pp_process_authority).permit(:item, :decision, :authority_id)
   end
 end

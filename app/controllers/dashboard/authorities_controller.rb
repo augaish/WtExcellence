@@ -16,6 +16,31 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @authorities = @report.authorities
     @categories = company.authority_categories.to_a
     @org_units = company.org_units.active.ordered.to_a
+    @diff = AuthorityMatrixDiff.new(@matrix.previous_version, @matrix) if @matrix.previous_version
+    @consultations = @matrix.consultations.includes(:authority, :org_unit, :ruled_by).to_a
+  end
+
+  # A new version is a copy, so the approved one stays exactly as approved while
+  # the next is consulted over — and so the two can be compared.
+  def open_next_version
+    successor = AuthorityMatrixVersionService.open_next(@matrix, actor: current_user)
+    redirect_to dashboard_authorities_path(matrix_id: successor.id),
+      notice: t("doa.versions.opened"), status: :see_other
+  end
+
+  def create_consultation
+    consultation = @matrix.consultations.new(consultation_params)
+    consultation.raised_by = current_user
+
+    save_and_return(consultation, "consultation_created")
+  end
+
+  def rule_consultation
+    consultation = @matrix.consultations.find_by(id: params[:id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if consultation.nil?
+
+    Thread.current[:current_user] = current_user
+    save_and_return_updated(consultation, consultation_ruling_params, "consultation_ruled")
   end
 
   def create_category
@@ -77,6 +102,11 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @matrix = params[:matrix_id].present? ? matrices.find_by(id: params[:matrix_id]) : matrices.first
   end
 
+  def save_and_return_updated(record, attributes, flash_key)
+    record.assign_attributes(attributes)
+    save_and_return(record, flash_key)
+  end
+
   def save_and_return(record, flash_key)
     if record.save
       back_to_matrix(notice: t("doa.flash.#{flash_key}"))
@@ -120,6 +150,15 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
 
   def band_params
     params.require(:authority_band).permit(:label_en, :label_ar, :min_amount, :max_amount)
+  end
+
+  def consultation_params
+    params.require(:authority_consultation).permit(:authority_id, :org_unit_id, :challenge,
+      :proposal, :expected_impact)
+  end
+
+  def consultation_ruling_params
+    params.require(:authority_consultation).permit(:status, :ruling)
   end
 
   def assignment_params
