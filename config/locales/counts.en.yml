@@ -3,3 +3,17 @@ en:
     zero: "No files"
     one: "1 file"
     other: "%{count} files"
+  risks_count:
+    zero: "No risks"
+    one: "1 risk"
+    other: "%{count} risks"
+  risk_matrix_population:
+    open: "Open risks only (%{count})"
+    all: "All risks, including closed (%{count})"
+    toggle_open: "Open"
+    toggle_all: "All"
+  ai_cost:
+    credits:
+      one: "1 credit"
+      other: "%{count} credits"
+    balance_after: "Balance updates when the answer arrives."

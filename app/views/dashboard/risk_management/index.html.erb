@@ -27,16 +27,38 @@
     <% end %>
 
     <!-- Risk Matrix Heatmap -->
+    <%# One orientation across the product: likelihood vertical, impact
+        horizontal, matching the Overview widget. The two disagreed, which made
+        the same risk look like two different ones depending on the page. %>
     <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mb-8 overflow-x-auto">
-      <h2 class="text-lg font-semibold text-[#0D1120] mb-4"><%= t('risk_matrix') %></h2>
+      <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div>
+          <h2 class="text-lg font-semibold text-[#0D1120]"><%= t('risk_matrix') %></h2>
+          <%# A matrix that does not say what it counts invites the wrong reading. %>
+          <p class="text-xs text-[#797C81] mt-0.5">
+            <%= t("risk_matrix_population.#{@matrix_population}", count: @matrix_risk_count) %>
+          </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <% %w[open all].each do |population| %>
+            <%= link_to t("risk_matrix_population.toggle_#{population}"),
+                dashboard_risk_management_index_path(population: population),
+                class: (@matrix_population == population ? ui_btn_secondary : ui_btn_neutral) %>
+          <% end %>
+        </div>
+      </div>
+
       <table class="border-collapse">
         <tbody>
-          <% (5).downto(1) do |impact| %>
+          <% (5).downto(1) do |likelihood| %>
             <tr>
-              <td class="text-xs font-medium text-[#797C81] pr-2 align-middle">Impact <%= impact %></td>
-              <% (1..5).each do |likelihood| %>
+              <td class="text-xs font-medium text-[#797C81] pe-2 align-middle whitespace-nowrap">
+                <%= t('likelihood', default: 'Likelihood') %> <%= likelihood %>
+              </td>
+              <% (1..5).each do |impact| %>
                 <% score = likelihood * impact %>
-                <% cell_risks = @heatmap[[likelihood, impact]] || [] %>
+                <% cell_risks = @heatmap[[ likelihood, impact ]] || [] %>
                 <% color = case score
                            when 1..4 then "bg-green-100 text-green-800"
                            when 5..10 then "bg-yellow-100 text-yellow-800"
@@ -44,10 +66,11 @@
                            else "bg-red-100 text-red-800"
                            end %>
                 <td class="w-20 h-16 border border-white">
-                  <div class="w-full h-full flex flex-col items-center justify-center rounded <%= color %>">
+                  <div class="w-full h-full flex flex-col items-center justify-center rounded <%= color %>"
+                       title="<%= t('likelihood', default: 'Likelihood') %> <%= likelihood %> × <%= t('impact', default: 'Impact') %> <%= impact %> = <%= score %>">
                     <span class="text-xs font-semibold"><%= score %></span>
                     <% if cell_risks.any? %>
-                      <span class="text-[10px]"><%= cell_risks.size %> risk<%= "s" if cell_risks.size != 1 %></span>
+                      <span class="text-[10px]"><%= t('risks_count', count: cell_risks.size) %></span>
                     <% end %>
                   </div>
                 </td>
@@ -56,8 +79,10 @@
           <% end %>
           <tr>
             <td></td>
-            <% (1..5).each do |likelihood| %>
-              <td class="text-xs font-medium text-[#797C81] text-center pt-1">L<%= likelihood %></td>
+            <% (1..5).each do |impact| %>
+              <td class="text-xs font-medium text-[#797C81] text-center pt-1">
+                <%= t('impact', default: 'Impact') %> <%= impact %>
+              </td>
             <% end %>
           </tr>
         </tbody>

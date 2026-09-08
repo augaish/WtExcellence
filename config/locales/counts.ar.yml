@@ -7,3 +7,23 @@ ar:
     few: "%{count} ملفات"
     many: "%{count} ملفًا"
     other: "%{count} ملف"
+  risks_count:
+    zero: "لا توجد مخاطر"
+    one: "خطر واحد"
+    two: "خطران"
+    few: "%{count} مخاطر"
+    many: "%{count} خطرًا"
+    other: "%{count} خطر"
+  risk_matrix_population:
+    open: "المخاطر المفتوحة فقط (%{count})"
+    all: "جميع المخاطر بما فيها المغلقة (%{count})"
+    toggle_open: "المفتوحة"
+    toggle_all: "الكل"
+  ai_cost:
+    credits:
+      one: "رصيد واحد"
+      two: "رصيدان"
+      few: "%{count} أرصدة"
+      many: "%{count} رصيدًا"
+      other: "%{count} رصيد"
+    balance_after: "يُحدَّث الرصيد عند وصول الإجابة."

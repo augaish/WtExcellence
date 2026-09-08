@@ -6,7 +6,14 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
 
   def index
     @risks = Risk.active.where(company_id: current_company&.id).includes(:owner, :riskable, :risk_workspace).order(inherent_score: :desc)
-    @heatmap = @risks.group_by { |risk| [ risk.likelihood, risk.impact ] }
+
+    # The matrix counted every risk including closed ones while the summary
+    # counted only open, so the two disagreed with no way to tell why. The
+    # population is now chosen and stated.
+    @matrix_population = params[:population] == "all" ? "all" : "open"
+    matrix_risks = @matrix_population == "all" ? @risks : @risks.reject(&:closed?)
+    @matrix_risk_count = matrix_risks.size
+    @heatmap = matrix_risks.group_by { |risk| [ risk.likelihood, risk.impact ] }
     @risk_workspaces = RiskWorkspace.active.where(company_id: current_company&.id).order(:name)
     @risks_by_workspace = @risks.group_by(&:risk_workspace)
   end

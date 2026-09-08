@@ -55,11 +55,8 @@ P3s, with the ones that mislead a user first.
 
 | | Finding | Why it is still open |
 |---|---|---|
-| F08 | CAPA document picker renders blank | Needs reproducing with PDF and DOCX before it can be called fixed; the review could only test a .txt file. |
-| F14 | AI cost is not disclosed before the action | Inconsistent with Generate Actions, which does show its cost. |
-| F15 | Ask AI describes controls that do not exist | Needs the answer grounded in the product manual and the current role's actions. |
+| F08 | CAPA document picker rendered blank | **Believed already fixed, needs confirming in the browser.** The API now returns .txt, .pdf and .docx correctly and is covered by tests, and the client has working empty and error states. The most likely original cause was the ActiveStorage URL failure that made two other pages return 500, repaired in the first batch of review fixes. Retest with a PDF before closing. |
 | F18 | Incomplete accessible names | A targeted observation, not a full audit. Worth doing properly against WCAG 2.2 AA rather than patching the named controls. |
-| F19 | Risk matrices swap axis convention between screens | Also needs an inherent/residual selector and an open/all population toggle. |
 | F22 | Governance registers have no work queues | Filters, saved views, export. Best done once the shared governance chassis exists, or it gets built twice. |
 | F23 | Library form feedback and folder context | Partly addressed by the F04 destination notice; the empty-upload error and the "Everyone" visibility label remain. |
 | F24 | Dense tables hide actions at 1280px | |

@@ -87,6 +87,25 @@ class PlatformAssistantService
     end
   end
 
+  # What the product actually contains. The assistant was answering "how do I…"
+  # questions by inventing plausible controls — "Related Items", "Link Existing
+  # Risk" — that do not exist, which sends a user hunting for a button that was
+  # never built. Listing the real areas is what stops that; the guard test keeps
+  # this in step with Company::MODULES.
+  PRODUCT_MAP = {
+    "library" => "Library — upload documents and link them as evidence to standards, CAPAs, risks, vendors, commitments and records.",
+    "org_structure" => "Org Structure — organizational units across six levels, with mandates, heads and colour groups. Has a list view and a chart view.",
+    "standards" => "Standards — assess clauses and checkpoints against ingested standards.",
+    "capa" => "CAPA Management — corrective and preventive actions, with a questionnaire, root cause and generated actions.",
+    "pp" => "Policies & Procedures — Process Architecture (the process tree, procedure steps and the operational authority matrix), Records and Packages, the Documenter lifecycle, and Efficiency Evaluation. Any record can be viewed as a branded printable document.",
+    "risk" => "Risk Management — a risk register scored on a 5x5 likelihood by impact matrix, with inherent, current residual and target exposure, and a company risk appetite.",
+    "vendors" => "Vendor Management — vendors with a risk level, category and owner.",
+    "commitments" => "Customer Commitments — obligations with due dates, where timing is derived from the due date rather than chosen.",
+    "trust_center" => "Trust Center — publishes what the company chooses to share externally.",
+    "ai_instructions" => "AI Instructions — company-specific guidance applied to AI answers.",
+    "tools" => "Tool Setup — checkpoint and scoring configuration."
+  }.freeze
+
   def call_llm(question, context)
     context_text = context.map { |c| "- #{c[:text]}" }.join("\n")
     prompt = <<~PROMPT
@@ -104,8 +123,19 @@ class PlatformAssistantService
          specific record isn't present, say you don't have that item in the
          company's data — never invent company-specific facts, names, or numbers.
 
-      When a question mixes both, combine your general knowledge with the
+      3. Questions about how to DO something in this platform. Answer these
+         only from the product map below. Never invent a screen, button, tab or
+         control: if the map does not show a way to do what was asked, say the
+         platform does not appear to offer it and suggest the closest thing that
+         does exist, or point the user to the in-app manual under Help. A
+         confident answer naming a control that was never built costs the user
+         more time than admitting the gap.
+
+      When a question mixes these, combine your general knowledge with the
       company context. Prefer the company context whenever it is relevant.
+
+      Product map — the areas this platform actually has:
+      #{PRODUCT_MAP.values.map { |line| "- #{line}" }.join("\n")}
 
       Company context:
       #{context_text.presence || "(no matching company records found for this question)"}
