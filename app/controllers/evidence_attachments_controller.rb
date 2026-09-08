@@ -35,7 +35,7 @@ class EvidenceAttachmentsController < DashboardController
       attachable_id = item_params[:id]
 
       # Validate attachable_type (CapaAction = attach to a specific corrective/preventive action)
-      unless %w[Standard Clause ChecklistItem Capa CapaAction].include?(attachable_type)
+      unless %w[Standard Clause ChecklistItem Capa CapaAction Risk Vendor CustomerCommitment].include?(attachable_type)
         errors << "Invalid type: #{attachable_type}"
         next
       end
@@ -228,6 +228,17 @@ class EvidenceAttachmentsController < DashboardController
       return false unless action
       # Only assignees of this action or QM/Admin can attach (comment/upload for that action)
       cu.has_admin_privileges? || action.capa_action_assignments.exists?(company_user_id: cu.id)
+    when "Risk", "Vendor", "CustomerCommitment"
+      # Governance evidence follows the same rule as the record itself: it must
+      # belong to this company, and the role must be allowed to manage it.
+      model = attachable_type.to_s.constantize
+      record = model.find_by(id: attachable_id, company_id: current_company.id)
+      return false unless record
+
+      cu.has_admin_privileges? || cu.company_quality_manager? ||
+        (attachable_type.to_s == "Risk" && current_user.can_manage_risks?) ||
+        (attachable_type.to_s == "Vendor" && current_user.can_manage_vendors?) ||
+        (attachable_type.to_s == "CustomerCommitment" && current_user.can_manage_commitments?)
     when "Standard"
       CompanyStandard.exists?(standard_id: attachable_id, company_id: current_company.id)
     when "Clause"

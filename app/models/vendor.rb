@@ -2,6 +2,9 @@ class Vendor < ApplicationRecord
   include GovernanceCapaLinkable
   include GovernanceActivity
 
+  has_many :evidence_attachments, as: :attachable, dependent: :destroy
+  has_many :uploads, through: :evidence_attachments
+
   tracks_governance_activity entity: "vendor",
     tracks: %i[name risk_level owner_id contact_email],
     summary: %i[name risk_level]

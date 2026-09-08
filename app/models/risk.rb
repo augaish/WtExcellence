@@ -2,6 +2,9 @@ class Risk < ApplicationRecord
   include GovernanceCapaLinkable
   include GovernanceActivity
 
+  has_many :evidence_attachments, as: :attachable, dependent: :destroy
+  has_many :uploads, through: :evidence_attachments
+
   tracks_governance_activity entity: "risk",
     tracks: %i[status likelihood impact residual_score owner_id closure_reason],
     summary: %i[title status inherent_score]

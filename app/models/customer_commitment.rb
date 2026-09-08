@@ -2,6 +2,9 @@ class CustomerCommitment < ApplicationRecord
   include GovernanceCapaLinkable
   include GovernanceActivity
 
+  has_many :evidence_attachments, as: :attachable, dependent: :destroy
+  has_many :uploads, through: :evidence_attachments
+
   tracks_governance_activity entity: "customer_commitment",
     tracks: %i[status due_date owner_id fulfillment_note],
     summary: %i[title customer_name due_date]

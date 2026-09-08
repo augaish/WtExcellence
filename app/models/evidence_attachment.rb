@@ -1,7 +1,9 @@
 class EvidenceAttachment < ApplicationRecord
   # Validations
   validates :upload_id, presence: true
-  validates :attachable_type, presence: true, inclusion: { in: %w[Standard Clause ChecklistItem Capa CapaAction Assessment PpRecord] }
+  validates :attachable_type, presence: true,
+    inclusion: { in: %w[Standard Clause ChecklistItem Capa CapaAction Assessment PpRecord
+                        Risk Vendor CustomerCommitment] }
   validates :attachable_id, presence: true
   validates :purpose, length: { maximum: 50 }, allow_blank: true
   validates :upload_id, uniqueness: { scope: [:attachable_type, :attachable_id],
@@ -19,6 +21,7 @@ class EvidenceAttachment < ApplicationRecord
   scope :for_capa, -> { where(attachable_type: "Capa") }
   scope :for_assessment, -> { where(attachable_type: "Assessment") }
   scope :for_pp_record, -> { where(attachable_type: "PpRecord") }
+  scope :for_governance, -> { where(attachable_type: %w[Risk Vendor CustomerCommitment]) }
 
   # Instance methods
   def attachable_name(language_code = "en")
@@ -42,6 +45,10 @@ class EvidenceAttachment < ApplicationRecord
       end
     when "PpRecord"
       attachable.display_title(language_code)
+    when "Risk", "CustomerCommitment"
+      attachable.title
+    when "Vendor"
+      attachable.name
     else
       "Unknown"
     end
