@@ -64,14 +64,18 @@ module NavigationHelper
       nav_item(label: t("documenter.title"), path: dashboard_documenter_path,
         icon: "calendar-03.png", active: request.path.include?("documenter")),
       nav_item(label: t("evaluation.title"), path: dashboard_process_evaluations_path,
-        icon: "score-start-icon.svg", active: request.path.include?("evaluation")),
-      nav_item(label: t("doa.title"), path: dashboard_authorities_path,
-        icon: "account-management-icon.svg", active: request.path.include?("authorities"))
+        icon: "score-start-icon.svg", active: request.path.include?("evaluation"))
     ]
   end
 
   def nav_governance_items
     items = []
+    # Delegation of Authority sits with Governance, though it is still gated on
+    # the P&P module that its records and matrices belong to.
+    if nav_module?(:pp)
+      items << nav_item(label: t("doa.title"), path: dashboard_authorities_path,
+        icon: "account-management-icon.svg", active: request.path.include?("authorities"))
+    end
     if current_user&.can_manage_risks? && module_enabled_for_current?(:risk)
       items << nav_item(label: t("risk_management"), path: dashboard_risk_management_index_path,
         icon: "score-start-icon.svg",

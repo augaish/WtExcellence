@@ -94,6 +94,19 @@ class ReviewFindingsTest < ActionDispatch::IntegrationTest
     assert_equal "Corrected notes", @upload.notes
   end
 
+  # Placement: Delegation of Authority belongs with Governance, not P&P.
+  test "the authorities page is listed under Governance" do
+    sign_in @admin
+    get dashboard_overview_path
+
+    assert_response :success
+    assert_select "#sidebar div" do |sections|
+      governance = sections.find { |section| section.text.include?(I18n.t("governance")) }
+      assert governance, "no Governance section in the sidebar"
+      assert_select governance, "a[href=?]", dashboard_authorities_path
+    end
+  end
+
   # F07
   test "a record link appears on the document detail page" do
     sign_in @admin
