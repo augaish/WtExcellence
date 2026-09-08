@@ -1,0 +1,47 @@
+ar:
+  process_steps:
+    title: خطوات الإجراء
+    errors:
+      unit_required: اختر وحدة المدة.
+      other_company: يجب أن تنتمي إلى نفس الشركة
+    flash:
+      created: تمت إضافة الخطوة.
+      updated: تم تحديث الخطوة.
+      deleted: تم حذف الخطوة.
+      not_found: هذه الخطوة لم تعد موجودة.
+    add: إضافة خطوة
+    number: "#"
+    activity: النشاط
+    description: وصف الخطوة
+    responsible: المنصب المسؤول
+    duration: مدة التنفيذ
+    system: النظام الآلي
+    none: لم تُسجَّل أي خطوات بعد.
+    total_from_steps: الإجمالي من الخطوات
+    total_disagrees: الزمن الكلي المسجل في بطاقة الإجراء لا يطابق مجموع خطواته.
+    units:
+      minutes: دقائق
+      hours: ساعات
+      days: أيام
+  process_authorities:
+    title: مصفوفة الصلاحيات الإجرائية
+    errors:
+      decision_required: حدد البند أو القرار.
+      holder_required: حدد المنصب أو الوحدة التنظيمية صاحبة هذا المستوى.
+    flash:
+      created: تمت إضافة القرار.
+      deleted: تم حذف القرار.
+      not_found: هذا القرار لم يعد موجودًا.
+      assignment_created: تم إسناد الصلاحية.
+      assignment_deleted: تم حذف الإسناد.
+    add: إضافة قرار
+    add_assignment: إسناد صلاحية
+    item: البند
+    decision: القرار
+    holder: المنصب أو الوحدة
+    level: المستوى
+    condition: الشرط
+    none: لم تُسجَّل أي قرارات بعد.
+    no_authorizer: لا يوجد صاحب صلاحية اعتماد نهائي لهذا القرار.
+    many_authorizers: يوجد أكثر من صاحب صلاحية اعتماد نهائي لهذا القرار.
+    segregation_breach: يجمع صاحب واحد بين الإعداد والمراجعة والاعتماد لهذا القرار، وهو ما لا تجيزه قواعد الصلاحيات.

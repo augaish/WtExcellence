@@ -1,0 +1,47 @@
+en:
+  process_steps:
+    title: "Procedure steps"
+    errors:
+      unit_required: "Choose a unit for the duration."
+      other_company: "must belong to the same company"
+    flash:
+      created: "Step added."
+      updated: "Step updated."
+      deleted: "Step removed."
+      not_found: "That step no longer exists."
+    add: "Add step"
+    number: "#"
+    activity: "Activity"
+    description: "Step description"
+    responsible: "Responsible position"
+    duration: "Duration"
+    system: "System used"
+    none: "No steps recorded yet."
+    total_from_steps: "Total from steps"
+    total_disagrees: "The total time recorded on the process card does not match the sum of its steps."
+    units:
+      minutes: "Minutes"
+      hours: "Hours"
+      days: "Days"
+  process_authorities:
+    title: "Operational authority matrix"
+    errors:
+      decision_required: "Describe the item or the decision."
+      holder_required: "Name the position or organizational unit that holds this level."
+    flash:
+      created: "Decision added."
+      deleted: "Decision removed."
+      not_found: "That decision no longer exists."
+      assignment_created: "Authority assigned."
+      assignment_deleted: "Assignment removed."
+    add: "Add decision"
+    add_assignment: "Assign authority"
+    item: "Item"
+    decision: "Decision"
+    holder: "Position or unit"
+    level: "Level"
+    condition: "Condition"
+    none: "No decisions recorded yet."
+    no_authorizer: "No holder carries final authorization for this decision."
+    many_authorizers: "More than one holder carries final authorization for this decision."
+    segregation_breach: "One holder prepares, reviews and authorizes this decision, which the authority rules do not permit."

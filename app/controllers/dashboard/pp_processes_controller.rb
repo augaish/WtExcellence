@@ -5,7 +5,7 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
   before_action :ensure_can_manage, only: [
     :new, :create, :edit, :update, :destroy, :toggle_active, :import, :run_import
   ]
-  before_action :set_process, only: [ :edit, :update, :destroy, :toggle_active ]
+  before_action :set_process, only: [ :show, :edit, :update, :destroy, :toggle_active ]
 
   helper_method :can_manage_processes?
 
@@ -30,6 +30,15 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
     @roots = @by_parent[nil] || []
     @total_count = company_scope.count
     @level_counts = company_scope.group(:level).count
+  end
+
+  # The procedure's own detail: its steps and its operational authority matrix.
+  # Both become sections of the generated document, so they are edited on a
+  # page of their own rather than in the drawer used for the process card.
+  def show
+    @steps = @process.steps.includes(:responsible_org_unit).to_a
+    @authorities = @process.authorities.includes(assignments: :org_unit).to_a
+    @org_units = company.org_units.active.ordered.to_a
   end
 
   def new

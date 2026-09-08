@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_082312) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_082825) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -628,6 +628,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_082312) do
     t.index ["tsvector_content"], name: "index_pg_search_documents_on_tsvector_content_gin", using: :gin
   end
 
+  create_table "pp_authority_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_process_authority_id", null: false
+    t.string "level", limit: 20, null: false
+    t.string "holder_title", limit: 250
+    t.uuid "org_unit_id"
+    t.string "condition", limit: 300
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_unit_id"], name: "index_pp_authority_assignments_on_org_unit_id"
+    t.index ["pp_process_authority_id", "level"], name: "index_pp_authority_assignments_on_authority_and_level"
+    t.index ["pp_process_authority_id"], name: "index_pp_authority_assignments_on_pp_process_authority_id"
+  end
+
   create_table "pp_diagram_elements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pp_diagram_id", null: false
     t.integer "position", default: 0, null: false
@@ -687,6 +701,33 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_082312) do
     t.datetime "updated_at", null: false
     t.index ["company_id", "name"], name: "index_pp_packages_on_company_id_and_name"
     t.index ["company_id"], name: "index_pp_packages_on_company_id"
+  end
+
+  create_table "pp_process_authorities", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_process_id", null: false
+    t.string "item", limit: 300
+    t.string "decision", limit: 300
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_process_id"], name: "index_pp_process_authorities_on_pp_process_id"
+  end
+
+  create_table "pp_process_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_process_id", null: false
+    t.integer "position", default: 1, null: false
+    t.string "activity", limit: 300
+    t.text "description"
+    t.string "responsible_title", limit: 250
+    t.uuid "responsible_org_unit_id"
+    t.decimal "duration_value", precision: 10, scale: 2
+    t.string "duration_unit", limit: 20
+    t.string "system_used", limit: 250
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_process_id", "position"], name: "index_pp_process_steps_on_pp_process_id_and_position"
+    t.index ["pp_process_id"], name: "index_pp_process_steps_on_pp_process_id"
+    t.index ["responsible_org_unit_id"], name: "index_pp_process_steps_on_responsible_org_unit_id"
   end
 
   create_table "pp_processes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1184,12 +1225,17 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_082312) do
   add_foreign_key "org_units", "org_groups"
   add_foreign_key "org_units", "org_units", column: "parent_id"
   add_foreign_key "org_units", "users", column: "head_user_id"
+  add_foreign_key "pp_authority_assignments", "org_units"
+  add_foreign_key "pp_authority_assignments", "pp_process_authorities"
   add_foreign_key "pp_diagram_elements", "pp_diagrams"
   add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "from_element_id"
   add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "to_element_id"
   add_foreign_key "pp_diagram_flows", "pp_diagrams"
   add_foreign_key "pp_diagrams", "companies"
   add_foreign_key "pp_packages", "companies"
+  add_foreign_key "pp_process_authorities", "pp_processes"
+  add_foreign_key "pp_process_steps", "org_units", column: "responsible_org_unit_id"
+  add_foreign_key "pp_process_steps", "pp_processes"
   add_foreign_key "pp_processes", "companies"
   add_foreign_key "pp_processes", "org_units", column: "owner_org_unit_id"
   add_foreign_key "pp_processes", "pp_processes", column: "parent_id"

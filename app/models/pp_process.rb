@@ -21,6 +21,8 @@ class PpProcess < ApplicationRecord
 
   has_many :children, -> { order(:sort_order, :created_at) },
     class_name: "PpProcess", foreign_key: "parent_id", dependent: :restrict_with_error
+  has_many :steps, -> { ordered }, class_name: "PpProcessStep", foreign_key: "pp_process_id", dependent: :destroy
+  has_many :authorities, -> { ordered }, class_name: "PpProcessAuthority", foreign_key: "pp_process_id", dependent: :destroy
   has_many :pp_records, class_name: "PpRecord", foreign_key: "pp_process_id", dependent: :nullify
   has_many :diagrams, -> { order(created_at: :desc) }, as: :owner, class_name: "PpDiagram", dependent: :destroy
 
@@ -44,6 +46,36 @@ class PpProcess < ApplicationRecord
   scope :roots, -> { where(parent_id: nil) }
   scope :ordered, -> { order(:sort_order, :code, :created_at) }
   scope :at_level, ->(level) { where(level: level) }
+
+  # The total time the procedure takes, summed from its steps rather than typed.
+  # Durations are captured by the system from the work itself, so a total cannot
+  # drift from the steps it is meant to describe. Returns nil when no step names
+  # a duration, in which case the typed total_time_value stands as a fallback.
+  def computed_total_minutes
+    durations = steps.filter_map(&:duration_in_minutes)
+    return nil if durations.empty?
+
+    durations.sum
+  end
+
+  # The computed total expressed in the unit the process card uses, so the card
+  # reads the same way whether the steps were entered in minutes or days.
+  def computed_total_in(unit)
+    minutes = computed_total_minutes
+    return nil if minutes.nil?
+
+    per_unit = PpProcessStep::MINUTES_PER_UNIT.fetch(unit.to_s, 1)
+    (minutes / per_unit.to_d).round(2)
+  end
+
+  # True when someone typed a total that the steps contradict. Surfaced as a
+  # warning rather than an error: the steps may simply be incomplete.
+  def total_time_disagrees_with_steps?
+    return false if total_time_value.blank? || total_time_unit.blank?
+
+    computed = computed_total_in(total_time_unit)
+    computed.present? && computed != total_time_value
+  end
 
   def display_name(locale = I18n.locale)
     primary, fallback = locale.to_s == "ar" ? [ name_ar, name_en ] : [ name_en, name_ar ]

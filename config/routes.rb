@@ -168,13 +168,20 @@ Rails.application.routes.draw do
     end
 
     # Process Architecture (P&P)
-    resources :pp_processes, except: [ :show ] do
+    resources :pp_processes do
       collection do
         get :import
         post :import, action: :run_import
         get :template
       end
       member { patch :toggle_active }
+
+      # The procedure's own detail: its steps and its operational authority
+      # matrix, both of which become sections of the generated document.
+      resources :steps, only: [ :create, :update, :destroy ], controller: "pp_process_steps"
+      resources :authorities, only: [ :create, :destroy ], controller: "pp_process_authorities" do
+        resources :assignments, only: [ :create, :destroy ], controller: "pp_authority_assignments"
+      end
     end
 
     # Account Management routes
