@@ -6,6 +6,9 @@
       <%= link_to t('new_commitment'), new_dashboard_customer_commitment_path, class: ui_btn_primary %>
     <% end %>
 
+    <%= render "dashboard/shared/register_filters", filter: @filter, path: dashboard_customer_commitments_path %>
+    <p class="text-xs text-[#797C81] mb-3"><%= t('registers.showing', count: @filter.results.count, total: @total_count) %></p>
+
     <% if @past_due_count > 0 %>
       <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6 text-sm text-red-800">
         <%= t('past_due_warning', count: @past_due_count) %>

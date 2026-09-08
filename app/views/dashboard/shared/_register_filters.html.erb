@@ -1,0 +1,27 @@
+<%# Search and work queues, shared by the three governance registers so a queue
+    behaves the same wherever it appears. %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-4 mb-4">
+  <%= form_with url: path, method: :get, class: "flex flex-col sm:flex-row sm:items-end gap-3" do |f| %>
+    <div class="flex-1 min-w-0">
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('registers.search') %></label>
+      <%= text_field_tag :q, filter.search_term, placeholder: t('registers.search_placeholder'),
+          class: "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
+    </div>
+    <%= hidden_field_tag :queue, filter.queue %>
+    <%= submit_tag t('registers.apply'), class: ui_btn_secondary %>
+    <% if filter.filtering? %>
+      <%= link_to t('registers.clear'), path, class: ui_btn_neutral %>
+    <% end %>
+  <% end %>
+
+  <div class="flex flex-wrap gap-2 mt-3">
+    <% filter.queues.each do |queue| %>
+      <% active = filter.queue == queue %>
+      <%= link_to url_for(request.query_parameters.merge(queue: queue)),
+            class: "inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border #{active ? 'bg-[#F6EEFF] border-[#5C3984] text-[#0D1120]' : 'bg-white border-[#E3E3E3] text-[#797C81] hover:bg-[#F7F7FD]'}" do %>
+        <%= t("registers.queues.#{queue}") %>
+        <span class="<%= active ? 'text-[#5C3984]' : 'text-[#797C81]' %>"><%= filter.queue_counts[queue] %></span>
+      <% end %>
+    <% end %>
+  </div>
+</div>

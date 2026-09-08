@@ -57,7 +57,7 @@ P3s, with the ones that mislead a user first.
 |---|---|---|
 | F08 | CAPA document picker rendered blank | **Believed already fixed, needs confirming in the browser.** The API now returns .txt, .pdf and .docx correctly and is covered by tests, and the client has working empty and error states. The most likely original cause was the ActiveStorage URL failure that made two other pages return 500, repaired in the first batch of review fixes. Retest with a PDF before closing. |
 | F18 | Incomplete accessible names | A targeted observation, not a full audit. Worth doing properly against WCAG 2.2 AA rather than patching the named controls. |
-| F22 | Governance registers have no work queues | Filters, saved views, export. Best done once the shared governance chassis exists, or it gets built twice. |
+| F22-b | Saved views and export on the registers | Search and work queues are done. Saving a view, and exporting with the filters applied, are not. |
 | F23 | Library form feedback and folder context | Partly addressed by the F04 destination notice; the empty-upload error and the "Everyone" visibility label remain. |
 | F24 | Dense tables hide actions at 1280px | |
 

@@ -1,0 +1,19 @@
+ar:
+  registers:
+    search: "بحث"
+    search_placeholder: "ابحث بالاسم أو الوصف"
+    apply: "تطبيق"
+    clear: "مسح"
+    showing: "عرض %{count} من %{total}"
+    none_match: "لا يوجد ما يطابق هذا البحث أو هذه القائمة."
+    queues:
+      all: "الكل"
+      mine: "الخاصة بي"
+      open: "مفتوحة"
+      closed: "مغلقة"
+      above_appetite: "تتجاوز حد التقبل"
+      unassessed: "غير مقيَّم"
+      critical: "حرجة"
+      overdue: "متأخرة"
+      due_soon: "يقترب استحقاقها"
+      fulfilled: "تم الوفاء بها"

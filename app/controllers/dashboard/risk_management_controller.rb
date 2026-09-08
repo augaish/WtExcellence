@@ -5,13 +5,23 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa ]
 
   def index
-    @risks = Risk.active.where(company_id: current_company&.id).includes(:owner, :riskable, :risk_workspace).order(inherent_score: :desc)
+    all_risks = Risk.active.where(company_id: current_company&.id)
+
+    # Search and queues, shared with the other governance registers.
+    @filter = GovernanceRegisterFilter.new(all_risks, params: params,
+      company_user: current_user&.company_user, company: current_company)
+    @total_count = all_risks.count
+    @risks = @filter.results.includes(:owner, :riskable, :risk_workspace).order(inherent_score: :desc)
+
+    # The matrix always describes the whole register, not the current search:
+    # a heatmap of filtered results would invite the wrong conclusion.
 
     # The matrix counted every risk including closed ones while the summary
     # counted only open, so the two disagreed with no way to tell why. The
     # population is now chosen and stated.
     @matrix_population = params[:population] == "all" ? "all" : "open"
-    matrix_risks = @matrix_population == "all" ? @risks : @risks.reject(&:closed?)
+    matrix_source = all_risks.includes(:owner)
+    matrix_risks = @matrix_population == "all" ? matrix_source.to_a : matrix_source.reject(&:closed?)
     @matrix_risk_count = matrix_risks.size
     @heatmap = matrix_risks.group_by { |risk| [ risk.likelihood, risk.impact ] }
     @risk_workspaces = RiskWorkspace.active.where(company_id: current_company&.id).order(:name)

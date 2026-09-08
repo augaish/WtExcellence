@@ -1,0 +1,19 @@
+en:
+  registers:
+    search: "Search"
+    search_placeholder: "Search by name or description"
+    apply: "Apply"
+    clear: "Clear"
+    showing: "Showing %{count} of %{total}"
+    none_match: "Nothing matches this search or queue."
+    queues:
+      all: "All"
+      mine: "Mine"
+      open: "Open"
+      closed: "Closed"
+      above_appetite: "Above appetite"
+      unassessed: "Unassessed"
+      critical: "Critical"
+      overdue: "Overdue"
+      due_soon: "Due soon"
+      fulfilled: "Fulfilled"

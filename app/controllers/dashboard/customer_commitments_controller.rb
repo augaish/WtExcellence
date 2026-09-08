@@ -6,8 +6,14 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   before_action :set_commitment, only: [ :show, :edit, :update, :destroy, :create_capa ]
 
   def index
-    @commitments = CustomerCommitment.active.where(company_id: current_company&.id).includes(:owner).order(due_date: :asc)
-    @past_due_count = @commitments.select(&:past_due?).size
+    all_commitments = CustomerCommitment.active.where(company_id: current_company&.id)
+    @filter = GovernanceRegisterFilter.new(all_commitments, params: params,
+      company_user: current_user&.company_user, company: current_company)
+    @total_count = all_commitments.count
+    @commitments = @filter.results.includes(:owner).order(due_date: :asc)
+
+    # The overdue count describes the whole register, not the current filter.
+    @past_due_count = all_commitments.to_a.select(&:past_due?).size
   end
 
   def show

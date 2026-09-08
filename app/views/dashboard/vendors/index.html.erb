@@ -6,6 +6,9 @@
       <%= link_to t('new_vendor'), new_dashboard_vendor_path, class: ui_btn_primary %>
     <% end %>
 
+    <%= render "dashboard/shared/register_filters", filter: @filter, path: dashboard_vendors_path %>
+    <p class="text-xs text-[#797C81] mb-3"><%= t('registers.showing', count: @filter.results.count, total: @total_count) %></p>
+
     <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">

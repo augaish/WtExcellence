@@ -13,7 +13,11 @@ class Dashboard::VendorsController < Dashboard::BaseController
       "WHEN 'critical' THEN 0 WHEN 'high' THEN 1 WHEN 'medium' THEN 2 " \
       "WHEN 'low' THEN 3 ELSE 4 END"
     )
-    @vendors = Vendor.active.where(company_id: current_company&.id).includes(:owner).order(severity_order, name: :asc)
+    all_vendors = Vendor.active.where(company_id: current_company&.id)
+    @filter = GovernanceRegisterFilter.new(all_vendors, params: params,
+      company_user: current_user&.company_user, company: current_company)
+    @total_count = all_vendors.count
+    @vendors = @filter.results.includes(:owner).order(severity_order, name: :asc)
   end
 
   def show

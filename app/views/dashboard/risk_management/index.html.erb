@@ -26,6 +26,9 @@
       <%= link_to t('log_new_risk'), dashboard_new_risk_path, class: ui_btn_primary %>
     <% end %>
 
+    <%= render "dashboard/shared/register_filters", filter: @filter, path: dashboard_risk_management_index_path %>
+    <p class="text-xs text-[#797C81] mb-3"><%= t('registers.showing', count: @filter.results.count, total: @total_count) %></p>
+
     <!-- Risk Matrix Heatmap -->
     <%# One orientation across the product: likelihood vertical, impact
         horizontal, matching the Overview widget. The two disagreed, which made
