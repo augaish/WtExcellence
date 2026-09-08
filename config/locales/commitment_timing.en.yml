@@ -1,0 +1,19 @@
+en:
+  commitment_timing:
+    title: "Timing"
+    timing:
+      no_due_date: "No due date"
+      not_due: "Not due"
+      due_soon: "Due soon"
+      overdue: "Overdue"
+      fulfilled_on_time: "Fulfilled on time"
+      fulfilled_late: "Fulfilled late"
+    days_overdue:
+      one: "1 day overdue"
+      other: "%{count} days overdue"
+    days_late:
+      one: "1 day late"
+      other: "%{count} days late"
+    fulfillment_note: "Basis for fulfilment"
+    fulfillment_note_placeholder: "What was delivered, and how was it verified?"
+    fulfillment_note_hint: "Required when the status is Fulfilled. Recorded with who confirmed it and when."

@@ -1,0 +1,19 @@
+ar:
+  commitment_timing:
+    title: "الحالة الزمنية"
+    timing:
+      no_due_date: لا يوجد تاريخ استحقاق
+      not_due: غير مستحق
+      due_soon: يقترب موعد الاستحقاق
+      overdue: متأخر
+      fulfilled_on_time: تم الوفاء في الموعد
+      fulfilled_late: تم الوفاء متأخرًا
+    days_overdue:
+      one: متأخر يوم واحد
+      other: متأخر %{count} يوم
+    days_late:
+      one: متأخر يوم واحد
+      other: متأخر %{count} يوم
+    fulfillment_note: أساس الوفاء
+    fulfillment_note_placeholder: ما الذي تم تسليمه، وكيف تم التحقق منه؟
+    fulfillment_note_hint: مطلوب عند اختيار الحالة "تم الوفاء". يُسجَّل مع اسم من أكده وتاريخه.

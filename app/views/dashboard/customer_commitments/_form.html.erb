@@ -46,7 +46,16 @@
 
     <div>
       <%= f.label :status, t('status'), class: ui_label %>
+      <%# Overdue is not offered: timing is derived from the due date, so it can
+          be reported but never chosen. %>
       <%= f.select :status, CustomerCommitment.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: ui_input %>
+    </div>
+
+    <div class="md:col-span-2">
+      <%= f.label :fulfillment_note, t('commitment_timing.fulfillment_note'), class: ui_label %>
+      <%= f.text_area :fulfillment_note, rows: 3, class: ui_input,
+          placeholder: t('commitment_timing.fulfillment_note_placeholder') %>
+      <p class="mt-1 text-xs text-[#797C81]"><%= t('commitment_timing.fulfillment_note_hint') %></p>
     </div>
   </div>
 

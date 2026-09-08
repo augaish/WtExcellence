@@ -36,12 +36,27 @@
           <p class="text-sm text-[#0D1120]"><%= @commitment.owner&.user&.name || t('unassigned') %></p>
         </div>
       </div>
+      <%# Workflow state and timing are shown side by side: "In progress" and
+          "4 days overdue" say different things, and the detail page used to
+          show only the first. %>
       <div>
         <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('status') %></p>
-        <span class="inline-flex mt-1 px-2 py-1 text-xs font-medium rounded-full <%= @commitment.status == 'fulfilled' ? 'bg-green-100 text-green-800' : @commitment.past_due? ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' %>">
+        <span class="inline-flex mt-1 px-2 py-1 text-xs font-medium rounded-full <%= @commitment.fulfilled? ? 'bg-green-100 text-green-800' : 'bg-[#F7F7FD] text-[#0D1120]' %>">
           <%= @commitment.status.titleize %>
         </span>
       </div>
+      <div>
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_timing.title') %></p>
+        <span class="inline-flex mt-1 px-2 py-1 text-xs font-medium rounded-full <%= commitment_timing_classes(@commitment) %>">
+          <%= commitment_timing_label(@commitment) %>
+        </span>
+      </div>
+      <% if @commitment.fulfillment_note.present? %>
+        <div class="md:col-span-2">
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_timing.fulfillment_note') %></p>
+          <p class="mt-1 text-sm text-[#0D1120]"><%= @commitment.fulfillment_note %></p>
+        </div>
+      <% end %>
     </div>
 
     <%= render "dashboard/shared/governance_capas", origin: @commitment,

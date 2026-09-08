@@ -28,7 +28,8 @@ class CustomerCommitmentTest < ActiveSupport::TestCase
 
     assert commitment.past_due?
 
-    commitment.update!(status: "fulfilled")
+    # Fulfilment must say on what basis the obligation was accepted as met.
+    commitment.update!(status: "fulfilled", fulfillment_note: "Report delivered and accepted.")
 
     refute commitment.past_due?
   end

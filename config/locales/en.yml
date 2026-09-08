@@ -1461,6 +1461,26 @@ en:
 
   # Assignment activity log (audit log descriptions, shown in current locale)
   audit_log:
+    company:
+      default_company: "Company"
+      CREATE_COMPANY: "Company \"%{company_name}\" was created"
+      DELETE_COMPANY: "Company \"%{company_name}\" was deleted"
+      UPDATE_COMPANY_LICENSE_SEATS: "License seats for company \"%{company_name}\" changed from %{old_seats} to %{new_seats}"
+    user:
+      default_user: "User"
+      default_role: "User"
+      permissions_added: "added: %{list}"
+      permissions_removed: "removed: %{list}"
+      ACTIVATE_USER: "User \"%{user_name}\" was activated"
+      DEACTIVATE_USER: "User \"%{user_name}\" was deactivated"
+      UPDATE_USER_PERMISSIONS: "Permissions for user \"%{user_name}\" updated"
+      UPDATE_USER_PERMISSIONS_with_changes: "Permissions for user \"%{user_name}\" updated (%{changes})"
+      CREATE_USER_INVITATION: "Invitation sent to \"%{user_name}\" (%{role})"
+      CREATE_USER_INVITATION_with_company: "Invitation sent to \"%{user_name}\" (%{role}) for company \"%{company_name}\""
+      UPDATE_USER_NAME: "User name updated to \"%{user_name}\""
+      UPDATE_USER_NAME_from: "User name changed from \"%{old_name}\" to \"%{user_name}\""
+      ACCEPT_USER_INVITATION: "User \"%{user_name}\" accepted invitation"
+      USER_LOGIN: "User \"%{user_name}\" logged in"
     assignment:
       by: "by"
       UPDATE_ASSIGNMENT_CONTENT: "Updated assignment content"
@@ -1530,26 +1550,6 @@ en:
     comment: "Comment on assessment %{clause_code}"
     comment_with_feedback: "Comment on assessment %{clause_code}: \"%{feedback}\""
     auditor_assigned: "Auditor %{auditor_name} assigned to assessment %{clause_code}"
-    company:
-      default_company: "Company"
-      CREATE_COMPANY: "Company \"%{company_name}\" was created"
-      DELETE_COMPANY: "Company \"%{company_name}\" was deleted"
-      UPDATE_COMPANY_LICENSE_SEATS: "License seats for company \"%{company_name}\" changed from %{old_seats} to %{new_seats}"
-    user:
-      default_user: "User"
-      default_role: "User"
-      permissions_added: "added: %{list}"
-      permissions_removed: "removed: %{list}"
-      ACTIVATE_USER: "User \"%{user_name}\" was activated"
-      DEACTIVATE_USER: "User \"%{user_name}\" was deactivated"
-      UPDATE_USER_PERMISSIONS: "Permissions for user \"%{user_name}\" updated"
-      UPDATE_USER_PERMISSIONS_with_changes: "Permissions for user \"%{user_name}\" updated (%{changes})"
-      CREATE_USER_INVITATION: "Invitation sent to \"%{user_name}\" (%{role})"
-      CREATE_USER_INVITATION_with_company: "Invitation sent to \"%{user_name}\" (%{role}) for company \"%{company_name}\""
-      UPDATE_USER_NAME: "User name updated to \"%{user_name}\""
-      UPDATE_USER_NAME_from: "User name changed from \"%{old_name}\" to \"%{user_name}\""
-      ACCEPT_USER_INVITATION: "User \"%{user_name}\" accepted invitation"
-      USER_LOGIN: "User \"%{user_name}\" logged in"
   
   date:
     formats:

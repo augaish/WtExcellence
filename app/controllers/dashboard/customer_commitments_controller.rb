@@ -64,6 +64,6 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   end
 
   def commitment_params
-    params.require(:customer_commitment).permit(:title, :description, :customer_name, :due_date, :status, :owner_id)
+    params.require(:customer_commitment).permit(:title, :description, :customer_name, :due_date, :status, :owner_id, :fulfillment_note)
   end
 end

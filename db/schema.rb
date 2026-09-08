@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_082825) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_083903) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -463,9 +463,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_082825) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "fulfilled_at"
+    t.uuid "fulfilled_by_id"
+    t.text "fulfillment_note"
     t.index ["company_id"], name: "index_customer_commitments_on_company_id"
     t.index ["created_by_id"], name: "index_customer_commitments_on_created_by_id"
     t.index ["deleted_at"], name: "index_customer_commitments_on_deleted_at"
+    t.index ["fulfilled_by_id"], name: "index_customer_commitments_on_fulfilled_by_id"
     t.index ["owner_id"], name: "index_customer_commitments_on_owner_id"
     t.index ["status"], name: "index_customer_commitments_on_status"
   end

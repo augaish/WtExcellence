@@ -1,0 +1,26 @@
+# Arabic translations that had no counterpart, found by
+# test/locales_consistency_test.rb rather than by reading screens. Grouped by
+# the namespace each key belongs to; the guard test keeps the set at zero.
+ar:
+  assessments:
+    owner: "المالك / المكلّف"
+  audit_log:
+    tool:
+      ASSESSMENT_APPROVED: "تم اعتماد تقييم البند %{clause_code}"
+      ASSESSMENT_COMMENT: "تمت إضافة تعليق على تقييم البند %{clause_code}"
+      ASSESSMENT_REJECTED: "تم رفض تقييم البند %{clause_code}"
+      ASSESSMENT_REOPENED: "تم إعادة فتح تقييم البند %{clause_code} لإعادة التقييم"
+      ASSESSMENT_SAVE_DRAFT: "تم حفظ تقييم البند %{clause_code} كمسودة"
+      ASSESSMENT_SUBMIT_FOR_REVIEW: "تم رفع تقييم البند %{clause_code} للمراجعة"
+      ASSIGN_AUDITOR_TO_ASSESSMENT: "تم تعيين المدقق %{auditor_name} لتقييم البند %{clause_code}"
+  cap: "الحد الأعلى"
+  cap_help: "عند التفعيل، تحدّ درجة هذا البند الفرعي درجة البند الرئيسي. فإذا حصل هذا البند الفرعي على درجة منخفضة، لا يمكن أن يتجاوز الإجمالي قيمته."
+  capa_management_ui:
+    analysis_tab:
+      view_action: "عرض"
+    evidence_tab:
+      action_column: "الإجراء"
+      documents_linked_to_actions: "المستندات المرتبطة بالإجراءات"
+  open_assessment: "فتح التقييم"
+  weight: "الوزن"
+  weight_help: "الأهمية النسبية لهذا البند الفرعي ضمن بنده الرئيسي. تتراوح القيم من 0 إلى 100 (كنسب مئوية). يجب أن يكون مجموع أوزان البنود الفرعية في البند الواحد 100. اتركه فارغًا لتوزيع الأوزان بالتساوي."

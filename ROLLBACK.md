@@ -19,6 +19,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `review-phase0d` | `2cc054a` | Editable AI drafts; risk closure requires a justification. |
 | `phase-a-foundations` | *(this commit)* | Authority levels, classification, DoA/SLA/glossary record types, glossary + references, company branding. |
 | `phase-b-procedure` | *(this commit)* | Procedure steps with computed totals; operational authority matrix with its rules. |
+| `governance-slice-1` | *(this commit)* | Commitment timing vs workflow state, fulfilment basis, locale guard, English audit-log repair. |
 
 ## Roll the code back
 ```bash
