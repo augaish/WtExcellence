@@ -79,6 +79,9 @@ ar:
       expired: "منتهٍ"
       in_force: "ساري"
       not_in_force: "غير ساري"
+      notice:
+        title: "تفويض على وشك الانتهاء"
+        body: "ينتهي تفويض %{authority} إلى %{to} بتاريخ %{date}. يُرجى تجديده أو تركه ينتهي."
       kinds:
         permanent: "دائم"
         temporary: "مؤقت"

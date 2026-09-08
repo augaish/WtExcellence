@@ -31,6 +31,19 @@ Sidekiq.configure_server do |config|
   rescue => e
     Rails.logger.error "Failed to register ingestion_reaper cron: #{e.class}: #{e.message}"
   end
+
+  # Warns before a delegation of authority lapses. Daily is enough: the warning
+  # window is thirty days, and an hourly run would only repeat itself.
+  config.on(:startup) do
+    Sidekiq::Cron::Job.create(
+      name: "delegation_expiry_notice",
+      cron: "0 6 * * *",
+      class: "DelegationExpiryNoticeJob",
+      queue: "cron_small"
+    )
+  rescue => e
+    Rails.logger.error "Failed to register delegation_expiry_notice cron: #{e.class}: #{e.message}"
+  end
 end
 
 Sidekiq.configure_client do |config|

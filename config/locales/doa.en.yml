@@ -79,6 +79,9 @@ en:
       expired: "Expired"
       in_force: "In force"
       not_in_force: "Not in force"
+      notice:
+        title: "A delegation is about to expire"
+        body: "The delegation of %{authority} to %{to} expires on %{date}. Renew it or let it lapse."
       kinds:
         permanent: "Permanent"
         temporary: "Temporary"

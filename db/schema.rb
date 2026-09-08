@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_113326) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_133700) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -240,6 +240,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_113326) do
     t.text "revocation_reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "expiry_notified_at"
     t.index ["authority_id", "valid_to"], name: "index_authority_delegations_on_authority_id_and_valid_to"
     t.index ["authority_id"], name: "index_authority_delegations_on_authority_id"
     t.index ["company_id", "status"], name: "index_authority_delegations_on_company_id_and_status"
@@ -937,6 +938,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_113326) do
     t.integer "version_number", default: 1, null: false
     t.uuid "previous_version_id"
     t.string "classification", limit: 30, default: "internal", null: false
+    t.string "counterparty", limit: 250
     t.index ["company_id", "classification"], name: "index_pp_records_on_company_id_and_classification"
     t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"
@@ -947,6 +949,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_113326) do
     t.index ["pp_process_id"], name: "index_pp_records_on_pp_process_id"
     t.index ["previous_version_id"], name: "index_pp_records_on_previous_version_id"
     t.index ["review_date"], name: "index_pp_records_on_review_date"
+  end
+
+  create_table "pp_service_levels", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.string "service_name", limit: 250
+    t.string "metric", limit: 30, default: "response_time", null: false
+    t.decimal "target_value", precision: 10, scale: 2
+    t.string "target_unit", limit: 20
+    t.text "measurement_method"
+    t.string "coverage", limit: 250
+    t.text "escalation_path"
+    t.text "remedy"
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_record_id", "sort_order"], name: "index_pp_service_levels_on_pp_record_id_and_sort_order"
+    t.index ["pp_record_id"], name: "index_pp_service_levels_on_pp_record_id"
   end
 
   create_table "pp_stage_approvals", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1401,6 +1420,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_113326) do
   add_foreign_key "pp_records", "pp_processes"
   add_foreign_key "pp_records", "pp_records", column: "previous_version_id"
   add_foreign_key "pp_records", "users", column: "owner_user_id"
+  add_foreign_key "pp_service_levels", "pp_records"
   add_foreign_key "pp_stage_approvals", "org_units"
   add_foreign_key "pp_stage_approvals", "pp_records"
   add_foreign_key "pp_stage_approvals", "users", column: "received_by_id"

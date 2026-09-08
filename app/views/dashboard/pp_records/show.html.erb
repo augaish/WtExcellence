@@ -9,6 +9,13 @@
       <% if can_manage_pp_records? %>
         <%= link_to t('edit'), edit_dashboard_pp_record_path(@record), class: ui_btn_primary %>
       <% end %>
+
+<% if @record.sla? %>
+  <div class="px-6 pb-4">
+    <%= render "dashboard/pp_records/service_levels", record: @record,
+        can_manage: (current_user&.platform_admin? || current_user&.company_user&.has_admin_privileges? || current_user&.company_user&.company_quality_manager?) %>
+  </div>
+<% end %>
     <% end %>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

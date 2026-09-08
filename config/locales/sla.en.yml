@@ -1,0 +1,37 @@
+en:
+  sla:
+    title: "Service levels"
+    none: "No service levels recorded yet."
+    add: "Add service level"
+    service: "Service"
+    metric: "Commitment"
+    target: "Target"
+    measurement: "How it is measured"
+    coverage: "Coverage"
+    escalation: "Escalation"
+    remedy: "Remedy if missed"
+    counterparty: "Other party"
+    counterparty_hint: "The customer or body this agreement is with. The owning unit is the provider."
+    not_measurable: "No target or measurement method recorded, so this cannot be reported on."
+    metrics:
+      availability: "Availability"
+      response_time: "Response time"
+      resolution_time: "Resolution time"
+      delivery_frequency: "Delivery frequency"
+      accuracy: "Accuracy"
+      other: "Other"
+    units:
+      percent: "%"
+      minutes: "minutes"
+      hours: "hours"
+      days: "days"
+      weeks: "weeks"
+      months: "months"
+      count: "count"
+    errors:
+      unit_mismatch: "does not suit this commitment"
+      percent_range: "cannot exceed 100%"
+    flash:
+      created: "Service level added."
+      deleted: "Service level removed."
+      not_found: "That service level no longer exists."

@@ -64,6 +64,7 @@ class RecordDocument
       diagram_section,
       steps_section,
       authority_matrix_section,
+      service_levels_section,
       references_section,
       classification_section,
       change_log_section,
@@ -183,6 +184,22 @@ class RecordDocument
     end
 
     section("authority_matrix", :matrix, rows)
+  end
+
+  # The measurable commitments of an agreement. Printed only for records that
+  # have them, so a policy never shows an empty service level table.
+  def service_levels_section
+    rows = record.service_levels.map do |level|
+      {
+        service: level.service_name,
+        metric: level.metric_label(locale),
+        target: level.target_label(locale),
+        measurement: level.measurement_method,
+        coverage: level.coverage
+      }
+    end
+
+    section("service_levels", :table, rows)
   end
 
   # المراجع

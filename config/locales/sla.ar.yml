@@ -1,0 +1,37 @@
+ar:
+  sla:
+    title: مستويات الخدمة
+    none: لم تُسجَّل مستويات خدمة بعد.
+    add: إضافة مستوى خدمة
+    service: الخدمة
+    metric: الالتزام
+    target: المستهدف
+    measurement: طريقة القياس
+    coverage: نطاق التغطية
+    escalation: التصعيد
+    remedy: المعالجة عند الإخلال
+    counterparty: الطرف الآخر
+    counterparty_hint: العميل أو الجهة الطرف في هذه الاتفاقية. الوحدة المالكة هي مقدم الخدمة.
+    not_measurable: لم يُسجَّل مستهدف أو طريقة قياس، لذا لا يمكن رفع تقارير عنه.
+    metrics:
+      availability: الجاهزية
+      response_time: زمن الاستجابة
+      resolution_time: زمن المعالجة
+      delivery_frequency: دورية التسليم
+      accuracy: الدقة
+      other: أخرى
+    units:
+      percent: "%"
+      minutes: دقيقة
+      hours: ساعة
+      days: يوم
+      weeks: أسبوع
+      months: شهر
+      count: عدد
+    errors:
+      unit_mismatch: لا يناسب هذا الالتزام
+      percent_range: لا يمكن أن يتجاوز 100%
+    flash:
+      created: تمت إضافة مستوى الخدمة.
+      deleted: تم حذف مستوى الخدمة.
+      not_found: مستوى الخدمة هذا لم يعد موجودًا.

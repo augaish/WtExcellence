@@ -56,6 +56,9 @@ class PpRecord < ApplicationRecord
   has_many :consultations, -> { ordered }, class_name: "AuthorityConsultation",
     foreign_key: "matrix_id", dependent: :destroy
 
+  has_many :service_levels, -> { ordered }, class_name: "PpServiceLevel",
+    foreign_key: "pp_record_id", dependent: :destroy
+
   has_many :record_terms, -> { ordered }, class_name: "PpRecordTerm", foreign_key: "pp_record_id", dependent: :destroy
   has_many :glossary_terms, through: :record_terms
   has_many :references, -> { ordered }, class_name: "PpRecordReference", foreign_key: "pp_record_id", dependent: :destroy
@@ -73,6 +76,7 @@ class PpRecord < ApplicationRecord
   validates :code, uniqueness: { scope: :company_id }, allow_blank: true
   validates :title_en, length: { maximum: 300 }
   validates :title_ar, length: { maximum: 300 }
+  validates :counterparty, length: { maximum: 250 }
   validates :version_label, length: { maximum: 50 }, allow_blank: true
   validate :must_have_a_title
   validate :package_must_be_same_company
@@ -94,6 +98,10 @@ class PpRecord < ApplicationRecord
   # Only a record classified public may be shown outside the company.
   def externally_publishable?
     DocumentClassification.publishable?(classification)
+  end
+
+  def sla?
+    record_type == "sla"
   end
 
   def doa?

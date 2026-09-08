@@ -7,6 +7,7 @@ ar:
       diagram: مخطط الإجراء
       steps: خطوات الإجراء
       authority_matrix: مصفوفة الصلاحيات الإجرائية
+      service_levels: "مستويات الخدمة"
       references: المراجع
       classification: تصنيف الوثيقة
       change_log: سجل التغييرات
@@ -47,6 +48,11 @@ ar:
       date: التاريخ
       status: الحالة
       version: رقم النسخة
+      service: "الخدمة"
+      metric: "الالتزام"
+      target: "المستهدف"
+      measurement: "طريقة القياس"
+      coverage: "نطاق التغطية"
       prepared_by: المعد
       change: وصف التغيير
       classification: التصنيف

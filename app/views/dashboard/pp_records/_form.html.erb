@@ -82,6 +82,13 @@
           <%# Confidentiality classification, printed on the document cover and
               used to decide what may be shown outside the company. %>
           <div>
+            <%# An agreement has two parties; the owning unit is the provider. %>
+            <%= f.label :counterparty, t('sla.counterparty'), class: label_class %>
+            <%= f.text_field :counterparty, class: input_class, placeholder: t('sla.counterparty') %>
+            <p class="mt-1 text-xs text-[#797C81]"><%= t('sla.counterparty_hint') %></p>
+          </div>
+
+          <div>
             <%= f.label :classification, t('pp_records.classification'), class: label_class %>
             <%= f.select :classification, DocumentClassification.options, {}, class: input_class %>
             <p class="mt-1 text-xs text-[#797C81]">

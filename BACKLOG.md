@@ -89,10 +89,10 @@ apply.
 
 ## Delegation of Authority — completing the module
 
-**Expiry notifications.** The data and the queries exist
-(`AuthorityDelegation#expiring_soon?`, `.expiring_before`), and the matrix shows
-the warning. What is missing is the scheduled job and the email, so a delegation
-lapsing is only noticed by someone looking at the page.
+**Expiry emails.** In-app notification is done — DelegationExpiryNoticeJob runs
+daily and tells the heads of both positions. Email delivery of the same notice
+is not, and needs a decision about which notifications should reach an inbox at
+all rather than adding one mailer in isolation.
 
 **Authority breaches into CAPA.** The source document has Internal Audit produce
 an annual report of non-compliance with the matrix. The findings are already
@@ -112,9 +112,10 @@ specifically so a DOCX writer is a second consumer rather than a rewrite. The
 work is a new dependency or hand-rolled WordprocessingML, and Arabic RTL is the
 hard part in either. Not started because there is no client template to fill.
 
-**SLA content.** `sla` exists as a record type and inherits the whole document
-chassis, but has no SLA-specific fields yet: service catalogue, parties,
-response and resolution targets, measurement method, escalation, penalties.
+**SLA reporting.** Service levels are recorded and printed — parties, targets,
+measurement method, coverage and remedy. What does not exist is measuring
+against them: recording actual performance per period and reporting attainment.
+That is a module of its own, and worth scoping only once real agreements exist.
 
 ## Governance modules
 

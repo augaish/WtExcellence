@@ -1,0 +1,67 @@
+<% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
+<% th = "px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase tracking-wider" %>
+
+<section class="bg-white border border-[#E3E3E3] rounded-lg">
+  <div class="p-5 border-b border-[#E3E3E3]">
+    <h2 class="text-base font-semibold text-[#0D1120]"><%= t('sla.title') %></h2>
+  </div>
+
+  <% if record.service_levels.any? %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[#E3E3E3] text-sm">
+        <thead class="bg-[#F7F7FD]">
+          <tr>
+            <% %w[service metric target measurement coverage].each do |column| %>
+              <th class="<%= th %>"><%= t("sla.#{column}") %></th>
+            <% end %>
+            <th class="<%= th %>"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#E3E3E3]">
+          <% record.service_levels.each do |level| %>
+            <tr>
+              <td class="px-3 py-2"><%= level.service_name %></td>
+              <td class="px-3 py-2"><%= level.metric_label %></td>
+              <td class="px-3 py-2"><%= level.target_label %></td>
+              <td class="px-3 py-2">
+                <%= level.measurement_method %>
+                <%# A commitment nobody can measure is a statement of intent. %>
+                <% unless level.measurable? %>
+                  <span class="block text-[11px] text-[#797C81]"><%= t('sla.not_measurable') %></span>
+                <% end %>
+              </td>
+              <td class="px-3 py-2"><%= level.coverage %></td>
+              <td class="px-3 py-2 text-end">
+                <% if can_manage %>
+                  <%= button_to t('delete'), dashboard_pp_record_service_level_path(record, level),
+                      method: :delete, form: { data: { turbo_confirm: t('are_you_sure') } },
+                      class: "text-xs text-[#797C81] hover:text-[#0D1120]" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="px-5 py-6 text-sm text-[#797C81]"><%= t('sla.none') %></p>
+  <% end %>
+
+  <% if can_manage %>
+    <%= form_with url: dashboard_pp_record_service_levels_path(record), method: :post,
+                  scope: :pp_service_level, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-3" do |f| %>
+      <%= f.text_field :service_name, placeholder: t('sla.service'), class: input %>
+      <%= f.select :metric, PpServiceLevel::METRICS.map { |m| [ t("sla.metrics.#{m}"), m ] }, {}, class: input %>
+      <div class="flex gap-2">
+        <%= f.number_field :target_value, step: :any, min: 0, placeholder: t('sla.target'), class: input %>
+        <%= f.select :target_unit,
+            PpServiceLevel::UNITS_FOR_METRIC.values.flatten.uniq.map { |u| [ t("sla.units.#{u}"), u ] },
+            { include_blank: true }, class: input %>
+      </div>
+      <%= f.text_field :measurement_method, placeholder: t('sla.measurement'), class: input %>
+      <%= f.text_field :coverage, placeholder: t('sla.coverage'), class: input %>
+      <%= f.text_field :remedy, placeholder: t('sla.remedy'), class: input %>
+      <%= f.submit t('sla.add'), class: ui_btn_primary %>
+    <% end %>
+  <% end %>
+</section>

@@ -175,6 +175,7 @@ Rails.application.routes.draw do
     end
 
     resources :pp_records do
+      resources :service_levels, only: [ :create, :destroy ], controller: "pp_service_levels"
       member do
         post :attach_documents
         delete :detach_document
