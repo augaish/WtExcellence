@@ -25,6 +25,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `phase-e-intelligence` | `f9a863a` | Conformance check, matrix version diff, consultation rounds. |
 | `phase-f-delegations` | `1cc7898` | Delegations: position-to-position, expiry, sub-delegation, effective authority. |
 | `phase-g-governance` | *(this commit)* | Activity trail, governance evidence, risk methodology, F12. |
+| `phase-g-orgchart` | *(this commit)* | Org chart view; thread-local actor leak fixed. |
 
 ## Roll the code back
 ```bash

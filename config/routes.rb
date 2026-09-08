@@ -108,6 +108,7 @@ Rails.application.routes.draw do
     resources :companies, only: [ :index ], controller: :companies
 
     # Org Structure (Main Menu) — company org chart used across P&P
+    get "org_units/chart", to: "org_units#chart", as: :org_units_chart
     resources :org_units, except: [ :show ] do
       collection do
         get :import

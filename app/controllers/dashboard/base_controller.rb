@@ -1,9 +1,8 @@
 class Dashboard::BaseController < ApplicationController
     layout "dashboard"
 
-    before_action :set_current_user_for_activity_logging
+    around_action :with_current_user_for_activity_logging
     before_action :set_notifications_for_navbar
-    after_action :clear_current_user_for_activity_logging
 
     # Get the current company based on the logged-in user
     # For non-platform-admin users, uses their company (users belong to exactly one company)
@@ -189,20 +188,25 @@ class Dashboard::BaseController < ApplicationController
 
     private
 
-    # Set current user in Thread storage for activity logging in model callbacks
-    def set_current_user_for_activity_logging
+    # Makes the acting user available to model callbacks that record activity.
+    #
+    # This was a before_action paired with an after_action, which leaks: an
+    # after_action does not run when a before_action halts the chain — every
+    # permission redirect does — nor when the action raises. Puma reuses
+    # threads between requests, so the next request served by that thread could
+    # attribute its changes to the previous request's user. An around_action
+    # with ensure clears it on every path out.
+    def with_current_user_for_activity_logging
         Thread.current[:current_user] = current_user
+        yield
+    ensure
+        Thread.current[:current_user] = nil
     end
 
     def set_notifications_for_navbar
         return unless current_user
         @recent_notifications = current_user.notifications.recent.limit(25)
         @unread_notifications_count = current_user.notifications.unread.count
-    end
-
-    # Clean up thread-local variable after request
-    def clear_current_user_for_activity_logging
-        Thread.current[:current_user] = nil
     end
 
     def require_company_admin

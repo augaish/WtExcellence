@@ -265,6 +265,17 @@ en:
     title: "P&P"
     full_title: "Policies & Procedures"
   org_structure:
+    chart:
+      title: "Organization chart"
+      subtitle: "Units and reporting lines, coloured by group. Select a unit to see its mandate."
+      list_view: "List view"
+      chart_view: "Chart view"
+      details: "Unit details"
+      select_a_unit: "Select a unit in the chart to see its mandate."
+      no_mandates: "No mandates recorded for this unit."
+      empty: "Add your first organizational unit to see the chart."
+      show_inactive: "Show inactive"
+      hide_inactive: "Hide inactive"
     title: "Org Structure"
     subtitle: "Your organisation chart: units, reporting lines, and colour groups."
     settings: "Structure Settings"

@@ -44,7 +44,6 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     delegation = company.authority_delegations.find_by(id: params[:id])
     return back_to_matrix(alert: t("doa.flash.not_found")) if delegation.nil?
 
-    Thread.current[:current_user] = current_user
     save_and_return_updated(delegation, revocation_params.merge(status: "revoked"), "delegation_revoked")
   end
 
@@ -67,7 +66,6 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     consultation = @matrix.consultations.find_by(id: params[:id])
     return back_to_matrix(alert: t("doa.flash.not_found")) if consultation.nil?
 
-    Thread.current[:current_user] = current_user
     save_and_return_updated(consultation, consultation_ruling_params, "consultation_ruled")
   end
 

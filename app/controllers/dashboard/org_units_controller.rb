@@ -31,6 +31,16 @@ class Dashboard::OrgUnitsController < Dashboard::BaseController
     @total_count = company_scope.count
   end
 
+  # The chart view: the same structure as the list, drawn as connected boxes
+  # coloured by group, with each unit's mandate a click away.
+  def chart
+    scope = company_scope.includes(:org_group, :head_user)
+    scope = scope.active unless params[:show_inactive] == "1"
+    @units = scope.order(:level, :sort_order, :name_en).to_a
+    @groups = company.org_groups.to_a
+    @show_inactive = params[:show_inactive] == "1"
+  end
+
   def new
     @org_unit = company_scope.new(
       parent_id: params[:parent_id].presence,

@@ -1,0 +1,78 @@
+<div class="p-6 space-y-5" data-controller="org-chart">
+  <%= render layout: "dashboard/shared/page_header",
+      locals: { title: t('org_structure.chart.title'), subtitle: t('org_structure.chart.subtitle') } do %>
+    <%= link_to t('org_structure.chart.list_view'), dashboard_org_units_path, class: ui_btn_neutral %>
+    <%= link_to (@show_inactive ? t('org_structure.chart.hide_inactive') : t('org_structure.chart.show_inactive')),
+        dashboard_org_units_chart_path(show_inactive: @show_inactive ? nil : "1"), class: ui_btn_neutral %>
+  <% end %>
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <%# The company's own mark sits on its own chart, beside the platform's. %>
+      <% if current_company&.brand_logo&.attached? %>
+        <%= image_tag signed_file_url(current_company.brand_logo, disposition: "inline"),
+            class: "h-9 w-auto max-w-[150px] object-contain", alt: current_company.name %>
+      <% end %>
+      <p class="text-sm font-semibold text-[#0D1120]"><%= current_company&.name %></p>
+    </div>
+
+  </div>
+
+  <% if @groups.any? %>
+    <div class="flex flex-wrap items-center gap-4">
+      <% @groups.each do |group| %>
+        <span class="inline-flex items-center gap-2 text-xs text-[#0D1120]">
+          <span class="inline-block w-3 h-3 rounded-sm" style="background: <%= group.color %>;"></span>
+          <%= group.display_name %>
+        </span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if @units.empty? %>
+    <%= render "dashboard/shared/empty_state", icon: "account-management-icon.svg",
+        title: t('org_structure.chart.title'), subtitle: t('org_structure.chart.empty') %>
+  <% else %>
+    <div class="grid gap-5 lg:grid-cols-3">
+      <%# The chart scrolls inside its own box rather than the page. %>
+      <div class="lg:col-span-2 bg-white border border-[#E3E3E3] rounded-lg p-4 overflow-x-auto">
+        <%= OrgChartRenderer.render(@units) %>
+      </div>
+
+      <aside class="bg-white border border-[#E3E3E3] rounded-lg p-5">
+        <h2 class="text-base font-semibold text-[#0D1120] mb-3"><%= t('org_structure.chart.details') %></h2>
+
+        <p data-org-chart-target="placeholder" class="text-sm text-[#797C81]">
+          <%= t('org_structure.chart.select_a_unit') %>
+        </p>
+
+        <% @units.each do |unit| %>
+          <div data-org-chart-target="panel" data-unit-id="<%= unit.id %>" hidden>
+            <p class="text-sm font-semibold text-[#0D1120]"><%= unit.display_name %></p>
+            <p class="mt-0.5 text-xs text-[#797C81]">
+              <%= [ unit.code, unit.level_name, unit.org_group&.display_name ].compact_blank.join(" · ") %>
+            </p>
+
+            <% if unit.head_user %>
+              <p class="mt-3 text-xs text-[#797C81]"><%= t('org_structure.head') %></p>
+              <p class="text-sm text-[#0D1120]"><%= unit.head_user.name %></p>
+            <% end %>
+
+            <p class="mt-3 text-xs text-[#797C81]"><%= t('org_structure.mandates') %></p>
+            <% if unit.mandate_list.any? %>
+              <ul class="mt-1 space-y-1 list-disc list-inside text-sm text-[#0D1120]">
+                <% unit.mandate_list.each do |mandate| %>
+                  <li><%= mandate %></li>
+                <% end %>
+              </ul>
+            <% else %>
+              <p class="mt-1 text-sm text-[#797C81]"><%= t('org_structure.chart.no_mandates') %></p>
+            <% end %>
+
+            <%= link_to t('edit'), edit_dashboard_org_unit_path(unit), class: "#{ui_btn_neutral} mt-4 inline-block" %>
+          </div>
+        <% end %>
+      </aside>
+    </div>
+  <% end %>
+</div>

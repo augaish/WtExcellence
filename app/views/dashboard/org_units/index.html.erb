@@ -3,6 +3,7 @@
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: { title: t('org_structure.title'), subtitle: t('org_structure.subtitle') } do %>
+      <%= link_to t('org_structure.chart.chart_view'), dashboard_org_units_chart_path, class: ui_btn_neutral %>
       <% if can_manage_org_structure? %>
         <%= link_to t('org_structure.settings'), settings_dashboard_org_units_path, class: ui_btn_neutral %>
         <%= link_to t('org_structure.import_title'), import_dashboard_org_units_path, class: ui_btn_secondary %>
