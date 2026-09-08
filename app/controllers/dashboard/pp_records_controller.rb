@@ -177,7 +177,7 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
     params.require(:pp_record).permit(
       :record_type, :code, :title_en, :title_ar, :description, :version_label,
       :effective_date, :review_date, :owner_user_id, :owner_org_unit_id,
-      :pp_process_id, :active
+      :pp_process_id, :active, :classification
     )
   end
 

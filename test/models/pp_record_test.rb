@@ -21,7 +21,19 @@ class PpRecordTest < ActiveSupport::TestCase
 
   test "rejects an unknown record type" do
     refute build_record(record_type: "memo").valid?
-    PpRecord::TYPES.each { |type| assert build_record(record_type: type).valid?, "#{type} should be valid" }
+
+    PpRecord::TYPES.each do |type|
+      # Types that describe work inside one process need that process; the rest
+      # stand alone.
+      attributes = { record_type: type }
+      attributes[:pp_process] = process_for_records if PpRecord::PROCESS_ENFORCED_TYPES.include?(type)
+
+      assert build_record(**attributes).valid?, "#{type} should be valid"
+    end
+  end
+
+  def process_for_records
+    @process_for_records ||= @company.pp_processes.create!(name_en: "Host process", level: 1)
   end
 
   test "code is unique per company" do

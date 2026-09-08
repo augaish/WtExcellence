@@ -1,0 +1,20 @@
+en:
+  authority_levels:
+    prepare:
+      label: "Prepare"
+      description: "Starting the procedure and preparing the related documents, records and information ready for the decision-maker."
+    review:
+      label: "Review"
+      description: "Verifying that the procedure is sound and aligned with business requirements. All requirements must be met before approval proceeds."
+    approve:
+      label: "Approve"
+      description: "Initial approval of the procedure before it is raised for recommendation or final authorization."
+    recommend:
+      label: "Recommend"
+      description: "Giving an opinion, after the necessary initial approvals, before the matter is raised for final authorization."
+    authorize:
+      label: "Authorize"
+      description: "Final, formal authorization of the procedure by the holder of the authority."
+    inform:
+      label: "Inform"
+      description: "Notifying the concerned party of the final decision taken, whether approved or not. No response is expected."

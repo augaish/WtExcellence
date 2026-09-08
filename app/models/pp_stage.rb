@@ -21,28 +21,33 @@ class PpStage
   #   :branch    - captures the intersections answer, which picks the next stage
   #   :approval  - holds a chain of org-unit approvals; duration is measured to
   #                the LAST approval received
+  #
+  # level: the AuthorityLevel this stage exercises. The lifecycle is an
+  # execution of an authority matrix, so naming the level here lets a stage be
+  # checked against who actually holds that level. Branch stages capture an
+  # answer rather than a decision and carry no level.
   DEFINITIONS = [
-    { key: "s1_verify",       phase: "inventory",     kind: :plain },
-    { key: "s1_approved",     phase: "inventory",     kind: :plain },
+    { key: "s1_verify",       phase: "inventory",     kind: :plain, level: "review" },
+    { key: "s1_approved",     phase: "inventory",     kind: :plain, level: "approve" },
 
-    { key: "s2_prep",         phase: "preparation",   kind: :plain },
-    { key: "s2_draftReview",  phase: "preparation",   kind: :plain },
-    { key: "s2_ownerReview",  phase: "preparation",   kind: :plain },
-    { key: "s2_comments",     phase: "preparation",   kind: :plain },
-    { key: "s2_confirmation", phase: "preparation",   kind: :branch },
-    { key: "s2_stakeholders", phase: "preparation",   kind: :approval },
-    { key: "s2_final",        phase: "preparation",   kind: :plain },
+    { key: "s2_prep",         phase: "preparation",   kind: :plain, level: "prepare" },
+    { key: "s2_draftReview",  phase: "preparation",   kind: :plain, level: "review" },
+    { key: "s2_ownerReview",  phase: "preparation",   kind: :plain, level: "review" },
+    { key: "s2_comments",     phase: "preparation",   kind: :plain, level: "review" },
+    { key: "s2_confirmation", phase: "preparation",   kind: :branch, level: nil },
+    { key: "s2_stakeholders", phase: "preparation",   kind: :approval, level: "approve" },
+    { key: "s2_final",        phase: "preparation",   kind: :plain, level: "approve" },
 
-    { key: "s3_design",       phase: "documentation", kind: :plain },
-    { key: "s3_designReview", phase: "documentation", kind: :plain },
+    { key: "s3_design",       phase: "documentation", kind: :plain, level: "prepare" },
+    { key: "s3_designReview", phase: "documentation", kind: :plain, level: "review" },
 
-    { key: "s4_initial",      phase: "approval",      kind: :plain },
-    { key: "s4_ownerapprove", phase: "approval",      kind: :plain },
-    { key: "s4_final",        phase: "approval",      kind: :approval },
+    { key: "s4_initial",      phase: "approval",      kind: :plain, level: "approve" },
+    { key: "s4_ownerapprove", phase: "approval",      kind: :plain, level: "approve" },
+    { key: "s4_final",        phase: "approval",      kind: :approval, level: "authorize" },
 
-    { key: "s5_toPublish",    phase: "publishing",    kind: :plain },
-    { key: "s5_published",    phase: "publishing",    kind: :plain },
-    { key: "s5_closed",       phase: "publishing",    kind: :plain }
+    { key: "s5_toPublish",    phase: "publishing",    kind: :plain, level: "prepare" },
+    { key: "s5_published",    phase: "publishing",    kind: :plain, level: "inform" },
+    { key: "s5_closed",       phase: "publishing",    kind: :plain, level: "inform" }
   ].freeze
 
   KEYS = DEFINITIONS.map { |d| d[:key] }.freeze
@@ -85,6 +90,12 @@ class PpStage
 
     def kind_of(key)
       find(key)&.fetch(:kind, nil)
+    end
+
+    # The AuthorityLevel this stage exercises, or nil for a branch that captures
+    # an answer rather than making a decision.
+    def level_of(key)
+      find(key)&.fetch(:level, nil)
     end
 
     def approval_stage?(key)

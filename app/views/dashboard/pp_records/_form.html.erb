@@ -78,6 +78,16 @@
             <%= f.label :version_label, t('pp_records.version'), class: label_class %>
             <%= f.text_field :version_label, placeholder: "v1.0", class: input_class %>
           </div>
+
+          <%# Confidentiality classification, printed on the document cover and
+              used to decide what may be shown outside the company. %>
+          <div>
+            <%= f.label :classification, t('pp_records.classification'), class: label_class %>
+            <%= f.select :classification, DocumentClassification.options, {}, class: input_class %>
+            <p class="mt-1 text-xs text-[#797C81]">
+              <%= DocumentClassification.description(f.object.classification.presence || DocumentClassification::DEFAULT_KEY) %>
+            </p>
+          </div>
           <div>
             <%= f.label :effective_date, t('pp_records.effective_date'), class: label_class %>
             <%= f.date_field :effective_date, class: input_class %>

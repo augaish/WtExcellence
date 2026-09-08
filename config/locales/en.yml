@@ -756,6 +756,7 @@ en:
     fix_errors: "Please fix the following:"
     tabs:
       all: "All"
+    classification: "Classification"
     types:
       policy: "Policy"
       procedure: "Procedure"
@@ -764,6 +765,10 @@ en:
       service: "Service"
       guideline: "Guideline"
       charter: "Charter"
+      executive_doa: "Executive Delegation of Authority"
+      operational_doa: "Operational Delegation of Authority"
+      sla: "Service Level Agreement"
+      glossary: "Glossary"
     types_plural:
       policy: "Policies"
       procedure: "Procedures"
@@ -772,8 +777,13 @@ en:
       service: "Services"
       guideline: "Guidelines"
       charter: "Charters"
+      executive_doa: "Executive Delegations of Authority"
+      operational_doa: "Operational Delegations of Authority"
+      sla: "Service Level Agreements"
+      glossary: "Glossaries"
     errors:
       title_required: "Enter a title in English or Arabic."
+      process_required: "is required for this document type"
       package_other_company: "must belong to the same company"
       process_other_company: "must belong to the same company"
       review_before_effective: "must be on or after the effective date"

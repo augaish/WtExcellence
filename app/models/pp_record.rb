@@ -1,10 +1,29 @@
 class PpRecord < ApplicationRecord
-  # Governed content types.
-  TYPES = %w[policy procedure work_instruction form service guideline charter].freeze
+  # Governed content types. Delegation of Authority comes in two tiers, and both
+  # are governed documents rather than a separate register: an executive matrix
+  # assigns authority to org units (positions), and an operational matrix does
+  # the same inside one procedure, for the job titles that execute it. SLAs and
+  # the glossary are governed the same way, so they live here too.
+  TYPES = %w[
+    policy procedure work_instruction form service guideline charter
+    executive_doa operational_doa sla glossary
+  ].freeze
+
+  # The two authority matrices. The operational one must conform to the
+  # executive one, which is why they are named together.
+  DOA_TYPES = %w[executive_doa operational_doa].freeze
 
   # Types that document how work is carried out must hang off a process; the
   # enterprise-wide types may stand alone.
-  PROCESS_REQUIRED_TYPES = %w[procedure work_instruction form].freeze
+  # Types that document how work is carried out and so cannot stand alone.
+  PROCESS_REQUIRED_TYPES = %w[procedure work_instruction form operational_doa].freeze
+
+  # Of those, the ones actually validated. The rule was declared when the module
+  # was built but never enforced, so live records of the older three may already
+  # have no process; validating them now would make those records uneditable.
+  # An operational matrix is new, so it can be held to the rule from the start.
+  # Backfilling the rest needs a data check first — see the audit note.
+  PROCESS_ENFORCED_TYPES = %w[operational_doa].freeze
 
   # Stages that count as "done" for package progress. The Documenter (Phase 3)
   # owns the full sequence; these are the terminal ones.
@@ -39,6 +58,7 @@ class PpRecord < ApplicationRecord
   has_one :next_version, class_name: "PpRecord", foreign_key: "previous_version_id", dependent: :nullify
 
   validates :record_type, presence: true, inclusion: { in: TYPES }
+  validates :classification, inclusion: { in: DocumentClassification::KEYS }
   validates :code, length: { maximum: 50 }, allow_blank: true
   validates :code, uniqueness: { scope: :company_id }, allow_blank: true
   validates :title_en, length: { maximum: 300 }
@@ -48,6 +68,7 @@ class PpRecord < ApplicationRecord
   validate :package_must_be_same_company
   validate :process_must_be_same_company
   validate :review_after_effective
+  validate :process_required_for_type
 
   scope :active, -> { where(active: true) }
   scope :ordered, -> { order(:record_type, :code, :created_at) }
@@ -55,6 +76,19 @@ class PpRecord < ApplicationRecord
   scope :unpackaged, -> { where(package_id: nil) }
   scope :in_package, ->(package) { where(package_id: package.id) }
   scope :due_for_review, ->(on = Date.current) { where(review_date: ..on) }
+
+  def classification_label(locale = I18n.locale)
+    DocumentClassification.label(classification, locale)
+  end
+
+  # Only a record classified public may be shown outside the company.
+  def externally_publishable?
+    DocumentClassification.publishable?(classification)
+  end
+
+  def doa?
+    DOA_TYPES.include?(record_type)
+  end
 
   def display_title(locale = I18n.locale)
     primary, fallback = locale.to_s == "ar" ? [ title_ar, title_en ] : [ title_en, title_ar ]
@@ -194,5 +228,12 @@ class PpRecord < ApplicationRecord
     return if effective_date.blank? || review_date.blank? || review_date >= effective_date
 
     errors.add(:review_date, I18n.t("pp_records.errors.review_before_effective"))
+  end
+
+  def process_required_for_type
+    return unless PROCESS_ENFORCED_TYPES.include?(record_type)
+    return if pp_process_id.present?
+
+    errors.add(:pp_process_id, I18n.t("pp_records.errors.process_required"))
   end
 end

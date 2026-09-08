@@ -776,6 +776,7 @@ ar:
     fix_errors: "يرجى تصحيح ما يلي:"
     tabs:
       all: "الكل"
+    classification: "تصنيف الوثيقة"
     types:
       policy: "سياسة"
       procedure: "إجراء"
@@ -784,6 +785,10 @@ ar:
       service: "خدمة"
       guideline: "دليل إرشادي"
       charter: "ميثاق"
+      executive_doa: "مصفوفة الصلاحيات التنفيذية"
+      operational_doa: "مصفوفة الصلاحيات الإجرائية"
+      sla: "اتفاقية مستوى الخدمة"
+      glossary: "قائمة التعريفات"
     types_plural:
       policy: "السياسات"
       procedure: "الإجراءات"
@@ -792,8 +797,13 @@ ar:
       service: "الخدمات"
       guideline: "الأدلة الإرشادية"
       charter: "المواثيق"
+      executive_doa: "مصفوفات الصلاحيات التنفيذية"
+      operational_doa: "مصفوفات الصلاحيات الإجرائية"
+      sla: "اتفاقيات مستوى الخدمة"
+      glossary: "قوائم التعريفات"
     errors:
       title_required: "أدخل العنوان بالعربية أو الإنجليزية."
+      process_required: "مطلوب لهذا النوع من الوثائق"
       package_other_company: "يجب أن تكون ضمن نفس الشركة"
       process_other_company: "يجب أن يكون ضمن نفس الشركة"
       review_before_effective: "يجب أن يكون في تاريخ السريان أو بعده"

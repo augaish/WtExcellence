@@ -1,0 +1,14 @@
+en:
+  document_classifications:
+    top_secret:
+      label: "Top Secret"
+      description: "Data is classified Top Secret when unauthorized access to it, or disclosure of it or its contents, would cause serious and exceptional damage that cannot be remedied or repaired."
+    secret:
+      label: "Secret"
+      description: "Data is classified Secret when unauthorized access to it, or disclosure of it or its contents, would cause serious damage. It applies to sensitive information that determines how the organization operates."
+    internal:
+      label: "Internal (Restricted)"
+      description: "Data is classified Internal — Restricted when unauthorized access to it, or disclosure of it or its contents, would cause limited damage. It applies to information not approved for circulation outside the organization."
+    public:
+      label: "Public"
+      description: "Data is classified Public when unauthorized access to it, or disclosure of it or its contents, carries none of the effects above. It applies to information declared public knowledge by the person authorized to do so, and may be given to anyone."
