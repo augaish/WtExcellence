@@ -1,5 +1,10 @@
 class Risk < ApplicationRecord
   include GovernanceCapaLinkable
+  include GovernanceActivity
+
+  tracks_governance_activity entity: "risk",
+    tracks: %i[status likelihood impact residual_score owner_id closure_reason],
+    summary: %i[title status inherent_score]
 
   belongs_to :company
   belongs_to :owner, class_name: "CompanyUser", optional: true
@@ -30,8 +35,6 @@ class Risk < ApplicationRecord
 
   before_save :calculate_scores
   before_save :stamp_closure
-  after_create :log_creation
-  after_update :log_update
 
   def soft_delete!
     update!(deleted_at: Time.current)
@@ -88,40 +91,5 @@ class Risk < ApplicationRecord
     end
   end
 
-  def log_creation
-    performed_by = Thread.current[:current_user]
-    return unless performed_by
 
-    AuditLogService.log_action(
-      actor_user: performed_by,
-      company: company,
-      action: "CREATE_RISK",
-      entity_type: "risk",
-      entity_id: id,
-      payload: { title: title, status: status, inherent_score: inherent_score }
-    )
-  end
-
-  def log_update
-    performed_by = Thread.current[:current_user]
-    return unless performed_by
-
-    changes_to_track = {}
-    changes_to_track["status"] = saved_change_to_status if saved_change_to_status?
-    changes_to_track["likelihood"] = saved_change_to_likelihood if saved_change_to_likelihood?
-    changes_to_track["impact"] = saved_change_to_impact if saved_change_to_impact?
-    changes_to_track["residual_score"] = saved_change_to_residual_score if saved_change_to_residual_score?
-    changes_to_track["owner_id"] = saved_change_to_owner_id if saved_change_to_owner_id?
-
-    return if changes_to_track.empty?
-
-    AuditLogService.log_action(
-      actor_user: performed_by,
-      company: company,
-      action: "UPDATE_RISK",
-      entity_type: "risk",
-      entity_id: id,
-      payload: { changes: changes_to_track }
-    )
-  end
 end

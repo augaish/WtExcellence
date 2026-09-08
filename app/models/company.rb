@@ -42,6 +42,9 @@ class Company < ApplicationRecord
   has_many :capas, dependent: :nullify
   has_many :company_standards, dependent: :destroy
   has_many :risk_workspaces, dependent: :destroy
+  # Risks hung off the company only through their workspace, unlike vendors and
+  # commitments, so there was no way to ask a company for its risks.
+  has_many :risks, dependent: :destroy
   has_many :customer_commitments, dependent: :destroy
   has_many :vendors, dependent: :destroy
   has_many :ai_instructions, dependent: :destroy

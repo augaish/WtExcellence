@@ -1,5 +1,10 @@
 class CustomerCommitment < ApplicationRecord
   include GovernanceCapaLinkable
+  include GovernanceActivity
+
+  tracks_governance_activity entity: "customer_commitment",
+    tracks: %i[status due_date owner_id fulfillment_note],
+    summary: %i[title customer_name due_date]
 
   belongs_to :company
   belongs_to :owner, class_name: "CompanyUser", optional: true

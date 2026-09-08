@@ -1,5 +1,10 @@
 class Vendor < ApplicationRecord
   include GovernanceCapaLinkable
+  include GovernanceActivity
+
+  tracks_governance_activity entity: "vendor",
+    tracks: %i[name risk_level owner_id contact_email],
+    summary: %i[name risk_level]
 
   belongs_to :company
   belongs_to :owner, class_name: "CompanyUser", optional: true
