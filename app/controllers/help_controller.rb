@@ -6,6 +6,9 @@ class HelpController < Dashboard::BaseController
     standards_assessment
     evidence
     capa
+    org_and_processes
+    policies_procedures
+    delegation_of_authority
     risk_grc
     ai_features
     trust_center

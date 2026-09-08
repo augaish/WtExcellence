@@ -63,7 +63,6 @@ P3s, with the ones that mislead a user first.
 | F22 | Governance registers have no work queues | Filters, saved views, export. Best done once the shared governance chassis exists, or it gets built twice. |
 | F23 | Library form feedback and folder context | Partly addressed by the F04 destination notice; the empty-upload error and the "Everyone" visibility label remain. |
 | F24 | Dense tables hide actions at 1280px | |
-| F25 | Help does not match navigation | The manual omits Org Structure, Process Architecture, Records and Packages. |
 
 **Two `saveRootCause` methods** are defined in
 `app/javascript/controllers/capas/questionnaire_controller.js`; the second

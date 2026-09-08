@@ -2379,6 +2379,15 @@ en:
       capa:
         title: "CAPA Management"
         summary: "Corrective actions and AI assistance"
+      org_and_processes:
+        title: "Org Structure & Processes"
+        summary: "Units, mandates, the process tree and its steps"
+      policies_procedures:
+        title: "Policies & Procedures"
+        summary: "Records, the Documenter, and generated documents"
+      delegation_of_authority:
+        title: "Authorities & Delegations"
+        summary: "Who may decide what, and until when"
       risk_grc:
         title: "Risk & GRC"
         summary: "Risks, workspaces, vendors, commitments"

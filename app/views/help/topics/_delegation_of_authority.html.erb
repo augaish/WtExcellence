@@ -1,0 +1,45 @@
+<% if rtl? %>
+  <p>تحدد وحدة الصلاحيات والتفويض من يملك اتخاذ أي قرار، وإلى أي حد، وحتى متى.</p>
+
+  <h2>المصفوفة التنفيذية</h2>
+  <p>المصفوفة نفسها سجلٌّ محكوم من نوع «مصفوفة الصلاحيات التنفيذية»، أنشئه أولًا من السجلات. تُنظَّم الصلاحيات في فئات، ولكل صلاحية مرجع نظامي يُبيّن من أين استُمدت.</p>
+
+  <h2>الشرائح</h2>
+  <p>الصلاحية التي تختلف باختلاف المبلغ تُسجَّل مرة واحدة بعدة شرائح، بدل تكرار الصف كاملًا لكل حد. لا يجوز تداخل شريحتين لنفس الصلاحية، وإلا تعذّر تحديد من يقرر مبلغًا يقع في كلتيهما.</p>
+
+  <h2>أصحاب الصلاحية</h2>
+  <p>صاحب الصلاحية إما وحدة تنظيمية محددة بالاسم، أو <strong>دور ديناميكي</strong> مثل «الوحدة المالكة» أو «الوحدة الأعلى» — وهو ما يحل محل العبارات الغامضة مثل «الجهة المعنية» التي يتعذر تحديدها عند المراجعة.</p>
+
+  <h2>الملاحظات</h2>
+  <p>يعرض النظام تلقائيًا: الصلاحيات بلا صاحب اعتماد، أو بأكثر من صاحب، أو التي يجمع فيها شخص واحد بين الإعداد والمراجعة والاعتماد، أو التي بلا مرجع نظامي. هذه ملاحظات إرشادية لا تمنع الحفظ.</p>
+
+  <h2>النسخ والاستطلاع</h2>
+  <p>فتح نسخة جديدة يُنشئ نسخة من المصفوفة، فتبقى المعتمدة كما هي ويُقارَن بينهما تلقائيًا. تُسجَّل ملاحظات الوحدات مع التحدي والمقترح والأثر المتوقع، ولا يُغلق أي بند دون قرار مكتوب.</p>
+
+  <h2>التفويض</h2>
+  <p>التفويض بين المناصب لا الأشخاص، فيبقى ساريًا عند تغيّر شاغل المنصب. لا يجوز تفويض أكثر مما يملكه المفوِّض، وينتهي التفويض المؤقت تلقائيًا في تاريخه، ويحتاج التفويض الفرعي موافقة مانح الصلاحية الأصلية مع بقاء المساءلة عليه.</p>
+
+  <div class="tip">تُقترح فئات وصلاحيات للبدء، لكن لا يُقترح أي صاحب صلاحية: تحديد من يقرر اجتهاد منظمتكم وحدها.</div>
+<% else %>
+  <p>Authorities &amp; Delegations records who may decide what, up to what limit, and until when.</p>
+
+  <h2>The executive matrix</h2>
+  <p>The matrix is itself a governed record of type <em>Executive Delegation of Authority</em> — create one under Records first. Authorities are organized into categories, and each records the regulation or policy it derives from.</p>
+
+  <h2>Threshold bands</h2>
+  <p>An authority that varies by amount is recorded once with several bands, rather than repeating the whole row per threshold. Two bands of one authority may not overlap, or the matrix could not say who decides an amount falling in both.</p>
+
+  <h2>Holders</h2>
+  <p>A holder is either a named organizational unit or a <strong>dynamic role</strong> such as "the owning unit" or "the parent unit" — which replaces vague phrasing like "the concerned department" that nobody can resolve at audit time.</p>
+
+  <h2>Findings</h2>
+  <p>The page continuously reports authorities nobody may finally authorize, authorities with more than one authorizer, one holder combining preparation, review and authorization, and rows with no recorded basis. These are advisory and never block a save.</p>
+
+  <h2>Versions and consultation</h2>
+  <p>Opening the next version copies the matrix, so the approved one stays exactly as approved and the two are compared automatically. Units raise objections with a challenge, proposal and expected impact, and no objection can be closed without a written ruling.</p>
+
+  <h2>Delegations</h2>
+  <p>A delegation runs between positions, not people, so it survives a change of postholder. Nobody may delegate more than they hold, a temporary delegation stops conferring authority the day it lapses, and a sub-delegation needs the original grantor's approval while accountability stays with them.</p>
+
+  <div class="tip">Categories and authorities are suggested to get you started, but no holder is ever suggested — who decides is your organization's judgement alone.</div>
+<% end %>
