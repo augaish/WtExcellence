@@ -36,15 +36,22 @@ class Dashboard::AiAssistantController < Dashboard::BaseController
       return
     end
 
-    CreditService.deduct_credits(current_company, "PLATFORM_ASSISTANT_QUERY", company_user: company_user) unless platform_admin
+    charged = !platform_admin
+    CreditService.deduct_credits(current_company, "PLATFORM_ASSISTANT_QUERY", company_user: company_user) if charged
 
+    # credits_used is recorded explicitly, as the other charged actions do, so
+    # the usage screens report what the balance was actually reduced by.
     AuditLogService.log_action(
       actor_user: current_user,
       company: current_company,
       action: "PLATFORM_ASSISTANT_QUERY",
       entity_type: "ai_assistant",
       entity_id: nil,
-      payload: { question: question, source_count: result[:sources].size }
+      payload: {
+        question: question,
+        source_count: result[:sources].size,
+        credits_used: charged ? CreditService.get_cost("PLATFORM_ASSISTANT_QUERY") : 0
+      }
     )
 
     render json: { success: true, answer: result[:answer], sources: result[:sources] }

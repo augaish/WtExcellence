@@ -1377,6 +1377,8 @@ en:
     visibility_public: "Public (Everyone can see)"
     visibility_private: "Private (Only you and company admins can see)"
     visibility_help: "Public files are visible to everyone. Private files are only visible to you and company administrators."
+    edit_title: "Edit Document"
+    upload_destination: "This document will be saved to %{folder}."
     upload_to_legal_documents_notice: "This document will be saved to Legal & Private Documents."
     make_public: "Make Public"
     make_private: "Make Private"

@@ -69,6 +69,31 @@ class ReviewFindingsTest < ActionDispatch::IntegrationTest
     assert_select "#sidebar a[href=?]", dashboard_pp_records_path, count: 0
   end
 
+  # F04 — uploading from inside a folder defaulted to no folder at all.
+  test "the upload dialog defaults to the folder being viewed" do
+    sign_in @admin
+    get folder_path(@folder)
+
+    assert_response :success
+    assert_select "select[name=?] option[selected][value=?]", "upload[folder_id]", @folder.id
+  end
+
+  # F05 — Edit was a placeholder alert; uploads#update already existed.
+  test "document metadata can be edited from the detail page" do
+    sign_in @admin
+    get folder_uploads_upload_path(folder_id: @folder.id, id: @upload.id)
+    assert_response :success
+    assert_select "#edit_document_dialog"
+    assert_no_match(/to be implemented/, response.body)
+
+    patch folder_uploads_upload_path(folder_id: @folder.id, id: @upload.id),
+      params: { upload: { name: "Renamed Document", notes: "Corrected notes" } }
+
+    assert_redirected_to folder_uploads_upload_path(folder_id: @folder.id, id: @upload.id)
+    assert_equal "Renamed Document", @upload.reload.name
+    assert_equal "Corrected notes", @upload.notes
+  end
+
   # F07
   test "a record link appears on the document detail page" do
     sign_in @admin

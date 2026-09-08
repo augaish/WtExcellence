@@ -183,6 +183,9 @@ class UploadsController < DashboardController
       return
     end
 
+    # Folders offered by the metadata edit dialog, scoped to the upload's company.
+    @all_folders = Folder.where(company_id: @upload.company_id).where.not(company_id: nil).order(:name)
+
     # Eager load attachables and their associations to avoid N+1 queries
     @linked_items = @upload.evidence_attachments.includes(:attachable).order(created_at: :desc)
 
@@ -439,6 +442,8 @@ class UploadsController < DashboardController
   end
 
   private
+
+  helper_method :can_modify_upload?
 
   def can_modify_upload?(upload)
     return false unless current_user && upload

@@ -1368,6 +1368,8 @@ ar:
     file_selected: تم اختيار الملف
     make_private: تحويل إلى خاص
     make_public: تحويل إلى عام
+    edit_title: تعديل المستند
+    upload_destination: "سيتم حفظ هذا المستند في %{folder}."
     upload_to_legal_documents_notice: سيتم حفظ هذا المستند ضمن قسم المستندات القانونية
       والخاصة.
     visibility: 'مستوى الظهور:'

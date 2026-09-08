@@ -1,0 +1,43 @@
+<%# Metadata editing for a stored document. The uploads#update action already
+    handled name/notes/folder with its own permission check — only this form was
+    missing, so the detail page offered an Edit button that did nothing. %>
+<dialog id="edit_document_dialog" class="backdrop:bg-black/30 backdrop:backdrop-blur-sm bg-white rounded-lg shadow-xl border border-[#E3E3E3] p-0 max-w-md w-full mx-4" data-controller="modal dialog-no-backdrop-close">
+    <div class="p-4 sm:p-6">
+        <div class="flex items-center justify-between mb-4 sm:mb-6">
+            <h2 class="text-lg sm:text-xl font-semibold text-[#0D1120] break-words"><%= t('document.edit_title') %></h2>
+            <button data-action="click->modal#close" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors duration-200" aria-label="<%= t('close') %>">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <%= form_with model: @upload,
+                      url: folder_uploads_upload_path(folder_id: @folder_id, id: @upload.id),
+                      method: :patch, class: "space-y-4 sm:space-y-6" do |f| %>
+            <div>
+                <%= f.label :name, t('document.document_name'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.text_field :name, placeholder: t('document.name_placeholder'),
+                    class: "w-full border border-[#5C3984] rounded-md px-4 py-3 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984] transition-colors duration-200 text-[16px] sm:text-sm" %>
+            </div>
+
+            <div>
+                <%= f.label :notes, t('document.notes'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.text_area :notes, placeholder: t('document.notes_placeholder'), rows: 3,
+                    class: "w-full border border-[#5C3984] rounded-md px-4 py-3 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984] transition-colors duration-200 resize-y text-[16px] sm:text-sm" %>
+            </div>
+
+            <div data-controller="choices-select">
+                <%= f.label :folder_id, t('document.select_folder'), class: "block text-sm font-medium text-gray-700 mb-2" %>
+                <%= f.collection_select :folder_id, (@all_folders || Folder.none).order(:name), :id, :name,
+                    { include_blank: t('no_folder') },
+                    { class: "w-full", data: { choices_select_target: "select" } } %>
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center <%= rtl? ? 'sm:justify-start sm:flex-row-reverse' : 'sm:justify-end' %> gap-2 <%= rtl? ? 'sm:space-x-reverse sm:space-x-3' : 'sm:space-x-3' %> pt-4">
+                <button type="button" data-action="click->modal#close" class="<%= ui_btn_neutral %>"><%= t('cancel') %></button>
+                <button type="submit" class="<%= ui_btn_primary %>"><%= t('save_changes') %></button>
+            </div>
+        <% end %>
+    </div>
+</dialog>

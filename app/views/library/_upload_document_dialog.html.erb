@@ -37,11 +37,18 @@
                 </p>
             <% else %>
                 <!-- Folder Selection -->
+                <%# Uploading from inside a folder defaults to that folder; leaving the
+                    select empty silently filed the document at the library root. %>
                 <div data-upload-dialog-target="folderSelection" data-controller="choices-select" data-choices-select-search-value="true">
                     <%= f.label :folder_id, t('document.select_folder'), class: "block text-sm font-medium text-gray-700 mb-2" %>
-                    <%= f.collection_select :folder_id, (@folders_for_upload || Folder.none).order(:name), :id, :name, 
-                { prompt: t('document.select_folder_placeholder') }, 
+                    <%= f.collection_select :folder_id, (@folders_for_upload || Folder.none).order(:name), :id, :name,
+                { prompt: t('document.select_folder_placeholder'), selected: @folder&.id },
                 { class: "w-full", data: { upload_dialog_target: "folderSelect", choices_select_target: "select" } } %>
+                    <% if @folder %>
+                        <p class="mt-2 text-sm text-gray-600 break-words">
+                            <%= t('document.upload_destination', folder: @folder.name) %>
+                        </p>
+                    <% end %>
                 </div>
 
                 <!-- Visibility Selection -->

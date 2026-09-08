@@ -11,6 +11,18 @@ class CreditService
     "PLATFORM_ASSISTANT_QUERY" => 2
   }.freeze
 
+  # Audit-log actions that represent a charged AI operation. The usage screens
+  # derive "credits used" from these, so an action missing here is charged
+  # silently — which is how assistant queries were deducted from a balance while
+  # every usage total stayed at zero. Keep it beside CREDIT_COSTS so a new
+  # charged action is added in one place.
+  LEDGER_ACTIONS = %w[
+    GENERATE_CAPA_ACTIONS
+    GENERATE_CAPA_QUESTIONNAIRE
+    SUGGEST_CAPA_CLAUSES
+    PLATFORM_ASSISTANT_QUERY
+  ].freeze
+
   CACHE_KEY = "credit_costs_cache"
   CACHE_EXPIRY = 1.hour
 

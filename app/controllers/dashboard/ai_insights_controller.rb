@@ -212,7 +212,7 @@ class Dashboard::AiInsightsController < Dashboard::BaseController
     return AuditLog.none unless current_company
 
     # Direct AI actions
-    ai_actions = ["GENERATE_CAPA_ACTIONS", "GENERATE_CAPA_QUESTIONNAIRE", "SUGGEST_CAPA_CLAUSES"]
+    ai_actions = CreditService::LEDGER_ACTIONS
     
     # Root cause regeneration (UPDATE_CAPA_QUESTIONNAIRE with step: 'regenerate_root_cause')
     root_cause_regeneration = AuditLog.where(company_id: current_company.id)

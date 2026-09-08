@@ -416,7 +416,7 @@ class Dashboard::OverviewController < Dashboard::BaseController
 
   # Get AI activities for a specific company
   def get_ai_activities_for_company(company_id)
-    ai_actions = [ "GENERATE_CAPA_ACTIONS", "GENERATE_CAPA_QUESTIONNAIRE", "SUGGEST_CAPA_CLAUSES" ]
+    ai_actions = CreditService::LEDGER_ACTIONS
 
     root_cause_regeneration = AuditLog.where(company_id: company_id)
                                       .where(action: "UPDATE_CAPA_QUESTIONNAIRE")
@@ -429,7 +429,7 @@ class Dashboard::OverviewController < Dashboard::BaseController
 
   # Get AI activities for all companies (super admin)
   def get_ai_activities_for_all_companies
-    ai_actions = [ "GENERATE_CAPA_ACTIONS", "GENERATE_CAPA_QUESTIONNAIRE", "SUGGEST_CAPA_CLAUSES" ]
+    ai_actions = CreditService::LEDGER_ACTIONS
 
     root_cause_regeneration = AuditLog.where(action: "UPDATE_CAPA_QUESTIONNAIRE")
                                       .where("payload_json->>'step' = ?", "regenerate_root_cause")
