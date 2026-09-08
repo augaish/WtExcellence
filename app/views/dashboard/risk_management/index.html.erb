@@ -1,3 +1,22 @@
+
+<% if current_user&.company_user&.has_admin_privileges? || current_user&.platform_admin? %>
+  <%# The threshold above which exposure needs an explicit decision. Set where
+      the register that uses it lives. %>
+  <div class="px-6 pb-2">
+    <%= form_with url: dashboard_update_risk_appetite_path, method: :patch, scope: :company,
+                  class: "flex flex-wrap items-end gap-3" do |f| %>
+      <div>
+        <%= f.label :risk_appetite_score, t('risk_methodology.appetite'),
+            class: "block text-xs font-medium text-[#797C81] mb-1" %>
+        <%= f.number_field :risk_appetite_score, value: current_company&.risk_appetite_score,
+            min: 1, max: 25,
+            class: "w-24 border border-[#E3E3E3] rounded-md px-3 py-2 text-sm" %>
+      </div>
+      <%= f.submit t('save_changes'), class: ui_btn_secondary %>
+      <p class="text-xs text-[#797C81] flex-1 min-w-[16rem]"><%= t('risk_methodology.appetite_hint') %></p>
+    <% end %>
+  </div>
+<% end %>
 <%= content_for :title, t('risk_management') %>
 
 <div class="min-h-screen bg-gray-50">

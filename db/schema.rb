@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_092925) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_113326) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -461,6 +461,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_092925) do
     t.integer "pp_yearly_target"
     t.string "brand_primary_color", limit: 7
     t.string "brand_accent_color", limit: 7
+    t.integer "risk_appetite_score"
     t.index ["status"], name: "index_companies_on_status"
   end
 
@@ -1055,6 +1056,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_092925) do
     t.text "closure_reason"
     t.datetime "closed_at"
     t.uuid "closed_by_id"
+    t.integer "target_likelihood"
+    t.integer "target_impact"
+    t.integer "target_score"
     t.index ["closed_by_id"], name: "index_risks_on_closed_by_id"
     t.index ["company_id"], name: "index_risks_on_company_id"
     t.index ["created_by_id"], name: "index_risks_on_created_by_id"

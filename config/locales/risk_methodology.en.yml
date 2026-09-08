@@ -1,0 +1,12 @@
+en:
+  risk_methodology:
+    target_likelihood: "Target likelihood"
+    target_impact: "Target impact"
+    target_score: "Target exposure"
+    current_exposure: "Current exposure"
+    target_note: "an intended outcome, not a measured one"
+    target_met: "Target reached"
+    above_appetite: "Above appetite (%{appetite})"
+    appetite: "Risk appetite"
+    appetite_hint: "Exposure above this score needs an explicit decision. Leave blank if the company has not set one."
+    appetite_saved: "Risk appetite updated."

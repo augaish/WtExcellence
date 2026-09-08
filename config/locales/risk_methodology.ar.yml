@@ -1,0 +1,12 @@
+ar:
+  risk_methodology:
+    target_likelihood: "الاحتمالية المستهدفة"
+    target_impact: "الأثر المستهدف"
+    target_score: "التعرض المستهدف"
+    current_exposure: "التعرض الحالي"
+    target_note: "نتيجة مستهدفة وليست مقاسة"
+    target_met: "تم بلوغ المستهدف"
+    above_appetite: "يتجاوز حد التقبل (%{appetite})"
+    appetite: "حد تقبل المخاطر"
+    appetite_hint: "التعرض الذي يتجاوز هذه الدرجة يتطلب قرارًا صريحًا. اتركه فارغًا إذا لم تحدد الشركة حدًا."
+    appetite_saved: "تم تحديث حد تقبل المخاطر."

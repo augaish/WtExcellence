@@ -27,6 +27,7 @@ class Risk < ApplicationRecord
   validates :title, presence: true
   validates :likelihood, :impact, presence: true, inclusion: { in: 1..5 }
   validates :residual_likelihood, :residual_impact, inclusion: { in: 1..5 }, allow_nil: true
+  validates :target_likelihood, :target_impact, inclusion: { in: 1..5 }, allow_nil: true
 
   # Closing a risk is a governance decision, so it must carry a justification.
   # Risks closed before this requirement existed keep a null reason and are only
@@ -64,6 +65,28 @@ class Risk < ApplicationRecord
     residual_score.present? ? risk_level(residual_score) : nil
   end
 
+  # What the company is carrying today. Residual only counts once there is a
+  # residual assessment behind it; until then the inherent score is the honest
+  # answer, because nothing has been shown to reduce it.
+  def current_score
+    residual_score.presence || inherent_score
+  end
+
+  # A target is an intention, not an achievement. It is never treated as the
+  # current exposure, which is the confusion the review warned about.
+  def target_met?
+    target_score.present? && current_score.present? && current_score <= target_score
+  end
+
+  # Above the threshold the company has approved. No appetite set means nothing
+  # is reported as exceeding it — silence is better than an invented threshold.
+  def above_appetite?
+    appetite = company&.risk_appetite_score
+    return false if appetite.blank? || current_score.blank?
+
+    current_score > appetite
+  end
+
   private
 
   # Only a closure being made or changed now needs a reason; a risk closed
@@ -91,6 +114,10 @@ class Risk < ApplicationRecord
 
     if residual_likelihood.present? && residual_impact.present?
       self.residual_score = RiskScoringService.calculate(likelihood: residual_likelihood, impact: residual_impact)
+    end
+
+    if target_likelihood.present? && target_impact.present?
+      self.target_score = RiskScoringService.calculate(likelihood: target_likelihood, impact: target_impact)
     end
   end
 

@@ -24,6 +24,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `phase-d-executive-doa` | `aec6e90` | Executive authority matrix: categories, authorities, threshold bands, dynamic roles, findings. |
 | `phase-e-intelligence` | `f9a863a` | Conformance check, matrix version diff, consultation rounds. |
 | `phase-f-delegations` | `1cc7898` | Delegations: position-to-position, expiry, sub-delegation, effective authority. |
+| `phase-g-governance` | *(this commit)* | Activity trail, governance evidence, risk methodology, F12. |
 
 ## Roll the code back
 ```bash

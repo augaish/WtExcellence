@@ -14,9 +14,24 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   def show
   end
 
+  # The appetite is a company-level threshold, set where the register that uses
+  # it lives rather than buried in general settings.
+  def update_appetite
+    unless current_user&.company_user&.has_admin_privileges? || current_user&.platform_admin?
+      return redirect_to dashboard_risk_management_index_path,
+        alert: t("risk_no_permission"), status: :see_other
+    end
+
+    score = params.require(:company).permit(:risk_appetite_score)[:risk_appetite_score]
+    current_company.update!(risk_appetite_score: score.presence)
+
+    redirect_to dashboard_risk_management_index_path,
+      notice: t("risk_methodology.appetite_saved"), status: :see_other
+  end
+
   def new
     @risk = Risk.new
-    @risk_workspaces = RiskWorkspace.active.where(company_id: current_company&.id).order(:name)
+    load_form_collections
   end
 
   def create
@@ -29,12 +44,13 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     if @risk.save
       redirect_to dashboard_risk_management_path(@risk), notice: t("risk_logged")
     else
+      load_form_collections
       render :new, status: :unprocessable_entity
     end
   end
 
   def edit
-    @risk_workspaces = RiskWorkspace.active.where(company_id: current_company&.id).order(:name)
+    load_form_collections
   end
 
   def update
@@ -45,6 +61,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     if @risk.save
       redirect_to dashboard_risk_management_path(@risk), notice: t("risk_updated")
     else
+      load_form_collections
       render :edit, status: :unprocessable_entity
     end
   end
@@ -64,6 +81,12 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
 
   private
 
+  # Every collection the form offers. Loaded for the failure paths too, so a
+  # validation error cannot silently remove a choice the user already had.
+  def load_form_collections
+    @risk_workspaces = RiskWorkspace.active.where(company_id: current_company&.id).order(:name)
+  end
+
   def set_risk
     @risk = Risk.active.where(company_id: current_company&.id).find(params[:id])
   end
@@ -72,6 +95,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     params.require(:risk).permit(
       :title, :description, :category, :owner_id, :status,
       :likelihood, :impact, :residual_likelihood, :residual_impact,
+      :target_likelihood, :target_impact,
       :risk_workspace_id, :closure_reason
     )
   end

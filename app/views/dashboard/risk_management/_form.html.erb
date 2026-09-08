@@ -64,6 +64,19 @@
         <%= f.label :residual_impact, t('residual_impact_label'), class: ui_label %>
         <%= f.select :residual_impact, (1..5), { include_blank: true }, class: ui_input %>
       </div>
+
+      <%# A target is where the company intends the exposure to end up. It is
+          recorded separately from the residual assessment so it can never be
+          mistaken for exposure already reduced. %>
+      <div>
+        <%= f.label :target_likelihood, t('risk_methodology.target_likelihood'), class: ui_label %>
+        <%= f.select :target_likelihood, (1..5), { include_blank: true }, class: ui_input %>
+      </div>
+
+      <div>
+        <%= f.label :target_impact, t('risk_methodology.target_impact'), class: ui_label %>
+        <%= f.select :target_impact, (1..5), { include_blank: true }, class: ui_input %>
+      </div>
     </div>
 
     <div>

@@ -29,7 +29,6 @@ P3s, with the ones that mislead a user first.
 |---|---|---|
 | F09 | CAPA edit shows the wrong priority | Custom select is not synchronised with the saved value on open. Small fix, needs the same treatment applied to every enhanced select. |
 | F11 | Generate Actions stays disabled until a page reload | Readiness is not recomputed after a save. |
-| F12 | Risk validation loses workspace options | Select collections are not reloaded when re-rendering a failed save. |
 | F08 | CAPA document picker renders blank | Needs reproducing with PDF and DOCX before it can be called fixed; the review could only test a .txt file. |
 | F14 | AI cost is not disclosed before the action | Inconsistent with Generate Actions, which does show its cost. |
 | F15 | Ask AI describes controls that do not exist | Needs the answer grounded in the product manual and the current role's actions. |

@@ -84,6 +84,8 @@ Rails.application.routes.draw do
       get "/", action: :index, as: :risk_management_index
       post "/", action: :create
       get "/new", action: :new, as: :new_risk
+      # Before "/:id", or "appetite" is read as a risk id.
+      patch "/appetite", action: :update_appetite, as: :update_risk_appetite
       get "/:id", action: :show, as: :risk_management
       get "/:id/edit", action: :edit, as: :edit_risk
       patch "/:id", action: :update, as: :update_risk
