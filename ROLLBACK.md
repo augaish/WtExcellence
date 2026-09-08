@@ -12,18 +12,18 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `pp-phase3-complete` | `fc89941` | Phase 3 (Documenter: 17-stage lifecycle). |
 | `pp-phase4-complete` | `ab95189` | Phase 4 (Process Architect: structured editor + SVG swimlanes). |
 | `pp-phase5-complete` | `e4be5fa` | Phase 5 (Efficiency Evaluation). |
-| `pp-phase6-complete` | *(this commit)* | Phase 6 (Monitoring widgets). P&P module complete. |
+| `pp-phase6-complete` | `ce502ec` | Phase 6 (Monitoring widgets). P&P module complete. |
 | `review-phase0a` | `4e432c1` | Review fixes: the two 500s (ActiveStorage URL options), evidence-reuse heading, record links on documents. |
 | `review-phase0b` | `f94570e` | One permission-aware navigation definition behind the sidebar and the mobile menu. |
 | `review-phase0c` | `43974d6` | Upload folder destination, document metadata editing, AI credit ledger. |
 | `review-phase0d` | `2cc054a` | Editable AI drafts; risk closure requires a justification. |
-| `phase-a-foundations` | *(this commit)* | Authority levels, classification, DoA/SLA/glossary record types, glossary + references, company branding. |
-| `phase-b-procedure` | *(this commit)* | Procedure steps with computed totals; operational authority matrix with its rules. |
-| `governance-slice-1` | *(this commit)* | Commitment timing vs workflow state, fulfilment basis, locale guard, English audit-log repair. |
-| `phase-c-documents` | *(this commit)* | Governed document assembly and branded print-ready rendering. |
-| `phase-d-executive-doa` | *(this commit)* | Executive authority matrix: categories, authorities, threshold bands, dynamic roles, findings. |
-| `phase-e-intelligence` | *(this commit)* | Conformance check, matrix version diff, consultation rounds. |
-| `phase-f-delegations` | *(this commit)* | Delegations: position-to-position, expiry, sub-delegation, effective authority. |
+| `phase-a-foundations` | `38a99a9` | Authority levels, classification, DoA/SLA/glossary record types, glossary + references, company branding. |
+| `phase-b-procedure` | `d51238f` | Procedure steps with computed totals; operational authority matrix with its rules. |
+| `governance-slice-1` | `165db96` | Commitment timing vs workflow state, fulfilment basis, locale guard, English audit-log repair. |
+| `phase-c-documents` | `defb17a` | Governed document assembly and branded print-ready rendering. |
+| `phase-d-executive-doa` | `aec6e90` | Executive authority matrix: categories, authorities, threshold bands, dynamic roles, findings. |
+| `phase-e-intelligence` | `f9a863a` | Conformance check, matrix version diff, consultation rounds. |
+| `phase-f-delegations` | `1cc7898` | Delegations: position-to-position, expiry, sub-delegation, effective authority. |
 
 ## Roll the code back
 ```bash
