@@ -44,6 +44,18 @@ and exits non-zero rather than leaving an archive that cannot be restored. If it
 prints "Verified", the backup is real. Anything else means you have no backup.
 
 ## Restore a database dump
+The database is `wtexcel_prod`, owned by `wtexcel` — not the `postgres` defaults
+an earlier version of this file assumed. Read the credentials from the container
+rather than typing them, so a rename cannot silently break the restore:
 ```bash
-gunzip -c /root/backups/<file>.sql.gz | docker exec -i wtexcel-db psql -U postgres -d way_to_excellence
+DB_USER=$(docker exec wtexcel-db printenv POSTGRES_USER)
+DB_NAME=$(docker exec wtexcel-db printenv POSTGRES_DB)
+DB_PASSWORD=$(docker exec wtexcel-db printenv POSTGRES_PASSWORD)
+
+gunzip -c /root/backups/<file>.sql.gz \
+  | docker exec -i -e PGPASSWORD="$DB_PASSWORD" wtexcel-db \
+      psql -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1
 ```
+`ON_ERROR_STOP=1` matters: without it psql reports success after skipping every
+statement it could not apply, which is how a half-restored database gets
+mistaken for a restored one.
