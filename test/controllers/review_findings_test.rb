@@ -1,0 +1,55 @@
+require "test_helper"
+
+# Reproduces the P1/P2 defects reported in the 8 September 2026 platform review.
+# Each test names the finding it covers so a regression points straight back at
+# the report.
+class ReviewFindingsTest < ActionDispatch::IntegrationTest
+  setup do
+    Rails.application.reload_routes!
+
+    @company = Company.create!(name: "Review Co #{SecureRandom.hex(4)}", license_seats: 10, credits: 50, is_active: true)
+    @admin = User.create!(email: "review-admin-#{SecureRandom.hex(4)}@example.com",
+      password: "password123", password_confirmation: "password123", name: "Review Admin", is_active: true)
+    CompanyUser.create!(company: @company, user: @admin, role: CompanyUser::ROLES[:company_admin])
+
+    @folder = Folder.create!(company: @company, name: "QA Folder", created_by: @admin.id)
+    @upload = Upload.new(company: @company, folder: @folder, name: "QA Document",
+      uploaded_by: @admin.id, visibility: "public", filename: "qa.txt",
+      mime_type: "text/plain", size_bytes: 12)
+    @upload.file.attach(io: StringIO.new("QA evidence"), filename: "qa.txt", content_type: "text/plain")
+    @upload.save!
+    @record = @company.pp_records.create!(record_type: "policy", title_en: "QA Policy", code: "POL-QA",
+      current_stage: "s1_verify", stage_entered_at: Time.current)
+    EvidenceAttachment.create!(upload: @upload, attachable: @record, attached_by: @admin.id)
+  end
+
+  # F01
+  test "All Uploaded Documents listing loads" do
+    sign_in @admin
+    get folder_path("all")
+    assert_response :success
+  end
+
+  # F02
+  test "company profile loads for a company admin" do
+    sign_in @admin
+    get dashboard_account_management_company_path(@company)
+    assert_response :success
+  end
+
+  # F06
+  test "evidence reuse heading is a string, not a translation object" do
+    sign_in @admin
+    get library_path
+    assert_response :success
+    assert_no_match(/upload_title/, response.body)
+  end
+
+  # F07
+  test "a record link appears on the document detail page" do
+    sign_in @admin
+    get folder_uploads_upload_path(folder_id: @folder.id, id: @upload.id)
+    assert_response :success
+    assert_includes response.body, "QA Policy"
+  end
+end

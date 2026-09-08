@@ -40,6 +40,8 @@ class EvidenceAttachment < ApplicationRecord
       rescue
         "Assessment #{attachable.id}"
       end
+    when "PpRecord"
+      attachable.display_title(language_code)
     else
       "Unknown"
     end
@@ -52,6 +54,8 @@ class EvidenceAttachment < ApplicationRecord
     when "Clause"
       attachable.full_code
     when "ChecklistItem"
+      attachable.code
+    when "PpRecord"
       attachable.code
     when "Capa", "CapaAction", "Assessment"
       nil

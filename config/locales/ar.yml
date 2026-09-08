@@ -1343,6 +1343,7 @@ ar:
   type: النوع
   in_folder: في المجلد
   uploaded_by: رفع بواسطة
+  document_label: المستند
   linked_to: مرتبط بـ
   download: تحميل
   share: مشاركة

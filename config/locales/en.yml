@@ -1348,6 +1348,7 @@ en:
   type: "Type"
   in_folder: "In Folder"
   uploaded_by: "Uploaded by"
+  document_label: "Document"
   linked_to: "Linked To"
   download: "Download"
   share: "Share"

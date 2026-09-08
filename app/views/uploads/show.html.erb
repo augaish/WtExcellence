@@ -297,8 +297,11 @@
         <% end %>
       <% end %>
       
+      <% linked_capas = @ungrouped_items.select { |a| a.attachable_type == 'Capa' && a.attachable } %>
+      <% linked_records = @ungrouped_items.select { |a| a.attachable_type == 'PpRecord' && a.attachable } %>
+
       <!-- Capas (each Capa gets its own section) -->
-      <% @ungrouped_items.select { |a| a.attachable_type == 'Capa' && a.attachable }.each do |attachment| %>
+      <% linked_capas.each do |attachment| %>
         <% capa = attachment.attachable %>
         <% capa_code = capa.friendly_code %>
         <% truncated_description = capa.description.present? ? (capa.description.length > 100 ? "#{capa.description[0..100]}..." : capa.description) : nil %>
@@ -346,7 +349,47 @@
         </div>
       <% end %>
     
-      <% if @grouped_by_standard.empty? && @ungrouped_items.select { |a| a.attachable_type == 'Capa' && a.attachable }.empty? %>
+      <!-- P&P records (each record gets its own section) -->
+      <% linked_records.each do |attachment| %>
+        <% record = attachment.attachable %>
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+          <div class="flex items-center justify-between p-4">
+            <div class="flex items-center gap-3 flex-1">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-[#F6EEFF] text-[#0D1120]">
+                <%= record.type_label %>
+              </span>
+              <div class="flex-1">
+                <span class="text-lg font-semibold text-[#0D1120]"><%= record.display_title %></span>
+                <% if record.code.present? %>
+                  <p class="text-sm text-gray-600 mt-1"><%= record.code %></p>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2">
+              <%= link_to evidence_attachment_path(attachment),
+                  data: {
+                    turbo_method: :delete,
+                    turbo_confirm: t('confirm_unlink_attachment')
+                  },
+                  class: "text-gray-600 hover:text-gray-700 p-2 rounded hover:bg-gray-100 transition-colors",
+                  title: t('unlink') do %>
+                <%= image_tag asset_path('unlink-icon.svg'), class: "w-5 h-5" %>
+              <% end %>
+
+              <%= link_to dashboard_pp_record_path(record),
+                  class: "text-[#5C3984] hover:text-[#5C3984] p-2 rounded hover:bg-blue-50 transition-colors",
+                  title: t('open') do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @grouped_by_standard.empty? && linked_capas.empty? && linked_records.empty? %>
         <div class="bg-white rounded-lg border border-gray-200 p-8 text-center">
           <p class="text-sm text-gray-500"><%= t('no_linked_items') %></p>
         </div>

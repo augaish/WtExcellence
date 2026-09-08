@@ -1,4 +1,11 @@
 class ApplicationController < ActionController::Base
+  # Views call ActiveStorage::Blob#url (via Upload#file_url and signed_file_url).
+  # The disk service builds those URLs from ActiveStorage::Current.url_options,
+  # which Rails only sets for controllers that include this concern — without it
+  # every page rendering a file URL raises "Cannot generate URL ... using Disk
+  # service" and returns a 500.
+  include ActiveStorage::SetCurrent
+
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
 
   before_action :restrict_www_to_homepage
