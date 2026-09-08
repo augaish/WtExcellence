@@ -179,9 +179,9 @@ export default class extends Controller {
             return
         }
 
-        // removeActiveItems first, or Choices keeps showing the previous choice
-        // alongside the new one.
-        this.choicesInstance.removeActiveItems()
+        // A single select replaces its own selection; clearing it first left
+        // the widget empty, which is how a Medium CAPA came to open with no
+        // priority showing at all.
         this.choicesInstance.setChoiceByValue(value === null ? "" : value)
     }
 

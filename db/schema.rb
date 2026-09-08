@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_133700) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_160139) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -939,6 +939,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_133700) do
     t.uuid "previous_version_id"
     t.string "classification", limit: 30, default: "internal", null: false
     t.string "counterparty", limit: 250
+    t.text "change_summary"
     t.index ["company_id", "classification"], name: "index_pp_records_on_company_id_and_classification"
     t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"

@@ -103,9 +103,9 @@ class RecordDocument
       "outputs" => process.outputs,
       "predecessor" => process.predecessor_process&.display_name(locale),
       "successor" => process.successor_process&.display_name(locale),
-      "frequency" => process.frequency,
+      "frequency" => enum_label("process_architecture.frequencies", process.frequency),
       "total_time" => total_time_for(process),
-      "automation_status" => process.automation_status,
+      "automation_status" => enum_label("process_architecture.automation", process.automation_status),
       "related_policies" => process.related_policies,
       "technical_systems" => process.technical_systems,
       "forms_used" => process.forms_used,
@@ -131,6 +131,13 @@ class RecordDocument
   def trim_number(value)
     number = value.to_f
     (number % 1).zero? ? number.to_i.to_s : number.to_s
+  end
+
+  # An internal value never reaches the page: on_demand prints as "On demand".
+  def enum_label(namespace, value)
+    return nil if value.blank?
+
+    I18n.t("#{namespace}.#{value}", locale: locale, default: value.to_s.humanize)
   end
 
   def unit_label(unit)
@@ -224,7 +231,7 @@ class RecordDocument
     rows = DocumentClassification::KEYS.map do |key|
       {
         label: DocumentClassification.label(key, locale),
-        description: DocumentClassification.description(key, locale),
+        definition: DocumentClassification.description(key, locale),
         current: key == record.classification
       }
     end
@@ -239,7 +246,10 @@ class RecordDocument
         version: version.version_label.presence || "v#{version.version_number}",
         date: version.effective_date || version.created_at.to_date,
         prepared_by: version.owner_user&.name,
-        description: version.description&.truncate(160)
+        # A change log records what changed, which the record's description
+        # does not say. The first version has nothing to change from.
+        description: version.change_summary.presence ||
+          (version.previous_version_id.nil? ? I18n.t("record_document.initial_version", locale: locale) : nil)
       }
     end
 

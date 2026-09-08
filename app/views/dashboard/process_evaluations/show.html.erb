@@ -35,7 +35,14 @@
           <h2 class="text-lg font-semibold text-[#0D1120]"><%= maturity[:title] %></h2>
           <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-[#F6EEFF] text-[#5C3984]"><%= maturity[:tier] %></span>
         </div>
-        <p class="text-sm text-[#797C81]"><%= maturity[:desc] %></p>
+        <% blocking = @result[:blocking_issues].to_i %>
+        <% if blocking.positive? %>
+          <%# Completeness is not clearance: a finding that must be resolved
+              overrides the tier's own description. %>
+          <p class="text-sm text-[#8A1C1C] font-medium"><%= t('evaluation.readiness.blocked', count: blocking) %></p>
+        <% else %>
+          <p class="text-sm text-[#797C81]"><%= maturity[:desc] %></p>
+        <% end %>
       </div>
     </div>
 

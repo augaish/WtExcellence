@@ -53,9 +53,18 @@ class PpDiagramElement < ApplicationRecord
     scope == "external"
   end
 
-  # Swimlanes are performers; anything external sits in its own pool, which is
-  # what makes "sequence flow must not cross pools" checkable.
+  # Performers are LANES inside the organisation's own pool. Only an external
+  # participant has a pool of its own. This distinction is what BPMN draws:
+  # sequence flow may cross lanes within a pool, and only crossing between
+  # pools needs a message flow. Treating every performer as a pool — as this
+  # once did — flagged an ordinary hand-off from Procurement to Finance as an
+  # external crossing.
   def pool
+    external? ? EXTERNAL_POOL : DEFAULT_POOL
+  end
+
+  # The swimlane the element is drawn in.
+  def lane
     return EXTERNAL_POOL if external?
 
     performer.presence || DEFAULT_POOL

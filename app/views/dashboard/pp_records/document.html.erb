@@ -42,7 +42,7 @@
          }.compact_blank.each do |key, value| %>
         <div class="flex justify-between gap-4 border-b border-[#E3E3E3] pb-2">
           <dt class="text-[#797C81]"><%= t("record_document.cover.#{key}") %></dt>
-          <dd class="font-medium text-end"><%= value.is_a?(Date) ? l(value, format: :long) : value %></dd>
+          <dd class="font-medium text-end"><%= value.is_a?(Date) ? l(value, format: :document) : value %></dd>
         </div>
       <% end %>
     </dl>

@@ -79,6 +79,14 @@
             <%= f.text_field :version_label, placeholder: "v1.0", class: input_class %>
           </div>
 
+          <%# Printed in the change log. It records what changed in this
+              version, which the description does not say. %>
+          <div class="md:col-span-2">
+            <%= f.label :change_summary, t('pp_records.change_summary'), class: label_class %>
+            <%= f.text_area :change_summary, rows: 2, class: input_class,
+                placeholder: t('pp_records.change_summary_placeholder') %>
+          </div>
+
           <%# Confidentiality classification, printed on the document cover and
               used to decide what may be shown outside the company. %>
           <div>

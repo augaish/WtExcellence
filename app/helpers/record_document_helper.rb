@@ -28,7 +28,7 @@ module RecordDocumentHelper
     return document_approval_status(row) if column == :status
 
     value = row[CELL_KEYS.fetch(column, column)]
-    return l(value, format: :long) if value.is_a?(Date) || value.is_a?(Time)
+    return l(value.to_date, format: :document) if value.is_a?(Date) || value.is_a?(Time)
 
     value
   end

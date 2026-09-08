@@ -44,6 +44,11 @@
                     <%= f.collection_select :folder_id, (@folders_for_upload || Folder.none).order(:name), :id, :name,
                 { prompt: t('document.select_folder_placeholder'), selected: @folder&.id },
                 { class: "w-full", data: { upload_dialog_target: "folderSelect", choices_select_target: "select" } } %>
+                    <%# The folder being viewed travels with the upload
+                        independently of the select widget, so a widget that
+                        drops its preselection cannot file the document at the
+                        root. %>
+                    <%= hidden_field_tag :context_folder_id, @folder&.id %>
                     <% if @folder %>
                         <p class="mt-2 text-sm text-gray-600 break-words">
                             <%= t('document.upload_destination', folder: @folder.name) %>

@@ -787,6 +787,8 @@ ar:
     fix_errors: "يرجى تصحيح ما يلي:"
     tabs:
       all: "الكل"
+    change_summary: "ما الذي تغيّر في هذه النسخة"
+    change_summary_placeholder: "مثال: إضافة خطوة المراجعة القانونية؛ تحديث حد الاعتماد."
     classification: "تصنيف الوثيقة"
     types:
       policy: "سياسة"

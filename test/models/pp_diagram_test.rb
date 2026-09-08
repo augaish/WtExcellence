@@ -18,22 +18,28 @@ class PpDiagramTest < ActiveSupport::TestCase
     end
   end
 
-  test "the pool is the performer, and external elements get their own pool" do
+  # Performers are lanes inside the organisation's own pool; only an external
+  # participant has a pool of its own. Sequence flow may cross lanes, and only
+  # crossing between pools needs a message flow.
+  test "performers are lanes, and only external elements get their own pool" do
     internal = add_element(performer: "Finance")
     external = add_element(performer: "Supplier", scope: "external")
     unnamed = add_element(performer: nil)
 
-    assert_equal "Finance", internal.pool
+    assert_equal PpDiagramElement::DEFAULT_POOL, internal.pool
+    assert_equal "Finance", internal.lane
     assert_equal PpDiagramElement::EXTERNAL_POOL, external.pool
-    assert_equal PpDiagramElement::DEFAULT_POOL, unnamed.pool
+    assert_equal PpDiagramElement::EXTERNAL_POOL, external.lane
+    assert_equal PpDiagramElement::DEFAULT_POOL, unnamed.lane
   end
 
-  test "pools list internal lanes first and external last" do
+  test "lanes list internal performers first and external last" do
     add_element(performer: "Finance")
     add_element(performer: "Supplier", scope: "external")
     add_element(performer: "HR")
 
-    assert_equal [ "Finance", "HR", PpDiagramElement::EXTERNAL_POOL ], @diagram.reload.pools
+    assert_equal [ "Finance", "HR", PpDiagramElement::EXTERNAL_POOL ], @diagram.reload.lanes
+    assert_equal [ PpDiagramElement::DEFAULT_POOL, PpDiagramElement::EXTERNAL_POOL ], @diagram.pools
   end
 
   test "a flow cannot connect an element to itself" do
@@ -82,7 +88,7 @@ class PpDiagramTest < ActiveSupport::TestCase
 
     flow = contract["flows"].first
     assert_equal "sequence", flow["kind"]
-    assert_equal({ "pool" => "HR" }, flow["from"])
+    assert_equal({ "pool" => PpDiagramElement::DEFAULT_POOL }, flow["from"])
     assert_equal "Request received", contract["trigger"]
   end
 

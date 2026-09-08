@@ -58,7 +58,7 @@ class ProcessDiagramRenderer
   def layout!
     return if @positions
 
-    @pools = @diagram.pools
+    @pools = @diagram.lanes
     @positions = {}
     column_for_pool = Hash.new(0)
 
@@ -67,9 +67,9 @@ class ProcessDiagramRenderer
     # without back-tracking.
     column = 0
     @elements.each do |element|
-      pool_index = @pools.index(element.pool) || 0
+      pool_index = @pools.index(element.lane) || 0
       @positions[element.id] = { column: column, lane: pool_index }
-      column_for_pool[element.pool] += 1
+      column_for_pool[element.lane] += 1
       column += 1
     end
   end

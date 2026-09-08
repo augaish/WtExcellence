@@ -24,10 +24,17 @@ class PpDiagram < ApplicationRecord
   end
 
   # Distinct swimlanes, organisation pools first and the external pool last.
-  def pools
-    names = elements.map(&:pool).uniq
+  # The swimlanes to draw: one per internal performer, in author order, with
+  # the external participant last so it reads as a separate pool.
+  def lanes
+    names = elements.map(&:lane).uniq
     internal = names.reject { |n| n == PpDiagramElement::EXTERNAL_POOL }
     internal + (names.include?(PpDiagramElement::EXTERNAL_POOL) ? [ PpDiagramElement::EXTERNAL_POOL ] : [])
+  end
+
+  # Kept for the evaluator contract: the two pools a flow can cross between.
+  def pools
+    elements.map(&:pool).uniq
   end
 
   # The evaluation contract. Keys are strings so the evaluator can be fed either

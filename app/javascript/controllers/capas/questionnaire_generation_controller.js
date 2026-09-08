@@ -358,10 +358,31 @@ export default class extends Controller {
   }
 
   // The reviewer's edits, if any, are what gets accepted.
+  //
+  // Only the field belonging to the pair currently under review counts. An
+  // accepted message stays on the page, and reading the first editable field
+  // on the page returned question one's answer for every later question.
   editedAnswer() {
-    const field = this.messagesContainerTarget.querySelector('[data-generated-answer]');
+    const current = this.messagesContainerTarget.querySelector('[data-message-type="generated"]');
+    const field = current ? current.querySelector('[data-generated-answer]') : null;
     const edited = field ? field.value.trim() : '';
     return edited || this.currentPair.answer;
+  }
+
+  // Once accepted, the answer is a fact of record rather than a draft: the
+  // editable field becomes plain text so it can neither be edited nor mistaken
+  // for the next question's field.
+  freezeAcceptedAnswer(message) {
+    const field = message.querySelector('[data-generated-answer]');
+    if (!field) return;
+
+    const text = document.createElement('div');
+    text.className = 'text-sm text-[#0D1120] message-content whitespace-pre-line';
+    text.textContent = field.value;
+    field.replaceWith(text);
+
+    const notice = message.querySelector('p');
+    if (notice) notice.remove();
   }
 
   async acceptPair() {
@@ -445,6 +466,7 @@ export default class extends Controller {
           // Normal flow - update the message to show it's accepted
           const lastMessage = this.messagesContainerTarget.lastElementChild;
           if (lastMessage && lastMessage.dataset.messageType === 'generated') {
+            this.freezeAcceptedAnswer(lastMessage);
             lastMessage.dataset.messageType = 'accepted';
             const acceptIndicator = document.createElement('div');
             acceptIndicator.className = 'text-xs text-[#3F9011] font-medium mt-2 flex items-center space-x-1';

@@ -15,6 +15,7 @@ ar:
     view: عرض الوثيقة
     diagram_omitted: "مخطط الإجراء غير مضمَّن في نسخة Word. افتح الوثيقة في المتصفح لعرضه."
     download_docx: "تنزيل بصيغة Word"
+    initial_version: "النسخة الأولى"
     contents: المحتويات
     fields:
       objective: الهدف من الإجراء

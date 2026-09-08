@@ -35,6 +35,13 @@ class UploadsController < DashboardController
       return
     end
 
+    # An upload started inside a folder belongs there unless the user chose
+    # otherwise. The dialog's select had been arriving blank, filing documents
+    # at the root while the user watched an empty folder.
+    if upload_params[:folder_id].blank? && params[:context_folder_id].present?
+      params[:upload][:folder_id] = params[:context_folder_id]
+    end
+
     # Ensure folder (if provided) belongs to the upload's company - prevent cross-company uploads
     folder_id = upload_params[:folder_id].presence
     if folder_id.present?

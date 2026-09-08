@@ -1,0 +1,4 @@
+ar:
+  date:
+    formats:
+      document: "%d %B %Y"

@@ -767,6 +767,8 @@ en:
     fix_errors: "Please fix the following:"
     tabs:
       all: "All"
+    change_summary: "What changed in this version"
+    change_summary_placeholder: "e.g. Added the legal review step; updated the approval threshold."
     classification: "Classification"
     types:
       policy: "Policy"

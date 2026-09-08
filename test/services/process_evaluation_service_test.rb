@@ -31,7 +31,7 @@ class ProcessEvaluationServiceTest < ActiveSupport::TestCase
   test "returns the documented result shape" do
     result = ProcessEvaluationService.evaluate(model)
 
-    assert_equal %i[score maturity axes recommendations], result.keys
+    assert_equal %i[score maturity blocking_issues axes recommendations], result.keys
     assert_equal 6, result[:axes].size
     assert_equal %w[bpmn sipoc lean iso raci digital], result[:axes].map { |a| a[:id] }
     assert_kind_of Integer, result[:score]

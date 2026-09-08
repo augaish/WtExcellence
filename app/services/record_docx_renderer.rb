@@ -153,7 +153,7 @@ class RecordDocxRenderer
 
   def format_value(value)
     return "" if value.nil?
-    return I18n.l(value, format: :long, locale: locale) if value.is_a?(Date) || value.is_a?(Time)
+    return I18n.l(value.to_date, format: :document, locale: locale) if value.is_a?(Date) || value.is_a?(Time)
 
     value.to_s
   end

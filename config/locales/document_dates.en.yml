@@ -1,0 +1,6 @@
+en:
+  date:
+    formats:
+      # Dates in generated documents. The long format carries a time, which
+      # printed "12:00 AM" beside an effective date.
+      document: "%d %B %Y"

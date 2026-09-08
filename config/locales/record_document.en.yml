@@ -15,6 +15,7 @@ en:
     view: "View document"
     diagram_omitted: "The procedure diagram is not included in the Word version. Open the document in the browser to see it."
     download_docx: "Download as Word"
+    initial_version: "Initial version"
     contents: "Contents"
     fields:
       objective: "Objective"

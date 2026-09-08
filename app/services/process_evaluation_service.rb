@@ -35,11 +35,16 @@ class ProcessEvaluationService
 
   def evaluate
     assessment = assess
+    recommendations = build_recommendations(assessment)
     {
       score: assessment[:score],
       maturity: maturity_level(assessment[:score]),
+      # A completeness score and readiness are different questions. A diagram
+      # can be 90% complete and still carry a finding that must be resolved
+      # before it is fit to publish; the score must not be read as clearance.
+      blocking_issues: recommendations.count { |r| r[:priority] == "high" },
       axes: assessment[:axes],
-      recommendations: build_recommendations(assessment)
+      recommendations: recommendations
     }
   end
 
