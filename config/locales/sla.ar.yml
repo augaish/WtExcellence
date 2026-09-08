@@ -13,6 +13,12 @@ ar:
     counterparty: الطرف الآخر
     counterparty_hint: العميل أو الجهة الطرف في هذه الاتفاقية. الوحدة المالكة هي مقدم الخدمة.
     not_measurable: لم يُسجَّل مستهدف أو طريقة قياس، لذا لا يمكن رفع تقارير عنه.
+    status:
+      measurable: "قابل للقياس"
+      target_missing: "غير قابل للقياس — المستهدف مفقود"
+      method_missing: "غير قابل للقياس — طريقة القياس مفقودة"
+    status_label: "الحالة"
+    summary: "%{measurable} من %{total} قابلة للقياس"
     metrics:
       availability: الجاهزية
       response_time: زمن الاستجابة
@@ -33,5 +39,6 @@ ar:
       percent_range: لا يمكن أن يتجاوز 100%
     flash:
       created: تمت إضافة مستوى الخدمة.
+      updated: "تم تحديث مستوى الخدمة."
       deleted: تم حذف مستوى الخدمة.
       not_found: مستوى الخدمة هذا لم يعد موجودًا.

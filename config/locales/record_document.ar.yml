@@ -8,6 +8,7 @@ ar:
       steps: خطوات الإجراء
       authority_matrix: مصفوفة الصلاحيات الإجرائية
       service_levels: "مستويات الخدمة"
+      executive_matrix: "مصفوفة الصلاحيات التنفيذية"
       references: المراجع
       classification: تصنيف الوثيقة
       change_log: سجل التغييرات
@@ -57,10 +58,17 @@ ar:
       measurement: "طريقة القياس"
       coverage: "نطاق التغطية"
       position: "#"
+      category: "الفئة"
+      authority: "الصلاحية"
+      band: "الشريحة"
+      basis: "المرجع النظامي"
+      remedy: "المعالجة عند الإخلال"
+      status_label: "الحالة"
       prepared_by: المعد
       change: وصف التغيير
       classification: التصنيف
     cover:
+      counterparty: "الطرف الآخر"
       owner: مالك الوثيقة
       publish_date: تاريخ النشر
       review_date: تاريخ المراجعة

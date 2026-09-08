@@ -183,27 +183,17 @@ class CapaClauseSuggestionService
         }
       ]
 
+      # Without a ceiling the reply can stop mid-JSON, which surfaced to users
+      # as a parse error about a closing quote.
       response = @client.complete(
         messages,
-        model: @model
+        model: @model,
+        extras: { max_tokens: ENV.fetch("CAPA_MAX_TOKENS", "4000").to_i }
       )
 
-      if response.nil?
-        Rails.logger.error "OpenRouter API returned nil response"
-        raise "API returned nil response"
-      end
-
-      if response.is_a?(Hash) && response["error"]
-        Rails.logger.error "API returned error: #{response['error'].inspect}"
-        raise "API error: #{response['error']['message'] || response['error']}"
-      end
-
-      content = response.dig("choices", 0, "message", "content")
-
-      if content.nil?
-        Rails.logger.error "Failed to extract content from response"
-        raise "Failed to extract content from API response"
-      end
+      # One reader for every reply, which names why a reply was unusable
+      # instead of the generic "failed to extract content".
+      content = LlmResponse.content!(response)
 
       Rails.logger.info "Successfully extracted content (#{content.length} chars)"
       content

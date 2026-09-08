@@ -35,7 +35,8 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
 
     get dashboard_authorities_path
     assert_response :success
-    AuthorityLevel::KEYS.each { |key| assert_select "th", text: AuthorityLevel.label(key) }
+    # One box per level under each band, rather than a column per level.
+    AuthorityLevel::KEYS.each { |key| assert_select "p", text: AuthorityLevel.label(key) }
   end
 
   test "an authority can be added and appears under its category" do
@@ -83,12 +84,12 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
 
     sign_in @admin
     post dashboard_create_authority_assignment_path(band_id: band.id), params: {
-      matrix_id: @matrix.id,
-      authority_assignment: { level: "authorize", org_unit_id: @minister.id }
+      matrix_id: @matrix.id, holder: "unit:#{@minister.id}",
+      authority_assignment: { level: "authorize" }
     }
     post dashboard_create_authority_assignment_path(band_id: band.id), params: {
-      matrix_id: @matrix.id,
-      authority_assignment: { level: "review", dynamic_role: "owning_unit", condition: "Where above SAR 1m" }
+      matrix_id: @matrix.id, holder: "role:owning_unit",
+      authority_assignment: { level: "review", condition: "Where above SAR 1m" }
     }
 
     levels = band.reload.assignments.map(&:level)

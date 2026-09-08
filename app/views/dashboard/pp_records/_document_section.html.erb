@@ -57,6 +57,40 @@
     </tbody>
   </table>
 
+<% when :executive_matrix %>
+  <table class="doc-avoid-break">
+    <thead>
+      <tr>
+        <% %w[category number authority band basis].each do |column| %>
+          <th><%= t("record_document.columns.#{column}") %></th>
+        <% end %>
+        <% AuthorityLevel::KEYS.each do |level| %><th><%= AuthorityLevel.label(level) %></th><% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% section.payload.each do |row| %>
+        <tr>
+          <td><%= row[:category] %></td>
+          <td><%= row[:number] %></td>
+          <td><%= row[:authority] %></td>
+          <td><%= row[:band] %></td>
+          <td><%= row[:basis] %></td>
+          <% AuthorityLevel::KEYS.each do |level| %>
+            <td>
+              <% holders = row[:assignments][level] %>
+              <% if holders.blank? %><span class="text-[#797C81]">-</span>
+              <% else %>
+                <% holders.each do |holder| %>
+                  <div><%= holder[:holder] %><% if holder[:condition].present? %> <span class="block text-[11px] text-[#797C81]">(<%= holder[:condition] %>)</span><% end %></div>
+                <% end %>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
 <% when :table %>
   <% rows = section.payload %>
   <% columns = document_columns_for(section) %>

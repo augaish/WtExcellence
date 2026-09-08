@@ -1,0 +1,13 @@
+en:
+  architect:
+    sync:
+      start: "Start"
+      end: "End"
+      generate: "Draw from steps"
+      generate_hint: "Draws one task per procedure step, in order, joined by sequence flow. Run it again after the steps change; tasks you added by hand are kept."
+      generated:
+        one: "Diagram drawn from 1 step."
+        other: "Diagram drawn from %{count} steps."
+      no_steps: "This process has no steps to draw from yet."
+      linked: "From step %{position}"
+      linked_hint: "Edits to this task's title, performer or description are written back to the step, and the step's edits come here."

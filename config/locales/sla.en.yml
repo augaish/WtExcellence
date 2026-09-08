@@ -13,6 +13,12 @@ en:
     counterparty: "Other party"
     counterparty_hint: "The customer or body this agreement is with. The owning unit is the provider."
     not_measurable: "No target or measurement method recorded, so this cannot be reported on."
+    status:
+      measurable: "Measurable"
+      target_missing: "Not measurable — target missing"
+      method_missing: "Not measurable — measurement method missing"
+    status_label: "Status"
+    summary: "%{measurable} of %{total} measurable"
     metrics:
       availability: "Availability"
       response_time: "Response time"
@@ -33,5 +39,6 @@ en:
       percent_range: "cannot exceed 100%"
     flash:
       created: "Service level added."
+      updated: "Service level updated."
       deleted: "Service level removed."
       not_found: "That service level no longer exists."

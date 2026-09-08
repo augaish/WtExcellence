@@ -9,6 +9,12 @@
       <%= link_to t('back'), owner_path(@diagram.owner), class: ui_btn_neutral %>
       <% if can_manage_diagrams? %>
         <%= link_to t('edit'), edit_dashboard_pp_diagram_path(@diagram), class: ui_btn_secondary %>
+        <% process = @diagram.owner.is_a?(PpProcess) ? @diagram.owner : @diagram.owner.try(:pp_process) %>
+        <% if process&.steps&.any? %>
+          <%= button_to t('architect.sync.generate'), generate_from_steps_dashboard_pp_diagram_path(@diagram),
+              method: :post, title: t('architect.sync.generate_hint'), class: ui_btn_primary,
+              form: { data: { turbo_confirm: t('architect.sync.generate_hint') } } %>
+        <% end %>
       <% end %>
     <% end %>
 
@@ -42,6 +48,10 @@
                       <span class="text-xs font-mono text-[#797C81]"><%= index + 1 %></span>
                       <span class="text-sm font-medium text-[#0D1120]"><%= element.title.presence || t('architect.untitled_element') %></span>
                       <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[#F6EEFF] text-[#5C3984]"><%= element.type_label %></span>
+                      <% if element.pp_process_step %>
+                        <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[#F7F7FD] text-[#797C81]"
+                              title="<%= t('architect.sync.linked_hint') %>"><%= t('architect.sync.linked', position: element.pp_process_step.position) %></span>
+                      <% end %>
                       <% if element.external? %>
                         <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-amber-100 text-amber-800"><%= t('architect.external') %></span>
                       <% end %>

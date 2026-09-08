@@ -1,0 +1,8 @@
+en:
+  llm:
+    errors:
+      no_response: "The AI service did not reply. Nothing was saved or charged; please try again."
+      unreadable: "The AI service replied in a form that could not be read. Nothing was saved or charged."
+      provider_error: "The AI service reported an error. Nothing was saved or charged."
+      empty: "The AI service returned an empty answer. Nothing was saved or charged; please try again."
+      truncated: "The AI answer was cut off before it finished. Nothing was saved or charged; please try again."

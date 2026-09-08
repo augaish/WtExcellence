@@ -36,6 +36,13 @@
               <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.owner_unit') %></dt>
               <dd class="mt-0.5 text-[#0D1120]"><%= @record.owner_org_unit&.display_name.presence || "—" %></dd>
             </div>
+            <% if @record.sla? %>
+              <%# Both sides of an agreement, readable without opening the edit form. %>
+              <div>
+                <dt class="text-xs font-medium text-[#797C81]"><%= t('sla.counterparty') %></dt>
+                <dd class="mt-0.5 text-[#0D1120]"><%= @record.counterparty.presence || "—" %></dd>
+              </div>
+            <% end %>
             <div>
               <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.owner_user') %></dt>
               <dd class="mt-0.5 text-[#0D1120]"><%= @record.owner_user&.name.presence || "—" %></dd>

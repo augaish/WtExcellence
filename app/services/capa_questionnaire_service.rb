@@ -55,7 +55,22 @@ class CapaQuestionnaireService
     end
   end
 
+  # One quiet retry: a cut-off reply is transient far more often than not, and
+  # a second attempt costs less than a user losing their place.
   def generate_single_pair(question_number, existing_questions = {})
+    attempts = 0
+    begin
+      attempts += 1
+      generate_single_pair_once(question_number, existing_questions)
+    rescue JSON::ParserError, LlmResponse::Empty => e
+      raise if attempts >= 2 || (e.is_a?(LlmResponse::Empty) && e.reason == :provider_error)
+
+      Rails.logger.warn "Retrying question #{question_number} after: #{e.message}"
+      retry
+    end
+  end
+
+  def generate_single_pair_once(question_number, existing_questions = {})
     begin
       if @provider == "openrouter"
         prompt = build_single_pair_prompt(question_number, existing_questions)
@@ -201,27 +216,17 @@ class CapaQuestionnaireService
         }
       ]
 
+      # Without a ceiling the reply can stop mid-JSON, which surfaced to users
+      # as a parse error about a closing quote.
       response = @client.complete(
         messages,
-        model: @model
+        model: @model,
+        extras: { max_tokens: ENV.fetch("CAPA_MAX_TOKENS", "4000").to_i }
       )
 
-      if response.nil?
-        Rails.logger.error "OpenRouter API returned nil response"
-        raise "API returned nil response"
-      end
-
-      if response.is_a?(Hash) && response["error"]
-        Rails.logger.error "API returned error: #{response['error'].inspect}"
-        raise "API error: #{response['error']['message'] || response['error']}"
-      end
-
-      content = response.dig("choices", 0, "message", "content")
-
-      if content.nil?
-        Rails.logger.error "Failed to extract content from response"
-        raise "Failed to extract content from API response"
-      end
+      # One reader for every reply, which names why a reply was unusable
+      # instead of the generic "failed to extract content".
+      content = LlmResponse.content!(response)
 
       Rails.logger.info "Successfully extracted content (#{content.length} chars)"
       content

@@ -7,6 +7,7 @@
 class AuthorityAssignment < ApplicationRecord
   belongs_to :authority_band
   belongs_to :org_unit, optional: true
+  belongs_to :user, optional: true
 
   has_one :authority, through: :authority_band
 
@@ -16,6 +17,7 @@ class AuthorityAssignment < ApplicationRecord
   validates :condition, length: { maximum: 300 }
   validate :must_name_a_holder
   validate :unit_must_be_same_company
+  validate :user_must_be_a_member
 
   scope :ordered, -> { order(:sort_order, :created_at) }
   scope :at_level, ->(level) { where(level: level) }
@@ -27,6 +29,7 @@ class AuthorityAssignment < ApplicationRecord
 
   def holder_label(locale = I18n.locale)
     return org_unit.display_name(locale) if org_unit
+    return user.name if user
     return DynamicRole.label(dynamic_role, locale) if dynamic_role.present?
 
     holder_title.to_s
@@ -35,7 +38,7 @@ class AuthorityAssignment < ApplicationRecord
   # Identifies the holder across rows, so one unit named in several cells is
   # recognised as a single holder when checking segregation of duties.
   def holder_key
-    org_unit_id.presence || dynamic_role.presence || holder_title.to_s.strip.downcase.presence
+    org_unit_id.presence || user_id.presence || dynamic_role.presence || holder_title.to_s.strip.downcase.presence
   end
 
   # A dynamic holder is only as good as the org structure it resolves against.
@@ -49,9 +52,19 @@ class AuthorityAssignment < ApplicationRecord
   private
 
   def must_name_a_holder
-    return if org_unit_id.present? || dynamic_role.present? || holder_title.present?
+    return if org_unit_id.present? || user_id.present? || dynamic_role.present? || holder_title.present?
 
     errors.add(:base, I18n.t("doa.errors.holder_required"))
+  end
+
+  # A person named as a holder must belong to the company whose matrix it is.
+  def user_must_be_a_member
+    return if user.nil? || authority_band.nil?
+
+    authority = authority_band.authority
+    return if authority.nil? || authority.company.users.exists?(user.id)
+
+    errors.add(:user, I18n.t("doa.errors.other_company"))
   end
 
   def unit_must_be_same_company

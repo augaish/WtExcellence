@@ -5,7 +5,7 @@ module RecordDocumentHelper
   TABLE_COLUMNS = {
     "definitions" => %i[term abbreviation definition],
     "steps" => %i[position activity description responsible duration system],
-    "service_levels" => %i[service metric target measurement coverage],
+    "service_levels" => %i[service metric target measurement coverage remedy status],
     "references" => %i[name source],
     "classification" => %i[classification definition],
     "change_log" => %i[version date prepared_by change],
@@ -25,7 +25,7 @@ module RecordDocumentHelper
   end
 
   def document_cell(row, column)
-    return document_approval_status(row) if column == :status
+    return document_approval_status(row) if column == :status && row.key?(:received)
 
     value = row[CELL_KEYS.fetch(column, column)]
     return l(value.to_date, format: :document) if value.is_a?(Date) || value.is_a?(Time)

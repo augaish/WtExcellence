@@ -44,6 +44,7 @@ class RecordDocument
       review_date: record.review_date,
       classification: record.classification_label(locale),
       company_name: company&.name,
+      counterparty: record.counterparty,
       palette: company&.brand_palette
     }
   end
@@ -64,6 +65,7 @@ class RecordDocument
       diagram_section,
       steps_section,
       authority_matrix_section,
+      executive_matrix_section,
       service_levels_section,
       references_section,
       classification_section,
@@ -200,6 +202,32 @@ class RecordDocument
     section("authority_matrix", :matrix, rows)
   end
 
+  # The executive matrix is the principal content of an executive_doa record;
+  # a document that omits it has left out the thing it exists to publish. One
+  # row per band, grouped under the authority, so a reader can find the
+  # applicable threshold without opening anything else.
+  def executive_matrix_section
+    return nil unless record.record_type == "executive_doa"
+
+    rows = record.authorities.includes(:authority_category, bands: { assignments: [ :org_unit, :user ] }).flat_map do |authority|
+      authority.bands.map do |band|
+        {
+          category: authority.authority_category&.display_name(locale),
+          number: authority.number,
+          authority: authority.display_name(locale),
+          band: band.display_label(locale),
+          basis: authority.basis_label(locale),
+          assignments: AuthorityLevel::KEYS.index_with do |level|
+            band.assignments.select { |a| a.level == level }
+                .map { |a| { holder: a.holder_label(locale), condition: a.condition } }
+          end
+        }
+      end
+    end
+
+    section("executive_matrix", :executive_matrix, rows)
+  end
+
   # The measurable commitments of an agreement. Printed only for records that
   # have them, so a policy never shows an empty service level table.
   def service_levels_section
@@ -209,11 +237,22 @@ class RecordDocument
         metric: level.metric_label(locale),
         target: level.target_label(locale),
         measurement: level.measurement_method,
-        coverage: level.coverage
+        coverage: level.coverage,
+        remedy: level.remedy,
+        # The record screen says when a row cannot be reported on; the document
+        # must say the same, or an incomplete statement prints as an obligation.
+        status: measurability_label(level)
       }
     end
 
     section("service_levels", :table, rows)
+  end
+
+  def measurability_label(level)
+    return I18n.t("sla.status.measurable", locale: locale) if level.measurable?
+    return I18n.t("sla.status.target_missing", locale: locale) if level.target_value.blank?
+
+    I18n.t("sla.status.method_missing", locale: locale)
   end
 
   # المراجع

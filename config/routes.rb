@@ -131,6 +131,7 @@ Rails.application.routes.draw do
     resources :pp_diagrams, except: [ :index ] do
       member do
         post :add_element
+        post :generate_from_steps
         patch "elements/:element_id", action: :update_element, as: :update_element
         delete "elements/:element_id", action: :destroy_element, as: :destroy_element
         post :add_flow
@@ -163,6 +164,11 @@ Rails.application.routes.draw do
       post "categories", action: :create_category, as: :create_authority_category
       post "authorities", action: :create_authority, as: :create_authority
       post "authorities/:authority_id/bands", action: :create_band, as: :create_authority_band
+      patch "bands/:id", action: :update_band, as: :update_authority_band
+      delete "bands/:id", action: :destroy_band, as: :destroy_authority_band
+      patch "categories/:id", action: :update_category, as: :update_authority_category
+      delete "categories/:id", action: :destroy_category, as: :destroy_authority_category
+      patch "authorities/:id", action: :update_authority, as: :update_authority
       post "bands/:band_id/assignments", action: :create_assignment, as: :create_authority_assignment
       delete "authorities/:id", action: :destroy_authority, as: :destroy_authority
       delete "assignments/:id", action: :destroy_assignment, as: :destroy_authority_assignment
@@ -175,7 +181,7 @@ Rails.application.routes.draw do
     end
 
     resources :pp_records do
-      resources :service_levels, only: [ :create, :destroy ], controller: "pp_service_levels"
+      resources :service_levels, only: [ :create, :update, :destroy ], controller: "pp_service_levels"
       member do
         post :attach_documents
         delete :detach_document

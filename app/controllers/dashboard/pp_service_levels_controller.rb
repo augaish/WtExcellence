@@ -17,6 +17,17 @@ class Dashboard::PpServiceLevelsController < Dashboard::BaseController
     end
   end
 
+  def update
+    level = @record.service_levels.find_by(id: params[:id])
+    return back_to_record(alert: t("sla.flash.not_found")) if level.nil?
+
+    if level.update(service_level_params)
+      back_to_record(notice: t("sla.flash.updated"))
+    else
+      back_to_record(alert: level.errors.full_messages.to_sentence)
+    end
+  end
+
   def destroy
     @record.service_levels.find_by(id: params[:id])&.destroy
     back_to_record(notice: t("sla.flash.deleted"))

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_160139) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_170002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -170,9 +170,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_160139) do
     t.integer "sort_order", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "user_id"
     t.index ["authority_band_id", "level"], name: "index_authority_assignments_on_authority_band_id_and_level"
     t.index ["authority_band_id"], name: "index_authority_assignments_on_authority_band_id"
     t.index ["org_unit_id"], name: "index_authority_assignments_on_org_unit_id"
+    t.index ["user_id"], name: "index_authority_assignments_on_user_id"
   end
 
   create_table "authority_bands", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -778,8 +780,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_160139) do
     t.string "flow_label", limit: 200
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "pp_process_step_id"
     t.index ["pp_diagram_id", "position"], name: "index_pp_diagram_elements_on_pp_diagram_id_and_position"
     t.index ["pp_diagram_id"], name: "index_pp_diagram_elements_on_pp_diagram_id"
+    t.index ["pp_process_step_id"], name: "index_pp_diagram_elements_on_pp_process_step_id"
   end
 
   create_table "pp_diagram_flows", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1315,6 +1319,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_160139) do
   add_foreign_key "authorities", "pp_records", column: "matrix_id"
   add_foreign_key "authority_assignments", "authority_bands"
   add_foreign_key "authority_assignments", "org_units"
+  add_foreign_key "authority_assignments", "users"
   add_foreign_key "authority_bands", "authorities"
   add_foreign_key "authority_categories", "companies"
   add_foreign_key "authority_consultations", "authorities"
@@ -1396,6 +1401,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_160139) do
   add_foreign_key "pp_authority_assignments", "org_units"
   add_foreign_key "pp_authority_assignments", "pp_process_authorities"
   add_foreign_key "pp_diagram_elements", "pp_diagrams"
+  add_foreign_key "pp_diagram_elements", "pp_process_steps"
   add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "from_element_id"
   add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "to_element_id"
   add_foreign_key "pp_diagram_flows", "pp_diagrams"

@@ -28,6 +28,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `phase-g-orgchart` | *(this commit)* | Org chart view; thread-local actor leak fixed. |
 | `sla-and-expiry` | *(this commit)* | Service levels on agreements; delegation expiry notices; register filters. |
 | `docx-export` | *(this commit)* | Word export of governed documents, right-to-left aware. |
+| `retest-batches` | *(this commit)* | Second-review fixes: answer persistence, pools vs lanes, matrix redesign, executive matrix in documents, SLA output, diagram drawn from steps. |
 
 ## Roll the code back
 ```bash

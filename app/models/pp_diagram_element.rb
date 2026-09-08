@@ -21,6 +21,11 @@ class PpDiagramElement < ApplicationRecord
   EXTERNAL_POOL = "external".freeze
 
   belongs_to :pp_diagram
+  # The procedure step this task was drawn from, if any. Edits to a linked
+  # element's title, performer or description are written back to the step.
+  belongs_to :pp_process_step, class_name: "PpProcessStep", optional: true
+
+  after_save :push_changes_to_step
   has_many :outgoing_flows, class_name: "PpDiagramFlow",
     foreign_key: "from_element_id", dependent: :destroy
   has_many :incoming_flows, class_name: "PpDiagramFlow",
@@ -72,5 +77,16 @@ class PpDiagramElement < ApplicationRecord
 
   def type_label(locale = I18n.locale)
     I18n.t("architect.element_types.#{element_type}", locale: locale, default: element_type)
+  end
+
+  private
+
+  # Guarded against echo: the step's own callback writes back here, and the
+  # flag stops the two from updating each other forever.
+  def push_changes_to_step
+    return if pp_process_step.nil? || DiagramStepSync.syncing?
+    return unless saved_change_to_title? || saved_change_to_performer? || saved_change_to_description?
+
+    DiagramStepSync.element_to_step(self)
   end
 end

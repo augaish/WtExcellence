@@ -3,7 +3,7 @@ class Dashboard::PpDiagramsController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_company_present
   before_action :ensure_can_manage, except: [ :show ]
-  before_action :set_diagram, only: [
+  before_action :set_diagram, only: [ :generate_from_steps,
     :show, :edit, :update, :destroy,
     :add_element, :update_element, :destroy_element, :add_flow, :destroy_flow
   ]
@@ -54,6 +54,16 @@ class Dashboard::PpDiagramsController < Dashboard::BaseController
     @diagram.destroy
     log_action("DELETE_DIAGRAM")
     redirect_to owner_path(owner), notice: t("architect.flash.deleted"), status: :see_other
+  end
+
+  # Draws the diagram from the owning process's steps: start, one task per
+  # step, end. Safe to run again after the steps change.
+  def generate_from_steps
+    process = @diagram.owner.is_a?(PpProcess) ? @diagram.owner : @diagram.owner.try(:pp_process)
+    return redirect_to dashboard_pp_diagram_path(@diagram), alert: t("architect.sync.no_steps"), status: :see_other if process.nil? || process.steps.none?
+
+    DiagramStepSync.generate(@diagram, process)
+    redirect_to dashboard_pp_diagram_path(@diagram), notice: t("architect.sync.generated", count: process.steps.count), status: :see_other
   end
 
   # ---- Elements ----------------------------------------------------------

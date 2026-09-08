@@ -87,7 +87,8 @@ class RecordDocxRenderer
       "version" => cover[:version],
       "publish_date" => format_value(cover[:effective_date]),
       "review_date" => format_value(cover[:review_date]),
-      "classification" => cover[:classification]
+      "classification" => cover[:classification],
+      "counterparty" => cover[:counterparty]
     }.compact_blank
 
     parts << spacer
@@ -106,6 +107,7 @@ class RecordDocxRenderer
     when :prose then paragraph(section.payload.to_s)
     when :fields then two_column_table(field_rows(section.payload))
     when :matrix then matrix_table(section.payload)
+    when :executive_matrix then executive_matrix_table(section.payload)
     when :diagram then paragraph(translate("record_document.diagram_omitted"), size: SMALL_SIZE, color: "797C81")
     when :table then section_table(section)
     else ""
@@ -126,7 +128,7 @@ class RecordDocxRenderer
 
   def cell_value(row, column)
     key = RecordDocumentHelper::CELL_KEYS.fetch(column, column)
-    return approval_status(row) if column == :status
+    return approval_status(row) if column == :status && row.key?(:received)
 
     format_value(row[key])
   end
@@ -146,6 +148,23 @@ class RecordDocxRenderer
 
         holders.map { |holder| [ holder[:holder], holder[:condition].presence && "(#{holder[:condition]})" ].compact.join(" ") }.join("; ")
       end
+    end
+
+    table(headers, body)
+  end
+
+  def executive_matrix_table(rows)
+    headers = %w[category number authority band basis].map { |c| translate("record_document.columns.#{c}") } +
+      AuthorityLevel::KEYS.map { |level| AuthorityLevel.label(level, locale) }
+
+    body = rows.map do |row|
+      [ row[:category].to_s, row[:number].to_s, row[:authority].to_s, row[:band].to_s, row[:basis].to_s ] +
+        AuthorityLevel::KEYS.map do |level|
+          holders = row[:assignments][level]
+          next "-" if holders.blank?
+
+          holders.map { |h| [ h[:holder], h[:condition].presence && "(#{h[:condition]})" ].compact.join(" ") }.join("; ")
+        end
     end
 
     table(headers, body)

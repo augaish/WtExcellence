@@ -7,6 +7,17 @@ class PpProcessStep < ApplicationRecord
   belongs_to :pp_process, class_name: "PpProcess"
   belongs_to :responsible_org_unit, class_name: "OrgUnit", optional: true
 
+  # The diagram task drawn from this step, if the diagram has been generated.
+  # A step that no longer exists has no business in the picture.
+  has_one :diagram_element, class_name: "PpDiagramElement", foreign_key: "pp_process_step_id", dependent: :destroy
+
+  # The association is consulted on create, before any element exists, and
+  # Rails caches that nil on the instance. A later destroy of the same object
+  # would trust the cache and leave the element behind, so it is reset first.
+  before_destroy(prepend: true) { association(:diagram_element).reset }
+
+  after_save :push_changes_to_element
+
   # Durations are entered per step in whatever unit suits it; the process total
   # is summed in minutes so mixed units add up correctly.
   UNITS = %w[minutes hours days].freeze
@@ -41,6 +52,17 @@ class PpProcessStep < ApplicationRecord
   end
 
   private
+
+  def push_changes_to_element
+    return if DiagramStepSync.syncing?
+    # Queried rather than read through the association, so nothing is cached
+    # on a step that has no element yet.
+    return unless PpDiagramElement.exists?(pp_process_step_id: id)
+    return unless saved_change_to_activity? || saved_change_to_responsible_title? ||
+                  saved_change_to_description? || saved_change_to_position?
+
+    DiagramStepSync.step_to_element(self)
+  end
 
   def duration_needs_a_unit
     return if duration_value.blank? || duration_unit.present?

@@ -13,7 +13,9 @@ class AuthorityBand < ApplicationRecord
   validate :max_must_exceed_min
   validate :must_not_overlap_sibling_bands
 
-  scope :ordered, -> { order(:sort_order, :min_amount, :created_at) }
+  # A band with no minimum is the lowest band. PostgreSQL sorts NULL last on an
+  # ascending order, which put "up to 10,000" after "above 10,000".
+  scope :ordered, -> { order(:sort_order, Arel.sql("min_amount ASC NULLS FIRST"), :created_at) }
 
   def bounded?
     min_amount.present? || max_amount.present?

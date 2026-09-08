@@ -16,6 +16,7 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @authorities = @report.authorities
     @categories = company.authority_categories.to_a
     @org_units = company.org_units.active.ordered.to_a
+    @company_users = company.users.order(:name).to_a
     @diff = AuthorityMatrixDiff.new(@matrix.previous_version, @matrix) if @matrix.previous_version
     @consultations = @matrix.consultations.includes(:authority, :org_unit, :ruled_by).to_a
     @suggested_categories = AuthorityCatalogue.categories
@@ -89,18 +90,68 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     authority = @matrix.authorities.find_by(id: params[:authority_id])
     return back_to_matrix(alert: t("doa.flash.not_found")) if authority.nil?
 
+    # An authority starts with one "all amounts" band so it has somewhere to
+    # hang holders. The first thresholds a user enters bound that band rather
+    # than colliding with it — which is what made every band submission vanish
+    # into an overlap error.
+    placeholder = authority.bands.first if authority.bands.one? && !authority.bands.first.bounded?
+    if placeholder
+      return save_and_return_updated(placeholder, band_params, "band_created")
+    end
+
     band = authority.bands.new(band_params)
     band.sort_order = authority.bands.maximum(:sort_order).to_i + 1
 
     save_and_return(band, "band_created")
   end
 
-  def create_assignment
-    band = AuthorityBand.joins(:authority)
-      .where(authorities: { matrix_id: @matrix.id }).find_by(id: params[:band_id])
+  def update_band
+    band = matrix_band(params[:id])
     return back_to_matrix(alert: t("doa.flash.not_found")) if band.nil?
 
-    save_and_return(band.assignments.new(assignment_params), "assignment_created")
+    save_and_return_updated(band, band_params, "band_updated")
+  end
+
+  # A band's holders go with it. An authority always keeps at least one band.
+  def destroy_band
+    band = matrix_band(params[:id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if band.nil?
+    return back_to_matrix(alert: t("doa.flash.last_band")) if band.authority.bands.one?
+
+    band.destroy
+    back_to_matrix(notice: t("doa.flash.deleted"))
+  end
+
+  def update_category
+    category = company.authority_categories.find_by(id: params[:id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if category.nil?
+
+    save_and_return_updated(category, category_params, "category_updated")
+  end
+
+  # Authorities in a removed category are kept, uncategorised, rather than
+  # deleted along with a heading.
+  def destroy_category
+    company.authority_categories.find_by(id: params[:id])&.destroy
+    back_to_matrix(notice: t("doa.flash.deleted"))
+  end
+
+  def update_authority
+    authority = @matrix.authorities.find_by(id: params[:id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if authority.nil?
+
+    save_and_return_updated(authority, authority_params, "authority_updated")
+  end
+
+  # One box per level. The holder arrives as a single tagged value —
+  # "unit:<id>", "user:<id>" or "role:<key>" — from one searchable list, so a
+  # user picks from units and people together without knowing the model.
+  def create_assignment
+    band = matrix_band(params[:band_id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if band.nil?
+
+    attributes = assignment_params.to_h.merge(holder_attributes(params[:holder]))
+    save_and_return(band.assignments.new(attributes), "assignment_created")
   end
 
   def destroy_authority
@@ -126,6 +177,21 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     matrices = company.pp_records.of_type("executive_doa").order(version_number: :desc, created_at: :desc)
     @matrices = matrices.to_a
     @matrix = params[:matrix_id].present? ? matrices.find_by(id: params[:matrix_id]) : matrices.first
+  end
+
+  def matrix_band(id)
+    AuthorityBand.joins(:authority).where(authorities: { matrix_id: @matrix.id }).find_by(id: id)
+  end
+
+  # Decodes the holder picker's value into the column it belongs in.
+  def holder_attributes(value)
+    kind, id = value.to_s.split(":", 2)
+    case kind
+    when "unit" then { org_unit_id: id }
+    when "user" then { user_id: id }
+    when "role" then { dynamic_role: id }
+    else {}
+    end
   end
 
   def save_and_return_updated(record, attributes, flash_key)
@@ -198,6 +264,6 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   end
 
   def assignment_params
-    params.require(:authority_assignment).permit(:level, :org_unit_id, :dynamic_role, :holder_title, :condition)
+    params.require(:authority_assignment).permit(:level, :holder_title, :condition)
   end
 end

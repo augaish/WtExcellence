@@ -1,9 +1,14 @@
 <% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
 <% th = "px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase tracking-wider" %>
+<% measurable = record.service_levels.count(&:measurable?) %>
 
 <section class="bg-white border border-[#E3E3E3] rounded-lg">
-  <div class="p-5 border-b border-[#E3E3E3]">
+  <div class="flex items-center justify-between gap-3 p-5 border-b border-[#E3E3E3]">
     <h2 class="text-base font-semibold text-[#0D1120]"><%= t('sla.title') %></h2>
+    <% if record.service_levels.any? %>
+      <%# The count a reviewer wants before approving: how many can be reported on. %>
+      <p class="text-xs text-[#797C81]"><%= t('sla.summary', measurable: measurable, total: record.service_levels.size) %></p>
+    <% end %>
   </div>
 
   <% if record.service_levels.any? %>
@@ -11,9 +16,10 @@
       <table class="min-w-full divide-y divide-[#E3E3E3] text-sm">
         <thead class="bg-[#F7F7FD]">
           <tr>
-            <% %w[service metric target measurement coverage].each do |column| %>
+            <% %w[service metric target measurement coverage remedy].each do |column| %>
               <th class="<%= th %>"><%= t("sla.#{column}") %></th>
             <% end %>
+            <th class="<%= th %>"><%= t('sla.status_label') %></th>
             <th class="<%= th %>"></th>
           </tr>
         </thead>
@@ -22,20 +28,43 @@
             <tr>
               <td class="px-3 py-2"><%= level.service_name %></td>
               <td class="px-3 py-2"><%= level.metric_label %></td>
-              <td class="px-3 py-2"><%= level.target_label %></td>
+              <td class="px-3 py-2"><%= level.target_label.presence || "—" %></td>
+              <td class="px-3 py-2"><%= level.measurement_method.presence || "—" %></td>
+              <td class="px-3 py-2"><%= level.coverage %></td>
+              <td class="px-3 py-2"><%= level.remedy.presence || "—" %></td>
               <td class="px-3 py-2">
-                <%= level.measurement_method %>
-                <%# A commitment nobody can measure is a statement of intent. %>
-                <% unless level.measurable? %>
-                  <span class="block text-[11px] text-[#797C81]"><%= t('sla.not_measurable') %></span>
+                <% if level.measurable? %>
+                  <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] bg-green-100 text-green-800"><%= t('sla.status.measurable') %></span>
+                <% else %>
+                  <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] bg-[#FDEBEB] text-[#8A1C1C]">
+                    <%= level.target_value.blank? ? t('sla.status.target_missing') : t('sla.status.method_missing') %>
+                  </span>
                 <% end %>
               </td>
-              <td class="px-3 py-2"><%= level.coverage %></td>
               <td class="px-3 py-2 text-end">
                 <% if can_manage %>
-                  <%= button_to t('delete'), dashboard_pp_record_service_level_path(record, level),
-                      method: :delete, form: { data: { turbo_confirm: t('are_you_sure') } },
-                      class: "text-xs text-[#797C81] hover:text-[#0D1120]" %>
+                  <div class="flex items-center justify-end gap-3">
+                    <details class="text-start">
+                      <summary class="cursor-pointer text-xs text-[#5C3984] hover:underline"><%= t('edit') %></summary>
+                      <%= form_with url: dashboard_pp_record_service_level_path(record, level), method: :patch,
+                                    scope: :pp_service_level, class: "mt-2 grid gap-2 w-72" do |f| %>
+                        <%= f.text_field :service_name, value: level.service_name, placeholder: t('sla.service'), class: input %>
+                        <%= f.select :metric, PpServiceLevel::METRICS.map { |m| [ t("sla.metrics.#{m}"), m ] }, { selected: level.metric }, class: input %>
+                        <div class="flex gap-2">
+                          <%= f.number_field :target_value, value: level.target_value, step: :any, min: 0, placeholder: t('sla.target'), class: input %>
+                          <%= f.select :target_unit, PpServiceLevel::UNITS_FOR_METRIC.fetch(level.metric, []).map { |u| [ t("sla.units.#{u}"), u ] },
+                              { include_blank: true, selected: level.target_unit }, class: input %>
+                        </div>
+                        <%= f.text_field :measurement_method, value: level.measurement_method, placeholder: t('sla.measurement'), class: input %>
+                        <%= f.text_field :coverage, value: level.coverage, placeholder: t('sla.coverage'), class: input %>
+                        <%= f.text_field :remedy, value: level.remedy, placeholder: t('sla.remedy'), class: input %>
+                        <%= f.submit t('save_changes'), class: ui_btn_secondary %>
+                      <% end %>
+                    </details>
+                    <%= button_to t('delete'), dashboard_pp_record_service_level_path(record, level),
+                        method: :delete, form: { data: { turbo_confirm: t('are_you_sure') } },
+                        class: "text-xs text-[#797C81] hover:text-[#0D1120]" %>
+                  </div>
                 <% end %>
               </td>
             </tr>
@@ -48,15 +77,18 @@
   <% end %>
 
   <% if can_manage %>
+    <%# Units are offered per commitment so a percentage cannot be given in hours. %>
     <%= form_with url: dashboard_pp_record_service_levels_path(record), method: :post,
-                  scope: :pp_service_level, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-3" do |f| %>
+                  scope: :pp_service_level, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-3",
+                  data: { controller: "sla-units" } do |f| %>
       <%= f.text_field :service_name, placeholder: t('sla.service'), class: input %>
-      <%= f.select :metric, PpServiceLevel::METRICS.map { |m| [ t("sla.metrics.#{m}"), m ] }, {}, class: input %>
+      <%= f.select :metric, PpServiceLevel::METRICS.map { |m| [ t("sla.metrics.#{m}"), m ] }, {},
+          class: input, data: { action: "change->sla-units#refresh", sla_units_target: "metric" } %>
       <div class="flex gap-2">
         <%= f.number_field :target_value, step: :any, min: 0, placeholder: t('sla.target'), class: input %>
-        <%= f.select :target_unit,
-            PpServiceLevel::UNITS_FOR_METRIC.values.flatten.uniq.map { |u| [ t("sla.units.#{u}"), u ] },
-            { include_blank: true }, class: input %>
+        <%= f.select :target_unit, [], { include_blank: true }, class: input,
+            data: { sla_units_target: "unit", units: PpServiceLevel::UNITS_FOR_METRIC.to_json,
+                    labels: PpServiceLevel::UNITS_FOR_METRIC.values.flatten.uniq.index_with { |u| t("sla.units.#{u}") }.to_json } %>
       </div>
       <%= f.text_field :measurement_method, placeholder: t('sla.measurement'), class: input %>
       <%= f.text_field :coverage, placeholder: t('sla.coverage'), class: input %>

@@ -1,0 +1,40 @@
+<%# One level of authority for one band: who holds it, and a picker to add
+    someone. The picker lists units and people together in one searchable
+    list, so a user chooses a holder without knowing how it is stored. %>
+<div class="rounded-lg border border-[#E3E3E3] bg-white p-2 min-h-[5.5rem] flex flex-col gap-1.5">
+  <p class="text-[11px] font-semibold text-[#797C81] uppercase tracking-wide" title="<%= AuthorityLevel.description(level) %>">
+    <%= AuthorityLevel.label(level) %>
+  </p>
+
+  <% holders = band.assignments.select { |a| a.level == level } %>
+  <% holders.each do |holder| %>
+    <span class="inline-flex items-center gap-1 rounded-full bg-[#F6EEFF] px-2 py-0.5 text-xs text-[#0D1120]">
+      <span><%= holder.holder_label %></span>
+      <% if holder.condition.present? %><span class="text-[#797C81]">(<%= holder.condition %>)</span><% end %>
+      <% if can_manage %>
+        <%= button_to "×", dashboard_destroy_authority_assignment_path(holder, matrix_id: matrix.id),
+            method: :delete, class: "text-[#797C81] hover:text-[#0D1120] leading-none", title: t('delete') %>
+      <% end %>
+    </span>
+  <% end %>
+
+  <% if can_manage %>
+    <details class="mt-auto">
+      <summary class="cursor-pointer text-[11px] text-[#5C3984] hover:underline"><%= t('doa.assign') %></summary>
+      <%= form_with url: dashboard_create_authority_assignment_path(band_id: band.id, matrix_id: matrix.id),
+                    method: :post, scope: :authority_assignment, class: "mt-1 space-y-1" do |f| %>
+        <%= f.hidden_field :level, value: level %>
+        <div data-controller="choices-select" data-choices-select-search-value="true">
+          <%= select_tag :holder, grouped_options_for_select({
+                t('doa.picker.units') => org_units.map { |u| [ u.display_name, "unit:#{u.id}" ] },
+                t('doa.picker.people') => company_users.map { |u| [ u.name, "user:#{u.id}" ] },
+                t('doa.picker.roles') => DynamicRole::KEYS.map { |k| [ DynamicRole.label(k), "role:#{k}" ] }
+              }), prompt: t('doa.picker.prompt'), class: "w-full text-xs",
+              data: { choices_select_target: "select", search_placeholder: t('registers.search') } %>
+        </div>
+        <%= f.text_field :condition, placeholder: t('doa.condition'), class: "w-full border border-[#E3E3E3] rounded px-2 py-1 text-xs" %>
+        <%= f.submit t('doa.assign'), class: "w-full px-2 py-1 text-xs font-medium text-white bg-[#5C3984] rounded hover:bg-[#4A2F6B]" %>
+      <% end %>
+    </details>
+  <% end %>
+</div>

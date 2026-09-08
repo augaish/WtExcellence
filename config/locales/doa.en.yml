@@ -19,6 +19,14 @@ en:
     none: "No authorities recorded in this matrix yet."
     no_matrix: "Create a record of type Executive Delegation of Authority to start a matrix."
     select_matrix: "Matrix"
+    picker:
+      prompt: "Choose a unit, person or role…"
+      units: "Organizational units"
+      people: "People"
+      roles: "Dynamic roles"
+    edit_band: "Edit band"
+    category_empty: "No authorities in this category yet. Add one below."
+    category_delete_confirm: "Remove this category? Its authorities are kept, uncategorised."
     bands:
       unbounded: "All amounts"
       up_to: "Up to %{max}"
@@ -104,6 +112,7 @@ en:
         revoked: "Delegation revoked."
         approved: "Sub-delegation approved."
     findings:
+      nothing_yet: "No authorities yet, so there is nothing to check."
       title: "Findings"
       none: "No findings. Every authority has one holder for final authorization and no conflicts of duty."
       no_authorizer: "No holder carries final authorization."
@@ -132,6 +141,10 @@ en:
       consultation_ruled: "Ruling recorded."
       delegation_created: "Delegation recorded."
       delegation_revoked: "Delegation revoked."
+      band_updated: "Band updated."
+      category_updated: "Category renamed."
+      authority_updated: "Authority updated."
+      last_band: "An authority keeps at least one band; edit this one instead."
       deleted: "Removed."
       not_found: "That item no longer exists."
       no_permission: "You don't have permission to manage authorities."

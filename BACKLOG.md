@@ -48,6 +48,21 @@ not committed, .env files are ignored, no API keys or production credentials
 appear in tracked files, and the demo seeds can no longer run outside
 development.
 
+## From the second review (retest) — still open
+
+Gate A items R01, R03–R11 and R14–R15 are addressed on this branch. What
+remains from that report:
+
+| | Finding | State |
+|---|---|---|
+| R07 (part) | A failed AI question offers only Close | The reply is now read robustly, retried once, and every failure names its cause and says nothing was charged; accepted answers are saved as they are accepted so nothing is lost. A "Retry this question" button in the modal is still to add. |
+| R13 | Validation failures clear the rest of the form | Units are now filtered per commitment and the percentage ceiling is enforced; keeping the other fields' values after a server-side rejection is not done. |
+| R16 | AI answer shows raw Markdown; header balance stale until navigation | The product map is current. Rendering the answer as formatted text and refreshing the balance from the completed request are not done. |
+| R17 | Accessible names, keyboard chart traversal, Arabic status words | Not started. Worth doing as one pass against WCAG 2.2 AA. |
+| R18 (part) | Library visibility helper text still describes "everyone" | Label fixed earlier; helper sentence not. |
+| Gate C | Delegation test matrix with a controllable clock; effective-authority enforcement; published-version immutability | Not started. Needs backend fixtures, not browser tests. |
+| Email | Delegation expiry by email | Needs the platform notification policy decided first (see below). |
+
 ## Correctness — review findings not yet fixed
 
 From the 8 September platform review. All P1s are done; these are the P2s and
