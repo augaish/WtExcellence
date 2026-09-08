@@ -23,6 +23,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `phase-c-documents` | *(this commit)* | Governed document assembly and branded print-ready rendering. |
 | `phase-d-executive-doa` | *(this commit)* | Executive authority matrix: categories, authorities, threshold bands, dynamic roles, findings. |
 | `phase-e-intelligence` | *(this commit)* | Conformance check, matrix version diff, consultation rounds. |
+| `phase-f-delegations` | *(this commit)* | Delegations: position-to-position, expiry, sub-delegation, effective authority. |
 
 ## Roll the code back
 ```bash

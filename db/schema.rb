@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_090209) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_092925) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -218,6 +218,38 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_090209) do
     t.index ["org_unit_id"], name: "index_authority_consultations_on_org_unit_id"
     t.index ["raised_by_id"], name: "index_authority_consultations_on_raised_by_id"
     t.index ["ruled_by_id"], name: "index_authority_consultations_on_ruled_by_id"
+  end
+
+  create_table "authority_delegations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.uuid "authority_id", null: false
+    t.uuid "from_org_unit_id", null: false
+    t.uuid "to_org_unit_id", null: false
+    t.string "kind", limit: 20, default: "temporary", null: false
+    t.decimal "limit_amount", precision: 15, scale: 2
+    t.date "valid_from"
+    t.date "valid_to"
+    t.string "status", limit: 20, default: "draft", null: false
+    t.uuid "decision_record_id"
+    t.uuid "parent_delegation_id"
+    t.uuid "grantor_approved_by_id"
+    t.datetime "grantor_approved_at"
+    t.text "reason"
+    t.uuid "revoked_by_id"
+    t.datetime "revoked_at"
+    t.text "revocation_reason"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["authority_id", "valid_to"], name: "index_authority_delegations_on_authority_id_and_valid_to"
+    t.index ["authority_id"], name: "index_authority_delegations_on_authority_id"
+    t.index ["company_id", "status"], name: "index_authority_delegations_on_company_id_and_status"
+    t.index ["company_id"], name: "index_authority_delegations_on_company_id"
+    t.index ["decision_record_id"], name: "index_authority_delegations_on_decision_record_id"
+    t.index ["from_org_unit_id"], name: "index_authority_delegations_on_from_org_unit_id"
+    t.index ["grantor_approved_by_id"], name: "index_authority_delegations_on_grantor_approved_by_id"
+    t.index ["parent_delegation_id"], name: "index_authority_delegations_on_parent_delegation_id"
+    t.index ["revoked_by_id"], name: "index_authority_delegations_on_revoked_by_id"
+    t.index ["to_org_unit_id"], name: "index_authority_delegations_on_to_org_unit_id"
   end
 
   create_table "capa_action_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1266,6 +1298,14 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_090209) do
   add_foreign_key "authority_consultations", "pp_records", column: "matrix_id"
   add_foreign_key "authority_consultations", "users", column: "raised_by_id"
   add_foreign_key "authority_consultations", "users", column: "ruled_by_id"
+  add_foreign_key "authority_delegations", "authorities"
+  add_foreign_key "authority_delegations", "authority_delegations", column: "parent_delegation_id"
+  add_foreign_key "authority_delegations", "companies"
+  add_foreign_key "authority_delegations", "org_units", column: "from_org_unit_id"
+  add_foreign_key "authority_delegations", "org_units", column: "to_org_unit_id"
+  add_foreign_key "authority_delegations", "pp_records", column: "decision_record_id"
+  add_foreign_key "authority_delegations", "users", column: "grantor_approved_by_id"
+  add_foreign_key "authority_delegations", "users", column: "revoked_by_id"
   add_foreign_key "capa_action_assignments", "capa_actions"
   add_foreign_key "capa_action_assignments", "company_users"
   add_foreign_key "capa_actions", "capas"

@@ -149,6 +149,10 @@
       <% end %>
     <% end %>
 
+    <%= render "dashboard/authorities/delegations", delegations: @delegations, matrix: @matrix,
+        authorities: @authorities, org_units: @org_units, input: input,
+        can_manage: can_manage_authorities? %>
+
     <%= render "dashboard/authorities/consultation", consultations: @consultations, matrix: @matrix,
         authorities: @authorities, org_units: @org_units, input: input,
         can_manage: can_manage_authorities? %>

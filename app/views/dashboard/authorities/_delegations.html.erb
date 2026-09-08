@@ -1,0 +1,95 @@
+<%# Delegations are between positions, never people, so one survives a change of
+    postholder. A temporary delegation stops conferring authority the day after
+    it lapses without anyone having to switch it off. %>
+<section class="bg-white border border-[#E3E3E3] rounded-lg">
+  <div class="p-5 border-b border-[#E3E3E3]">
+    <h2 class="text-base font-semibold text-[#0D1120]"><%= t('doa.delegation.title') %></h2>
+  </div>
+
+  <% if delegations.any? %>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-[#E3E3E3] text-sm">
+        <thead class="bg-[#F7F7FD]">
+          <tr>
+            <% %w[authority from to kind limit valid_from valid_to].each do |column| %>
+              <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase">
+                <%= column == "authority" ? t('doa.authority') : t("doa.delegation.#{column}") %>
+              </th>
+            <% end %>
+            <th class="px-3 py-2"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[#E3E3E3]">
+          <% delegations.each do |delegation| %>
+            <tr>
+              <td class="px-3 py-2">
+                <%= delegation.authority.display_name %>
+                <% if delegation.parent_delegation %>
+                  <span class="block text-[11px] text-[#797C81]">
+                    <%= t('doa.delegation.sub_of') %>: <%= delegation.parent_delegation.from_org_unit.display_name %>
+                    · <%= t('doa.delegation.accountable') %>: <%= delegation.accountable_unit.display_name %>
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-3 py-2"><%= delegation.from_org_unit.display_name %></td>
+              <td class="px-3 py-2"><%= delegation.to_org_unit.display_name %></td>
+              <td class="px-3 py-2"><%= delegation.kind_label %></td>
+              <td class="px-3 py-2">
+                <%= delegation.effective_limit ? number_with_delimiter(delegation.effective_limit.to_i) : t('doa.delegation.no_limit') %>
+              </td>
+              <td class="px-3 py-2"><%= delegation.valid_from %></td>
+              <td class="px-3 py-2">
+                <%= delegation.valid_to %>
+                <%# Status is derived from the dates, not chosen. %>
+                <% state = if delegation.revoked? then :revoked
+                           elsif delegation.expired? then :expired
+                           elsif delegation.in_force? then :in_force
+                           else :not_in_force end %>
+                <span class="block text-[11px] <%= state == :in_force ? 'text-[#0D1120]' : 'text-[#797C81]' %>">
+                  <% if state == :revoked %>
+                    <%= t('doa.delegation.statuses.revoked') %>
+                  <% elsif state == :expired %>
+                    <%= t('doa.delegation.expired') %>
+                  <% elsif delegation.expiring_soon? %>
+                    <%= t('doa.delegation.expiring', days: AuthorityDelegation::EXPIRY_LEAD_DAYS) %>
+                  <% else %>
+                    <%= t("doa.delegation.#{state}") %>
+                  <% end %>
+                </span>
+              </td>
+              <td class="px-3 py-2 text-end">
+                <% if can_manage && !delegation.revoked? %>
+                  <%= form_with url: dashboard_revoke_authority_delegation_path(delegation, matrix_id: matrix.id),
+                                method: :patch, scope: :authority_delegation, class: "flex gap-1" do |f| %>
+                    <%= f.text_field :revocation_reason, placeholder: t('doa.delegation.revocation_reason'),
+                        class: "#{input} w-40 text-xs" %>
+                    <%= f.submit t('doa.delegation.revoke'), class: "px-2 py-1 text-xs text-[#797C81] hover:text-[#0D1120]" %>
+                  <% end %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="px-5 py-6 text-sm text-[#797C81]"><%= t('doa.delegation.none') %></p>
+  <% end %>
+
+  <% if can_manage && authorities.any? %>
+    <%= form_with url: dashboard_create_authority_delegation_path(matrix_id: matrix.id), method: :post,
+                  scope: :authority_delegation, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-4" do |f| %>
+      <%= f.collection_select :authority_id, authorities, :id, :display_name, {}, class: input %>
+      <%= f.collection_select :from_org_unit_id, org_units, :id, :display_name,
+          { include_blank: t('doa.delegation.from') }, class: input %>
+      <%= f.collection_select :to_org_unit_id, org_units, :id, :display_name,
+          { include_blank: t('doa.delegation.to') }, class: input %>
+      <%= f.select :kind, AuthorityDelegation::KINDS.map { |k| [ t("doa.delegation.kinds.#{k}"), k ] }, {}, class: input %>
+      <%= f.number_field :limit_amount, placeholder: t('doa.delegation.limit'), class: input %>
+      <%= f.date_field :valid_from, class: input %>
+      <%= f.date_field :valid_to, class: input %>
+      <%= f.submit t('doa.delegation.add'), class: ui_btn_primary %>
+      <%= f.hidden_field :status, value: "active" %>
+    <% end %>
+  <% end %>
+</section>

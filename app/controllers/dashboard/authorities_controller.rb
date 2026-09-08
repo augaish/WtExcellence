@@ -18,6 +18,22 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @org_units = company.org_units.active.ordered.to_a
     @diff = AuthorityMatrixDiff.new(@matrix.previous_version, @matrix) if @matrix.previous_version
     @consultations = @matrix.consultations.includes(:authority, :org_unit, :ruled_by).to_a
+    @delegations = company.authority_delegations
+      .includes(:authority, :from_org_unit, :to_org_unit, :parent_delegation).to_a
+  end
+
+  def create_delegation
+    delegation = company.authority_delegations.new(delegation_params)
+
+    save_and_return(delegation, "delegation_created")
+  end
+
+  def revoke_delegation
+    delegation = company.authority_delegations.find_by(id: params[:id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if delegation.nil?
+
+    Thread.current[:current_user] = current_user
+    save_and_return_updated(delegation, revocation_params.merge(status: "revoked"), "delegation_revoked")
   end
 
   # A new version is a copy, so the approved one stays exactly as approved while
@@ -150,6 +166,16 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
 
   def band_params
     params.require(:authority_band).permit(:label_en, :label_ar, :min_amount, :max_amount)
+  end
+
+  def delegation_params
+    params.require(:authority_delegation).permit(:authority_id, :from_org_unit_id, :to_org_unit_id,
+      :kind, :limit_amount, :valid_from, :valid_to, :status, :decision_record_id,
+      :parent_delegation_id, :reason)
+  end
+
+  def revocation_params
+    params.require(:authority_delegation).permit(:revocation_reason)
   end
 
   def consultation_params

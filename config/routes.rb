@@ -166,6 +166,8 @@ Rails.application.routes.draw do
       post "versions", action: :open_next_version, as: :open_next_authority_version
       post "consultations", action: :create_consultation, as: :create_authority_consultation
       patch "consultations/:id", action: :rule_consultation, as: :rule_authority_consultation
+      post "delegations", action: :create_delegation, as: :create_authority_delegation
+      patch "delegations/:id/revoke", action: :revoke_delegation, as: :revoke_authority_delegation
     end
 
     resources :pp_records do

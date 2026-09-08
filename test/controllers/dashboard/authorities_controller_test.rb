@@ -188,6 +188,62 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "open", consultation.reload.status
   end
 
+  test "a delegation can be recorded and shows as in force" do
+    authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+    deputy = @company.org_units.create!(name_en: "Deputy", level: 2, parent: @minister)
+
+    sign_in @admin
+    post dashboard_create_authority_delegation_path(matrix_id: @matrix.id), params: {
+      authority_delegation: { authority_id: authority.id, from_org_unit_id: @minister.id,
+                              to_org_unit_id: deputy.id, kind: "temporary", status: "active",
+                              valid_from: Date.current.to_s, valid_to: (Date.current + 14).to_s }
+    }
+
+    delegation = @company.authority_delegations.sole
+    assert delegation.in_force?
+
+    # Ending inside the warning window, it is flagged before it lapses rather
+    # than simply reported as in force.
+    assert delegation.expiring_soon?
+    follow_redirect!
+    assert_includes response.body,
+      I18n.t("doa.delegation.expiring", days: AuthorityDelegation::EXPIRY_LEAD_DAYS)
+  end
+
+  test "a delegation beyond what the holder may decide is refused" do
+    authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+    authority.bands.sole.update!(max_amount: 1_000_000)
+    authority.bands.sole.assignments.create!(level: "authorize", org_unit: @minister)
+    deputy = @company.org_units.create!(name_en: "Deputy", level: 2, parent: @minister)
+
+    sign_in @admin
+    post dashboard_create_authority_delegation_path(matrix_id: @matrix.id), params: {
+      authority_delegation: { authority_id: authority.id, from_org_unit_id: @minister.id,
+                              to_org_unit_id: deputy.id, kind: "permanent", status: "active",
+                              limit_amount: 9_000_000 }
+    }
+
+    assert_equal 0, @company.authority_delegations.count
+    assert_includes flash[:alert], "1000000"
+  end
+
+  test "revoking a delegation records who did it and why" do
+    authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+    deputy = @company.org_units.create!(name_en: "Deputy", level: 2, parent: @minister)
+    delegation = @company.authority_delegations.create!(authority: authority, from_org_unit: @minister,
+      to_org_unit: deputy, kind: "permanent", status: "active")
+
+    sign_in @admin
+    patch dashboard_revoke_authority_delegation_path(delegation, matrix_id: @matrix.id), params: {
+      authority_delegation: { revocation_reason: "The postholder returned." }
+    }
+
+    delegation.reload
+    assert delegation.revoked?
+    assert_equal @admin, delegation.revoked_by
+    assert_not delegation.in_force?
+  end
+
   test "another company's matrix is not reachable" do
     other = Company.create!(name: "Other #{SecureRandom.hex(4)}", license_seats: 5, credits: 1, is_active: true)
     foreign = other.pp_records.create!(record_type: "executive_doa", title_en: "Foreign DoA")

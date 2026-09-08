@@ -11,6 +11,7 @@ class Authority < ApplicationRecord
   belongs_to :basis_clause, class_name: "Clause", optional: true
 
   has_many :bands, -> { ordered }, class_name: "AuthorityBand", dependent: :destroy
+  has_many :delegations, class_name: "AuthorityDelegation", dependent: :destroy
   has_many :assignments, through: :bands
 
   validates :name_en, length: { maximum: 500 }

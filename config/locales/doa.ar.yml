@@ -58,6 +58,48 @@ ar:
     versions:
       open_next: "فتح النسخة التالية"
       opened: "تم فتح نسخة جديدة."
+    delegation:
+      title: "التفويضات"
+      none: "لم تُسجَّل أي تفويضات."
+      add: "تسجيل تفويض"
+      from: "المفوِّض"
+      to: "المفوَّض له"
+      kind: "النوع"
+      limit: "الحد"
+      no_limit: "كما هو ممنوح"
+      valid_from: "من"
+      valid_to: "حتى"
+      decision: "قرار التفويض"
+      sub_of: "تفويض فرعي من"
+      accountable: "المساءلة على"
+      revoke: "إلغاء"
+      revocation_reason: "سبب الإلغاء"
+      approve_as_grantor: "موافقة مانح الصلاحية الأصلية"
+      expiring: "ينتهي خلال %{days} يومًا"
+      expired: "منتهٍ"
+      in_force: "ساري"
+      not_in_force: "غير ساري"
+      kinds:
+        permanent: "دائم"
+        temporary: "مؤقت"
+        acting: "تكليف"
+      statuses:
+        draft: "مسودة"
+        active: "ساري"
+        revoked: "ملغى"
+      errors:
+        self_delegation: "لا يمكن أن يكون نفس المنصب المفوِّض"
+        circular: "هذا المنصب يفوّض هذه الصلاحية بالاتجاه المعاكس، مما يجعل تحديد صاحب الصلاحية غير ممكن."
+        temporary_needs_end: "مطلوب للتفويض المؤقت"
+        end_before_start: "يجب أن يكون في تاريخ البداية أو بعده"
+        exceeds_holder: "لا يمكن أن يتجاوز %{limit}، وهو أقصى ما يملك المنصب المفوِّض اتخاذ قرار بشأنه"
+        needs_grantor_approval: "يتطلب التفويض الفرعي موافقة مانح الصلاحية الأصلية قبل سريانه."
+        second_hop: "لا يجوز إعادة تفويض التفويض الفرعي مرة أخرى."
+      flash:
+        created: "تم تسجيل التفويض."
+        updated: "تم تحديث التفويض."
+        revoked: "تم إلغاء التفويض."
+        approved: "تمت الموافقة على التفويض الفرعي."
     findings:
       title: الملاحظات
       none: لا توجد ملاحظات. لكل صلاحية صاحب اعتماد واحد ولا يوجد تعارض في المهام.
@@ -85,6 +127,8 @@ ar:
       assignment_created: تم إسناد الصلاحية.
       consultation_created: تم تسجيل الملاحظة.
       consultation_ruled: تم تسجيل القرار.
+      delegation_created: تم تسجيل التفويض.
+      delegation_revoked: تم إلغاء التفويض.
       deleted: تم الحذف.
       not_found: هذا العنصر لم يعد موجودًا.
       no_permission: ليست لديك صلاحية إدارة الصلاحيات.
