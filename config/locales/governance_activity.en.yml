@@ -1,0 +1,26 @@
+en:
+  governance_activity:
+    title: "Activity"
+    none: "No recorded activity yet."
+    unknown_actor: "Unknown"
+    not_set: "not set"
+    change: "%{attribute}: %{from} → %{to}"
+    actions:
+      create_risk: "Risk created"
+      update_risk: "Risk updated"
+      create_vendor: "Vendor created"
+      update_vendor: "Vendor updated"
+      create_customer_commitment: "Commitment created"
+      update_customer_commitment: "Commitment updated"
+    attributes:
+      status: "Status"
+      likelihood: "Likelihood"
+      impact: "Impact"
+      residual_score: "Residual score"
+      owner_id: "Owner"
+      closure_reason: "Closure reason"
+      risk_level: "Risk level"
+      contact_email: "Contact email"
+      name: "Name"
+      due_date: "Due date"
+      fulfillment_note: "Basis for fulfilment"

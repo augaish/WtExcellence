@@ -1,0 +1,36 @@
+<%# The record's own history. Shown on all three governance records from the
+    same partial, so what one module records is what the others do. %>
+<div class="bg-white border border-[#E3E3E3] rounded-lg">
+  <div class="p-5 border-b border-[#E3E3E3]">
+    <h2 class="text-base font-semibold text-[#0D1120]"><%= t('governance_activity.title') %></h2>
+  </div>
+
+  <% entries = record.activity_trail(limit: 25) %>
+  <% if entries.any? %>
+    <ol class="divide-y divide-[#E3E3E3]">
+      <% entries.each do |entry| %>
+        <li class="p-5">
+          <div class="flex items-start justify-between gap-4">
+            <p class="text-sm font-medium text-[#0D1120]"><%= activity_action_label(entry) %></p>
+            <p class="text-xs text-[#797C81] whitespace-nowrap"><%= l(entry.created_at, format: :long) %></p>
+          </div>
+
+          <p class="mt-1 text-xs text-[#797C81]">
+            <%= entry.actor_user&.name || t('governance_activity.unknown_actor') %>
+          </p>
+
+          <% sentences = activity_change_sentences(entry) %>
+          <% if sentences.any? %>
+            <ul class="mt-2 space-y-1 text-sm text-[#0D1120]">
+              <% sentences.each do |sentence| %>
+                <li><%= sentence %></li>
+              <% end %>
+            </ul>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  <% else %>
+    <p class="px-5 py-6 text-sm text-[#797C81]"><%= t('governance_activity.none') %></p>
+  <% end %>
+</div>

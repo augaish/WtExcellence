@@ -1,0 +1,26 @@
+ar:
+  governance_activity:
+    title: النشاط
+    none: لا يوجد نشاط مسجل بعد.
+    unknown_actor: غير معروف
+    not_set: غير محدد
+    change: "%{attribute}: %{from} ← %{to}"
+    actions:
+      create_risk: تم إنشاء الخطر
+      update_risk: تم تحديث الخطر
+      create_vendor: تم إنشاء المورد
+      update_vendor: تم تحديث المورد
+      create_customer_commitment: تم إنشاء الالتزام
+      update_customer_commitment: تم تحديث الالتزام
+    attributes:
+      status: الحالة
+      likelihood: الاحتمالية
+      impact: الأثر
+      residual_score: الدرجة المتبقية
+      owner_id: المالك
+      closure_reason: سبب الإغلاق
+      risk_level: مستوى المخاطر
+      contact_email: البريد الإلكتروني
+      name: الاسم
+      due_date: تاريخ الاستحقاق
+      fulfillment_note: أساس الوفاء

@@ -61,5 +61,7 @@
 
     <%= render "dashboard/shared/governance_capas", origin: @commitment,
           create_path: create_capa_dashboard_customer_commitment_path(@commitment) %>
+
+    <%= render "dashboard/shared/activity_trail", record: @commitment %>
   </div>
 </div>
