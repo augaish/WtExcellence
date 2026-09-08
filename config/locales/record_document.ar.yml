@@ -1,0 +1,64 @@
+ar:
+  record_document:
+    sections:
+      definitions: التعريفات العامة والاختصارات
+      body: المحتوى
+      process_card: بطاقة الإجراء
+      diagram: مخطط الإجراء
+      steps: خطوات الإجراء
+      authority_matrix: مصفوفة الصلاحيات الإجرائية
+      references: المراجع
+      classification: تصنيف الوثيقة
+      change_log: سجل التغييرات
+      approvals: المراجعات والاعتمادات
+    view: عرض الوثيقة
+    contents: المحتويات
+    fields:
+      objective: الهدف من الإجراء
+      owner: مالك الإجراء
+      trigger: محرك الإجراء
+      inputs: مدخلات الإجراء
+      outputs: مخرجات الإجراء
+      predecessor: الإجراء السابق
+      successor: الإجراء اللاحق
+      frequency: دورية تنفيذ الإجراء
+      total_time: الزمن الكلي لتنفيذ الإجراء
+      automation_status: حالة الأتمتة
+      related_policies: السياسات ذات العلاقة
+      technical_systems: الأنظمة التقنية المستخدمة
+      forms_used: النماذج المستخدمة
+      kpis: مؤشرات قياس الإجراء
+    columns:
+      term: المصطلح
+      abbreviation: الاختصار
+      definition: التعريف
+      number: "#"
+      activity: النشاط
+      description: وصف الخطوة
+      responsible: المسؤول
+      duration: مدة التنفيذ
+      system: النظام الآلي
+      item: البند
+      decision: القرار
+      name: الاسم
+      source: المصدر
+      role: الدور
+      unit: الوحدة التنظيمية
+      date: التاريخ
+      status: الحالة
+      version: رقم النسخة
+      prepared_by: المعد
+      change: وصف التغيير
+      classification: التصنيف
+    cover:
+      owner: مالك الوثيقة
+      publish_date: تاريخ النشر
+      review_date: تاريخ المراجعة
+      version: رقم النسخة
+      code: الرمز المرجعي
+      classification: التصنيف
+    approval_pending: قيد الانتظار
+    approval_received: تم الاستلام
+    current_classification: هذه الوثيقة
+    print: طباعة أو حفظ بصيغة PDF
+    empty: لا يوجد محتوى لطباعته في هذه الوثيقة بعد.

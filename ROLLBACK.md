@@ -20,6 +20,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `phase-a-foundations` | *(this commit)* | Authority levels, classification, DoA/SLA/glossary record types, glossary + references, company branding. |
 | `phase-b-procedure` | *(this commit)* | Procedure steps with computed totals; operational authority matrix with its rules. |
 | `governance-slice-1` | *(this commit)* | Commitment timing vs workflow state, fulfilment basis, locale guard, English audit-log repair. |
+| `phase-c-documents` | *(this commit)* | Governed document assembly and branded print-ready rendering. |
 
 ## Roll the code back
 ```bash

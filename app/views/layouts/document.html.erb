@@ -1,0 +1,39 @@
+<%# A print layout: no chrome, no navigation, A4 pages, and the reading
+    direction of the document's own language. %>
+<!DOCTYPE html>
+<html dir="<%= text_direction %>" lang="<%= I18n.locale %>">
+  <head>
+    <title><%= @document.cover[:title] %></title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <style>
+      @page { size: A4; margin: 18mm 16mm; }
+
+      body { background: #fff; color: #0D1120; font-family: Geist, system-ui, sans-serif; }
+
+      /* Each major part of the document starts its own page in print. */
+      .doc-page-break { break-before: page; }
+      .doc-avoid-break { break-inside: avoid; }
+
+      /* Screen preview shows the page edges; print does not need them. */
+      @media screen {
+        body { background: #F7F7FD; }
+        .doc-sheet { max-width: 210mm; margin: 24px auto; padding: 18mm 16mm; background: #fff;
+                     box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+      }
+      @media print {
+        .doc-no-print { display: none !important; }
+        .doc-sheet { max-width: none; margin: 0; padding: 0; box-shadow: none; }
+      }
+
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border: 1px solid #E3E3E3; padding: 6px 8px; text-align: start; vertical-align: top; font-size: 12px; }
+      th { background: #F7F7FD; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <%= yield %>
+  </body>
+</html>

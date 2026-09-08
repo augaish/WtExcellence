@@ -1,0 +1,71 @@
+<% cover = @document.cover %>
+<% sections = @document.sections %>
+<% primary = cover[:palette]&.primary || BrandPalette::DEFAULT_PRIMARY %>
+<% accent = cover[:palette]&.accent || BrandPalette::DEFAULT_ACCENT %>
+
+<div class="doc-sheet">
+  <div class="doc-no-print mb-6 flex justify-end gap-3">
+    <%= link_to t('back'), dashboard_pp_record_path(@record), class: ui_btn_neutral %>
+    <button type="button" onclick="window.print()" class="<%= ui_btn_primary %>"><%= t('record_document.print') %></button>
+  </div>
+
+  <!-- Cover -->
+  <header class="doc-avoid-break pb-8 mb-8 border-b-4" style="border-color: <%= primary %>;">
+    <div class="flex items-center justify-between gap-6 mb-10">
+      <%# The company's logo sits beside the platform's, never replacing it. %>
+      <div class="flex items-center gap-3">
+        <%= image_tag asset_path('logo.png'), class: "h-10 w-10 rounded-full", alt: "Way to Excellence" %>
+        <% if @record.company&.brand_logo&.attached? %>
+          <span class="h-8 w-px" style="background: #E3E3E3;" aria-hidden="true"></span>
+          <%= image_tag signed_file_url(@record.company.brand_logo, disposition: "inline"),
+              class: "h-10 w-auto max-w-[160px] object-contain", alt: cover[:company_name] %>
+        <% end %>
+      </div>
+      <span class="text-xs font-semibold px-3 py-1 rounded-full" style="background: <%= accent %>; color: <%= primary %>;">
+        <%= cover[:classification] %>
+      </span>
+    </div>
+
+    <p class="text-sm font-medium mb-2" style="color: <%= primary %>;"><%= cover[:type_label] %></p>
+    <h1 class="text-3xl font-bold mb-2"><%= cover[:title] %></h1>
+    <p class="text-sm text-[#797C81]"><%= cover[:company_name] %></p>
+
+    <dl class="mt-8 grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+      <% {
+           "code" => cover[:code],
+           "owner" => cover[:owner],
+           "version" => cover[:version],
+           "publish_date" => cover[:effective_date],
+           "review_date" => cover[:review_date]
+         }.compact_blank.each do |key, value| %>
+        <div class="flex justify-between gap-4 border-b border-[#E3E3E3] pb-2">
+          <dt class="text-[#797C81]"><%= t("record_document.cover.#{key}") %></dt>
+          <dd class="font-medium text-end"><%= value.is_a?(Date) ? l(value, format: :long) : value %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </header>
+
+  <% if sections.empty? %>
+    <p class="text-sm text-[#797C81]"><%= t('record_document.empty') %></p>
+  <% else %>
+    <!-- المحتويات -->
+    <nav class="doc-avoid-break mb-10">
+      <h2 class="text-lg font-semibold mb-3" style="color: <%= primary %>;"><%= t('record_document.contents') %></h2>
+      <ol class="text-sm space-y-1">
+        <% sections.each_with_index do |section, index| %>
+          <li><span class="text-[#797C81] me-2"><%= index + 1 %>.</span><%= section.title %></li>
+        <% end %>
+      </ol>
+    </nav>
+
+    <% sections.each_with_index do |section, index| %>
+      <section class="doc-page-break mb-10">
+        <h2 class="text-lg font-semibold mb-4 pb-2 border-b-2" style="color: <%= primary %>; border-color: <%= accent %>;">
+          <%= index + 1 %>. <%= section.title %>
+        </h2>
+        <%= render "dashboard/pp_records/document_section", section: section, accent: accent %>
+      </section>
+    <% end %>
+  <% end %>
+</div>

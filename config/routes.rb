@@ -158,6 +158,7 @@ Rails.application.routes.draw do
       member do
         post :attach_documents
         delete :detach_document
+        get :document
       end
     end
     resources :pp_packages do

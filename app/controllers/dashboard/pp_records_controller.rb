@@ -5,7 +5,7 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   before_action :ensure_can_manage, only: [
     :new, :create, :edit, :update, :destroy, :attach_documents, :detach_document
   ]
-  before_action :set_record, only: [ :show, :edit, :update, :destroy, :attach_documents, :detach_document ]
+  before_action :set_record, only: [ :show, :edit, :update, :destroy, :attach_documents, :detach_document, :document ]
 
   helper_method :can_manage_pp_records?
 
@@ -32,6 +32,15 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
     @packages_count = company.pp_packages.count
     @due_for_review = company_scope.active.where.not(review_date: nil)
       .select { |r| r.review_overdue? || r.review_due_soon?(review_lead_days) }
+  end
+
+  # The governed document itself, assembled from the record and rendered with the
+  # company's branding. Laid out for print, so the browser's own "Save as PDF"
+  # produces the file — no headless browser on the server, which this deployment
+  # cannot afford to run.
+  def document
+    @document = RecordDocument.new(@record, locale: I18n.locale)
+    render layout: "document"
   end
 
   def show

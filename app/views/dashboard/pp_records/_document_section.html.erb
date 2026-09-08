@@ -1,0 +1,81 @@
+<%# One section of a governed document. The shape is chosen by the section's
+    kind, so the assembler decides what a section is and this decides how it
+    looks. %>
+<% case section.kind %>
+<% when :prose %>
+  <div class="text-sm leading-relaxed whitespace-pre-line"><%= section.payload %></div>
+
+<% when :fields %>
+  <dl class="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+    <% section.payload.each do |key, value| %>
+      <div class="doc-avoid-break border-b border-[#E3E3E3] pb-2">
+        <dt class="text-[#797C81] text-xs mb-1"><%= t("record_document.fields.#{key}", default: key.to_s.humanize) %></dt>
+        <dd class="font-medium"><%= value %></dd>
+      </div>
+    <% end %>
+  </dl>
+
+<% when :diagram %>
+  <div class="doc-avoid-break overflow-x-auto"><%= ProcessDiagramRenderer.render(section.payload) %></div>
+
+<% when :matrix %>
+  <table class="doc-avoid-break">
+    <thead>
+      <tr>
+        <th><%= t('record_document.columns.item') %></th>
+        <th><%= t('record_document.columns.decision') %></th>
+        <% AuthorityLevel::KEYS.each do |level| %>
+          <th><%= AuthorityLevel.label(level) %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% section.payload.each do |row| %>
+        <tr>
+          <td><%= row[:item] %></td>
+          <td><%= row[:decision] %></td>
+          <% AuthorityLevel::KEYS.each do |level| %>
+            <td>
+              <% holders = row[:assignments][level] %>
+              <% if holders.blank? %>
+                <span class="text-[#797C81]">-</span>
+              <% else %>
+                <% holders.each do |holder| %>
+                  <div>
+                    <%= holder[:holder] %>
+                    <%# A condition is printed, not reduced to an asterisk. %>
+                    <% if holder[:condition].present? %>
+                      <span class="block text-[11px] text-[#797C81]">(<%= holder[:condition] %>)</span>
+                    <% end %>
+                  </div>
+                <% end %>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+<% when :table %>
+  <% rows = section.payload %>
+  <% columns = document_columns_for(section) %>
+  <table>
+    <thead>
+      <tr>
+        <% columns.each do |column| %>
+          <th><%= t("record_document.columns.#{column}") %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% rows.each do |row| %>
+        <tr <%= 'style=background:' + accent if row[:current] %>>
+          <% columns.each do |column| %>
+            <td><%= document_cell(row, column) %></td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
