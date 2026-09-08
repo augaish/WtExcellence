@@ -13,6 +13,10 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `pp-phase4-complete` | `ab95189` | Phase 4 (Process Architect: structured editor + SVG swimlanes). |
 | `pp-phase5-complete` | `e4be5fa` | Phase 5 (Efficiency Evaluation). |
 | `pp-phase6-complete` | *(this commit)* | Phase 6 (Monitoring widgets). P&P module complete. |
+| `review-phase0a` | `4e432c1` | Review fixes: the two 500s (ActiveStorage URL options), evidence-reuse heading, record links on documents. |
+| `review-phase0b` | `f94570e` | One permission-aware navigation definition behind the sidebar and the mobile menu. |
+| `review-phase0c` | `43974d6` | Upload folder destination, document metadata editing, AI credit ledger. |
+| `review-phase0d` | `2cc054a` | Editable AI drafts; risk closure requires a justification. |
 
 ## Roll the code back
 ```bash
