@@ -106,11 +106,11 @@ evidence. Sized as its own phase.
 
 ## Documents
 
-**Real `.docx` output.** Phase C produces a branded, print-ready page and the
-browser's Save as PDF. `RecordDocument` returns sections rather than markup
-specifically so a DOCX writer is a second consumer rather than a rewrite. The
-work is a new dependency or hand-rolled WordprocessingML, and Arabic RTL is the
-hard part in either. Not started because there is no client template to fill.
+**Images in the Word version.** The .docx carries every section except the
+procedure diagram, which says in the file that it is only in the browser.
+Embedding it needs the SVG converted to a raster or EMF and added as a media
+part with its own relationship — worth doing once someone has said the Word
+output is otherwise right.
 
 **SLA reporting.** Service levels are recorded and printed — parties, targets,
 measurement method, coverage and remedy. What does not exist is measuring

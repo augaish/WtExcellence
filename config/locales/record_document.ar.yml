@@ -13,6 +13,8 @@ ar:
       change_log: سجل التغييرات
       approvals: المراجعات والاعتمادات
     view: عرض الوثيقة
+    diagram_omitted: "مخطط الإجراء غير مضمَّن في نسخة Word. افتح الوثيقة في المتصفح لعرضه."
+    download_docx: "تنزيل بصيغة Word"
     contents: المحتويات
     fields:
       objective: الهدف من الإجراء
@@ -53,6 +55,7 @@ ar:
       target: "المستهدف"
       measurement: "طريقة القياس"
       coverage: "نطاق التغطية"
+      position: "#"
       prepared_by: المعد
       change: وصف التغيير
       classification: التصنيف

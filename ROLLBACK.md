@@ -27,6 +27,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `phase-g-governance` | *(this commit)* | Activity trail, governance evidence, risk methodology, F12. |
 | `phase-g-orgchart` | *(this commit)* | Org chart view; thread-local actor leak fixed. |
 | `sla-and-expiry` | *(this commit)* | Service levels on agreements; delegation expiry notices; register filters. |
+| `docx-export` | *(this commit)* | Word export of governed documents, right-to-left aware. |
 
 ## Roll the code back
 ```bash

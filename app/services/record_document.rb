@@ -118,12 +118,19 @@ class RecordDocument
   # The total the steps add up to wins over any typed value: the document must
   # not quote a duration the procedure's own steps contradict.
   def total_time_for(process)
-    computed = process.computed_total_in(process.total_time_unit.presence || "hours")
-    return "#{computed} #{unit_label(process.total_time_unit.presence || 'hours')}" if computed
+    unit = process.total_time_unit.presence || "hours"
+    computed = process.computed_total_in(unit)
+    return "#{trim_number(computed)} #{unit_label(unit)}" if computed
 
     return nil if process.total_time_value.blank?
 
-    "#{process.total_time_value} #{unit_label(process.total_time_unit)}"
+    "#{trim_number(process.total_time_value)} #{unit_label(process.total_time_unit)}"
+  end
+
+  # 24 rather than 24.0; 1.5 stays 1.5.
+  def trim_number(value)
+    number = value.to_f
+    (number % 1).zero? ? number.to_i.to_s : number.to_s
   end
 
   def unit_label(unit)

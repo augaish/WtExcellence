@@ -180,6 +180,7 @@ Rails.application.routes.draw do
         post :attach_documents
         delete :detach_document
         get :document
+        get :document_docx
       end
     end
     resources :pp_packages do

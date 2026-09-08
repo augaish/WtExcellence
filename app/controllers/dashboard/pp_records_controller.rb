@@ -5,7 +5,7 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   before_action :ensure_can_manage, only: [
     :new, :create, :edit, :update, :destroy, :attach_documents, :detach_document
   ]
-  before_action :set_record, only: [ :show, :edit, :update, :destroy, :attach_documents, :detach_document, :document ]
+  before_action :set_record, only: [ :show, :edit, :update, :destroy, :attach_documents, :detach_document, :document, :document_docx ]
 
   helper_method :can_manage_pp_records?
 
@@ -41,6 +41,17 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   def document
     @document = RecordDocument.new(@record, locale: I18n.locale)
     render layout: "document"
+  end
+
+  # The same document as a Word file, built from the same sections, so the two
+  # cannot describe different things.
+  def document_docx
+    renderer = RecordDocxRenderer.new(RecordDocument.new(@record, locale: I18n.locale))
+
+    send_data renderer.render,
+      filename: renderer.filename,
+      type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      disposition: "attachment"
   end
 
   def show

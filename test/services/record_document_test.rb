@@ -72,7 +72,7 @@ class RecordDocumentTest < ActiveSupport::TestCase
     @process.steps.create!(position: 2, duration_value: 3, duration_unit: "hours")
 
     card = document.sections.find { |s| s.key == "process_card" }
-    assert_equal "5.0 Hours", card.payload["total_time"],
+    assert_equal "5 Hours", card.payload["total_time"],
       "a document must not quote a duration its own steps contradict"
   end
 

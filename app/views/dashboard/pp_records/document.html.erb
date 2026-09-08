@@ -6,6 +6,8 @@
 <div class="doc-sheet">
   <div class="doc-no-print mb-6 flex justify-end gap-3">
     <%= link_to t('back'), dashboard_pp_record_path(@record), class: ui_btn_neutral %>
+    <%= link_to t('record_document.download_docx'),
+        document_docx_dashboard_pp_record_path(@record, locale: I18n.locale), class: ui_btn_secondary %>
     <button type="button" onclick="window.print()" class="<%= ui_btn_primary %>"><%= t('record_document.print') %></button>
   </div>
 

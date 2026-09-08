@@ -79,6 +79,10 @@ gem "tailwindcss-rails", "~> 4.3"
 
 gem "pdf-reader"
 
+# Writing .docx files, which are zip archives of XML. Already present as a
+# transitive dependency; declared here because the app now uses it directly.
+gem "rubyzip", require: "zip"
+
 gem "roo", "~> 2.10"  # XLSX parsing for Qiyas structured uploads
 
 gem "open_router"
