@@ -1,0 +1,27 @@
+<%# Suggestions, never seeded data. A matrix states who may decide what in one
+    particular organisation; one imported wholesale from another would be wrong
+    in ways nobody would notice until it mattered. %>
+<section class="bg-white border border-[#E3E3E3] rounded-lg p-5">
+  <h2 class="text-base font-semibold text-[#0D1120]"><%= t('doa.catalogue.title') %></h2>
+  <p class="mt-1 text-sm text-[#797C81]"><%= t('doa.catalogue.subtitle') %></p>
+
+  <%= form_with url: dashboard_apply_authority_suggestions_path(matrix_id: matrix.id),
+                method: :post, class: "mt-4 space-y-4" do %>
+    <div class="grid gap-2 md:grid-cols-3">
+      <% suggestions.each do |category| %>
+        <label class="flex items-start gap-2 rounded-lg border border-[#E3E3E3] p-3 hover:bg-[#F7F7FD]">
+          <%= check_box_tag "category_keys[]", category[:key], false, class: "mt-0.5 rounded border-[#E3E3E3]" %>
+          <span>
+            <span class="block text-sm text-[#0D1120]"><%= category[:name] %></span>
+            <span class="block text-xs text-[#797C81]">
+              <%= category[:authorities].map { |a| a[:name] }.first(2).join(" · ") %><%= "…" if category[:authorities].size > 2 %>
+            </span>
+          </span>
+        </label>
+      <% end %>
+    </div>
+
+    <p class="text-xs text-[#797C81]"><%= t('doa.catalogue.note') %></p>
+    <%= submit_tag t('doa.catalogue.apply'), class: ui_btn_secondary %>
+  <% end %>
+</section>

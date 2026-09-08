@@ -57,6 +57,10 @@
       <% end %>
     </section>
 
+    <% if can_manage_authorities? %>
+      <%= render "dashboard/authorities/suggestions", suggestions: @suggested_categories, matrix: @matrix %>
+    <% end %>
+
     <!-- The matrix -->
     <% if @authorities.empty? %>
       <p class="text-sm text-[#797C81]"><%= t('doa.none') %></p>

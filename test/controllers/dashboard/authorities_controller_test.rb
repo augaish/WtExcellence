@@ -244,6 +244,43 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_not delegation.in_force?
   end
 
+  test "suggestions are offered but nothing is created until asked for" do
+    sign_in @admin
+    get dashboard_authorities_path
+
+    assert_response :success
+    # assert_select decodes entities; the note contains an apostrophe.
+    assert_select "h2", text: I18n.t("doa.catalogue.title")
+    assert_select "p", text: I18n.t("doa.catalogue.note")
+    assert_equal 0, @matrix.authorities.count, "suggestions must not create anything by being shown"
+  end
+
+  test "chosen suggestions become the company's own records" do
+    sign_in @admin
+    post dashboard_apply_authority_suggestions_path(matrix_id: @matrix.id),
+      params: { category_keys: %w[financial] }
+
+    assert_redirected_to dashboard_authorities_path(matrix_id: @matrix.id)
+    assert_operator @matrix.reload.authorities.count, :>, 0
+    assert @matrix.authorities.all? { |a| a.assignments.empty? }, "no holder is ever suggested"
+  end
+
+  test "applying with nothing selected says so rather than silently doing nothing" do
+    sign_in @admin
+    post dashboard_apply_authority_suggestions_path(matrix_id: @matrix.id), params: {}
+
+    assert_equal 0, @matrix.authorities.count
+    assert_includes flash[:alert], I18n.t("doa.catalogue.none_selected")
+  end
+
+  test "a viewer is not offered suggestions" do
+    sign_in @viewer
+    get dashboard_authorities_path
+
+    assert_response :success
+    assert_not_includes response.body, I18n.t("doa.catalogue.apply")
+  end
+
   test "another company's matrix is not reachable" do
     other = Company.create!(name: "Other #{SecureRandom.hex(4)}", license_seats: 5, credits: 1, is_active: true)
     foreign = other.pp_records.create!(record_type: "executive_doa", title_en: "Foreign DoA")

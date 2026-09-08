@@ -18,8 +18,20 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @org_units = company.org_units.active.ordered.to_a
     @diff = AuthorityMatrixDiff.new(@matrix.previous_version, @matrix) if @matrix.previous_version
     @consultations = @matrix.consultations.includes(:authority, :org_unit, :ruled_by).to_a
+    @suggested_categories = AuthorityCatalogue.categories
     @delegations = company.authority_delegations
       .includes(:authority, :from_org_unit, :to_org_unit, :parent_delegation).to_a
+  end
+
+  # Suggestions are applied only when asked for, and become ordinary editable
+  # records — never seeded data the company did not choose.
+  def apply_suggestions
+    keys = Array(params[:category_keys]).map(&:to_s)
+    return back_to_matrix(alert: t("doa.catalogue.none_selected")) if keys.empty?
+
+    created = AuthorityCatalogue.apply(@matrix, category_keys: keys, locale: I18n.locale)
+    back_to_matrix(notice: t("doa.catalogue.applied",
+      categories: created[:categories], authorities: created[:authorities]))
   end
 
   def create_delegation
