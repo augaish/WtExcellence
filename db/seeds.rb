@@ -1,3 +1,18 @@
+# These seeds create demo accounts, including a platform super admin. Running
+# them anywhere but development would put accounts with a shared, well-known
+# password into a live system, so the environment is checked rather than
+# trusted. SEEDS_ALLOW_NON_DEVELOPMENT=1 overrides it for a deliberate staging
+# rebuild.
+unless Rails.env.development? || ENV["SEEDS_ALLOW_NON_DEVELOPMENT"] == "1"
+  abort "Refusing to seed in #{Rails.env}. These seeds create demo accounts. " \
+        "Set SEEDS_ALLOW_NON_DEVELOPMENT=1 if that is genuinely what you want."
+end
+
+# The demo password is read from the environment so it is not a constant sitting
+# in a repository. It still defaults to something obvious, because these are
+# throwaway development accounts and a developer needs to be able to sign in.
+SEED_PASSWORD = ENV.fetch("SEED_PASSWORD", "password123").freeze
+
 require 'faker'
 
 puts "Creating languages..."
@@ -16,73 +31,73 @@ puts ""
 puts "Creating users..."
 super_admin = User.find_or_create_by!(email: 'superadmin@example.com') do |user|
   user.name = 'Super Admin'
-  user.password = 'password123'
-  user.password_confirmation = 'password123'
+  user.password = SEED_PASSWORD
+  user.password_confirmation = SEED_PASSWORD
   user.role = 'super_admin'
   user.is_active = true
   user.locale_code = 'en'
 end
-puts "  Created Super Admin: #{super_admin.email} (password: password123)"
+puts "  Created Super Admin: #{super_admin.email}"
 
 regular_user1 = User.find_or_create_by!(email: 'user1@example.com') do |user|
   user.name = 'Regular User 1'
-  user.password = 'password123'
-  user.password_confirmation = 'password123'
+  user.password = SEED_PASSWORD
+  user.password_confirmation = SEED_PASSWORD
   user.role = nil
   user.is_active = true
   user.locale_code = 'en'
 end
-puts "  Created Regular User 1: #{regular_user1.email} (password: password123)"
+puts "  Created Regular User 1: #{regular_user1.email}"
 
 regular_user2 = User.find_or_create_by!(email: 'user2@example.com') do |user|
   user.name = 'Regular User 2'
-  user.password = 'password123'
-  user.password_confirmation = 'password123'
+  user.password = SEED_PASSWORD
+  user.password_confirmation = SEED_PASSWORD
   user.role = nil
   user.is_active = true
   user.locale_code = 'ar'
 end
-puts "  Created Regular User 2: #{regular_user2.email} (password: password123)"
+puts "  Created Regular User 2: #{regular_user2.email}"
 
 regular_user3 = User.find_or_create_by!(email: 'user3@example.com') do |user|
   user.name = 'Regular User 3'
-  user.password = 'password123'
-  user.password_confirmation = 'password123'
+  user.password = SEED_PASSWORD
+  user.password_confirmation = SEED_PASSWORD
   user.role = nil
   user.is_active = true
   user.locale_code = 'en'
 end
-puts "  Created Regular User 3: #{regular_user3.email} (password: password123)"
+puts "  Created Regular User 3: #{regular_user3.email}"
 
 regular_user4 = User.find_or_create_by!(email: 'user4@example.com') do |user|
   user.name = 'Regular User 4'
-  user.password = 'password123'
-  user.password_confirmation = 'password123'
+  user.password = SEED_PASSWORD
+  user.password_confirmation = SEED_PASSWORD
   user.role = nil
   user.is_active = true
   user.locale_code = 'en'
 end
-puts "  Created Regular User 4: #{regular_user4.email} (password: password123)"
+puts "  Created Regular User 4: #{regular_user4.email}"
 
 regular_user5 = User.find_or_create_by!(email: 'user5@example.com') do |user|
   user.name = 'Regular User 5'
-  user.password = 'password123'
-  user.password_confirmation = 'password123'
+  user.password = SEED_PASSWORD
+  user.password_confirmation = SEED_PASSWORD
   user.role = nil
   user.is_active = true
   user.locale_code = 'ar'
 end
-puts "  Created Regular User 5: #{regular_user5.email} (password: password123)"
+puts "  Created Regular User 5: #{regular_user5.email}"
 
 quality_manager = User.find_or_create_by!(email: 'qm@example.com') do |user|
   user.name = 'Quality Manager'
-  user.password = 'password123'
-  user.password_confirmation = 'password123'
+  user.password = SEED_PASSWORD
+  user.password_confirmation = SEED_PASSWORD
   user.role = nil
   user.is_active = true
   user.locale_code = 'en'
 end
-puts "  Created Quality Manager: #{quality_manager.email} (password: password123)"
+puts "  Created Quality Manager: #{quality_manager.email}"
 puts "Users created!"
 puts ""
 

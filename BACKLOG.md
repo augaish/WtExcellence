@@ -20,6 +20,14 @@ To run locally after this change:
 export DATABASE_HOST=localhost DATABASE_PASSWORD=<your local password>
 ```
 
+The wider point is reuse: a password in a repository is only dangerous where it
+still opens something. If that value was used anywhere else — a server login,
+another database, an account — change it there too.
+
+Checked and clean: config/master.key is not committed, .env files are ignored,
+and no API keys or production credentials appear in tracked files. Production
+connects with different credentials entirely.
+
 ## Correctness — review findings not yet fixed
 
 From the 8 September platform review. All P1s are done; these are the P2s and
