@@ -20,6 +20,7 @@ export default class extends Controller {
     this.translations = {
       questionLabel: this.element.dataset.questionLabel || 'Question %{number}',
       answerLabel: this.element.dataset.answerLabel || 'Answer',
+      draftNotice: this.element.dataset.draftNotice || '',
       acceptedLabel: this.element.dataset.acceptedLabel || 'Accepted',
       acceptedHeading: this.element.dataset.acceptedHeading || 'Question %{number} - Accepted',
       regenerateLabel: this.element.dataset.regenerateLabel || 'Regenerate',
@@ -356,8 +357,17 @@ export default class extends Controller {
     }
   }
 
+  // The reviewer's edits, if any, are what gets accepted.
+  editedAnswer() {
+    const field = this.messagesContainerTarget.querySelector('[data-generated-answer]');
+    const edited = field ? field.value.trim() : '';
+    return edited || this.currentPair.answer;
+  }
+
   async acceptPair() {
     if (!this.currentPair || this.isGenerating) return;
+
+    this.currentPair.answer = this.editedAnswer();
     
     this.isGenerating = true;
     this.regenerateButtonTarget.disabled = true;
@@ -535,12 +545,17 @@ export default class extends Controller {
     messageDiv.className = 'flex flex-col space-y-2';
     messageDiv.dataset.messageType = 'generated';
     
+    // The answer is a draft, not a finding: it is labelled as such and stays
+    // editable so a reviewer can correct an unsupported claim before accepting
+    // it, rather than choosing only between Regenerate and Accept.
     messageDiv.innerHTML = `
       <div class="bg-[#F7F7FD] border border-[#E3E3E3] rounded-lg p-4">
         <div class="text-xs font-semibold text-[#797C81] mb-2">${this.translations.questionLabel.replace('%{number}', questionNumber)}</div>
         <div class="text-sm font-medium text-[#0D1120] mb-3">${this.escapeHtml(question)}</div>
         <div class="text-xs font-semibold text-[#797C81] mb-2">${this.translations.answerLabel}</div>
-        <div class="text-sm text-[#0D1120] message-content">${this.escapeHtml(answer)}</div>
+        <textarea class="w-full text-sm text-[#0D1120] bg-white border border-[#E3E3E3] rounded-md p-3 resize-y focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]"
+                  rows="4" data-generated-answer>${this.escapeHtml(answer)}</textarea>
+        <p class="mt-2 text-xs text-[#797C81]">${this.escapeHtml(this.translations.draftNotice)}</p>
       </div>
     `;
     

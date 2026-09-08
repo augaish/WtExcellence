@@ -6,6 +6,7 @@ class Risk < ApplicationRecord
   belongs_to :created_by, class_name: "User", optional: true
   belongs_to :riskable, polymorphic: true, optional: true
   belongs_to :risk_workspace, optional: true
+  belongs_to :closed_by, class_name: "User", optional: true
 
   enum :status, {
     identified: "identified",
@@ -19,10 +20,16 @@ class Risk < ApplicationRecord
   validates :likelihood, :impact, presence: true, inclusion: { in: 1..5 }
   validates :residual_likelihood, :residual_impact, inclusion: { in: 1..5 }, allow_nil: true
 
+  # Closing a risk is a governance decision, so it must carry a justification.
+  # Risks closed before this requirement existed keep a null reason and are only
+  # asked for one when their closure is next changed.
+  validates :closure_reason, presence: true, if: :closure_reason_required?
+
   scope :active, -> { where(deleted_at: nil) }
   scope :deleted, -> { where.not(deleted_at: nil) }
 
   before_save :calculate_scores
+  before_save :stamp_closure
   after_create :log_creation
   after_update :log_update
 
@@ -52,6 +59,26 @@ class Risk < ApplicationRecord
   end
 
   private
+
+  # Only a closure being made or changed now needs a reason; a risk closed
+  # before the column existed is left alone until someone touches its status.
+  def closure_reason_required?
+    closed? && (new_record? || status_changed? || closure_reason_changed?)
+  end
+
+  # Records who closed the risk and when, and clears both if it is reopened.
+  def stamp_closure
+    return unless status_changed?
+
+    if closed?
+      self.closed_at = Time.current
+      self.closed_by ||= Thread.current[:current_user]
+    else
+      self.closed_at = nil
+      self.closed_by = nil
+      self.closure_reason = nil
+    end
+  end
 
   def calculate_scores
     self.inherent_score = RiskScoringService.calculate(likelihood: likelihood, impact: impact)

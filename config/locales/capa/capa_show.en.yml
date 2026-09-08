@@ -212,6 +212,7 @@ en:
         complete: "Complete"
         question_label: "Question %{number}"
         answer_label: "Answer"
+        draft_notice: "AI-generated draft. Review and edit it before accepting — it may contain assumptions the record does not support."
         accepted_label: "Accepted"
         accepted_heading: "Question %{number} - Accepted"
       general_confirmation:

@@ -70,6 +70,14 @@
       <%= f.label :status, t('status'), class: ui_label %>
       <%= f.select :status, Risk.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: ui_input %>
     </div>
+
+    <%# Closing a risk is a governance decision and must say why. %>
+    <div>
+      <%= f.label :closure_reason, t('risk.closure_reason'), class: ui_label %>
+      <%= f.text_area :closure_reason, rows: 3, class: ui_input,
+          placeholder: t('risk.closure_reason_placeholder') %>
+      <p class="mt-1 text-xs text-[#797C81]"><%= t('risk.closure_reason_hint') %></p>
+    </div>
   </div>
 
   <div class="flex justify-end gap-3">

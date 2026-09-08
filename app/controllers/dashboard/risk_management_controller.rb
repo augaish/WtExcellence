@@ -72,7 +72,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     params.require(:risk).permit(
       :title, :description, :category, :owner_id, :status,
       :likelihood, :impact, :residual_likelihood, :residual_impact,
-      :risk_workspace_id
+      :risk_workspace_id, :closure_reason
     )
   end
 

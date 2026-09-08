@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_07_19_180000) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_080420) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -848,6 +848,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_07_19_180000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "risk_workspace_id"
+    t.text "closure_reason"
+    t.datetime "closed_at"
+    t.uuid "closed_by_id"
+    t.index ["closed_by_id"], name: "index_risks_on_closed_by_id"
     t.index ["company_id"], name: "index_risks_on_company_id"
     t.index ["created_by_id"], name: "index_risks_on_created_by_id"
     t.index ["deleted_at"], name: "index_risks_on_deleted_at"
