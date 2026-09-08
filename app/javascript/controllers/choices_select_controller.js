@@ -23,6 +23,13 @@ export default class extends Controller {
     connect() {
         this.choicesInstance = null
 
+        // Setting select.value directly does not update the Choices widget, so a
+        // form populated by JavaScript could display one value and save another.
+        // Anything that assigns a value fires "choices:sync" on the select and
+        // the widget is re-rendered from it.
+        this._onSyncRequest = () => this.syncFromSelect()
+        this.element.addEventListener("choices:sync", this._onSyncRequest)
+
         // Use a reliable delay to ensure the modal is open
         // and the DOM is ready for event binding.
         this._initTimer = setTimeout(() => {
@@ -32,6 +39,7 @@ export default class extends Controller {
     }
 
     disconnect() {
+        this.element.removeEventListener("choices:sync", this._onSyncRequest)
         if (this._initTimer) clearTimeout(this._initTimer)
         this._unbindFloatDropdown()
         this._destroyChoices()
@@ -122,6 +130,13 @@ export default class extends Controller {
                 }
             })
 
+            // A sync asked for before the widget existed is applied now rather
+            // than lost, since Choices initialises on a timer.
+            if (this._pendingSync) {
+                this.syncFromSelect()
+                this._pendingSync = false
+            }
+
             // Sync disabled state immediately
             if (this.selectTarget.disabled) {
                 this.choicesInstance.disable()
@@ -144,6 +159,30 @@ export default class extends Controller {
             this.choicesInstance.destroy()
             this.choicesInstance = null
         }
+    }
+
+    // Public: re-render the widget from the underlying <select>'s current value.
+    syncFromSelect() {
+        if (!this.hasSelectTarget) return
+
+        if (!this.choicesInstance) {
+            this._pendingSync = true
+            return
+        }
+
+        const value = this.selectTarget.value
+
+        if (this.selectTarget.multiple) {
+            const values = Array.from(this.selectTarget.selectedOptions).map((option) => option.value)
+            this.choicesInstance.removeActiveItems()
+            if (values.length) this.choicesInstance.setChoiceByValue(values)
+            return
+        }
+
+        // removeActiveItems first, or Choices keeps showing the previous choice
+        // alongside the new one.
+        this.choicesInstance.removeActiveItems()
+        this.choicesInstance.setChoiceByValue(value === null ? "" : value)
     }
 
     // Public: enable the select

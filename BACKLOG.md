@@ -35,8 +35,6 @@ P3s, with the ones that mislead a user first.
 
 | | Finding | Why it is still open |
 |---|---|---|
-| F09 | CAPA edit shows the wrong priority | Custom select is not synchronised with the saved value on open. Small fix, needs the same treatment applied to every enhanced select. |
-| F11 | Generate Actions stays disabled until a page reload | Readiness is not recomputed after a save. |
 | F08 | CAPA document picker renders blank | Needs reproducing with PDF and DOCX before it can be called fixed; the review could only test a .txt file. |
 | F14 | AI cost is not disclosed before the action | Inconsistent with Generate Actions, which does show its cost. |
 | F15 | Ask AI describes controls that do not exist | Needs the answer grounded in the product manual and the current role's actions. |
@@ -47,6 +45,11 @@ P3s, with the ones that mislead a user first.
 | F24 | Dense tables hide actions at 1280px | |
 | F25 | Help does not match navigation | The manual omits Org Structure, Process Architecture, Records and Packages. |
 | F26 | Copy, empty states and financial labels | Includes "1 files" and the unexplained "AI-assessed" caption. |
+
+**Two `saveRootCause` methods** are defined in
+`app/javascript/controllers/capas/questionnaire_controller.js`; the second
+silently overrides the first. Only one is reachable, so behaviour is correct,
+but the dead one should go once someone can confirm which was intended.
 
 ## Data integrity
 

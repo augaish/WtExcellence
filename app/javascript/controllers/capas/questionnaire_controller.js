@@ -188,6 +188,7 @@ export default class extends Controller {
         
         if (this.hasRootCauseViewTarget) {
           this.rootCauseViewTarget.textContent = result.root_cause || "";
+          this.updateGenerateActionsReadiness(result.root_cause);
         }
         if (this.hasRootCauseEditTarget) {
           this.rootCauseEditTarget.value = result.root_cause || "";
@@ -259,6 +260,20 @@ export default class extends Controller {
     this.rootCauseEditTarget.classList.add("hidden");
   }
   
+  // The Generate Actions button's disabled state is rendered by the server from
+  // whether a root cause exists. Saving one over fetch left that state stale, so
+  // the workflow looked blocked until the page was reloaded.
+  updateGenerateActionsReadiness(rootCause) {
+    const button = document.getElementById("generateActionsButton");
+    if (!button) return;
+
+    const ready = Boolean(rootCause && rootCause.trim().length > 0);
+    button.dataset.rootCauseReady = String(ready);
+
+    if (button.dataset.roleDisabled === "true") return;
+    button.disabled = !ready;
+  }
+
   async saveRootCause(event) {
     event.preventDefault();
     
@@ -421,6 +436,7 @@ export default class extends Controller {
         if (this.hasRootCauseViewTarget) {
           this.rootCauseViewTarget.textContent = this.rootCauseEditTarget.value || "";
         }
+        this.updateGenerateActionsReadiness(this.rootCauseEditTarget.value);
         this.exitRootCauseEditMode();
         
         if (result.notification_html) {
