@@ -28,7 +28,7 @@
         <div>
           <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('due_date') %></p>
           <p class="text-sm <%= @commitment.past_due? ? 'text-red-600 font-medium' : 'text-[#0D1120]' %>">
-            <%= @commitment.due_date&.strftime('%b %d, %Y') || "-" %>
+            <%= @commitment.due_date ? l(@commitment.due_date, format: :document) : "-" %>
           </p>
         </div>
         <div>
@@ -42,7 +42,7 @@
       <div>
         <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('status') %></p>
         <span class="inline-flex mt-1 px-2 py-1 text-xs font-medium rounded-full <%= @commitment.fulfilled? ? 'bg-green-100 text-green-800' : 'bg-[#F7F7FD] text-[#0D1120]' %>">
-          <%= @commitment.status.titleize %>
+          <%= t("commitment_status.#{@commitment.status}") %>
         </span>
       </div>
       <div>

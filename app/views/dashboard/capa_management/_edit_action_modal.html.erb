@@ -23,20 +23,20 @@
         <!-- Title -->
         <div class="flex flex-col gap-2">
           <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.edit_action.title_label") %></label>
-          <input type="text" name="capa[title]" required class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" placeholder="<%= t('capa_management_ui.modals.edit_action.title_placeholder') %>" data-field="title">
+          <input type="text" name="capa[title]" required aria-label="<%= t('capa_management_ui.modals.edit_action.title_label') %>" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" placeholder="<%= t('capa_management_ui.modals.edit_action.title_placeholder') %>" data-field="title">
         </div>
 
         <!-- Description -->
         <div class="flex flex-col gap-2">
           <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.edit_action.description_label") %></label>
-          <textarea name="capa[description]" required rows="3" class="px-4 py-3 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" placeholder="<%= t('capa_management_ui.modals.edit_action.description_placeholder') %>" data-field="description"></textarea>
+          <textarea name="capa[description]" required aria-label="<%= t('capa_management_ui.modals.edit_action.description_label') %>" rows="3" class="px-4 py-3 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" placeholder="<%= t('capa_management_ui.modals.edit_action.description_placeholder') %>" data-field="description"></textarea>
         </div>
 
         <!-- Source & Standard -->
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex flex-col gap-2 flex-1" data-controller="choices-select">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.edit_action.source_label") %></label>
-            <select name="capa[source]" required data-choices-select-target="select" class="w-full" data-field="source">
+            <select name="capa[source]" required aria-label="<%= t('capa_management_ui.modals.edit_action.source_label') %>" data-choices-select-target="select" class="w-full" data-field="source">
               <option value="internal_audit"><%= t("capa_sources.internal_audit") %></option>
               <option value="external_audit"><%= t("capa_sources.external_audit") %></option>
               <option value="customer_complaint"><%= t("capa_sources.customer_complaint") %></option>
@@ -44,7 +44,7 @@
           </div>
           <div class="flex flex-col gap-2 flex-1" data-controller="choices-select" data-choices-select-search-value="true">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.edit_action.related_standard_label") %></label>
-            <select name="capa[standard_id]" data-choices-select-target="select" class="w-full" data-field="standardId">
+            <select name="capa[standard_id]" aria-label="<%= t('capa_management_ui.modals.edit_action.related_standard_label') %>" data-choices-select-target="select" class="w-full" data-field="standardId">
               <option value=""><%= t("capa_management_ui.modals.edit_action.select_standard_placeholder") %></option>
               <% @standards&.each do |standard| %>
                 <option value="<%= standard.id %>"><%= standard.display_name %></option>
@@ -57,7 +57,7 @@
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex flex-col gap-2 flex-1" data-controller="choices-select">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.edit_action.priority_label") %></label>
-            <select name="capa[priority]" data-choices-select-target="select" class="w-full" data-field="priority">
+            <select name="capa[priority]" aria-label="<%= t('capa_management_ui.modals.edit_action.priority_label') %>" data-choices-select-target="select" class="w-full" data-field="priority">
               <option value="high"><%= t("priority_levels.high") %></option>
               <option value="medium"><%= t("priority_levels.medium") %></option>
               <option value="low"><%= t("priority_levels.low") %></option>
@@ -65,14 +65,14 @@
           </div>
           <div class="flex flex-col gap-2 flex-1">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("due_date_optional") %></label>
-            <input type="date" name="capa[due_date]" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" data-field="dueDate">
+            <input type="date" name="capa[due_date]" aria-label="<%= t('due_date_optional') %>" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" data-field="dueDate">
           </div>
         </div>
 
         <!-- Status -->
         <div class="flex flex-col gap-2" data-controller="choices-select">
           <label class="text-sm font-semibold text-[#0D1120]"><%= t("status") %></label>
-          <select name="capa[status]" required data-choices-select-target="select" class="w-full" data-field="status" data-capas--edit-form-target="statusSelect">
+          <select name="capa[status]" required aria-label="<%= t('status') %>" data-choices-select-target="select" class="w-full" data-field="status" data-capas--edit-form-target="statusSelect">
             <option value="open"><%= t("capa_management_ui.statuses.open") %></option>
             <option value="assigned"><%= t("capa_management_ui.statuses.assigned") %></option>
             <option value="in_progress"><%= t("capa_management_ui.statuses.in_progress") %></option>
@@ -89,7 +89,7 @@
             <!-- Assigned users will render here as chips -->
           </div>
           <div class="flex flex-col gap-2">
-            <select multiple name="capa[company_user_ids][]" data-capas--edit-form-target="userSelect" class="w-full">
+            <select multiple name="capa[company_user_ids][]" aria-label="<%= t('assign_to') %>" data-capas--edit-form-target="userSelect" class="w-full">
               <% @company_users&.each do |company_user| %>
                 <% 
                    props = { 

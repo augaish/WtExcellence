@@ -29,6 +29,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `sla-and-expiry` | *(this commit)* | Service levels on agreements; delegation expiry notices; register filters. |
 | `docx-export` | *(this commit)* | Word export of governed documents, right-to-left aware. |
 | `retest-batches` | *(this commit)* | Second-review fixes: answer persistence, pools vs lanes, matrix redesign, executive matrix in documents, SLA output, diagram drawn from steps. |
+| `retest-batch-three` | *(this commit)* | Retry this question; rejected forms keep values; formatted AI answers and live balance; accessibility pass; Gate C delegation matrix; published-version immutability. |
 
 ## Roll the code back
 ```bash

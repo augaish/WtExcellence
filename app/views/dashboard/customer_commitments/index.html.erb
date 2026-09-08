@@ -35,12 +35,12 @@
                   <td class="p-4 text-sm font-medium text-[#0D1120]"><%= commitment.title %></td>
                   <td class="p-4 text-sm text-[#797C81]"><%= commitment.customer_name %></td>
                   <td class="p-4 text-sm <%= commitment.past_due? ? 'text-red-600 font-medium' : 'text-[#797C81]' %>">
-                    <%= commitment.due_date&.strftime('%b %d, %Y') || "-" %>
+                    <%= commitment.due_date ? l(commitment.due_date, format: :document) : "-" %>
                   </td>
                   <td class="p-4 text-sm text-[#797C81]"><%= commitment.owner&.user&.name || t('unassigned') %></td>
                   <td class="p-4">
                     <span class="px-2 py-1 text-xs font-medium rounded-full <%= commitment.status == 'fulfilled' ? 'bg-green-100 text-green-800' : commitment.past_due? ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800' %>">
-                      <%= commitment.status.titleize %>
+                      <%= t("commitment_status.#{commitment.status}") %>
                     </span>
                   </td>
                   <td class="p-4">

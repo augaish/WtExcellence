@@ -188,6 +188,14 @@ class Dashboard::BaseController < ApplicationController
 
     private
 
+    # A server-side rejection redirects back to the page, which used to arrive
+    # with an empty form: fixing one field meant retyping every other. The
+    # submitted values ride the redirect in the flash and are read back by the
+    # `retained` helper, so the user corrects one thing and resubmits.
+    def retain_form_values(scope, values)
+      flash[:retained_form] = { scope.to_s => values.to_h.stringify_keys }
+    end
+
     # Makes the acting user available to model callbacks that record activity.
     #
     # This was a before_action paired with an after_action, which leaks: an

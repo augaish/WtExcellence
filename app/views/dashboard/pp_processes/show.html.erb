@@ -104,10 +104,10 @@
 
     <%= form_with url: dashboard_pp_process_steps_path(@process), method: :post,
                   scope: :pp_process_step, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-6" do |f| %>
-      <%= f.text_field :activity, placeholder: t('process_steps.activity'), class: input %>
-      <%= f.text_field :description, placeholder: t('process_steps.description'), class: input %>
-      <%= f.text_field :responsible_title, placeholder: t('process_steps.responsible'), class: input %>
-      <%= f.number_field :duration_value, step: :any, min: 0, placeholder: t('process_steps.duration'), class: input %>
+      <%= f.text_field :activity, value: retained(:pp_process_step, :activity), placeholder: t('process_steps.activity'), class: input %>
+      <%= f.text_field :description, value: retained(:pp_process_step, :description), placeholder: t('process_steps.description'), class: input %>
+      <%= f.text_field :responsible_title, value: retained(:pp_process_step, :responsible_title), placeholder: t('process_steps.responsible'), class: input %>
+      <%= f.number_field :duration_value, value: retained(:pp_process_step, :duration_value), step: :any, min: 0, placeholder: t('process_steps.duration'), class: input %>
       <%= f.select :duration_unit,
           PpProcessStep::UNITS.map { |unit| [ t("process_steps.units.#{unit}"), unit ] },
           { include_blank: true }, class: input %>

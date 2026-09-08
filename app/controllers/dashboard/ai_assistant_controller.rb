@@ -54,7 +54,12 @@ class Dashboard::AiAssistantController < Dashboard::BaseController
       }
     )
 
-    render json: { success: true, answer: result[:answer], sources: result[:sources] }
+    render json: {
+      success: true, answer: result[:answer], sources: result[:sources],
+      # So the header can show the balance the charge left, not the one the
+      # page loaded with.
+      balance: (charged ? company_user.reload.assigned_credits : nil)
+    }
   end
 
   private

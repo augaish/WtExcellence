@@ -203,8 +203,17 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     if record.save
       back_to_matrix(notice: t("doa.flash.#{flash_key}"))
     else
+      retain_form_values(record.model_name.param_key, retained_attributes_for(record))
       back_to_matrix(alert: record.errors.full_messages.to_sentence)
     end
+  end
+
+  # What the form would need to show again: the typed columns, plus which
+  # parent the row was meant for.
+  def retained_attributes_for(record)
+    typed = record.attributes.reject { |k, v| v.nil? || %w[id created_at updated_at sort_order].include?(k) }
+    typed["holder"] = params[:holder] if params[:holder].present?
+    typed
   end
 
   def back_to_matrix(notice: nil, alert: nil)

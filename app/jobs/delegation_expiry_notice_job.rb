@@ -11,10 +11,14 @@ class DelegationExpiryNoticeJob < ApplicationJob
   queue_as :cron_small
 
   def perform
+    window = Date.current..AuthorityDelegation::EXPIRY_LEAD_DAYS.days.from_now.to_date
+
+    # Never examined, or examined when there was nobody to tell. The second
+    # group is looked at again in case a head has since been assigned.
     due = AuthorityDelegation
       .active_status
-      .where(expiry_notified_at: nil)
-      .where(valid_to: Date.current..AuthorityDelegation::EXPIRY_LEAD_DAYS.days.from_now.to_date)
+      .where(valid_to: window)
+      .where("expiry_notified_at IS NULL OR expiry_notice_outcome = ?", "no_recipients")
       .includes(:authority, :from_org_unit, :to_org_unit, company: [])
 
     due.find_each { |delegation| notify(delegation) }
@@ -25,15 +29,19 @@ class DelegationExpiryNoticeJob < ApplicationJob
   def notify(delegation)
     recipients = recipients_for(delegation)
 
-    # Stamped even when nobody can be told, or the job would retry this
-    # delegation every run for the rest of its life.
+    # A headless delegation is stamped with that outcome rather than left
+    # looking delivered, and is only re-examined once a head exists — so it is
+    # neither retried every run nor silently unowned forever.
     if recipients.empty?
-      delegation.update_columns(expiry_notified_at: Time.current)
+      delegation.update_columns(expiry_notified_at: Time.current, expiry_notice_outcome: "no_recipients")
       return
     end
 
+    # Already delivered for this lapse; a re-examination adds nothing.
+    return if delegation.expiry_notice_outcome == "delivered"
+
     recipients.each { |user| create_notification(delegation, user) }
-    delegation.update_columns(expiry_notified_at: Time.current)
+    delegation.update_columns(expiry_notified_at: Time.current, expiry_notice_outcome: "delivered")
   rescue => e
     # One unnotifiable delegation must not stop the rest being warned about.
     Rails.logger.error "DelegationExpiryNoticeJob failed for #{delegation.id}: #{e.class}: #{e.message}"

@@ -37,6 +37,16 @@
       <%# The chart scrolls inside its own box rather than the page. %>
       <div class="lg:col-span-2 bg-white border border-[#E3E3E3] rounded-lg p-4 overflow-x-auto">
         <%= OrgChartRenderer.render(@units) %>
+        <%# The same structure as a list, for screen readers and anyone who
+            cannot use the drawing. %>
+        <ul class="sr-only" aria-label="<%= t('org_structure.chart.text_tree') %>">
+          <% @units.each do |unit| %>
+            <li>
+              <%= unit.display_name %> — <%= unit.level_name %>
+              <% if unit.parent %>(<%= t('org_structure.chart.reports_to', unit: unit.parent.display_name) %>)<% end %>
+            </li>
+          <% end %>
+        </ul>
       </div>
 
       <aside class="bg-white border border-[#E3E3E3] rounded-lg p-5">

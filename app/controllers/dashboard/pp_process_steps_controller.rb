@@ -10,6 +10,7 @@ class Dashboard::PpProcessStepsController < Dashboard::PpProcessDetailController
     if step.save
       back_to_process(notice: t("process_steps.flash.created"))
     else
+      retain_form_values(:pp_process_step, step_params)
       back_to_process(alert: step.errors.full_messages.to_sentence)
     end
   end

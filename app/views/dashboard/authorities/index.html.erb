@@ -148,8 +148,9 @@
                 <%= form_with url: dashboard_create_authority_band_path(authority_id: authority.id, matrix_id: @matrix.id),
                               method: :post, scope: :authority_band, class: "flex flex-wrap items-center gap-2" do |f| %>
                   <span class="text-xs text-[#797C81]"><%= t('doa.add_band') %>:</span>
-                  <%= f.number_field :min_amount, step: :any, min: 0, placeholder: t('doa.min_amount'), class: "#{input} w-32" %>
-                  <%= f.number_field :max_amount, step: :any, min: 0, placeholder: t('doa.max_amount'), class: "#{input} w-32" %>
+                  <% mine = retained(:authority_band, :authority_id) == authority.id %>
+                  <%= f.number_field :min_amount, value: (retained(:authority_band, :min_amount) if mine), step: :any, min: 0, placeholder: t('doa.min_amount'), class: "#{input} w-32" %>
+                  <%= f.number_field :max_amount, value: (retained(:authority_band, :max_amount) if mine), step: :any, min: 0, placeholder: t('doa.max_amount'), class: "#{input} w-32" %>
                   <%= f.submit t('doa.add_band'), class: ui_btn_neutral %>
                 <% end %>
               <% end %>

@@ -12,6 +12,7 @@ class AuthorityBand < ApplicationRecord
   validates :min_amount, :max_amount, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validate :max_must_exceed_min
   validate :must_not_overlap_sibling_bands
+  validate :matrix_must_be_editable
 
   # A band with no minimum is the lowest band. PostgreSQL sorts NULL last on an
   # ascending order, which put "up to 10,000" after "above 10,000".
@@ -100,5 +101,19 @@ class AuthorityBand < ApplicationRecord
     upper = [ max_amount, other.max_amount ].compact.min
 
     upper.nil? || lower < upper
+  end
+
+  def published_matrix_for_guard
+    authority&.matrix
+  end
+
+  # A matrix that has been published is a statement of record. Changing an
+  # authority in it would change what was approved without anyone approving
+  # the change; the next version is where edits belong.
+  def matrix_must_be_editable
+    m = published_matrix_for_guard
+    return if m.nil? || !m.completed?
+
+    errors.add(:base, I18n.t("doa.errors.matrix_published"))
   end
 end

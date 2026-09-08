@@ -41,8 +41,9 @@ class OrgChartRenderer
     layout!
     <<~SVG.html_safe
       <svg viewBox="0 0 #{canvas_width} #{canvas_height}" width="#{canvas_width}" height="#{canvas_height}"
-           xmlns="http://www.w3.org/2000/svg" role="img"
+           xmlns="http://www.w3.org/2000/svg" role="group"
            aria-label="#{escape(I18n.t('org_structure.chart.title', locale: locale))}">
+        <title>#{escape(I18n.t('org_structure.chart.title', locale: locale))}</title>
         #{connectors_svg}
         #{boxes_svg}
       </svg>

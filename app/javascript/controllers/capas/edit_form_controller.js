@@ -470,7 +470,7 @@ export default class extends Controller {
         </td>
         <td class="p-4" onclick="event.stopPropagation();">
           <details class="relative" data-controller="capas--dropdown">
-            <summary class="list-none text-[#797C81] hover:text-[#0D1120] cursor-pointer">
+            <summary class="list-none text-[#797C81] hover:text-[#0D1120] cursor-pointer" role="button" tabindex="0" aria-haspopup="menu" aria-label="${this.escapeHtml ? this.escapeHtml(capa.title) : capa.title}">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
               </svg>

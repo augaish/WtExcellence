@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_170002) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_180001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -243,6 +243,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_170002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "expiry_notified_at"
+    t.string "expiry_notice_outcome", limit: 20
     t.index ["authority_id", "valid_to"], name: "index_authority_delegations_on_authority_id_and_valid_to"
     t.index ["authority_id"], name: "index_authority_delegations_on_authority_id"
     t.index ["company_id", "status"], name: "index_authority_delegations_on_company_id_and_status"

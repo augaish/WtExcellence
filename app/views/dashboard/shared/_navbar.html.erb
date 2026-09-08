@@ -36,7 +36,7 @@
         <!-- Current User Credits -->
         <div class="flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#F7F7FD] px-3 sm:px-4 py-2 rounded-lg min-h-[44px]">
             <span class="text-[#5C3984] font-medium"><%= t('credits') %></span>
-            <span class="text-[#0D1120] font-semibold"><%= current_user_credit_balance %></span>
+            <span class="text-[#0D1120] font-semibold" data-credit-balance><%= current_user_credit_balance %></span>
         </div>
         <% end %>
 
@@ -191,7 +191,7 @@
                 <!-- Credits Display -->
                 <div class="flex items-center justify-between gap-3 py-3 px-4 bg-[#F7F7FD] rounded-lg mb-4">
                     <span class="text-[#5C3984] font-medium"><%= t('credits') %></span>
-                    <span class="text-[#0D1120] font-semibold text-lg"><%= current_user_credit_balance %></span>
+                    <span class="text-[#0D1120] font-semibold text-lg" data-credit-balance><%= current_user_credit_balance %></span>
                 </div>
                 <% end %>
 

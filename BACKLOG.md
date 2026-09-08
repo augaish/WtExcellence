@@ -48,20 +48,16 @@ not committed, .env files are ignored, no API keys or production credentials
 appear in tracked files, and the demo seeds can no longer run outside
 development.
 
-## From the second review (retest) — still open
+## From the second review (retest)
 
-Gate A items R01, R03–R11 and R14–R15 are addressed on this branch. What
-remains from that report:
+Gates A and B are addressed on this branch, and the Gate C delegation matrix is
+proven by tests with a controllable clock. What remains:
 
-| | Finding | State |
+| | Item | State |
 |---|---|---|
-| R07 (part) | A failed AI question offers only Close | The reply is now read robustly, retried once, and every failure names its cause and says nothing was charged; accepted answers are saved as they are accepted so nothing is lost. A "Retry this question" button in the modal is still to add. |
-| R13 | Validation failures clear the rest of the form | Units are now filtered per commitment and the percentage ceiling is enforced; keeping the other fields' values after a server-side rejection is not done. |
-| R16 | AI answer shows raw Markdown; header balance stale until navigation | The product map is current. Rendering the answer as formatted text and refreshing the balance from the completed request are not done. |
-| R17 | Accessible names, keyboard chart traversal, Arabic status words | Not started. Worth doing as one pass against WCAG 2.2 AA. |
-| R18 (part) | Library visibility helper text still describes "everyone" | Label fixed earlier; helper sentence not. |
-| Gate C | Delegation test matrix with a controllable clock; effective-authority enforcement; published-version immutability | Not started. Needs backend fixtures, not browser tests. |
-| Email | Delegation expiry by email | Needs the platform notification policy decided first (see below). |
+| R17 (part) | Full WCAG 2.2 AA audit | The sampled gaps are closed: every CAPA modal control is named, the row menu is a named keyboard control, the org chart exposes its nodes and offers a textual tree, statuses are translated and dates carry no time. A full audit with a screen reader has not been done. |
+| Gate C (part) | Effective-authority enforcement at decision points | The question "who may decide this today" is answered (EffectiveAuthority); no screen yet refuses an action on that basis. |
+| Email | Delegation expiry by email | Needs the platform notification policy decided first. |
 
 ## Correctness — review findings not yet fixed
 

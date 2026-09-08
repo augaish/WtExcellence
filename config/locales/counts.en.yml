@@ -22,3 +22,13 @@ en:
       blocked:
         one: "High completeness, but 1 issue must be resolved before this is ready for review."
         other: "High completeness, but %{count} issues must be resolved before this is ready for review."
+  commitment_status:
+    open: "Open"
+    in_progress: "In progress"
+    fulfilled: "Fulfilled"
+  risk_status:
+    identified: "Identified"
+    assessing: "Assessing"
+    mitigating: "Mitigating"
+    monitoring: "Monitoring"
+    closed: "Closed"

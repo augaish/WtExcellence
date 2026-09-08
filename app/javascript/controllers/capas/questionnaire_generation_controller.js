@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 
 // Connects to data-controller="capas--questionnaire-generation"
 export default class extends Controller {
-  static targets = [
+  static targets = ["retryButton", 
     "messagesContainer",
     "actionButtons",
     "loadingState",
@@ -293,17 +293,34 @@ export default class extends Controller {
         this.hideLoading();
         this.showActionButtons();
       } else {
-        const error = await response.json();
-        this.showError(error.error || 'Failed to generate question pair');
-        this.hideLoading();
+        const error = await response.json().catch(() => ({}));
+        this.offerRetry(error.error || 'Failed to generate question pair');
       }
     } catch (error) {
       console.error('Error generating pair:', error);
-      this.showError('Network error. Please try again.');
-      this.hideLoading();
+      this.offerRetry('Network error. Please try again.');
     } finally {
       this.isGenerating = false;
     }
+  }
+
+  // A failed question is not a dead end. What was accepted is already saved
+  // server-side, so the only thing to do is try this question again.
+  offerRetry(message) {
+    this.hideLoading();
+    this.showError(`${message} ${this.element.dataset.failedLabel || ''}`.trim());
+    if (this.hasActionButtonsTarget) this.actionButtonsTarget.style.display = 'block';
+    if (this.hasRegenerateButtonTarget) this.regenerateButtonTarget.style.display = 'none';
+    if (this.hasAcceptButtonTarget) this.acceptButtonTarget.style.display = 'none';
+    if (this.hasRetryButtonTarget) this.retryButtonTarget.style.display = 'flex';
+  }
+
+  async retryPair() {
+    if (this.isGenerating) return;
+    if (this.hasRetryButtonTarget) this.retryButtonTarget.style.display = 'none';
+    if (this.hasRegenerateButtonTarget) this.regenerateButtonTarget.style.display = '';
+    if (this.hasAcceptButtonTarget) this.acceptButtonTarget.style.display = '';
+    await this.generatePair();
   }
 
   async regeneratePair() {

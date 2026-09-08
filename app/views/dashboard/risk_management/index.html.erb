@@ -139,7 +139,7 @@
                         -
                       <% end %>
                     </td>
-                    <td class="p-4 text-sm text-[#797C81]"><%= risk.status.titleize %></td>
+                    <td class="p-4 text-sm text-[#797C81]"><%= t("risk_status.#{risk.status}") %></td>
                     <td class="p-4">
                       <%= link_to "View", dashboard_risk_management_path(risk), class: "text-blue-500 hover:text-blue-700 text-sm" %>
                     </td>

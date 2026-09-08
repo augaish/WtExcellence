@@ -147,4 +147,16 @@ module ApplicationHelper
   rescue I18n::MissingTranslationData, KeyError, ArgumentError
     notification.title
   end
+
+  # The value a rejected form submitted for a field, so the page can hand it
+  # back rather than asking for it again. Nil when nothing was retained.
+  def retained(scope, field)
+    flash[:retained_form]&.dig(scope.to_s, field.to_s)
+  end
+
+  # True when a retained submission belongs to this scope — used to open the
+  # right inline form after a rejection.
+  def retained_form?(scope)
+    flash[:retained_form]&.key?(scope.to_s) || false
+  end
 end

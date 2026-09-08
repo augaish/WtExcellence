@@ -81,18 +81,18 @@
     <%= form_with url: dashboard_pp_record_service_levels_path(record), method: :post,
                   scope: :pp_service_level, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-3",
                   data: { controller: "sla-units" } do |f| %>
-      <%= f.text_field :service_name, placeholder: t('sla.service'), class: input %>
-      <%= f.select :metric, PpServiceLevel::METRICS.map { |m| [ t("sla.metrics.#{m}"), m ] }, {},
+      <%= f.text_field :service_name, value: retained(:pp_service_level, :service_name), placeholder: t('sla.service'), class: input %>
+      <%= f.select :metric, PpServiceLevel::METRICS.map { |m| [ t("sla.metrics.#{m}"), m ] }, { selected: retained(:pp_service_level, :metric) },
           class: input, data: { action: "change->sla-units#refresh", sla_units_target: "metric" } %>
       <div class="flex gap-2">
-        <%= f.number_field :target_value, step: :any, min: 0, placeholder: t('sla.target'), class: input %>
+        <%= f.number_field :target_value, value: retained(:pp_service_level, :target_value), step: :any, min: 0, placeholder: t('sla.target'), class: input %>
         <%= f.select :target_unit, [], { include_blank: true }, class: input,
             data: { sla_units_target: "unit", units: PpServiceLevel::UNITS_FOR_METRIC.to_json,
                     labels: PpServiceLevel::UNITS_FOR_METRIC.values.flatten.uniq.index_with { |u| t("sla.units.#{u}") }.to_json } %>
       </div>
-      <%= f.text_field :measurement_method, placeholder: t('sla.measurement'), class: input %>
-      <%= f.text_field :coverage, placeholder: t('sla.coverage'), class: input %>
-      <%= f.text_field :remedy, placeholder: t('sla.remedy'), class: input %>
+      <%= f.text_field :measurement_method, value: retained(:pp_service_level, :measurement_method), placeholder: t('sla.measurement'), class: input %>
+      <%= f.text_field :coverage, value: retained(:pp_service_level, :coverage), placeholder: t('sla.coverage'), class: input %>
+      <%= f.text_field :remedy, value: retained(:pp_service_level, :remedy), placeholder: t('sla.remedy'), class: input %>
       <%= f.submit t('sla.add'), class: ui_btn_primary %>
     <% end %>
   <% end %>

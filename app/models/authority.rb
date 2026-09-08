@@ -18,6 +18,7 @@ class Authority < ApplicationRecord
   validates :name_ar, length: { maximum: 500 }
   validate :must_have_a_name
   validate :matrix_must_be_an_executive_doa
+  validate :matrix_must_be_editable
 
   scope :ordered, -> { order(:sort_order, :number, :created_at) }
   scope :in_category, ->(category) { where(authority_category_id: category&.id) }
@@ -83,5 +84,19 @@ class Authority < ApplicationRecord
     return if matrix.nil? || matrix.record_type == "executive_doa"
 
     errors.add(:matrix, I18n.t("doa.errors.matrix_wrong_type"))
+  end
+
+  def published_matrix_for_guard
+    matrix
+  end
+
+  # A matrix that has been published is a statement of record. Changing an
+  # authority in it would change what was approved without anyone approving
+  # the change; the next version is where edits belong.
+  def matrix_must_be_editable
+    m = published_matrix_for_guard
+    return if m.nil? || !m.completed?
+
+    errors.add(:base, I18n.t("doa.errors.matrix_published"))
   end
 end

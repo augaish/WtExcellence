@@ -79,15 +79,15 @@
   <% if can_manage && authorities.any? %>
     <%= form_with url: dashboard_create_authority_delegation_path(matrix_id: matrix.id), method: :post,
                   scope: :authority_delegation, class: "p-5 border-t border-[#E3E3E3] grid gap-3 md:grid-cols-4" do |f| %>
-      <%= f.collection_select :authority_id, authorities, :id, :display_name, {}, class: input %>
+      <%= f.collection_select :authority_id, authorities, :id, :display_name, { selected: retained(:authority_delegation, :authority_id) }, class: input %>
       <%= f.collection_select :from_org_unit_id, org_units, :id, :display_name,
-          { include_blank: t('doa.delegation.from') }, class: input %>
+          { include_blank: t('doa.delegation.from'), selected: retained(:authority_delegation, :from_org_unit_id) }, class: input %>
       <%= f.collection_select :to_org_unit_id, org_units, :id, :display_name,
-          { include_blank: t('doa.delegation.to') }, class: input %>
-      <%= f.select :kind, AuthorityDelegation::KINDS.map { |k| [ t("doa.delegation.kinds.#{k}"), k ] }, {}, class: input %>
-      <%= f.number_field :limit_amount, placeholder: t('doa.delegation.limit'), class: input %>
-      <%= f.date_field :valid_from, class: input %>
-      <%= f.date_field :valid_to, class: input %>
+          { include_blank: t('doa.delegation.to'), selected: retained(:authority_delegation, :to_org_unit_id) }, class: input %>
+      <%= f.select :kind, AuthorityDelegation::KINDS.map { |k| [ t("doa.delegation.kinds.#{k}"), k ] }, { selected: retained(:authority_delegation, :kind) }, class: input %>
+      <%= f.number_field :limit_amount, value: retained(:authority_delegation, :limit_amount), placeholder: t('doa.delegation.limit'), class: input %>
+      <%= f.date_field :valid_from, value: retained(:authority_delegation, :valid_from), class: input %>
+      <%= f.date_field :valid_to, value: retained(:authority_delegation, :valid_to), class: input %>
       <%= f.submit t('doa.delegation.add'), class: ui_btn_primary %>
       <%= f.hidden_field :status, value: "active" %>
     <% end %>

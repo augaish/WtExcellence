@@ -18,6 +18,7 @@ class AuthorityAssignment < ApplicationRecord
   validate :must_name_a_holder
   validate :unit_must_be_same_company
   validate :user_must_be_a_member
+  validate :matrix_must_be_editable
 
   scope :ordered, -> { order(:sort_order, :created_at) }
   scope :at_level, ->(level) { where(level: level) }
@@ -74,5 +75,19 @@ class AuthorityAssignment < ApplicationRecord
     return if authority.nil? || org_unit.company_id == authority.company_id
 
     errors.add(:org_unit, I18n.t("doa.errors.other_company"))
+  end
+
+  def published_matrix_for_guard
+    authority_band&.authority&.matrix
+  end
+
+  # A matrix that has been published is a statement of record. Changing an
+  # authority in it would change what was approved without anyone approving
+  # the change; the next version is where edits belong.
+  def matrix_must_be_editable
+    m = published_matrix_for_guard
+    return if m.nil? || !m.completed?
+
+    errors.add(:base, I18n.t("doa.errors.matrix_published"))
   end
 end

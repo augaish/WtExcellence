@@ -211,6 +211,8 @@ ar:
         complete: مكتمل
         question_label: السؤال %{number}
         answer_label: الإجابة
+        retry: "إعادة محاولة هذا السؤال"
+        failed_keep: "إجاباتك المعتمدة محفوظة."
         draft_notice: مسودة مُولّدة بالذكاء الاصطناعي. راجعها وعدّلها قبل الاعتماد — قد تتضمن افتراضات لا يدعمها السجل.
         accepted_label: تم القبول
         accepted_heading: السؤال %{number} - تم القبول

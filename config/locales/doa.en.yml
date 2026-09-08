@@ -155,4 +155,5 @@ en:
       holder_required: "Name an organizational unit, a role, or a position."
       other_company: "must belong to the same company"
       max_below_min: "must be greater than the lower bound"
+      matrix_published: "This matrix version has been published. Open the next version to make changes."
       bands_overlap: "This band overlaps another band of the same authority, so the matrix cannot say who decides an amount in both."

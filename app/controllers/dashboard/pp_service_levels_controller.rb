@@ -13,6 +13,7 @@ class Dashboard::PpServiceLevelsController < Dashboard::BaseController
     if level.save
       back_to_record(notice: t("sla.flash.created"))
     else
+      retain_form_values(:pp_service_level, service_level_params)
       back_to_record(alert: level.errors.full_messages.to_sentence)
     end
   end
