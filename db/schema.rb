@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_081755) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_082312) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -343,6 +343,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_081755) do
     t.boolean "trust_center_enabled", default: false, null: false
     t.jsonb "weekend_days", default: [5, 6], null: false
     t.integer "pp_yearly_target"
+    t.string "brand_primary_color", limit: 7
+    t.string "brand_accent_color", limit: 7
     t.index ["status"], name: "index_companies_on_status"
   end
 
@@ -509,6 +511,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_081755) do
     t.index ["company_id"], name: "index_folders_on_company_id"
     t.index ["created_by"], name: "index_folders_on_created_by"
     t.index ["parent_id"], name: "index_folders_on_parent_id"
+  end
+
+  create_table "glossary_terms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "term_en", limit: 250
+    t.string "term_ar", limit: 250
+    t.string "abbreviation", limit: 50
+    t.text "definition_en"
+    t.text "definition_ar"
+    t.integer "sort_order", default: 0, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_glossary_terms_on_company_id"
   end
 
   create_table "ingestion_jobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -709,6 +725,29 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_081755) do
     t.index ["parent_id"], name: "index_pp_processes_on_parent_id"
     t.index ["predecessor_process_id"], name: "index_pp_processes_on_predecessor_process_id"
     t.index ["successor_process_id"], name: "index_pp_processes_on_successor_process_id"
+  end
+
+  create_table "pp_record_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.uuid "clause_id"
+    t.string "name", limit: 300
+    t.string "source", limit: 300
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["clause_id"], name: "index_pp_record_references_on_clause_id"
+    t.index ["pp_record_id"], name: "index_pp_record_references_on_pp_record_id"
+  end
+
+  create_table "pp_record_terms", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.uuid "glossary_term_id", null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["glossary_term_id"], name: "index_pp_record_terms_on_glossary_term_id"
+    t.index ["pp_record_id", "glossary_term_id"], name: "index_pp_record_terms_uniqueness", unique: true
+    t.index ["pp_record_id"], name: "index_pp_record_terms_on_pp_record_id"
   end
 
   create_table "pp_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1136,6 +1175,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_081755) do
   add_foreign_key "evidence_attachments", "uploads"
   add_foreign_key "folders", "companies"
   add_foreign_key "folders", "folders", column: "parent_id"
+  add_foreign_key "glossary_terms", "companies"
   add_foreign_key "ingestion_jobs", "uploads", column: "input_pdf_id"
   add_foreign_key "notifications", "users", column: "recipient_id"
   add_foreign_key "org_groups", "companies"
@@ -1156,6 +1196,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_081755) do
   add_foreign_key "pp_processes", "pp_processes", column: "predecessor_process_id"
   add_foreign_key "pp_processes", "pp_processes", column: "successor_process_id"
   add_foreign_key "pp_processes", "users", column: "owner_user_id"
+  add_foreign_key "pp_record_references", "clauses"
+  add_foreign_key "pp_record_references", "pp_records"
+  add_foreign_key "pp_record_terms", "glossary_terms"
+  add_foreign_key "pp_record_terms", "pp_records"
   add_foreign_key "pp_records", "companies"
   add_foreign_key "pp_records", "org_units", column: "owner_org_unit_id"
   add_foreign_key "pp_records", "pp_packages", column: "package_id"

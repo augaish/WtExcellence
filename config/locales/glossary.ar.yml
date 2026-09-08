@@ -1,0 +1,6 @@
+ar:
+  glossary:
+    title: قائمة التعريفات
+    errors:
+      term_required: أدخل المصطلح بالعربية أو الإنجليزية.
+      other_company: يجب أن ينتمي إلى نفس الشركة

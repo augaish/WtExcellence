@@ -32,6 +32,7 @@ class Company < ApplicationRecord
   has_many :pp_packages, dependent: :destroy
   has_many :pp_records, dependent: :destroy
   has_many :pp_stage_targets, dependent: :destroy
+  has_many :glossary_terms, -> { ordered }, dependent: :destroy
   has_many :company_holidays, -> { order(:start_date) }, dependent: :destroy
   has_many :pp_diagrams, dependent: :destroy
   has_many :users, through: :company_users
@@ -45,7 +46,13 @@ class Company < ApplicationRecord
   has_many :uploads, dependent: :destroy
   has_many :clause_score_caches, class_name: "ClauseScoreCache", dependent: :destroy
 
+  # Company branding, set by the company admin. Colours are stored as hex; the
+  # palette decides whether one is actually usable.
+  has_one_attached :brand_logo
+
   validates :name, presence: true, length: { maximum: 200 }
+  validates :brand_primary_color, :brand_accent_color,
+    format: { with: BrandPalette::HEX_PATTERN, message: :invalid }, allow_blank: true
   validates :license_seats, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :credits, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :default_locale, length: { maximum: 10 }
@@ -88,6 +95,11 @@ class Company < ApplicationRecord
     enabled
   end
 
+  # The colours to render for this company, falling back to the WTE palette.
+  def brand_palette
+    @brand_palette ||= BrandPalette.new(self)
+  end
+
   def pending?
     status == "pending"
   end
@@ -106,6 +118,7 @@ class Company < ApplicationRecord
   def reload(*)
     @module_settings = nil
     @stage_target_days = nil
+    @brand_palette = nil
     super
   end
 

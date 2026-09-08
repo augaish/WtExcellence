@@ -1,0 +1,6 @@
+en:
+  glossary:
+    title: "Glossary"
+    errors:
+      term_required: "Enter the term in English or Arabic."
+      other_company: "must belong to the same company"

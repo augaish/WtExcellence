@@ -1,0 +1,85 @@
+<% palette = @company.brand_palette %>
+
+<div class="p-6 space-y-6">
+  <%= render "dashboard/shared/page_header", title: t('branding.title'), subtitle: t('branding.subtitle') %>
+
+  <%= form_with model: @company, url: dashboard_update_branding_path, method: :patch,
+                html: { multipart: true }, class: "max-w-2xl space-y-6" do |f| %>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-lg p-6 space-y-5">
+      <h2 class="text-base font-semibold text-[#0D1120]"><%= t('branding.logo') %></h2>
+
+      <div class="flex items-center gap-4">
+        <div class="w-32 h-16 border border-[#E3E3E3] rounded-lg flex items-center justify-center bg-[#F7F7FD] overflow-hidden">
+          <% if @company.brand_logo.attached? %>
+            <%= image_tag signed_file_url(@company.brand_logo, disposition: "inline"),
+                class: "max-h-full max-w-full object-contain", alt: @company.name %>
+          <% else %>
+            <span class="text-xs text-[#797C81]"><%= t('branding.no_logo') %></span>
+          <% end %>
+        </div>
+
+        <div class="flex-1">
+          <%= f.file_field :brand_logo, accept: "image/png,image/jpeg,image/svg+xml",
+              class: "block w-full text-sm text-[#0D1120] file:me-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#F6EEFF] file:text-[#5C3984]" %>
+          <p class="mt-2 text-xs text-[#797C81]"><%= t('branding.logo_hint') %></p>
+
+          <% if @company.brand_logo.attached? %>
+            <label class="mt-3 flex items-center gap-2 text-sm text-[#0D1120]">
+              <%= check_box_tag :remove_brand_logo, "1", false, class: "rounded border-[#E3E3E3]" %>
+              <%= t('branding.remove_logo') %>
+            </label>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-lg p-6 space-y-5">
+      <h2 class="text-base font-semibold text-[#0D1120]"><%= t('branding.colors') %></h2>
+
+      <% if palette.primary_rejected? %>
+        <div class="rounded-lg border border-[#E3E3E3] bg-[#F7F7FD] p-4 text-sm text-[#0D1120]">
+          <%= t('branding.primary_rejected') %>
+        </div>
+      <% end %>
+
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div>
+          <%= f.label :brand_primary_color, t('branding.primary_color'),
+              class: "block text-sm font-medium text-[#0D1120] mb-2" %>
+          <div class="flex items-center gap-3">
+            <%= f.color_field :brand_primary_color, value: palette.primary,
+                class: "h-10 w-14 rounded border border-[#E3E3E3] p-1" %>
+            <%= f.text_field :brand_primary_color, placeholder: BrandPalette::DEFAULT_PRIMARY,
+                class: "flex-1 border border-[#E3E3E3] rounded-md px-3 py-2 text-sm" %>
+          </div>
+          <p class="mt-2 text-xs text-[#797C81]"><%= t('branding.primary_hint') %></p>
+        </div>
+
+        <div>
+          <%= f.label :brand_accent_color, t('branding.accent_color'),
+              class: "block text-sm font-medium text-[#0D1120] mb-2" %>
+          <div class="flex items-center gap-3">
+            <%= f.color_field :brand_accent_color, value: palette.accent,
+                class: "h-10 w-14 rounded border border-[#E3E3E3] p-1" %>
+            <%= f.text_field :brand_accent_color, placeholder: BrandPalette::DEFAULT_ACCENT,
+                class: "flex-1 border border-[#E3E3E3] rounded-md px-3 py-2 text-sm" %>
+          </div>
+          <p class="mt-2 text-xs text-[#797C81]"><%= t('branding.accent_hint') %></p>
+        </div>
+      </div>
+
+      <div class="rounded-lg p-4" style="background-color: <%= palette.accent %>;">
+        <p class="text-xs font-medium text-[#797C81] mb-2"><%= t('branding.preview') %></p>
+        <span class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium text-white"
+              style="background-color: <%= palette.primary %>;">
+          <%= t('branding.preview_button') %>
+        </span>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <%= f.submit t('save_changes'), class: ui_btn_primary %>
+    </div>
+  <% end %>
+</div>

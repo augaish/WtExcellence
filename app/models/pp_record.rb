@@ -50,6 +50,10 @@ class PpRecord < ApplicationRecord
   has_many :evidence_attachments, as: :attachable, dependent: :destroy
   has_many :uploads, through: :evidence_attachments
 
+  has_many :record_terms, -> { ordered }, class_name: "PpRecordTerm", foreign_key: "pp_record_id", dependent: :destroy
+  has_many :glossary_terms, through: :record_terms
+  has_many :references, -> { ordered }, class_name: "PpRecordReference", foreign_key: "pp_record_id", dependent: :destroy
+
   has_many :stage_transitions, class_name: "PpStageTransition", dependent: :destroy
   has_many :stage_approvals, class_name: "PpStageApproval", dependent: :destroy
   has_many :stage_assignees, class_name: "PpStageAssignee", dependent: :destroy

@@ -804,6 +804,7 @@ ar:
     errors:
       title_required: "أدخل العنوان بالعربية أو الإنجليزية."
       process_required: "مطلوب لهذا النوع من الوثائق"
+      reference_needs_name: "أدخل اسم المرجع أو اربط بندًا."
       package_other_company: "يجب أن تكون ضمن نفس الشركة"
       process_other_company: "يجب أن يكون ضمن نفس الشركة"
       review_before_effective: "يجب أن يكون في تاريخ السريان أو بعده"

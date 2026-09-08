@@ -17,6 +17,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `review-phase0b` | `f94570e` | One permission-aware navigation definition behind the sidebar and the mobile menu. |
 | `review-phase0c` | `43974d6` | Upload folder destination, document metadata editing, AI credit ledger. |
 | `review-phase0d` | `2cc054a` | Editable AI drafts; risk closure requires a justification. |
+| `phase-a-foundations` | *(this commit)* | Authority levels, classification, DoA/SLA/glossary record types, glossary + references, company branding. |
 
 ## Roll the code back
 ```bash

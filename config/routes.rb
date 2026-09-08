@@ -204,6 +204,9 @@ Rails.application.routes.draw do
     patch "notifications/:id/read", to: "notifications#mark_read", as: :notification_mark_read
 
     # General settings routes
+    get "branding", to: "branding#index", as: :branding
+    patch "branding", to: "branding#update", as: :update_branding
+
     get "general_settings", to: "general_settings#index", as: :general_settings
     patch "general_settings", to: "general_settings#update", as: :update_general_settings
     get "general_settings/export_analytics", to: "general_settings#export_analytics", as: :export_analytics, defaults: { format: :csv }

@@ -8,6 +8,14 @@
             <%= image_tag asset_path('logo.png'), class: "w-8 h-8 max-w-full h-auto rounded-full flex-shrink-0" %>
             <span class="font-bold text-[#5C3984] text-base sm:text-lg leading-tight hidden sm:inline"><%= t('way_to_excellence') %></span>
         <% end %>
+
+        <%# The company's own logo sits beside the WTE mark, never replacing it. %>
+        <% if current_user&.company&.brand_logo&.attached? %>
+            <span class="h-6 w-px bg-[#E3E3E3] flex-shrink-0" aria-hidden="true"></span>
+            <%= image_tag signed_file_url(current_user.company.brand_logo, disposition: "inline"),
+                class: "h-8 w-auto max-w-[140px] object-contain flex-shrink-0",
+                alt: current_user.company.name %>
+        <% end %>
         <!-- Sidebar Toggle Button (Desktop) -->
         <button id="sidebarToggle" class="hidden sm:flex p-2 min-h-[44px] min-w-[44px] text-gray-600 hover:text-purple-900 hover:bg-purple-100 bg-[#F7F7FD] rounded-lg transition-colors duration-200 flex-shrink-0 items-center justify-center" onclick="toggleSidebar()" aria-label="<%= t('toggle_sidebar', default: 'Toggle sidebar') %>">
             <%= image_tag asset_path('sidebar-toogle-icon.svg'), class: "w-5 h-5 max-w-full h-auto" %>
