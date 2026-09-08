@@ -33,6 +33,8 @@ class Company < ApplicationRecord
   has_many :pp_records, dependent: :destroy
   has_many :pp_stage_targets, dependent: :destroy
   has_many :glossary_terms, -> { ordered }, dependent: :destroy
+  has_many :authority_categories, -> { ordered }, dependent: :destroy
+  has_many :authorities, -> { ordered }, dependent: :destroy
   has_many :company_holidays, -> { order(:start_date) }, dependent: :destroy
   has_many :pp_diagrams, dependent: :destroy
   has_many :users, through: :company_users

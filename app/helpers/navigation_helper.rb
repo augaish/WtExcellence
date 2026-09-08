@@ -64,7 +64,9 @@ module NavigationHelper
       nav_item(label: t("documenter.title"), path: dashboard_documenter_path,
         icon: "calendar-03.png", active: request.path.include?("documenter")),
       nav_item(label: t("evaluation.title"), path: dashboard_process_evaluations_path,
-        icon: "score-start-icon.svg", active: request.path.include?("evaluation"))
+        icon: "score-start-icon.svg", active: request.path.include?("evaluation")),
+      nav_item(label: t("doa.title"), path: dashboard_authorities_path,
+        icon: "account-management-icon.svg", active: request.path.include?("authorities"))
     ]
   end
 

@@ -21,6 +21,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `phase-b-procedure` | *(this commit)* | Procedure steps with computed totals; operational authority matrix with its rules. |
 | `governance-slice-1` | *(this commit)* | Commitment timing vs workflow state, fulfilment basis, locale guard, English audit-log repair. |
 | `phase-c-documents` | *(this commit)* | Governed document assembly and branded print-ready rendering. |
+| `phase-d-executive-doa` | *(this commit)* | Executive authority matrix: categories, authorities, threshold bands, dynamic roles, findings. |
 
 ## Roll the code back
 ```bash

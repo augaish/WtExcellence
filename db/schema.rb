@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_083903) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_08_085444) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -134,6 +134,66 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_083903) do
     t.index ["company_id"], name: "index_audit_logs_on_company_id"
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["entity_type", "entity_id"], name: "index_audit_logs_on_entity_type_and_entity_id"
+  end
+
+  create_table "authorities", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.uuid "matrix_id", null: false
+    t.uuid "authority_category_id"
+    t.integer "number"
+    t.string "name_en", limit: 500
+    t.string "name_ar", limit: 500
+    t.text "notes"
+    t.uuid "basis_record_id"
+    t.uuid "basis_clause_id"
+    t.boolean "conflict_sensitive", default: false, null: false
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["authority_category_id"], name: "index_authorities_on_authority_category_id"
+    t.index ["basis_clause_id"], name: "index_authorities_on_basis_clause_id"
+    t.index ["basis_record_id"], name: "index_authorities_on_basis_record_id"
+    t.index ["company_id"], name: "index_authorities_on_company_id"
+    t.index ["matrix_id", "number"], name: "index_authorities_on_matrix_id_and_number"
+    t.index ["matrix_id"], name: "index_authorities_on_matrix_id"
+  end
+
+  create_table "authority_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "authority_band_id", null: false
+    t.string "level", limit: 20, null: false
+    t.uuid "org_unit_id"
+    t.string "dynamic_role", limit: 40
+    t.string "holder_title", limit: 250
+    t.string "condition", limit: 300
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["authority_band_id", "level"], name: "index_authority_assignments_on_authority_band_id_and_level"
+    t.index ["authority_band_id"], name: "index_authority_assignments_on_authority_band_id"
+    t.index ["org_unit_id"], name: "index_authority_assignments_on_org_unit_id"
+  end
+
+  create_table "authority_bands", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "authority_id", null: false
+    t.string "label_en", limit: 250
+    t.string "label_ar", limit: 250
+    t.decimal "min_amount", precision: 15, scale: 2
+    t.decimal "max_amount", precision: 15, scale: 2
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["authority_id"], name: "index_authority_bands_on_authority_id"
+  end
+
+  create_table "authority_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "company_id", null: false
+    t.string "code", limit: 50
+    t.string "name_en", limit: 250
+    t.string "name_ar", limit: 250
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_authority_categories_on_company_id"
   end
 
   create_table "capa_action_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1166,6 +1226,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_083903) do
   add_foreign_key "assignment_evaluations", "users", column: "evaluator_id"
   add_foreign_key "audit_logs", "companies"
   add_foreign_key "audit_logs", "users", column: "actor_user_id", on_delete: :nullify
+  add_foreign_key "authorities", "authority_categories"
+  add_foreign_key "authorities", "clauses", column: "basis_clause_id"
+  add_foreign_key "authorities", "companies"
+  add_foreign_key "authorities", "pp_records", column: "basis_record_id"
+  add_foreign_key "authorities", "pp_records", column: "matrix_id"
+  add_foreign_key "authority_assignments", "authority_bands"
+  add_foreign_key "authority_assignments", "org_units"
+  add_foreign_key "authority_bands", "authorities"
+  add_foreign_key "authority_categories", "companies"
   add_foreign_key "capa_action_assignments", "capa_actions"
   add_foreign_key "capa_action_assignments", "company_users"
   add_foreign_key "capa_actions", "capas"

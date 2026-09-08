@@ -1,0 +1,62 @@
+ar:
+  doa:
+    title: الصلاحيات والتفويض
+    matrix: مصفوفة الصلاحيات
+    category: الفئة
+    uncategorised: بدون فئة
+    authority: الصلاحية
+    band: الشريحة
+    basis: المرجع النظامي
+    no_basis: لم يُسجَّل مرجع نظامي
+    add_category: إضافة فئة
+    add_authority: إضافة صلاحية
+    add_band: إضافة شريحة
+    assign: إسناد
+    holder: صاحب الصلاحية
+    condition: الشرط
+    min_amount: من
+    max_amount: حتى
+    none: لم تُسجَّل أي صلاحيات في هذه المصفوفة بعد.
+    no_matrix: أنشئ سجلًا من نوع مصفوفة الصلاحيات التنفيذية للبدء.
+    select_matrix: المصفوفة
+    bands:
+      unbounded: جميع المبالغ
+      up_to: حتى %{max}
+      above: أكثر من %{min}
+      between: أكثر من %{min} وحتى %{max}
+    findings:
+      title: الملاحظات
+      none: لا توجد ملاحظات. لكل صلاحية صاحب اعتماد واحد ولا يوجد تعارض في المهام.
+      no_authorizer: لا يوجد صاحب صلاحية اعتماد نهائي.
+      many_authorizers: يوجد أكثر من صاحب صلاحية اعتماد نهائي.
+      segregation: يجمع صاحب واحد بين الإعداد والمراجعة والاعتماد لهذه الصلاحية.
+      missing_basis: لم يُسجَّل نظام أو سياسة كمرجع لهذه الصلاحية.
+    dynamic_roles:
+      owning_unit:
+        label: الوحدة المالكة
+        rule: الوحدة التنظيمية المالكة للإجراء أو الوثيقة محل القرار.
+      parent_unit:
+        label: الوحدة الأعلى
+        rule: الوحدة التي تعلو الوحدة المالكة مباشرة في الدليل التنظيمي المعتمد.
+      direct_manager:
+        label: المدير المباشر
+        rule: رئيس الوحدة التي تعلو الوحدة المالكة مباشرة.
+      concerned_unit:
+        label: الوحدة المعنية
+        rule: الوحدة التي يشمل اختصاصها موضوع القرار.
+    flash:
+      category_created: تمت إضافة الفئة.
+      authority_created: تمت إضافة الصلاحية.
+      band_created: تمت إضافة الشريحة.
+      assignment_created: تم إسناد الصلاحية.
+      deleted: تم الحذف.
+      not_found: هذا العنصر لم يعد موجودًا.
+      no_permission: ليست لديك صلاحية إدارة الصلاحيات.
+    errors:
+      category_name_required: أدخل اسم الفئة بالعربية أو الإنجليزية.
+      authority_name_required: أدخل الصلاحية بالعربية أو الإنجليزية.
+      matrix_wrong_type: يجب أن يكون سجل مصفوفة صلاحيات تنفيذية
+      holder_required: حدد وحدة تنظيمية أو دورًا أو منصبًا.
+      other_company: يجب أن ينتمي إلى نفس الشركة
+      max_below_min: يجب أن يكون أكبر من الحد الأدنى
+      bands_overlap: تتداخل هذه الشريحة مع شريحة أخرى لنفس الصلاحية، مما يجعل المصفوفة غير قادرة على تحديد من يقرر مبلغًا يقع في كلتيهما.

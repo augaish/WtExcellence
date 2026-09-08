@@ -1,0 +1,62 @@
+en:
+  doa:
+    title: "Authorities & Delegations"
+    matrix: "Authority matrix"
+    category: "Category"
+    uncategorised: "Uncategorised"
+    authority: "Authority"
+    band: "Band"
+    basis: "Basis"
+    no_basis: "No basis recorded"
+    add_category: "Add category"
+    add_authority: "Add authority"
+    add_band: "Add band"
+    assign: "Assign"
+    holder: "Holder"
+    condition: "Condition"
+    min_amount: "From"
+    max_amount: "Up to"
+    none: "No authorities recorded in this matrix yet."
+    no_matrix: "Create a record of type Executive Delegation of Authority to start a matrix."
+    select_matrix: "Matrix"
+    bands:
+      unbounded: "All amounts"
+      up_to: "Up to %{max}"
+      above: "Above %{min}"
+      between: "Above %{min} and up to %{max}"
+    findings:
+      title: "Findings"
+      none: "No findings. Every authority has one holder for final authorization and no conflicts of duty."
+      no_authorizer: "No holder carries final authorization."
+      many_authorizers: "More than one holder carries final authorization."
+      segregation: "One holder prepares, reviews and authorizes this authority."
+      missing_basis: "No regulation or policy is recorded as the basis for this authority."
+    dynamic_roles:
+      owning_unit:
+        label: "The owning unit"
+        rule: "The organizational unit that owns the process or document under decision."
+      parent_unit:
+        label: "The parent unit"
+        rule: "The unit directly above the owning unit in the approved organizational structure."
+      direct_manager:
+        label: "The direct manager"
+        rule: "The head of the unit directly above the owning unit."
+      concerned_unit:
+        label: "The concerned unit"
+        rule: "The unit whose mandate covers the subject of the decision."
+    flash:
+      category_created: "Category added."
+      authority_created: "Authority added."
+      band_created: "Band added."
+      assignment_created: "Authority assigned."
+      deleted: "Removed."
+      not_found: "That item no longer exists."
+      no_permission: "You don't have permission to manage authorities."
+    errors:
+      category_name_required: "Enter the category name in English or Arabic."
+      authority_name_required: "Enter the authority in English or Arabic."
+      matrix_wrong_type: "must be an Executive Delegation of Authority record"
+      holder_required: "Name an organizational unit, a role, or a position."
+      other_company: "must belong to the same company"
+      max_below_min: "must be greater than the lower bound"
+      bands_overlap: "This band overlaps another band of the same authority, so the matrix cannot say who decides an amount in both."

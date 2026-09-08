@@ -1,0 +1,162 @@
+<% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
+<% th = "px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase tracking-wider" %>
+
+<div class="p-6 space-y-6">
+  <%= render "dashboard/shared/page_header", title: t('doa.title'),
+      subtitle: @matrix&.display_title %>
+
+  <% if @matrix.nil? %>
+    <%= render "dashboard/shared/empty_state", icon: "account-management-icon.svg",
+        title: t('doa.matrix'), subtitle: t('doa.no_matrix') %>
+  <% else %>
+    <% if @matrices.size > 1 %>
+      <%= form_with url: dashboard_authorities_path, method: :get, class: "flex items-end gap-3" do %>
+        <div>
+          <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('doa.select_matrix') %></label>
+          <%= select_tag :matrix_id,
+              options_from_collection_for_select(@matrices, :id, :display_title, @matrix.id),
+              class: input, onchange: "this.form.requestSubmit()" %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <!-- Findings -->
+    <section class="bg-white border border-[#E3E3E3] rounded-lg p-5">
+      <h2 class="text-base font-semibold text-[#0D1120] mb-3"><%= t('doa.findings.title') %></h2>
+      <% if @report.any? %>
+        <ul class="space-y-2 text-sm">
+          <% @report.by_authority.each do |authority, findings| %>
+            <li class="rounded-lg bg-[#F7F7FD] border border-[#E3E3E3] px-4 py-3">
+              <p class="font-medium text-[#0D1120]"><%= authority.display_name %></p>
+              <ul class="mt-1 space-y-0.5 text-[#797C81]">
+                <% findings.each do |finding| %>
+                  <li>
+                    <%= finding.message %>
+                    <% if finding.band&.bounded? %>
+                      <span class="text-xs">(<%= finding.band.display_label %>)</span>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-sm text-[#797C81]"><%= t('doa.findings.none') %></p>
+      <% end %>
+    </section>
+
+    <!-- The matrix -->
+    <% if @authorities.empty? %>
+      <p class="text-sm text-[#797C81]"><%= t('doa.none') %></p>
+    <% else %>
+      <% @authorities.group_by(&:authority_category).each do |category, authorities| %>
+        <section class="bg-white border border-[#E3E3E3] rounded-lg">
+          <div class="p-5 border-b border-[#E3E3E3]">
+            <h2 class="text-base font-semibold text-[#0D1120]">
+              <%= category&.display_name || t('doa.uncategorised') %>
+            </h2>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-[#E3E3E3]">
+              <thead class="bg-[#F7F7FD]">
+                <tr>
+                  <th class="<%= th %>">#</th>
+                  <th class="<%= th %>"><%= t('doa.authority') %></th>
+                  <th class="<%= th %>"><%= t('doa.band') %></th>
+                  <% AuthorityLevel::KEYS.each do |level| %>
+                    <th class="<%= th %>" title="<%= AuthorityLevel.description(level) %>"><%= AuthorityLevel.label(level) %></th>
+                  <% end %>
+                  <th class="<%= th %>"></th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[#E3E3E3]">
+                <% authorities.each do |authority| %>
+                  <% authority.bands.each_with_index do |band, index| %>
+                    <tr>
+                      <% if index.zero? %>
+                        <td class="px-3 py-2 text-sm align-top" rowspan="<%= authority.bands.size %>"><%= authority.number %></td>
+                        <td class="px-3 py-2 text-sm align-top" rowspan="<%= authority.bands.size %>">
+                          <p class="text-[#0D1120]"><%= authority.display_name %></p>
+                          <p class="text-xs text-[#797C81] mt-1">
+                            <%= t('doa.basis') %>: <%= authority.basis_label.presence || t('doa.no_basis') %>
+                          </p>
+                        </td>
+                      <% end %>
+                      <td class="px-3 py-2 text-xs text-[#797C81] align-top"><%= band.display_label %></td>
+                      <% AuthorityLevel::KEYS.each do |level| %>
+                        <td class="px-3 py-2 text-sm align-top">
+                          <% holders = band.assignments.select { |a| a.level == level } %>
+                          <% if holders.empty? %>
+                            <span class="text-[#797C81]">-</span>
+                          <% else %>
+                            <% holders.each do |holder| %>
+                              <div class="mb-1">
+                                <%= holder.holder_label %>
+                                <%# A qualifier is shown, not reduced to an asterisk. %>
+                                <% if holder.condition.present? %>
+                                  <span class="block text-[11px] text-[#797C81]">(<%= holder.condition %>)</span>
+                                <% end %>
+                                <% if can_manage_authorities? %>
+                                  <%= button_to "×", dashboard_destroy_authority_assignment_path(holder, matrix_id: @matrix.id),
+                                      method: :delete, class: "text-[11px] text-[#797C81] hover:text-[#0D1120]" %>
+                                <% end %>
+                              </div>
+                            <% end %>
+                          <% end %>
+                        </td>
+                      <% end %>
+                      <td class="px-3 py-2 align-top">
+                        <% if can_manage_authorities? %>
+                          <%= render "dashboard/authorities/assign_form", band: band, matrix: @matrix,
+                              org_units: @org_units, input: input %>
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <% if can_manage_authorities? %>
+            <div class="p-5 border-t border-[#E3E3E3]">
+              <%= form_with url: dashboard_create_authority_path(matrix_id: @matrix.id), method: :post,
+                            scope: :authority, class: "grid gap-3 md:grid-cols-4" do |f| %>
+                <%= f.hidden_field :authority_category_id, value: category&.id %>
+                <%= f.text_field :name_en, placeholder: t('doa.authority') + " (EN)", class: input %>
+                <%= f.text_field :name_ar, placeholder: t('doa.authority') + " (AR)", class: input %>
+                <%= f.collection_select :basis_record_id,
+                    @matrix.company.pp_records.of_type("policy").ordered, :id, :display_title,
+                    { include_blank: t('doa.basis') }, class: input %>
+                <%= f.submit t('doa.add_authority'), class: ui_btn_primary %>
+              <% end %>
+            </div>
+          <% end %>
+        </section>
+      <% end %>
+    <% end %>
+
+    <% if can_manage_authorities? %>
+      <section class="bg-white border border-[#E3E3E3] rounded-lg p-5 grid gap-3 md:grid-cols-2">
+        <%= form_with url: dashboard_create_authority_category_path(matrix_id: @matrix.id), method: :post,
+                      scope: :authority_category, class: "flex gap-3" do |f| %>
+          <%= f.text_field :name_en, placeholder: t('doa.category') + " (EN)", class: input %>
+          <%= f.text_field :name_ar, placeholder: t('doa.category') + " (AR)", class: input %>
+          <%= f.submit t('doa.add_category'), class: ui_btn_secondary %>
+        <% end %>
+
+        <% if @authorities.any? %>
+          <%= form_with url: dashboard_create_authority_band_path(authority_id: @authorities.first.id, matrix_id: @matrix.id),
+                        method: :post, scope: :authority_band, class: "flex gap-3" do |f| %>
+            <%= f.collection_select :authority_id, @authorities, :id, :display_name, {}, class: input, name: "authority_id" %>
+            <%= f.number_field :min_amount, placeholder: t('doa.min_amount'), class: input %>
+            <%= f.number_field :max_amount, placeholder: t('doa.max_amount'), class: input %>
+            <%= f.submit t('doa.add_band'), class: ui_btn_secondary %>
+          <% end %>
+        <% end %>
+      </section>
+    <% end %>
+  <% end %>
+</div>

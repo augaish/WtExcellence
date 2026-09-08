@@ -154,6 +154,17 @@ Rails.application.routes.draw do
     end
 
     # Records + Packages (P&P)
+    # Executive Delegation of Authority
+    scope :authorities, controller: :authorities do
+      get "/", action: :index, as: :authorities
+      post "categories", action: :create_category, as: :create_authority_category
+      post "authorities", action: :create_authority, as: :create_authority
+      post "authorities/:authority_id/bands", action: :create_band, as: :create_authority_band
+      post "bands/:band_id/assignments", action: :create_assignment, as: :create_authority_assignment
+      delete "authorities/:id", action: :destroy_authority, as: :destroy_authority
+      delete "assignments/:id", action: :destroy_assignment, as: :destroy_authority_assignment
+    end
+
     resources :pp_records do
       member do
         post :attach_documents

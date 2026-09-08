@@ -1,0 +1,13 @@
+<%= form_with url: dashboard_create_authority_assignment_path(band_id: band.id, matrix_id: matrix.id),
+              method: :post, scope: :authority_assignment, class: "flex flex-wrap gap-1" do |f| %>
+  <%= f.select :level, AuthorityLevel::KEYS.map { |key| [ AuthorityLevel.label(key), key ] },
+      {}, class: "#{input} w-28 text-xs" %>
+  <%# A holder is a named unit, or a rule for finding one — which is what
+      replaces "the concerned deputy" in the source matrix. %>
+  <%= f.select :org_unit_id, options_from_collection_for_select(org_units, :id, :display_name),
+      { include_blank: t('doa.holder') }, class: "#{input} w-32 text-xs" %>
+  <%= f.select :dynamic_role, DynamicRole.options,
+      { include_blank: "—" }, class: "#{input} w-28 text-xs" %>
+  <%= f.text_field :condition, placeholder: t('doa.condition'), class: "#{input} w-28 text-xs" %>
+  <%= f.submit t('doa.assign'), class: "px-2 py-1 text-xs font-medium text-[#5C3984] rounded hover:bg-[#F6EEFF]" %>
+<% end %>
