@@ -7,11 +7,18 @@ Ordered by what I would do first.
 
 ## Security
 
-**Database password committed in plaintext** — `config/database.yml` carries a
-literal password for the development and test databases. Production connects
-via `DATABASE_URL` from Kamal secrets, so production is not exposed, but the
-value is in git history and should be rotated. Raised four times; never actioned
-because it needs a decision about the local development setup.
+**Rotate the leaked development database password.** The literal password has
+been removed from `config/database.yml` — credentials now come from
+`DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_HOST` — but removing it from the
+file does not remove it from git history. Anyone with repository access can
+still read it, so the password itself has to be changed anywhere it was used.
+Production was never exposed: it connects through `DATABASE_URL` from Kamal
+secrets.
+
+To run locally after this change:
+```
+export DATABASE_HOST=localhost DATABASE_PASSWORD=<your local password>
+```
 
 ## Correctness — review findings not yet fixed
 

@@ -20,12 +20,16 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 
+# Credentials come from the environment. A password committed here ends up in
+# git history for good, which is why the one that used to sit in this file has
+# to be treated as compromised and rotated. With no password set, libpq falls
+# back to PGPASSWORD or to whatever local authentication the socket allows.
 development:
   <<: *default
-  database: way_to_excellence_development
-
-  username: postgres
-  password: Patrick242004
+  database: <%= ENV.fetch("DATABASE_NAME", "way_to_excellence_development") %>
+  username: <%= ENV.fetch("DATABASE_USER", "postgres") %>
+  password: <%= ENV["DATABASE_PASSWORD"] %>
+  host: <%= ENV["DATABASE_HOST"] %>
 
   # The specified database role being used to connect to PostgreSQL.
   # To create additional roles in PostgreSQL see `$ createuser --help`.
@@ -59,9 +63,10 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: way_to_excellence_test
-  username: postgres
-  password: Patrick242004
+  database: <%= ENV.fetch("TEST_DATABASE_NAME", "way_to_excellence_test") %>
+  username: <%= ENV.fetch("DATABASE_USER", "postgres") %>
+  password: <%= ENV["DATABASE_PASSWORD"] %>
+  host: <%= ENV["DATABASE_HOST"] %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
