@@ -1398,7 +1398,7 @@ ar:
     visibility_help: الملفات العامة متاحة للجميع، بينما الملفات الخاصة متاحة لك ولمسؤولي
       الشركة فقط.
     visibility_private: خاص (متاح لك ولمسؤولي الشركة فقط)
-    visibility_public: عام (متاح للجميع)
+    visibility_public: "مرئي للشركة (أي شخص في شركتك)"
   file_size: حجم الملف
   linked_items: العناصر المرتبطة
   link_more: ربط المزيد
@@ -1823,13 +1823,13 @@ ar:
           all: نشطة + مؤرشفة
     overview_cards:
       open_capas: الحالات المفتوحة
-      assistant_interactions: تفاعلات المساعد
+      assistant_interactions: "المفتوحة حاليًا"
       high_priority: أولوية مرتفعة
       view_list: عرض القائمة
       overdue: متأخرة
       avg_resolution_time: المدة الزمنية لإغلاق الحالات
       days_label: أيام
-      ai_assessed: تقييم الذكاء الاصطناعي
+      ai_assessed: "عبر إجراءات CAPA المغلقة"
     overview_charts:
       resolved_over_time: CAPA المغلقة بمرور الوقت
       closed_vs_total: CAPA المغلقة مقابل الإجمالي

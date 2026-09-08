@@ -1,0 +1,9 @@
+ar:
+  # Arabic distinguishes six plural categories; English has two.
+  files_count:
+    zero: "لا توجد ملفات"
+    one: "ملف واحد"
+    two: "ملفان"
+    few: "%{count} ملفات"
+    many: "%{count} ملفًا"
+    other: "%{count} ملف"

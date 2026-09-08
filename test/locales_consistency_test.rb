@@ -45,7 +45,34 @@ class LocalesConsistencyTest < ActiveSupport::TestCase
     assert_empty missing, "these keys have no Arabic translation: #{missing.join(', ')}"
   end
 
+  # A key defined in two files with two different values is decided by load
+  # order, which is not a decision anyone made. It is how a corrected label came
+  # back unchanged: the fix was applied to one copy and the other won.
+  test "no key is defined twice with different values" do
+    I18n.available_locales.each do |locale|
+      values = Hash.new { |hash, key| hash[key] = {} }
+
+      LOCALE_FILES.each do |file|
+        tree = YAML.unsafe_load_file(file)[locale.to_s]
+        next if tree.nil?
+
+        leaf_paths(tree).each do |path|
+          values[path][File.basename(file)] = dig_path(tree, path)
+        end
+      end
+
+      conflicting = values.select { |_path, by_file| by_file.values.uniq.size > 1 }
+
+      assert_empty conflicting.keys.sort,
+        "#{locale}: defined more than once with different values, so load order decides which wins"
+    end
+  end
+
   private
+
+  def dig_path(tree, path)
+    path.split(".").reduce(tree) { |node, key| node.is_a?(Hash) ? node[key] : nil }
+  end
 
   # Records, per dotted path, whether each file treats it as a leaf or a branch.
   def record_shapes(tree, file, shapes, prefix = nil)

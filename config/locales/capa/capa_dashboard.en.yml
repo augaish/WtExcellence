@@ -12,13 +12,13 @@ en:
       no_assignments: "No assignments yet"
     overview_cards:
       open_capas: "Open CAPAs"
-      assistant_interactions: "Assistant Interactions"
+      assistant_interactions: "Currently open"
       high_priority: "High Priority"
       view_list: "View list"
       overdue: "Overdue"
       avg_resolution_time: "Avg. Resolution Time"
       days_label: "days"
-      ai_assessed: "AI-assessed"
+      ai_assessed: "Across closed CAPAs"
     overview_tables:
       assigned_to_me: "Assigned to Me"
       no_assigned: "No CAPAs assigned to you"

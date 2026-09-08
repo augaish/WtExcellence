@@ -45,8 +45,9 @@
             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#5C3984] flex-shrink-0" fill="none" stroke="currentColor" viewbox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
             </svg>
-            <span class="text-xs sm:text-sm font-medium text-[#0D1120]" data-folder-file-count><%= file_count %>
-                <%= t('files') %></span>
+            <%# Pluralised, so a folder with one file does not read "1 files". %>
+            <span class="text-xs sm:text-sm font-medium text-[#0D1120]"
+                  data-folder-file-count data-folder-file-count-value="<%= file_count %>"><%= t('files_count', count: file_count) %></span>
         </div>
 
         <% if _updated_date.present? %>

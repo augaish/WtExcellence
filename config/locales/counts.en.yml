@@ -1,0 +1,5 @@
+en:
+  files_count:
+    zero: "No files"
+    one: "1 file"
+    other: "%{count} files"
