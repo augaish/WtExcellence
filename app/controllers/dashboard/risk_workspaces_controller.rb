@@ -1,6 +1,7 @@
 class Dashboard::RiskWorkspacesController < Dashboard::BaseController
   before_action :authenticate_user!
-  before_action :ensure_can_manage_risks
+  before_action :ensure_can_view_governance, only: [ :index, :show ]
+  before_action :ensure_can_manage_risks, except: [ :index, :show ]
   before_action :set_risk_workspace, only: [ :show, :edit, :update, :destroy ]
 
   def index

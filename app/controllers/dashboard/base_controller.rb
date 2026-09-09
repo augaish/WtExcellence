@@ -167,6 +167,10 @@ class Dashboard::BaseController < ApplicationController
 
     # Shared permission guards for the GRC modules. Each denies with a proper
     # 303 redirect (browsers/Turbo follow 3xx, not 403+Location) or 403 JSON.
+    def ensure_can_view_governance
+      deny_grc_access(t("grc.no_permission_view")) unless current_user&.can_view_governance?
+    end
+
     def ensure_can_manage_risks
       deny_grc_access(t("grc.no_permission_risks")) unless current_user&.can_manage_risks?
     end

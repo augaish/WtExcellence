@@ -1,8 +1,8 @@
 class Dashboard::VendorsController < Dashboard::BaseController
   before_action :authenticate_user!
   requires_module :vendors
-  before_action :ensure_not_risk_manager_only
-  before_action :ensure_can_manage_vendors
+  before_action :ensure_can_view_governance, only: [ :index, :show ]
+  before_action :ensure_can_manage_vendors, except: [ :index, :show ]
   before_action :set_vendor, only: [ :show, :edit, :update, :destroy, :create_capa ]
 
   def index

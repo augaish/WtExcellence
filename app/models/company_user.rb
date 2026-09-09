@@ -67,11 +67,27 @@ class CompanyUser < ApplicationRecord
     company_admin? || company_quality_manager? || user&.platform_admin?
   end
 
-  # Risk management: company admins have full access; risk managers are
-  # scoped to the risk register (mirrors how quality managers are scoped to assessments)
-  def can_manage_risks?
+  # The licence rule: a risk-manager licence works the Governance modules
+  # (risks, vendors, commitments) and only reads Standards and P&P; a
+  # quality-manager licence works P&P and Standards and only reads Governance.
+  # Company admins do both.
+  def can_manage_governance?
     company_admin? || company_risk_manager? || user&.platform_admin?
   end
+
+  def can_view_governance?
+    can_manage_governance? || company_quality_manager?
+  end
+
+  def can_manage_quality?
+    company_admin? || company_quality_manager? || user&.platform_admin?
+  end
+
+  def can_view_quality?
+    can_manage_quality? || company_risk_manager?
+  end
+
+  alias can_manage_risks? can_manage_governance?
 
   def credit_balance
     assigned_credits || 0

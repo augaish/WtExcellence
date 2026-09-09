@@ -1,6 +1,7 @@
 class StandardsController < Dashboard::BaseController
   requires_module :standards
-  before_action :ensure_not_risk_manager_only
+  # A risk manager may read the standards; every write stays closed to them.
+  before_action :ensure_not_risk_manager_only, except: [ :index, :show, :standards_compliance, :clause_children, :versions, :compare, :job_status ]
   before_action :require_platform_admin, only: [
     :upload_standard,
     :retry_ingestion,

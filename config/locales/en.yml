@@ -2557,6 +2557,7 @@ en:
   owner: "Owner"
   grc:
     no_permission_risks: "You don't have permission to manage risks."
+    no_permission_view: "Your licence does not include the Governance modules."
     no_permission_vendors: "You don't have permission to manage vendors."
     no_permission_commitments: "You don't have permission to manage customer commitments."
     no_permission_ai_instructions: "You don't have permission to manage AI instructions."

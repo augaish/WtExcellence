@@ -1,7 +1,8 @@
 class Dashboard::RiskManagementController < Dashboard::BaseController
   before_action :authenticate_user!
   requires_module :risk
-  before_action :ensure_can_manage_risks
+  before_action :ensure_can_view_governance, only: [ :index, :show ]
+  before_action :ensure_can_manage_risks, except: [ :index, :show ]
   before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa ]
 
   def index
@@ -34,7 +35,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   # The appetite is a company-level threshold, set where the register that uses
   # it lives rather than buried in general settings.
   def update_appetite
-    unless current_user&.company_user&.has_admin_privileges? || current_user&.platform_admin?
+    unless current_user&.can_manage_governance?
       return redirect_to dashboard_risk_management_index_path,
         alert: t("risk_no_permission"), status: :see_other
     end

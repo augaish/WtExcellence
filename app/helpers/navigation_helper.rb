@@ -76,16 +76,16 @@ module NavigationHelper
       items << nav_item(label: t("doa.title"), path: dashboard_authorities_path,
         icon: "account-management-icon.svg", active: request.path.include?("authorities"))
     end
-    if current_user&.can_manage_risks? && module_enabled_for_current?(:risk)
+    if current_user&.can_view_governance? && module_enabled_for_current?(:risk)
       items << nav_item(label: t("risk_management"), path: dashboard_risk_management_index_path,
         icon: "score-start-icon.svg",
         active: request.path.include?("risk_management") || request.path.include?("risk_workspaces"))
     end
-    if current_user&.can_manage_vendors? && module_enabled_for_current?(:vendors)
+    if current_user&.can_view_governance? && module_enabled_for_current?(:vendors)
       items << nav_item(label: t("vendor_management"), path: dashboard_vendors_path,
         icon: "account-management-icon.svg", active: request.path.include?("vendors"))
     end
-    if current_user&.can_manage_commitments? && module_enabled_for_current?(:commitments)
+    if current_user&.can_view_governance? && module_enabled_for_current?(:commitments)
       items << nav_item(label: t("customer_commitments"), path: dashboard_customer_commitments_path,
         icon: "calendar-03.png", active: request.path.include?("customer_commitments"))
     end
@@ -123,9 +123,14 @@ module NavigationHelper
     items
   end
 
-  # Risk managers only ever see the Governance section, so every module outside
-  # it is hidden from them regardless of the company's module settings.
+  # A risk-manager licence works Governance and reads Standards and P&P; the
+  # rest of the product stays hidden from it.
+  READABLE_BY_RISK_MANAGERS = %i[pp standards org_structure].freeze
+
   def nav_module?(key)
-    module_enabled_for_current?(key) && !current_user&.risk_manager_only?
+    return false unless module_enabled_for_current?(key)
+    return true unless current_user&.risk_manager_only?
+
+    READABLE_BY_RISK_MANAGERS.include?(key.to_sym)
   end
 end

@@ -79,24 +79,26 @@ class User < ApplicationRecord
     company_user&.company_risk_manager?
   end
 
-  def can_manage_risks?
-    company_user&.can_manage_risks? || platform_admin?
+  # Governance (risks, vendors, commitments): risk managers and admins work
+  # it; quality managers read it.
+  def can_manage_governance?
+    company_user&.can_manage_governance? || platform_admin?
   end
 
-  def can_manage_commitments?
-    company_user&.has_admin_privileges? || platform_admin?
+  def can_view_governance?
+    company_user&.can_view_governance? || platform_admin?
   end
 
-  def can_manage_vendors?
-    company_user&.has_admin_privileges? || platform_admin?
-  end
+  alias can_manage_risks? can_manage_governance?
+  alias can_manage_commitments? can_manage_governance?
+  alias can_manage_vendors? can_manage_governance?
 
   def can_manage_ai_instructions?
     platform_admin?
   end
 
-  # A user whose only company role is Risk Manager — scoped to risk
-  # management only, with no access to CAPA, Standards, or Library.
+  # A user whose company role is Risk Manager: works Governance, reads
+  # Standards, P&P and the Library, and has no access to CAPA or the AI tools.
   def risk_manager_only?
     company_risk_manager? && !platform_admin?
   end

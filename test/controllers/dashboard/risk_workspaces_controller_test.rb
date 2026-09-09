@@ -47,16 +47,16 @@ class Dashboard::RiskWorkspacesControllerTest < ActionDispatch::IntegrationTest
     assert_response :see_other
   end
 
-  test "risk manager is blocked from CAPA management, Standards, and Library" do
+  test "risk manager is blocked from CAPA management but may read Standards and the Library" do
     sign_in @risk_manager_user, scope: :user
 
     get dashboard_capa_management_path
     assert_response :see_other
 
     get standards_path
-    assert_response :see_other
+    assert_response :success
 
     get library_path
-    assert_response :see_other
+    assert_response :success
   end
 end

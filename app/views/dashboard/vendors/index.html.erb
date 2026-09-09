@@ -3,7 +3,7 @@
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: { title: t('vendor_management'), subtitle: t('vendor_management_subtitle') } do %>
-      <%= link_to t('new_vendor'), new_dashboard_vendor_path, class: ui_btn_primary %>
+      <%= link_to t('new_vendor'), new_dashboard_vendor_path, class: ui_btn_primary if current_user&.can_manage_governance? %>
     <% end %>
 
     <%= render "dashboard/shared/register_filters", filter: @filter, path: dashboard_vendors_path %>

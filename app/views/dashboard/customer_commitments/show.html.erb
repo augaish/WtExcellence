@@ -7,10 +7,12 @@
         <%= link_to t('back_to_commitments'), dashboard_customer_commitments_path, class: "text-sm text-[#5C3984] hover:underline mb-2 inline-block" %>
         <h1 class="text-2xl font-bold text-[#0D1120]"><%= @commitment.title %></h1>
       </div>
+      <% if current_user&.can_manage_governance? %>
       <div class="flex items-center gap-3">
         <%= link_to t('edit'), edit_dashboard_customer_commitment_path(@commitment), class: ui_btn_secondary %>
         <%= link_to t('delete'), dashboard_customer_commitment_path(@commitment), data: { turbo_method: :delete, turbo_confirm: t('are_you_sure') }, class: ui_btn_danger %>
       </div>
+      <% end %>
     </div>
 
     <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 space-y-4">

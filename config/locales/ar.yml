@@ -2541,6 +2541,7 @@ ar:
   owner: "المالك"
   grc:
     no_permission_risks: "ليس لديك إذن لإدارة المخاطر."
+    no_permission_view: "لا تشمل رخصتك وحدات الحوكمة."
     no_permission_vendors: "ليس لديك إذن لإدارة الموردين."
     no_permission_commitments: "ليس لديك إذن لإدارة التزامات العملاء."
     no_permission_ai_instructions: "ليس لديك إذن لإدارة تعليمات الذكاء الاصطناعي."

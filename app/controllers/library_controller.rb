@@ -1,6 +1,7 @@
 class LibraryController < DashboardController
   requires_module :library
-  before_action :ensure_not_risk_manager_only
+  # The Library holds the published documents; a risk manager may read it.
+  before_action :ensure_not_risk_manager_only, except: [ :index, :show ]
 
   def index
     # For super admins and delegated admins, show company selection if no company_id is provided
