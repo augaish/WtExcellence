@@ -4,7 +4,6 @@
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: { title: t('documenter.title'), subtitle: t('documenter.subtitle') } do %>
       <% if can_manage_documenter? %>
-        <%= link_to t('documenter.settings'), dashboard_documenter_settings_path, class: ui_btn_neutral %>
       <% end %>
     <% end %>
 

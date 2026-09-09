@@ -185,7 +185,7 @@ class Dashboard::DocumenterControllerTest < ActionDispatch::IntegrationTest
 
   test "settings renders every stage target and the working week" do
     sign_in @admin
-    get dashboard_documenter_settings_path
+    get dashboard_general_settings_documenter_path
 
     assert_response :success
     PpStage::KEYS.each do |key|
@@ -224,7 +224,7 @@ class Dashboard::DocumenterControllerTest < ActionDispatch::IntegrationTest
 
   test "a contributor cannot open Documenter settings" do
     sign_in @contributor
-    get dashboard_documenter_settings_path
+    get dashboard_general_settings_documenter_path
 
     assert_redirected_to dashboard_documenter_path
   end

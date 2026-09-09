@@ -10,7 +10,10 @@
 # Each box carries the unit's id, so the page can open its mandate when clicked.
 class OrgChartRenderer
   BOX_WIDTH = 190
-  BOX_HEIGHT = 56
+  BOX_HEIGHT = 68
+  TEXT_INSET = 16
+  # A name longer than this is wrapped onto a second line; longer still is cut.
+  LINE_CHARS = 24
   H_GAP = 18
   V_GAP = 64
   PADDING = 24
@@ -41,7 +44,7 @@ class OrgChartRenderer
     layout!
     <<~SVG.html_safe
       <svg viewBox="0 0 #{canvas_width} #{canvas_height}" width="#{canvas_width}" height="#{canvas_height}"
-           xmlns="http://www.w3.org/2000/svg" role="group"
+           xmlns="http://www.w3.org/2000/svg" role="group" direction="#{direction}"
            aria-label="#{escape(I18n.t('org_structure.chart.title', locale: locale))}">
         <title>#{escape(I18n.t('org_structure.chart.title', locale: locale))}</title>
         #{connectors_svg}
@@ -124,6 +127,7 @@ class OrgChartRenderer
     unit = position[:unit]
     colour = group_colour(unit)
     name = unit.display_name(locale)
+    lines = wrap_label(name)
 
     # The whole box is the control, so the click target is the box a reader
     # already sees rather than a small link inside it.
@@ -134,13 +138,39 @@ class OrgChartRenderer
          aria-label="#{escape(name)}">
         <rect x="#{position[:x]}" y="#{position[:y]}" width="#{BOX_WIDTH}" height="#{BOX_HEIGHT}"
               rx="8" fill="#FFFFFF" stroke="#{BORDER}" stroke-width="1" />
-        <rect x="#{position[:x]}" y="#{position[:y]}" width="5" height="#{BOX_HEIGHT}"
+        <rect x="#{accent_x(position)}" y="#{position[:y]}" width="5" height="#{BOX_HEIGHT}"
               rx="2" fill="#{colour}" />
-        <text x="#{position[:x] + 16}" y="#{position[:y] + 23}" font-size="12" font-weight="600"
-              fill="#{TEXT}">#{escape(truncate_label(name))}</text>
-        <text x="#{position[:x] + 16}" y="#{position[:y] + 40}" font-size="10" fill="#{MUTED}">#{escape(subtitle(unit))}</text>
+        <text x="#{text_x(position)}" y="#{position[:y] + 22}" font-size="12" font-weight="600"
+              text-anchor="#{text_anchor}" fill="#{TEXT}">#{escape(lines[0])}</text>
+        <text x="#{text_x(position)}" y="#{position[:y] + 37}" font-size="12" font-weight="600"
+              text-anchor="#{text_anchor}" fill="#{TEXT}">#{escape(lines[1])}</text>
+        <text x="#{text_x(position)}" y="#{position[:y] + 54}" font-size="10"
+              text-anchor="#{text_anchor}" fill="#{MUTED}">#{escape(subtitle(unit))}</text>
       </g>
     BOX
+  end
+
+  # Text is anchored to the side it is read from. Inside an Arabic page an SVG
+  # inherits right-to-left direction, so a start-anchored label at the left
+  # edge would run out of the box to the left — which is exactly what happened.
+  def rtl?
+    locale.to_s.start_with?("ar")
+  end
+
+  def direction
+    rtl? ? "rtl" : "ltr"
+  end
+
+  def text_anchor
+    rtl? ? "end" : "start"
+  end
+
+  def text_x(position)
+    rtl? ? position[:x] + BOX_WIDTH - TEXT_INSET : position[:x] + TEXT_INSET
+  end
+
+  def accent_x(position)
+    rtl? ? position[:x] + BOX_WIDTH - 5 : position[:x]
   end
 
   def subtitle(unit)
@@ -152,10 +182,24 @@ class OrgChartRenderer
     unit.org_group&.color.presence || PRIMARY
   end
 
-  # SVG has no text wrapping, so a long name is cut rather than allowed to run
-  # over the next box. The full name stays available in the box's label.
-  def truncate_label(name)
-    name.to_s.length > 26 ? "#{name[0, 25]}…" : name.to_s
+  # SVG has no text wrapping, so the name is broken into two lines by hand at
+  # word boundaries. Anything beyond the second line is cut; the full name
+  # stays available in the box's label and the text tree beside the chart.
+  def wrap_label(name)
+    words = name.to_s.split(/\s+/)
+    lines = [ "" ]
+    words.each do |word|
+      candidate = [ lines.last, word ].reject(&:empty?).join(" ")
+      if candidate.length <= LINE_CHARS || lines.last.empty?
+        lines[-1] = candidate
+      else
+        lines << word
+      end
+    end
+    lines = lines.first(2)
+    lines[1] = "#{lines[1][0, LINE_CHARS - 1]}…" if lines[1] && (lines[1].length > LINE_CHARS || words.join(" ").length > lines.join(" ").length)
+    lines[0] = "#{lines[0][0, LINE_CHARS - 1]}…" if lines[0].length > LINE_CHARS && lines[1].nil?
+    [ lines[0], lines[1].to_s ]
   end
 
   def empty_svg

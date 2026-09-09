@@ -109,6 +109,7 @@ Rails.application.routes.draw do
 
     # Org Structure (Main Menu) — company org chart used across P&P
     get "org_units/chart", to: "org_units#chart", as: :org_units_chart
+    post "org_units/build_library", to: "org_units#build_library", as: :org_units_build_library
     resources :org_units, except: [ :show ] do
       collection do
         get :import
@@ -244,6 +245,7 @@ Rails.application.routes.draw do
     patch "branding", to: "branding#update", as: :update_branding
 
     get "general_settings", to: "general_settings#index", as: :general_settings
+    get "general_settings/documenter", to: "documenter#settings", as: :general_settings_documenter
     patch "general_settings", to: "general_settings#update", as: :update_general_settings
     get "general_settings/export_analytics", to: "general_settings#export_analytics", as: :export_analytics, defaults: { format: :csv }
     resources :credit_changes, only: [ :index, :update ], controller: :credit_changes

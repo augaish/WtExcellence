@@ -9,6 +9,7 @@ class OrgUnit < ApplicationRecord
   has_many :children, -> { order(:sort_order, :created_at) },
     class_name: "OrgUnit", foreign_key: "parent_id", dependent: :restrict_with_error
   has_many :members, class_name: "User", foreign_key: "org_unit_id", dependent: :nullify
+  has_one :library_folder, class_name: "Folder", foreign_key: "org_unit_id", dependent: :nullify
   has_many :owned_processes, class_name: "PpProcess", foreign_key: "owner_org_unit_id", dependent: :nullify
 
   validates :level, presence: true,

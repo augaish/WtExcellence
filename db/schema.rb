@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_08_180001) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_09_111241) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -633,8 +633,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_180001) do
     t.uuid "company_id"
     t.string "color", default: "#5C3984", null: false
     t.uuid "parent_id"
+    t.uuid "org_unit_id"
     t.index ["company_id"], name: "index_folders_on_company_id"
     t.index ["created_by"], name: "index_folders_on_created_by"
+    t.index ["org_unit_id"], name: "index_folders_on_org_unit_id", unique: true
     t.index ["parent_id"], name: "index_folders_on_parent_id"
   end
 
@@ -1390,6 +1392,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_08_180001) do
   add_foreign_key "evidence_attachments", "uploads"
   add_foreign_key "folders", "companies"
   add_foreign_key "folders", "folders", column: "parent_id"
+  add_foreign_key "folders", "org_units", on_delete: :nullify
   add_foreign_key "glossary_terms", "companies"
   add_foreign_key "ingestion_jobs", "uploads", column: "input_pdf_id"
   add_foreign_key "notifications", "users", column: "recipient_id"

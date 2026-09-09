@@ -11,6 +11,9 @@ class Folder < ApplicationRecord
   belongs_to :company, optional: true
   belongs_to :creator, class_name: "User", foreign_key: "created_by", optional: true
   belongs_to :parent, class_name: "Folder", optional: true
+  # Set when the folder was built from the organization structure, so a rebuild
+  # finds and updates the same folder instead of creating a second one.
+  belongs_to :org_unit, class_name: "OrgUnit", optional: true
   has_many :children, class_name: "Folder", foreign_key: "parent_id", dependent: :destroy
   has_many :uploads, dependent: :destroy
 

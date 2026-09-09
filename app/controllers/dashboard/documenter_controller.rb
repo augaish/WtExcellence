@@ -203,9 +203,9 @@ class Dashboard::DocumenterController < Dashboard::BaseController
       end
     end
 
-    redirect_to dashboard_documenter_settings_path, notice: t("documenter.flash.settings_saved"), status: :see_other
+    redirect_to dashboard_general_settings_documenter_path, notice: t("documenter.flash.settings_saved"), status: :see_other
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to dashboard_documenter_settings_path, alert: e.record.errors.full_messages.to_sentence, status: :see_other
+    redirect_to dashboard_general_settings_documenter_path, alert: e.record.errors.full_messages.to_sentence, status: :see_other
   end
 
   def create_holiday
@@ -214,15 +214,15 @@ class Dashboard::DocumenterController < Dashboard::BaseController
     )
 
     if holiday.save
-      redirect_to dashboard_documenter_settings_path, notice: t("documenter.flash.holiday_added"), status: :see_other
+      redirect_to dashboard_general_settings_documenter_path, notice: t("documenter.flash.holiday_added"), status: :see_other
     else
-      redirect_to dashboard_documenter_settings_path, alert: holiday.errors.full_messages.to_sentence, status: :see_other
+      redirect_to dashboard_general_settings_documenter_path, alert: holiday.errors.full_messages.to_sentence, status: :see_other
     end
   end
 
   def destroy_holiday
     company.company_holidays.find_by(id: params[:holiday_id])&.destroy
-    redirect_to dashboard_documenter_settings_path, notice: t("documenter.flash.holiday_removed"), status: :see_other
+    redirect_to dashboard_general_settings_documenter_path, notice: t("documenter.flash.holiday_removed"), status: :see_other
   end
 
   private

@@ -46,5 +46,27 @@ Procedure: same, with Procedure Design → Design Review inserted after Stakehol
 - Send for Publishing: either assign a publisher contributor (pastes link, presses Publish, QM confirms) or "publish in system only" (straight to Published).
 - Published: PDF generated from the filled template, saved in the owner unit's library folder, notification to all company users.
 
-## Open questions
-See the chat message; answers will be recorded here before work starts.
+## Decisions (answered)
+- P&P Manager = a user with the QM licence, one or more per company, set by company admin in Account Management.
+- Level 0 is fixed to the three bands; the company may rename them. Plus sign on Level 1 and Level 2 only.
+- Anything typed in English or Arabic is translated by the system into the other language; the client may edit the translation.
+- All existing process data is test data: delete it in the migration. Procedures are level 3 and live in Records.
+- The objective text (circle) is set on the Process Architecture page.
+- SLA, guideline, charter, work instruction: not needed now (will become library folders later).
+- Codes: TYPE-UNIT-NUMBER-Vn, e.g. POL-HR-001-V1; procedures use the architecture number: PROC-HR-1.2.4.12-V1.
+- Glossary: a record with a short flow: any contributor under a P&P Manager can log a term; approval by the P&P Manager makes it visible to all users.
+- Packages unchanged; records are added from the package window.
+- Old versions readable by QMs and company admins only; others see only the latest version.
+- "Same function" = the unit head's reporters as defined in the org structure (everyone in the company holds a contributor licence and is placed in the org).
+- Auto-approval counts working days; the option exists for Final Approval too.
+- After a stakeholder rejection the P&P Manager chooses whether to re-send to the rejecting units only or to all.
+- A Final Approval rejection keeps the record in place unless the P&P Manager or company admin sends it back to a chosen stage, fixes it, then re-sends to the refuser.
+- Data Verification contributor is chosen by the person who logs the record.
+- PDF: headless Chromium printing the document page (design can be improved later).
+- Publish notification: in-app only. Published records are read-only; changes go through "Update existing".
+- Only the team under the company admin may add records, not any contributor.
+
+## Still open
+- What is "the team under the company admin"? (proposal: company admins, quality managers and the contributors assigned under a P&P Manager)
+- Translation engine: use the existing LLM provider (OpenRouter) and charge credits, or free of charge?
+- Procedure number: how is 1.2.4.12 composed? (proposal: L1 number . L2 number . procedure sequence)

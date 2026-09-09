@@ -4,7 +4,7 @@ class Dashboard::OrgUnitsController < Dashboard::BaseController
   before_action :ensure_company_present
   before_action :ensure_can_manage, only: [
     :new, :create, :edit, :update, :destroy, :toggle_active,
-    :import, :run_import, :settings, :update_settings
+    :import, :run_import, :settings, :update_settings, :build_library
   ]
   before_action :set_org_unit, only: [ :edit, :update, :destroy, :toggle_active ]
 
@@ -39,6 +39,15 @@ class Dashboard::OrgUnitsController < Dashboard::BaseController
     @units = scope.order(:level, :sort_order, :name_en).to_a
     @groups = company.org_groups.to_a
     @show_inactive = params[:show_inactive] == "1"
+  end
+
+  # Builds (or refreshes) the Library folders that mirror the structure.
+  def build_library
+    result = OrgLibraryBuilder.build(company, user: current_user)
+    log_action("build_library")
+    redirect_to dashboard_org_units_path,
+      notice: t("org_structure.flash.library_built", created: result.created, updated: result.updated),
+      status: :see_other
   end
 
   def new

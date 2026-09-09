@@ -69,4 +69,29 @@ class OrgChartRendererTest < ActiveSupport::TestCase
     assert_not_includes output, "<script>"
     assert_includes output, "&lt;script&gt;"
   end
+
+  test "Arabic labels are anchored to the right edge so they stay inside the box" do
+    unit = @company.org_units.create!(name_en: "Legal", name_ar: "الإدارة القانونية", level: 1)
+    output = OrgChartRenderer.render([ unit ], locale: :ar)
+
+    assert_includes output, 'direction="rtl"'
+    assert_includes output, 'text-anchor="end"'
+    assert_includes output, "الإدارة القانونية"
+    # The anchor point is the inner right edge, not the left one.
+    assert_includes output, %(x="#{OrgChartRenderer::PADDING + OrgChartRenderer::BOX_WIDTH - OrgChartRenderer::TEXT_INSET}")
+  end
+
+  test "English labels stay anchored to the left" do
+    output = svg
+    assert_includes output, 'direction="ltr"'
+    assert_includes output, 'text-anchor="start"'
+  end
+
+  test "a long name wraps onto a second line instead of running out of the box" do
+    unit = @company.org_units.create!(name_en: "General Directorate of Institutional Excellence", level: 1)
+    output = OrgChartRenderer.render([ unit ])
+
+    assert_includes output, ">General Directorate of<"
+    assert_includes output, ">Institutional Excellence<"
+  end
 end

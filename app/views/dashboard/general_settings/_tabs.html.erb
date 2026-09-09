@@ -1,0 +1,15 @@
+<%# Settings are one place with tabs: the user's own profile, then the
+    company-wide areas the user is allowed to manage. %>
+<% tabs = [ [ :profile, t('settings_tabs.profile'), dashboard_general_settings_path ] ] %>
+<% tabs << [ :documenter, t('settings_tabs.documenter'), dashboard_general_settings_documenter_path ] if can_manage_documenter_settings? %>
+<nav class="mb-6 border-b border-[#E3E3E3]" aria-label="<%= t('settings') %>">
+  <ul class="flex flex-wrap gap-6 -mb-px">
+    <% tabs.each do |key, label, path| %>
+      <li>
+        <%= link_to label, path,
+              class: "inline-block pb-3 text-sm font-medium border-b-2 transition-colors #{key == current ? 'border-[#5C3984] text-[#5C3984]' : 'border-transparent text-[#797C81] hover:text-[#0D1120]'}",
+              "aria-current": (key == current ? "page" : nil) %>
+      </li>
+    <% end %>
+  </ul>
+</nav>

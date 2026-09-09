@@ -121,4 +121,24 @@ class Dashboard::OrgUnitsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_includes response.body, "code,name_en,name_ar,level,parent_code"
   end
+
+  test "admin builds the library folders from the structure" do
+    sign_in @admin
+    @company.org_units.create!(name_en: "Finance", level: 2, parent: @ceo)
+
+    assert_difference -> { Folder.where(company_id: @company.id).count }, 2 do
+      post dashboard_org_units_build_library_path
+    end
+    assert_redirected_to dashboard_org_units_path
+    assert_equal Folder.find_by(org_unit_id: @ceo.id), Folder.find_by(name: "Finance", company_id: @company.id).parent
+  end
+
+  test "a viewer cannot build the library folders" do
+    sign_in @viewer
+
+    assert_no_difference -> { Folder.count } do
+      post dashboard_org_units_build_library_path
+    end
+    assert_redirected_to dashboard_org_units_path
+  end
 end

@@ -27,6 +27,18 @@ class Dashboard::PpRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", dashboard_pp_packages_path
   end
 
+  test "the add button names the open tab and Packages sits beside it" do
+    sign_in @admin
+    get dashboard_pp_records_path(record_type: "policy")
+
+    assert_response :success
+    assert_select "a[href=?]", new_dashboard_pp_record_path(record_type: "policy"), text: "Add Policy"
+    assert_select "a[href=?]", dashboard_pp_packages_path, text: I18n.t("pp_records.packages.title")
+
+    get dashboard_pp_records_path
+    assert_select "a[href=?]", new_dashboard_pp_record_path, text: I18n.t("pp_records.add_record")
+  end
+
   test "the type tab filters the list" do
     sign_in @admin
     @company.pp_records.create!(record_type: "form", title_en: "Request Form")

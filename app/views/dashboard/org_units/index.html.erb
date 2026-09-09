@@ -6,6 +6,8 @@
       <%= link_to t('org_structure.chart.chart_view'), dashboard_org_units_chart_path, class: ui_btn_neutral %>
       <% if can_manage_org_structure? %>
         <%= link_to t('org_structure.settings'), settings_dashboard_org_units_path, class: ui_btn_neutral %>
+        <%= button_to t('org_structure.build_library'), dashboard_org_units_build_library_path, method: :post,
+              form: { data: { turbo_confirm: t('org_structure.build_library_confirm') } }, class: ui_btn_neutral %>
         <%= link_to t('org_structure.import_title'), import_dashboard_org_units_path, class: ui_btn_secondary %>
         <%= link_to t('org_structure.add_unit'), new_dashboard_org_unit_path, class: ui_btn_primary %>
       <% end %>
