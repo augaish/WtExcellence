@@ -77,3 +77,23 @@ Procedure: same, with Procedure Design → Design Review inserted after Stakehol
 - Approvals (PpStageApproval): unit heads answer in their own worklist; sequence groups; auto-approval after N working days (daily job); resend to rejecting units or all; skip only Stakeholder Review and only when nobody was asked.
 - Content: clauses + sub-clauses with comments for policies; steps on the procedure record (drawn into the diagram and kept in sync); forms/services/glossary show their card.
 - Publishing: assign a publisher (link, then manager confirms) or system-only; PDF printed by headless Chromium into the owning unit's Library folder; in-app notification to everyone; glossary approval creates the company term.
+
+## Phase 5 (planned): Branding preview, Authorities & Delegations redesign, Org tab polish
+Status: DRAFT — questions open (see chat). Nothing built yet.
+
+### Branding
+- Logo shown broken after upload: the page builds a signed storage URL for the image; the fix is to serve the logo through the app itself (`/dashboard/branding/logo`), which works whatever the storage is, and to use that same route on the document cover.
+- Live preview: choosing a file or a colour updates the preview box (logo beside the WTE logo, primary/accent colours) before saving; Save persists, Cancel reverts.
+
+### Authorities & Delegations
+- Empty at first: no matrix is created until the company adds its first category. Suggested starting points become an icon/button at the top that opens the catalogue to pick from.
+- Top buttons (company admin and Governance Manager = risk-manager licence only): Add category · Download as PDF · Send for approval (only when there are changes since the last approved version) · Delegations.
+- Categories: numbered by position; drag to reorder; new ones take the last number; pencil icon to rename inline; collapse/expand; search box that filters as you type.
+- Bands: removed (see explanation in chat) once confirmed.
+- Holder chips: person icon for a user, structure icon for a unit; dynamic roles: structure icon for unit roles, person icon for "direct manager".
+- Delegations: a panel behind the fourth button; a delegated authority shows in the main table with a different colour and a "Delegated" tag, with the original holder visible on that authority.
+- Operational DoA: rows link to a step of the procedure (from the Documenter) and, optionally, to an executive authority.
+
+### Org tab
+- Structure Settings: remove the level-names section; levels fixed up to 9.
+- Chart: the unit-details box appears only after a box is selected; zoom + / − buttons in the chart corner.
