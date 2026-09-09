@@ -35,7 +35,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Phase 3: Records journeys per type, auto codes, "Update existing" versions, authoring rule | `72e266f` | Additive migration: journey fields on pp_records, pp_record_links, pp_record_participants. Procedures now require a level-2 process. |
 | Phase 4: Documenter flows (roles, clauses, steps on procedures, stakeholder/final approvals, publishing with PDF) | `9bb61dd` | **Destructive migration**: clears every record except the authority matrices, plus stage history, approvals, tasks, record diagrams (test data, per owner). Adds `pp_manager` on company_users, clause/comment/task tables, decision columns on approvals, journey columns on records, `pp_record_id` on steps. Docker image now installs Chromium (`CHROMIUM_BIN`). Restore from the pre-deploy backup to get rows back. |
 | Phase 5: branding preview + app-served logo, Authorities redesign (no bands, ordered categories, review round, Governance Manager), operational DoA on procedure steps, org tab polish | `058a73f` | Additive migration: `gov_manager` on company_users, `limit_text` on authorities, `authority_matrix_reviews`, record/step links on pp_process_authorities. Level names for org units are no longer shown (table kept). |
-| Licence rule across modules + P&P split into three switches (Process Architecture, P&P, Authorities & Delegations) | `PENDING_SHA` | No migration. New module keys default to on. |
+| Licence rule across modules + P&P split into three switches (Process Architecture, P&P, Authorities & Delegations) | `8a0a4fc` | No migration. New module keys default to on. |
 
 ## Roll the code back
 ```bash
