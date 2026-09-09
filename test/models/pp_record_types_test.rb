@@ -5,7 +5,7 @@ require "test_helper"
 class PpRecordTypesTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Types Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
-    @process = @company.pp_processes.create!(name_en: "Procurement", level: 1, category: "core")
+    @process = @company.pp_processes.create!(name_en: "Procurement", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "Procurement", level: 1, category: "core"))
   end
 
   test "the new governed types are available and named in both locales" do

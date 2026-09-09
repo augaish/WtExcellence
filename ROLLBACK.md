@@ -32,6 +32,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `retest-batch-three` | *(this commit)* | Retry this question; rejected forms keep values; formatted AI answers and live balance; accessibility pass; Gate C delegation matrix; published-version immutability. |
 | Phase 1 of records/documenter plan: Arabic chart labels, library folders from org, settings tabs, per-tab add button | `71a0c1b` | Additive migration: `org_unit_id` on folders |
 | Phase 2: Process Architecture Level 0/1/2, model view, architecture settings | `39a45af` | **Destructive migration**: empties pp_processes, steps, authorities, process diagrams (test data, per owner); adds `number` to pp_processes and band names/objective to companies. Restore from the pre-deploy backup to get the rows back. |
+| Phase 3: Records journeys per type, auto codes, "Update existing" versions, authoring rule | `PENDING_SHA` | Additive migration: journey fields on pp_records, pp_record_links, pp_record_participants. Procedures now require a level-2 process. |
 
 ## Roll the code back
 ```bash

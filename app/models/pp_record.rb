@@ -9,9 +9,20 @@ class PpRecord < ApplicationRecord
     executive_doa operational_doa sla glossary
   ].freeze
 
+  # The types with a tab and a journey of their own in Records. The rest stay
+  # readable under "All" (the authority matrices are managed under Governance).
+  TAB_TYPES = %w[policy procedure form service glossary].freeze
+
   # The two authority matrices. The operational one must conform to the
   # executive one, which is why they are named together.
   DOA_TYPES = %w[executive_doa operational_doa].freeze
+
+  # Procedure card vocabularies, shared with the process card so the two read
+  # the same way.
+  FREQUENCIES = PpProcess::FREQUENCIES
+  AUTOMATION_STATUSES = PpProcess::AUTOMATION_STATUSES
+  TIME_UNITS = PpProcess::TIME_UNITS
+  SERVICE_TYPES = %w[internal external].freeze
 
   # Types that document how work is carried out must hang off a process; the
   # enterprise-wide types may stand alone.
@@ -23,7 +34,9 @@ class PpRecord < ApplicationRecord
   # have no process; validating them now would make those records uneditable.
   # An operational matrix is new, so it can be held to the rule from the start.
   # Backfilling the rest needs a data check first — see the audit note.
-  PROCESS_ENFORCED_TYPES = %w[operational_doa].freeze
+  # A procedure is level 3 of the architecture, so it must hang off a level-2
+  # process from the day the journeys were split by type.
+  PROCESS_ENFORCED_TYPES = %w[operational_doa procedure].freeze
 
   # Stages that count as "done" for package progress. The Documenter (Phase 3)
   # owns the full sequence; these are the terminal ones.
@@ -70,6 +83,19 @@ class PpRecord < ApplicationRecord
   belongs_to :previous_version, class_name: "PpRecord", optional: true
   has_one :next_version, class_name: "PpRecord", foreign_key: "previous_version_id", dependent: :nullify
 
+  # Procedure card: what runs before and after, and what it implements or uses.
+  belongs_to :predecessor_record, class_name: "PpRecord", optional: true
+  belongs_to :successor_record, class_name: "PpRecord", optional: true
+  has_many :links, class_name: "PpRecordLink", foreign_key: "pp_record_id", dependent: :destroy
+  has_many :related_policies, -> { where(pp_record_links: { kind: "related_policy" }) },
+    through: :links, source: :linked_record
+  has_many :forms_used, -> { where(pp_record_links: { kind: "form_used" }) },
+    through: :links, source: :linked_record
+
+  # Service card: the units that take part besides the owning (providing) unit.
+  has_many :participants, class_name: "PpRecordParticipant", foreign_key: "pp_record_id", dependent: :destroy
+  has_many :participating_units, through: :participants, source: :org_unit
+
   validates :record_type, presence: true, inclusion: { in: TYPES }
   validates :classification, inclusion: { in: DocumentClassification::KEYS }
   validates :code, length: { maximum: 50 }, allow_blank: true
@@ -83,6 +109,19 @@ class PpRecord < ApplicationRecord
   validate :process_must_be_same_company
   validate :review_after_effective
   validate :process_required_for_type
+  validate :procedure_process_must_be_level_two
+  validate :reason_required_for_new_version
+  validates :frequency, inclusion: { in: FREQUENCIES }, allow_blank: true
+  validates :automation_status, inclusion: { in: AUTOMATION_STATUSES }, allow_blank: true
+  validates :total_time_unit, inclusion: { in: TIME_UNITS }, allow_blank: true
+  validates :total_time_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :service_type, inclusion: { in: SERVICE_TYPES }, allow_blank: true
+  validates :scope, :requirements, :beneficiaries, :channels, :delivery_stages, :inputs, :outputs,
+    :technical_systems, :kpis, length: { maximum: 5000 }
+  validates :trigger_text, length: { maximum: 500 }
+  validates :delivery_period, length: { maximum: 250 }
+
+  before_validation :assign_code_and_sequence
 
   scope :active, -> { where(active: true) }
   scope :ordered, -> { order(:record_type, :code, :created_at) }
@@ -90,6 +129,9 @@ class PpRecord < ApplicationRecord
   scope :unpackaged, -> { where(package_id: nil) }
   scope :in_package, ->(package) { where(package_id: package.id) }
   scope :due_for_review, ->(on = Date.current) { where(review_date: ..on) }
+  # The newest issue of each document: a record nobody has opened a next
+  # version of.
+  scope :latest, -> { where.not(id: PpRecord.where.not(previous_version_id: nil).select(:previous_version_id)) }
 
   def classification_label(locale = I18n.locale)
     DocumentClassification.label(classification, locale)
@@ -119,6 +161,51 @@ class PpRecord < ApplicationRecord
 
   def completed?
     COMPLETED_STAGES.include?(current_stage.to_s)
+  end
+
+  # Published means read-only: changes go through "Update existing", which
+  # opens the next version.
+  def editable?
+    !completed? && next_version.nil?
+  end
+
+  def latest_version?
+    next_version.nil?
+  end
+
+  def new_version?
+    previous_version_id.present?
+  end
+
+  def procedure?
+    record_type == "procedure"
+  end
+
+  def service?
+    record_type == "service"
+  end
+
+  def glossary?
+    record_type == "glossary"
+  end
+
+  # Level 0 . Level 1 . Level 2 . own sequence, for a procedure.
+  def architecture_number
+    return nil unless procedure? && pp_process && sequence_number
+
+    "#{pp_process.architecture_number}.#{sequence_number}"
+  end
+
+  def frequency_label(locale = I18n.locale)
+    frequency.present? ? I18n.t("process_architecture.frequencies.#{frequency}", locale: locale) : nil
+  end
+
+  def automation_label(locale = I18n.locale)
+    automation_status.present? ? I18n.t("process_architecture.automation.#{automation_status}", locale: locale) : nil
+  end
+
+  def service_type_label(locale = I18n.locale)
+    service_type.present? ? I18n.t("pp_records.service_types.#{service_type}", locale: locale) : nil
   end
 
   def packaged?
@@ -253,5 +340,32 @@ class PpRecord < ApplicationRecord
     return if pp_process_id.present?
 
     errors.add(:pp_process_id, I18n.t("pp_records.errors.process_required"))
+  end
+
+  def procedure_process_must_be_level_two
+    return unless procedure? && pp_process
+    return if pp_process.level == PpProcess::MAX_LEVEL
+
+    errors.add(:pp_process_id, I18n.t("pp_records.errors.process_must_be_level_two"))
+  end
+
+  # A new version must say why it exists; the first issue need not.
+  def reason_required_for_new_version
+    return unless new_version? && TAB_TYPES.include?(record_type)
+    return if change_summary.to_s.strip.present?
+
+    errors.add(:change_summary, I18n.t("pp_records.errors.reason_required"))
+  end
+
+  # The sequence is fixed the first time the record is saved and the code is
+  # built from it; both stay put after that, so a code never changes under a
+  # reader's feet. A typed code is kept as typed.
+  def assign_code_and_sequence
+    return if company.nil?
+
+    if sequence_number.blank? && (code.blank? || new_record?)
+      self.sequence_number = RecordCodeService.new(self).send(procedure? && pp_process ? :next_procedure_sequence : :next_type_sequence)
+    end
+    self.code = RecordCodeService.build(self) if code.blank?
   end
 end

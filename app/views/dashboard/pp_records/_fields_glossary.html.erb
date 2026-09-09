@@ -1,0 +1,18 @@
+<%# Glossary: a term and what it means, nothing more. %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_identity') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :title_en, t('pp_records.term_en'), class: label_class %>
+      <%= f.text_field :title_en, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :title_ar, t('pp_records.term_ar'), class: label_class %>
+      <%= f.text_field :title_ar, dir: "rtl", class: input_class %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :description, t('pp_records.definition'), class: label_class %>
+      <%= f.text_area :description, rows: 3, class: input_class %>
+    </div>
+  </div>
+</div>

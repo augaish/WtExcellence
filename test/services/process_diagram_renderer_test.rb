@@ -3,7 +3,7 @@ require "test_helper"
 class ProcessDiagramRendererTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Render Co #{SecureRandom.hex(4)}", license_seats: 5, is_active: true)
-    @record = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding")
+    @record = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding", pp_process: level_two_process(@company))
     @diagram = @company.pp_diagrams.create!(owner: @record, name: "Onboarding")
   end
 

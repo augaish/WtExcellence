@@ -27,7 +27,7 @@ class Dashboard::RowEditingTest < ActionDispatch::IntegrationTest
   end
 
   test "a step can be corrected in place and the total follows" do
-    process = @company.pp_processes.create!(name_en: "P", level: 1, category: "core")
+    process = @company.pp_processes.create!(name_en: "P", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "P", level: 1, category: "core"))
     step = process.steps.create!(position: 1, activity: "Draft", duration_value: 2, duration_unit: "hours")
 
     patch dashboard_pp_process_step_path(process, step), params: { pp_process_step: { duration_value: 5 } }
@@ -37,7 +37,7 @@ class Dashboard::RowEditingTest < ActionDispatch::IntegrationTest
   end
 
   test "the step and SLA pages offer an edit for each row" do
-    process = @company.pp_processes.create!(name_en: "P", level: 1, category: "core")
+    process = @company.pp_processes.create!(name_en: "P", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "P", level: 1, category: "core"))
     step = process.steps.create!(position: 1, activity: "Draft")
     get dashboard_pp_process_path(process)
     assert_select "form[action=?]", dashboard_pp_process_step_path(process, step)
@@ -49,7 +49,7 @@ class Dashboard::RowEditingTest < ActionDispatch::IntegrationTest
   end
 
   test "the diagram can be drawn from the steps through the page" do
-    process = @company.pp_processes.create!(name_en: "P", level: 1, category: "core")
+    process = @company.pp_processes.create!(name_en: "P", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "P", level: 1, category: "core"))
     process.steps.create!(position: 1, activity: "Draft", responsible_title: "Officer")
     diagram = @company.pp_diagrams.create!(owner: process, name: "Flow")
 

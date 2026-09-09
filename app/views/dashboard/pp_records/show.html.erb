@@ -6,8 +6,12 @@
           title: @record.display_title, subtitle: "#{@record.type_label}#{@record.code.present? ? " · #{@record.code}" : ''}" } do %>
       <%= link_to t('back'), dashboard_pp_records_path(record_type: @record.record_type), class: ui_btn_neutral %>
       <%= link_to t('record_document.view'), document_dashboard_pp_record_path(@record), class: ui_btn_secondary %>
-      <% if can_manage_pp_records? %>
+      <% if can_manage_pp_records? && @record.editable? %>
         <%= link_to t('edit'), edit_dashboard_pp_record_path(@record), class: ui_btn_primary %>
+      <% end %>
+      <% if can_manage_pp_records? && @record.latest_version? && @record.completed? %>
+        <%= button_to t('pp_records.update_existing'), open_next_version_dashboard_pp_record_path(@record), method: :post,
+              class: ui_btn_primary, form: { class: "inline", data: { turbo_confirm: t('pp_records.update_existing_confirm', version: @record.version_number + 1) } } %>
       <% end %>
 
 <% if @record.sla? %>
@@ -16,6 +20,18 @@
         can_manage: (current_user&.platform_admin? || current_user&.company_user&.has_admin_privileges? || current_user&.company_user&.company_quality_manager?) %>
   </div>
 <% end %>
+    <% end %>
+
+    <% unless @record.latest_version? %>
+      <div class="bg-gray-100 border border-[#E3E3E3] rounded-xl p-4 mb-4 text-sm text-[#0D1120]">
+        <%= t('pp_records.superseded_banner', version: @record.version_number) %>
+        <%= link_to t('pp_records.open_latest'), dashboard_pp_record_path(@record.next_version), class: "ms-1 font-medium text-[#5C3984] hover:underline" %>
+      </div>
+    <% end %>
+    <% if @record.completed? && @record.latest_version? %>
+      <div class="bg-[#F6EEFF] border border-[#5C3984]/30 rounded-xl p-4 mb-4 text-sm text-[#0D1120]">
+        <%= t('pp_records.published_read_only') %>
+      </div>
     <% end %>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -30,7 +46,12 @@
             </div>
             <div>
               <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.version') %></dt>
-              <dd class="mt-0.5 text-[#0D1120]"><%= @record.version_label.presence || "—" %></dd>
+              <dd class="mt-0.5 text-[#0D1120]">
+                V<%= @record.version_number %>
+                <% if @record.previous_version && can_see_versions? %>
+                  · <%= link_to t('pp_records.previous_version', version: @record.previous_version.version_number), dashboard_pp_record_path(@record.previous_version), class: "text-[#5C3984] hover:underline" %>
+                <% end %>
+              </dd>
             </div>
             <div>
               <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.owner_unit') %></dt>
@@ -88,11 +109,19 @@
 
           <% if @record.description.present? %>
             <div class="mt-4 pt-4 border-t border-[#E3E3E3]">
-              <dt class="text-xs font-medium text-[#797C81] mb-1"><%= t('pp_records.description') %></dt>
+              <dt class="text-xs font-medium text-[#797C81] mb-1"><%= @record.procedure? ? t('pp_records.purpose') : (@record.glossary? ? t('pp_records.definition') : t('pp_records.description')) %></dt>
               <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= @record.description %></p>
             </div>
           <% end %>
+          <% if @record.change_summary.present? %>
+            <div class="mt-4 pt-4 border-t border-[#E3E3E3]">
+              <dt class="text-xs font-medium text-[#797C81] mb-1"><%= t('pp_records.reason_for_change') %></dt>
+              <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= @record.change_summary %></p>
+            </div>
+          <% end %>
         </div>
+
+        <%= render "dashboard/pp_records/card", record: @record %>
 
         <!-- Documents -->
         <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">

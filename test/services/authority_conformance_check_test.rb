@@ -12,7 +12,7 @@ class AuthorityConformanceCheckTest < ActiveSupport::TestCase
     @authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
     @authority.bands.sole.assignments.create!(level: "authorize", org_unit: @deputy)
 
-    @process = @company.pp_processes.create!(name_en: "Contracting", level: 1, category: "core")
+    @process = @company.pp_processes.create!(name_en: "Contracting", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "Contracting", level: 1, category: "core"))
     @operational = @process.authorities.create!(decision: "Award the contract", authority: @authority)
   end
 

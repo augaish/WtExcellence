@@ -9,7 +9,7 @@ class Dashboard::ProcessEvaluationsControllerTest < ActionDispatch::IntegrationT
       password: "password123", password_confirmation: "password123", name: "Admin", is_active: true)
     CompanyUser.create!(company: @company, user: @admin, role: CompanyUser::ROLES[:company_admin])
 
-    @record = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding")
+    @record = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding", pp_process: level_two_process(@company))
     @diagram = @company.pp_diagrams.create!(owner: @record, name: "Onboarding process",
       trigger_text: "Request received", inputs_summary: "Draft", outputs_summary: "Signed policy")
     @start = @diagram.elements.create!(element_type: "startEvent", title: "Start", performer: "HR", description: "Begins")

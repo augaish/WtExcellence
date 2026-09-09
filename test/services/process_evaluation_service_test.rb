@@ -210,7 +210,7 @@ class ProcessEvaluationServiceTest < ActiveSupport::TestCase
 
   test "evaluating a saved diagram inherits the process card summary" do
     company = Company.create!(name: "Eval Co #{SecureRandom.hex(4)}", license_seats: 5, is_active: true)
-    process = company.pp_processes.create!(name_en: "Hiring", level: 1, category: "core",
+    process = company.pp_processes.create!(name_en: "Hiring", level: 2, category: "core", parent: company.pp_processes.create!(name_en: "L1 " + "Hiring", level: 1, category: "core"),
       trigger_text: "Vacancy approved", inputs: "Job description", outputs: "Contract")
     diagram = company.pp_diagrams.create!(owner: process, name: "Hiring")
     diagram.elements.create!(element_type: "startEvent", title: "Start", performer: "HR", description: "x")

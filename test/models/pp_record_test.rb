@@ -33,7 +33,7 @@ class PpRecordTest < ActiveSupport::TestCase
   end
 
   def process_for_records
-    @process_for_records ||= @company.pp_processes.create!(name_en: "Host process", level: 1, category: "core")
+    @process_for_records ||= @company.pp_processes.create!(name_en: "Host process", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "Host process", level: 1, category: "core"))
   end
 
   test "code is unique per company" do

@@ -149,3 +149,9 @@ running a script. A GitHub Actions workflow would remove that dependency.
 
 **Level 3 of the process tree.** Fills in as procedures attach to level-2
 processes; nothing to build until there is content to hang on it.
+
+## Records journeys (Phase 3) — follow-ups
+- Glossary: the "glossary" record type now holds term + definition. The older `GlossaryTerm` table (terms linked to documents for the Definitions section) still exists; when the glossary flow is built in Phase 4, an approved glossary record should create/refresh its `GlossaryTerm` so documents keep pulling definitions from one place.
+- Procedure steps still hang off `PpProcess`; Phase 4 moves them to the procedure record (and the diagram with them).
+- Existing procedure records without a level-2 process are now invalid on edit (rule requested by the owner). Prod had only test data.
+

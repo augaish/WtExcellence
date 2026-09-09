@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_09_112245) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -903,6 +903,27 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112245) do
     t.index ["successor_process_id"], name: "index_pp_processes_on_successor_process_id"
   end
 
+  create_table "pp_record_links", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.uuid "linked_record_id", null: false
+    t.string "kind", limit: 30, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["linked_record_id"], name: "index_pp_record_links_on_linked_record_id"
+    t.index ["pp_record_id", "linked_record_id", "kind"], name: "index_pp_record_links_unique", unique: true
+    t.index ["pp_record_id"], name: "index_pp_record_links_on_pp_record_id"
+  end
+
+  create_table "pp_record_participants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.uuid "org_unit_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["org_unit_id"], name: "index_pp_record_participants_on_org_unit_id"
+    t.index ["pp_record_id", "org_unit_id"], name: "index_pp_record_participants_on_pp_record_id_and_org_unit_id", unique: true
+    t.index ["pp_record_id"], name: "index_pp_record_participants_on_pp_record_id"
+  end
+
   create_table "pp_record_references", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pp_record_id", null: false
     t.uuid "clause_id"
@@ -951,6 +972,25 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112245) do
     t.string "classification", limit: 30, default: "internal", null: false
     t.string "counterparty", limit: 250
     t.text "change_summary"
+    t.text "scope"
+    t.string "trigger_text", limit: 500
+    t.text "inputs"
+    t.text "outputs"
+    t.uuid "predecessor_record_id"
+    t.uuid "successor_record_id"
+    t.string "frequency", limit: 20
+    t.decimal "total_time_value", precision: 10, scale: 2
+    t.string "total_time_unit", limit: 10
+    t.string "automation_status", limit: 30
+    t.text "technical_systems"
+    t.text "kpis"
+    t.integer "sequence_number"
+    t.string "service_type", limit: 20
+    t.text "requirements"
+    t.text "beneficiaries"
+    t.string "delivery_period", limit: 250
+    t.text "channels"
+    t.text "delivery_stages"
     t.index ["company_id", "classification"], name: "index_pp_records_on_company_id_and_classification"
     t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"
@@ -1425,6 +1465,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112245) do
   add_foreign_key "pp_processes", "pp_processes", column: "predecessor_process_id"
   add_foreign_key "pp_processes", "pp_processes", column: "successor_process_id"
   add_foreign_key "pp_processes", "users", column: "owner_user_id"
+  add_foreign_key "pp_record_links", "pp_records"
+  add_foreign_key "pp_record_links", "pp_records", column: "linked_record_id"
+  add_foreign_key "pp_record_participants", "org_units"
+  add_foreign_key "pp_record_participants", "pp_records"
   add_foreign_key "pp_record_references", "clauses"
   add_foreign_key "pp_record_references", "pp_records"
   add_foreign_key "pp_record_terms", "glossary_terms"
@@ -1433,7 +1477,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112245) do
   add_foreign_key "pp_records", "org_units", column: "owner_org_unit_id"
   add_foreign_key "pp_records", "pp_packages", column: "package_id"
   add_foreign_key "pp_records", "pp_processes"
+  add_foreign_key "pp_records", "pp_records", column: "predecessor_record_id", on_delete: :nullify
   add_foreign_key "pp_records", "pp_records", column: "previous_version_id"
+  add_foreign_key "pp_records", "pp_records", column: "successor_record_id", on_delete: :nullify
   add_foreign_key "pp_records", "users", column: "owner_user_id"
   add_foreign_key "pp_service_levels", "pp_records"
   add_foreign_key "pp_stage_approvals", "org_units"

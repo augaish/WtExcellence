@@ -9,7 +9,7 @@ class Dashboard::PpProcessDetailTest < ActionDispatch::IntegrationTest
     @company = Company.create!(name: "Detail Co #{SecureRandom.hex(4)}", license_seats: 10, credits: 50, is_active: true)
     @admin = create_user("detail-admin", CompanyUser::ROLES[:company_admin])
     @viewer = create_user("detail-viewer", CompanyUser::ROLES[:company_viewer])
-    @process = @company.pp_processes.create!(name_en: "Policy development", level: 1, category: "core", code: "PRO-01")
+    @process = @company.pp_processes.create!(name_en: "Policy development", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "Policy development", level: 1, category: "core"), code: "PRO-01")
   end
 
   def create_user(prefix, role)
@@ -115,7 +115,7 @@ class Dashboard::PpProcessDetailTest < ActionDispatch::IntegrationTest
 
   test "a process from another company is not reachable" do
     other = Company.create!(name: "Other #{SecureRandom.hex(4)}", license_seats: 5, credits: 1, is_active: true)
-    foreign = other.pp_processes.create!(name_en: "Foreign", level: 1, category: "core")
+    foreign = other.pp_processes.create!(name_en: "Foreign", level: 2, category: "core", parent: other.pp_processes.create!(name_en: "L1 " + "Foreign", level: 1, category: "core"))
 
     sign_in @admin
     get dashboard_pp_process_path(foreign)

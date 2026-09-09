@@ -3,11 +3,15 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_company_present
   before_action :ensure_can_manage, only: [
-    :new, :create, :edit, :update, :destroy, :attach_documents, :detach_document
+    :new, :create, :edit, :update, :destroy, :attach_documents, :detach_document, :open_next_version
   ]
-  before_action :set_record, only: [ :show, :edit, :update, :destroy, :attach_documents, :detach_document, :document, :document_docx ]
+  before_action :set_record, only: [
+    :show, :edit, :update, :destroy, :attach_documents, :detach_document, :document, :document_docx, :open_next_version
+  ]
+  before_action :ensure_editable, only: [ :edit, :update, :destroy ]
+  before_action :ensure_version_visible, only: [ :show, :document, :document_docx ]
 
-  helper_method :can_manage_pp_records?
+  helper_method :can_manage_pp_records?, :can_see_versions?
 
   def index
     scope = company_scope.includes(:owner_user, :owner_org_unit, :pp_process, :package)
@@ -18,6 +22,11 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
     @record_type = params[:record_type].presence
     scope = scope.of_type(@record_type) if @record_type && PpRecord::TYPES.include?(@record_type)
 
+    # Everyone sees the latest issue of each document. Quality managers and
+    # admins may also list the earlier versions.
+    @show_versions = can_see_versions? && params[:show_versions] == "1"
+    scope = scope.latest unless @show_versions
+
     @query = params[:q].to_s.strip
     if @query.present?
       like = "%#{@query}%"
@@ -27,8 +36,8 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
     end
 
     @records = scope.ordered.to_a
-    @counts_by_type = company_scope.active.group(:record_type).count
-    @total_count = company_scope.active.count
+    @counts_by_type = company_scope.active.latest.group(:record_type).count
+    @total_count = company_scope.active.latest.count
     @packages_count = company.pp_packages.count
     @due_for_review = company_scope.active.where.not(review_date: nil)
       .select { |r| r.review_overdue? || r.review_due_soon?(review_lead_days) }
@@ -60,12 +69,26 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
     @available_uploads = company.uploads.where.not(id: @attachments.map(&:upload_id)).order(created_at: :desc).limit(100)
   end
 
+  # The type comes from the tab the button was pressed on; it is not chosen
+  # inside the form.
   def new
-    @record = company_scope.new(
-      record_type: params[:record_type].presence || PpRecord::TYPES.first,
-      code: suggested_code
-    )
+    type = PpRecord::TAB_TYPES.include?(params[:record_type]) ? params[:record_type] : PpRecord::TAB_TYPES.first
+    @record = company_scope.new(record_type: type)
     render_form
+  end
+
+  # "Update existing": opens the next version as a draft carrying everything
+  # the current one says, and asks for the reason for change.
+  def open_next_version
+    unless @record.latest_version?
+      redirect_to dashboard_pp_record_path(@record.next_version), alert: t("pp_records.flash.already_updated"), status: :see_other
+      return
+    end
+
+    successor = RecordVersionService.open_next(@record, actor: current_user)
+    @record = successor
+    log_action("OPEN_NEXT_VERSION")
+    redirect_to edit_dashboard_pp_record_path(successor), notice: t("pp_records.flash.next_version_opened", version: successor.version_number), status: :see_other
   end
 
   def edit
@@ -75,9 +98,9 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   def create
     @record = company_scope.new(record_params)
     @record.company = company
-    @record.code = suggested_code if @record.code.blank?
 
     if @record.save
+      save_links_and_participants
       log_action("CREATE_PP_RECORD")
       redirect_to dashboard_pp_record_path(@record), notice: t("pp_records.flash.created"), status: :see_other
     else
@@ -87,6 +110,7 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
 
   def update
     if @record.update(record_params)
+      save_links_and_participants
       log_action("UPDATE_PP_RECORD")
       redirect_to dashboard_pp_record_path(@record), notice: t("pp_records.flash.updated"), status: :see_other
     else
@@ -158,11 +182,10 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
     redirect_to dashboard_overview_path, alert: t("pp_records.flash.no_company"), status: :see_other
   end
 
+  # The admin, the quality managers, and the admin's own team (see
+  # RecordAuthoring).
   def can_manage_pp_records?
-    return true if current_user&.platform_admin?
-
-    cu = current_user&.company_user
-    cu.present? && (cu.has_admin_privileges? || cu.company_quality_manager?)
+    RecordAuthoring.allowed?(current_user, company)
   end
 
   def ensure_can_manage
@@ -178,26 +201,74 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
     redirect_to dashboard_pp_records_path, alert: t("pp_records.flash.not_found"), status: :see_other
   end
 
-  def suggested_code
-    HierarchicalCodeService.next_record_code(
-      company: company, record_type: params.dig(:pp_record, :record_type) || params[:record_type]
-    )
+  # Multi-picks arrive as id lists and are written as link rows, so the record
+  # form stays a plain form.
+  def save_links_and_participants
+    if @record.procedure?
+      replace_links("related_policy", params[:related_policy_ids])
+      replace_links("form_used", params[:form_used_ids])
+    end
+    return unless @record.service?
+
+    wanted = Array(params[:participating_unit_ids]).reject(&:blank?)
+    wanted &= company.org_units.where(id: wanted).pluck(:id)
+    @record.participants.where.not(org_unit_id: wanted).destroy_all
+    (wanted - @record.participants.pluck(:org_unit_id)).each { |id| @record.participants.create!(org_unit_id: id) }
+  end
+
+  def replace_links(kind, ids)
+    wanted = Array(ids).reject(&:blank?)
+    wanted &= company_scope.where(id: wanted).pluck(:id)
+    @record.links.of_kind(kind).where.not(linked_record_id: wanted).destroy_all
+    existing = @record.links.of_kind(kind).pluck(:linked_record_id)
+    (wanted - existing).each { |id| @record.links.create!(linked_record_id: id, kind: kind) }
   end
 
   def render_form(status: :ok)
     @org_units = company.org_units.active.ordered.to_a
     @company_users = company.users.order(:name).to_a
     @processes = company.pp_processes.active.ordered.to_a
+    latest = company_scope.active.latest.ordered
+    @policies = latest.of_type("policy").to_a
+    @forms = latest.of_type("form").to_a
+    @procedures = latest.of_type("procedure").where.not(id: @record.id).to_a
     render(@record&.persisted? ? :edit : :new, status: status)
+  end
+
+  # Published records are read-only; their next version is where changes go.
+  def ensure_editable
+    return if @record.editable?
+
+    redirect_to dashboard_pp_record_path(@record), alert: t("pp_records.flash.read_only"), status: :see_other
+  end
+
+  # Earlier versions are history for the quality team; everyone else lands on
+  # the latest issue.
+  def ensure_version_visible
+    return if @record.latest_version? || can_see_versions?
+
+    latest = @record
+    latest = latest.next_version while latest.next_version
+    redirect_to dashboard_pp_record_path(latest), status: :see_other
+  end
+
+  def can_see_versions?
+    return true if current_user&.platform_admin?
+
+    cu = current_user&.company_user
+    cu.present? && (cu.has_admin_privileges? || cu.company_quality_manager?)
   end
 
   # A record never chooses its own package — that is composed from the package
   # side — so package_id is deliberately NOT permitted here.
   def record_params
     params.require(:pp_record).permit(
-      :record_type, :code, :title_en, :title_ar, :description, :version_label,
+      :record_type, :title_en, :title_ar, :description, :scope,
       :effective_date, :review_date, :owner_user_id, :owner_org_unit_id,
-      :pp_process_id, :active, :classification, :counterparty, :change_summary
+      :pp_process_id, :active, :classification, :counterparty, :change_summary,
+      :trigger_text, :inputs, :outputs, :predecessor_record_id, :successor_record_id,
+      :frequency, :total_time_value, :total_time_unit, :automation_status, :technical_systems, :kpis,
+      :service_type, :requirements, :beneficiaries, :delivery_period, :channels, :delivery_stages
     )
   end
 

@@ -1,17 +1,27 @@
-<%# Record form. Locals: record, org_units, company_users, processes %>
+<%# Record form. One form, one journey per type: the tab decides the type and
+    the type decides which card is shown. Locals: record, org_units,
+    company_users, processes, policies, forms, procedures %>
 <% input_class = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
 <% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
+<% hint_class = "mt-1 text-[11px] text-[#797C81]" %>
+<% type_label = t("pp_records.types.#{record.record_type}") %>
+<% heading = if record.new_version?
+                t('pp_records.new_version_title', type: type_label, version: record.version_number)
+              elsif record.persisted?
+                t('pp_records.edit_typed', type: type_label)
+              else
+                t('pp_records.add_typed', type: type_label)
+              end %>
 
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-3xl mx-auto px-6 py-8">
-    <%= render layout: "dashboard/shared/page_header", locals: {
-          title: record.persisted? ? t('pp_records.edit_record') : t('pp_records.add_record'),
-          subtitle: t('pp_records.form_subtitle') } do %>
-      <%= link_to t('cancel'), (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path), class: ui_btn_neutral %>
+    <%= render layout: "dashboard/shared/page_header", locals: { title: heading, subtitle: t("pp_records.journeys.#{record.record_type}", default: t('pp_records.form_subtitle')) } do %>
+      <%= link_to t('cancel'), (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path(record_type: record.record_type)), class: ui_btn_neutral %>
     <% end %>
 
     <%= form_with model: record, url: (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path),
           method: (record.persisted? ? :patch : :post), class: "space-y-6" do |f| %>
+      <%= f.hidden_field :record_type %>
 
       <% if record.errors.any? %>
         <div class="bg-red-50 border border-red-200 rounded-xl p-4">
@@ -22,101 +32,61 @@
         </div>
       <% end %>
 
-      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_identity') %></h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <%# Code and version are the system's, never typed. %>
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+        <dl class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
           <div>
-            <%= f.label :record_type, t('pp_records.type'), class: label_class %>
-            <%= f.select :record_type, PpRecord::TYPES.map { |t| [ t("pp_records.types.#{t}"), t ] }, {}, class: input_class %>
-          </div>
-          <div>
-            <%= f.label :code, t('pp_records.code'), class: label_class %>
-            <%= f.text_field :code, class: "#{input_class} font-mono" %>
-            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('pp_records.code_hint') %></p>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.code') %></dt>
+            <dd class="mt-0.5 font-mono text-[#0D1120]"><%= record.code.presence || t('pp_records.code_on_save') %></dd>
           </div>
           <div>
-            <%= f.label :title_en, t('pp_records.title_en'), class: label_class %>
-            <%= f.text_field :title_en, class: input_class %>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.version') %></dt>
+            <dd class="mt-0.5 text-[#0D1120]">V<%= record.version_number %></dd>
           </div>
           <div>
-            <%= f.label :title_ar, t('pp_records.title_ar'), class: label_class %>
-            <%= f.text_field :title_ar, dir: "rtl", class: input_class %>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.type') %></dt>
+            <dd class="mt-0.5 text-[#0D1120]"><%= type_label %></dd>
           </div>
-          <div class="sm:col-span-2">
-            <%= f.label :description, t('pp_records.description'), class: label_class %>
-            <%= f.text_area :description, rows: 3, class: input_class %>
-          </div>
-        </div>
+        </dl>
+        <p class="<%= hint_class %>"><%= t('pp_records.code_rule') %></p>
       </div>
 
-      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_ownership') %></h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <%= f.label :owner_org_unit_id, t('pp_records.owner_unit'), class: label_class %>
-            <%= f.select :owner_org_unit_id, org_units.map { |u| [ u.display_name, u.id ] },
-                  { include_blank: t('process_architecture.no_owner') }, class: input_class %>
-          </div>
-          <div>
-            <%= f.label :owner_user_id, t('pp_records.owner_user'), class: label_class %>
-            <%= f.select :owner_user_id, company_users.map { |u| [ u.name, u.id ] },
-                  { include_blank: t('process_architecture.no_owner') }, class: input_class %>
-          </div>
-          <div class="sm:col-span-2">
-            <%= f.label :pp_process_id, t('pp_records.process'), class: label_class %>
-            <%= f.select :pp_process_id, processes.map { |p| [ "#{p.code} · #{p.display_name}", p.id ] },
-                  { include_blank: t('pp_records.no_process') }, class: input_class %>
-            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('pp_records.process_hint') %></p>
+      <% if record.new_version? %>
+        <div class="bg-[#F6EEFF] border border-[#5C3984]/30 rounded-xl p-5">
+          <%= f.label :change_summary, t('pp_records.reason_for_change'), class: "block text-sm font-semibold text-[#0D1120] mb-1" %>
+          <%= f.text_area :change_summary, rows: 3, class: input_class, required: true, placeholder: t('pp_records.change_summary_placeholder') %>
+          <p class="<%= hint_class %>"><%= t('pp_records.reason_for_change_hint', version: record.previous_version&.version_number) %></p>
+        </div>
+      <% end %>
+
+      <%= render "dashboard/pp_records/fields_#{record.record_type}", f: f, record: record, org_units: org_units,
+            company_users: company_users, processes: processes, policies: policies, forms: forms, procedures: procedures,
+            input_class: input_class, label_class: label_class, hint_class: hint_class %>
+
+      <% unless record.glossary? %>
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+          <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_version') %></h2>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <%= f.label :classification, t('pp_records.classification'), class: label_class %>
+              <%= f.select :classification, DocumentClassification.options, {}, class: input_class %>
+              <p class="<%= hint_class %>"><%= DocumentClassification.description(f.object.classification.presence || DocumentClassification::DEFAULT_KEY) %></p>
+            </div>
+            <div>
+              <%= f.label :effective_date, t('pp_records.effective_date'), class: label_class %>
+              <%= f.date_field :effective_date, class: input_class %>
+            </div>
+            <div>
+              <%= f.label :review_date, t('pp_records.review_date'), class: label_class %>
+              <%= f.date_field :review_date, class: input_class %>
+              <p class="<%= hint_class %>"><%= t('pp_records.review_date_hint') %></p>
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
-        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_version') %></h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <%= f.label :version_label, t('pp_records.version'), class: label_class %>
-            <%= f.text_field :version_label, placeholder: "v1.0", class: input_class %>
-          </div>
-
-          <%# Printed in the change log. It records what changed in this
-              version, which the description does not say. %>
-          <div class="md:col-span-2">
-            <%= f.label :change_summary, t('pp_records.change_summary'), class: label_class %>
-            <%= f.text_area :change_summary, rows: 2, class: input_class,
-                placeholder: t('pp_records.change_summary_placeholder') %>
-          </div>
-
-          <%# Confidentiality classification, printed on the document cover and
-              used to decide what may be shown outside the company. %>
-          <div>
-            <%# An agreement has two parties; the owning unit is the provider. %>
-            <%= f.label :counterparty, t('sla.counterparty'), class: label_class %>
-            <%= f.text_field :counterparty, class: input_class, placeholder: t('sla.counterparty') %>
-            <p class="mt-1 text-xs text-[#797C81]"><%= t('sla.counterparty_hint') %></p>
-          </div>
-
-          <div>
-            <%= f.label :classification, t('pp_records.classification'), class: label_class %>
-            <%= f.select :classification, DocumentClassification.options, {}, class: input_class %>
-            <p class="mt-1 text-xs text-[#797C81]">
-              <%= DocumentClassification.description(f.object.classification.presence || DocumentClassification::DEFAULT_KEY) %>
-            </p>
-          </div>
-          <div>
-            <%= f.label :effective_date, t('pp_records.effective_date'), class: label_class %>
-            <%= f.date_field :effective_date, class: input_class %>
-          </div>
-          <div>
-            <%= f.label :review_date, t('pp_records.review_date'), class: label_class %>
-            <%= f.date_field :review_date, class: input_class %>
-            <p class="mt-1 text-[11px] text-[#797C81]"><%= t('pp_records.review_date_hint') %></p>
-          </div>
-        </div>
-      </div>
+      <% end %>
 
       <div class="flex items-center justify-end gap-2">
-        <%= link_to t('cancel'), (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path), class: ui_btn_neutral %>
+        <%= link_to t('cancel'), (record.persisted? ? dashboard_pp_record_path(record) : dashboard_pp_records_path(record_type: record.record_type)), class: ui_btn_neutral %>
         <%= f.submit (record.persisted? ? t('save') : t('create')), class: ui_btn_primary %>
       </div>
     <% end %>

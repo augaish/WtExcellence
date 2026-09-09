@@ -3,7 +3,7 @@ require "test_helper"
 class PpDiagramTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Dia Co #{SecureRandom.hex(4)}", license_seats: 5, is_active: true)
-    @record = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding")
+    @record = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding", pp_process: level_two_process(@company))
     @diagram = @company.pp_diagrams.create!(owner: @record, name: "Onboarding process")
   end
 
@@ -93,7 +93,7 @@ class PpDiagramTest < ActiveSupport::TestCase
   end
 
   test "summary fields fall back to the owning process card" do
-    process = @company.pp_processes.create!(name_en: "Hiring", level: 1, category: "core",
+    process = @company.pp_processes.create!(name_en: "Hiring", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "Hiring", level: 1, category: "core"),
       trigger_text: "Vacancy approved", inputs: "Job description", outputs: "Signed contract")
     diagram = @company.pp_diagrams.create!(owner: process, name: "Hiring")
 

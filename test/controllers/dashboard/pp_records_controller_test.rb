@@ -57,27 +57,82 @@ class Dashboard::PpRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_dashboard_pp_record_path(record_type: nil), count: 0
   end
 
-  test "admin creates a record" do
+  test "admin creates a policy and the system assigns its code" do
     sign_in @admin
+    hr = @company.org_units.create!(name_en: "Human Resources", level: 1, code: "HR")
 
     assert_difference -> { @company.pp_records.count }, 1 do
       post dashboard_pp_records_path, params: {
-        pp_record: { record_type: "procedure", title_en: "Onboarding", title_ar: "التعيين",
-                     version_label: "v1.0", effective_date: "2026-01-01", review_date: "2027-01-01" }
+        pp_record: { record_type: "policy", title_en: "Onboarding", title_ar: "التعيين", scope: "All staff",
+                     owner_org_unit_id: hr.id, effective_date: "2026-01-01", review_date: "2027-01-01" }
       }
     end
 
     record = @company.pp_records.find_by(title_en: "Onboarding")
-    assert_equal "procedure", record.record_type
-    assert_equal "v1.0", record.version_label
+    assert_equal "policy", record.record_type
+    assert_equal "POL-HR-001-V1", record.code
+    assert_equal "All staff", record.scope
   end
 
-  test "the new form suggests a code prefixed by type" do
+  test "a procedure is filed under a level-2 process and carries the architecture number" do
+    sign_in @admin
+    hr = @company.org_units.create!(name_en: "Human Resources", level: 1, code: "HR")
+    l1 = @company.pp_processes.create!(name_en: "Human capital", level: 1, category: "support")
+    l2 = @company.pp_processes.create!(name_en: "Recruiting", level: 2, parent: l1)
+    policy = @company.pp_records.create!(record_type: "policy", title_en: "HR Policy", owner_org_unit: hr)
+
+    post dashboard_pp_records_path, params: {
+      pp_record: { record_type: "procedure", title_en: "Hire a candidate", owner_org_unit_id: hr.id, pp_process_id: l2.id,
+                   trigger_text: "Vacancy approved", frequency: "on_demand", automation_status: "manual" },
+      related_policy_ids: [ policy.id ]
+    }
+
+    record = @company.pp_records.find_by(title_en: "Hire a candidate")
+    assert_equal "PROC-HR-3.1.1.1-V1", record.code
+    assert_equal "3.1.1.1", record.architecture_number
+    assert_equal [ policy ], record.related_policies.to_a
+  end
+
+  test "a procedure without a level-2 process is refused" do
+    sign_in @admin
+    l1 = @company.pp_processes.create!(name_en: "Human capital", level: 1, category: "support")
+
+    post dashboard_pp_records_path, params: { pp_record: { record_type: "procedure", title_en: "Loose", pp_process_id: l1.id } }
+    assert_response :unprocessable_entity
+    assert_nil @company.pp_records.find_by(title_en: "Loose")
+  end
+
+  test "the new form fixes the type from the tab and shows the code as assigned on save" do
     sign_in @admin
     get new_dashboard_pp_record_path(record_type: "form")
 
     assert_response :success
-    assert_select "input[name='pp_record[code]'][value=?]", "FRM-01"
+    assert_select "input[type=hidden][name='pp_record[record_type]'][value=form]"
+    assert_select "select[name='pp_record[record_type]']", count: 0
+    assert_select "body", text: /#{Regexp.escape(I18n.t('pp_records.code_on_save'))}/
+  end
+
+  test "a service keeps its participating units" do
+    sign_in @admin
+    it = @company.org_units.create!(name_en: "IT", level: 1, code: "IT")
+    legal = @company.org_units.create!(name_en: "Legal", level: 1, code: "LG")
+
+    post dashboard_pp_records_path, params: {
+      pp_record: { record_type: "service", title_en: "Laptop request", service_type: "internal", owner_org_unit_id: it.id,
+                   requirements: "Manager approval", delivery_period: "3 days" },
+      participating_unit_ids: [ legal.id ]
+    }
+
+    record = @company.pp_records.find_by(title_en: "Laptop request")
+    assert_equal "SEV-IT-001-V1", record.code
+    assert_equal [ legal ], record.participating_units.to_a
+  end
+
+  test "the tabs are the five journey types" do
+    sign_in @admin
+    get dashboard_pp_records_path
+    PpRecord::TAB_TYPES.each { |type| assert_select "a[href=?]", dashboard_pp_records_path(record_type: type) }
+    assert_select "a[href=?]", dashboard_pp_records_path(record_type: "sla"), count: 0
   end
 
   test "a record cannot set its own package" do

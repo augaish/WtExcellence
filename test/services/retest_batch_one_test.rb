@@ -4,7 +4,7 @@ require "test_helper"
 class RetestBatchOneTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Retest Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
-    @process = @company.pp_processes.create!(name_en: "Purchase orders", level: 1, category: "core",
+    @process = @company.pp_processes.create!(name_en: "Purchase orders", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "Purchase orders", level: 1, category: "core"),
       frequency: "on_demand", automation_status: "partially_automated")
     @diagram = @company.pp_diagrams.create!(owner: @process, name: "PO flow")
   end
@@ -81,7 +81,7 @@ class RetestBatchOneTest < ActiveSupport::TestCase
 
   test "the change log records what changed, not the description" do
     first = @company.pp_records.create!(record_type: "policy", title_en: "Policy", description: "Long description of the policy itself.")
-    second = @company.pp_records.create!(record_type: "policy", title_en: "Policy", previous_version: first,
+    second = @company.pp_records.create!(record_type: "policy", title_en: "Policy", previous_version: first, change_summary: "Reworded",
       version_number: 2, version_label: "v2", change_summary: "Added the legal review step.")
 
     log = RecordDocument.new(second).sections.find { |s| s.key == "change_log" }

@@ -1,0 +1,122 @@
+<%# Procedure card, field for field as the procedure template reads. The three
+    level selects narrow each other; only the level-2 choice is saved. %>
+<% company = record.company %>
+<% process_data = processes.map { |p| { id: p.id, parentId: p.parent_id, level: p.level, category: p.effective_category, label: "#{p.architecture_number} · #{p.display_name}" } } %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4"
+     data-controller="process-picker"
+     data-process-picker-processes-value="<%= process_data.to_json %>"
+     data-process-picker-selected-value="<%= record.pp_process_id %>"
+     data-process-picker-blank-label-value="<%= t('pp_records.pick') %>">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_placement') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div>
+      <%= label_tag :band, t('process_architecture.levels.l0'), class: label_class %>
+      <%= select_tag :band, options_for_select(PpProcess::CATEGORIES.map { |c| [ company.process_band_name(c), c ] }, record.pp_process&.effective_category),
+            include_blank: t('pp_records.pick'), class: input_class,
+            data: { process_picker_target: "band", action: "change->process-picker#bandChanged" } %>
+    </div>
+    <div>
+      <%= label_tag :level1, t('process_architecture.levels.l1'), class: label_class %>
+      <%= select_tag :level1, "", class: input_class,
+            data: { process_picker_target: "level1", action: "change->process-picker#level1Changed" } %>
+    </div>
+    <div>
+      <%= f.label :pp_process_id, t('process_architecture.levels.l2'), class: label_class %>
+      <%= f.select :pp_process_id, [], {}, class: input_class, data: { process_picker_target: "level2" } %>
+      <p class="<%= hint_class %>"><%= t('pp_records.level2_hint') %></p>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_identity') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :title_en, t('pp_records.title_en'), class: label_class %>
+      <%= f.text_field :title_en, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :title_ar, t('pp_records.title_ar'), class: label_class %>
+      <%= f.text_field :title_ar, dir: "rtl", class: input_class %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :description, t('pp_records.purpose'), class: label_class %>
+      <%= f.text_area :description, rows: 3, class: input_class %>
+      <p class="<%= hint_class %>"><%= t('process_architecture.objective_hint') %></p>
+    </div>
+    <%= render "dashboard/pp_records/ownership_fields", f: f, org_units: org_units, company_users: company_users,
+          input_class: input_class, label_class: label_class, hint_class: hint_class, unit_label: t('pp_records.owner_unit') %>
+    <div>
+      <%= f.label :trigger_text, t('process_architecture.trigger'), class: label_class %>
+      <%= f.text_field :trigger_text, class: input_class %>
+      <p class="<%= hint_class %>"><%= t('process_architecture.trigger_hint') %></p>
+    </div>
+    <div>
+      <%= f.label :inputs, t('process_architecture.inputs'), class: label_class %>
+      <%= f.text_area :inputs, rows: 2, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :outputs, t('process_architecture.outputs'), class: label_class %>
+      <%= f.text_area :outputs, rows: 2, class: input_class %>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.section_sequence') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :predecessor_record_id, t('pp_records.previous_procedure'), class: label_class %>
+      <%= f.select :predecessor_record_id, procedures.map { |p| [ "#{p.code} · #{p.display_title}", p.id ] },
+            { include_blank: t('process_architecture.none') }, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :successor_record_id, t('pp_records.next_procedure'), class: label_class %>
+      <%= f.select :successor_record_id, procedures.map { |p| [ "#{p.code} · #{p.display_title}", p.id ] },
+            { include_blank: t('process_architecture.none') }, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :frequency, t('process_architecture.frequency'), class: label_class %>
+      <%= f.select :frequency, PpRecord::FREQUENCIES.map { |v| [ t("process_architecture.frequencies.#{v}"), v ] },
+            { include_blank: t('process_architecture.none') }, class: input_class %>
+    </div>
+    <div>
+      <label class="<%= label_class %>"><%= t('process_architecture.total_time') %></label>
+      <div class="flex gap-2">
+        <%= f.number_field :total_time_value, step: :any, min: 0, class: "#{input_class} flex-1" %>
+        <%= f.select :total_time_unit, PpRecord::TIME_UNITS.map { |u| [ t("process_architecture.time_units.#{u}"), u ] },
+              { include_blank: t('process_architecture.unit') }, class: "#{input_class} w-32" %>
+      </div>
+      <p class="<%= hint_class %>"><%= t('pp_records.total_time_hint') %></p>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.section_references') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :automation_status, t('process_architecture.automation_status'), class: label_class %>
+      <%= f.select :automation_status, PpRecord::AUTOMATION_STATUSES.map { |v| [ t("process_architecture.automation.#{v}"), v ] },
+            { include_blank: t('process_architecture.none') }, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :technical_systems, t('process_architecture.technical_systems'), class: label_class %>
+      <%= f.text_area :technical_systems, rows: 2, class: input_class %>
+    </div>
+    <div data-controller="choices-select" data-choices-select-search-value="true">
+      <%= label_tag :related_policy_ids, t('process_architecture.related_policies'), class: label_class %>
+      <%= select_tag :related_policy_ids, options_for_select(policies.map { |p| [ "#{p.code} · #{p.display_title}", p.id ] }, record.related_policies.map(&:id)),
+            multiple: true, class: input_class, data: { choices_select_target: "select" } %>
+    </div>
+    <div data-controller="choices-select" data-choices-select-search-value="true">
+      <%= label_tag :form_used_ids, t('process_architecture.forms_used'), class: label_class %>
+      <%= select_tag :form_used_ids, options_for_select(forms.map { |p| [ "#{p.code} · #{p.display_title}", p.id ] }, record.forms_used.map(&:id)),
+            multiple: true, class: input_class, data: { choices_select_target: "select" } %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :kpis, t('process_architecture.kpis'), class: label_class %>
+      <%= f.text_area :kpis, rows: 2, class: input_class %>
+    </div>
+  </div>
+</div>

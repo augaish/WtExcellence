@@ -1,0 +1,45 @@
+<%# The type's own card, read back the way the form asked for it. Locals: record %>
+<% rows = [] %>
+<% if record.record_type.in?(%w[policy form]) %>
+  <% rows << [ t('pp_records.scope'), record.scope ] %>
+<% elsif record.procedure? %>
+  <% rows << [ t('process_architecture.levels.l0'), record.pp_process && record.company.process_band_name(record.pp_process.effective_category) ] %>
+  <% rows << [ t('process_architecture.levels.l1'), record.pp_process&.parent && "#{record.pp_process.parent.architecture_number} · #{record.pp_process.parent.display_name}" ] %>
+  <% rows << [ t('process_architecture.levels.l2'), record.pp_process && "#{record.pp_process.architecture_number} · #{record.pp_process.display_name}" ] %>
+  <% rows << [ t('pp_records.architecture_number'), record.architecture_number ] %>
+  <% rows << [ t('process_architecture.trigger'), record.trigger_text ] %>
+  <% rows << [ t('process_architecture.inputs'), record.inputs ] %>
+  <% rows << [ t('process_architecture.outputs'), record.outputs ] %>
+  <% rows << [ t('pp_records.previous_procedure'), record.predecessor_record && "#{record.predecessor_record.code} · #{record.predecessor_record.display_title}" ] %>
+  <% rows << [ t('pp_records.next_procedure'), record.successor_record && "#{record.successor_record.code} · #{record.successor_record.display_title}" ] %>
+  <% rows << [ t('process_architecture.frequency'), record.frequency_label ] %>
+  <% rows << [ t('process_architecture.total_time'), record.total_time_value && "#{record.total_time_value} #{t("process_architecture.time_units.#{record.total_time_unit}", default: record.total_time_unit)}" ] %>
+  <% rows << [ t('process_architecture.automation_status'), record.automation_label ] %>
+  <% rows << [ t('process_architecture.related_policies'), record.related_policies.map { |p| "#{p.code} · #{p.display_title}" }.join(", ") ] %>
+  <% rows << [ t('process_architecture.technical_systems'), record.technical_systems ] %>
+  <% rows << [ t('process_architecture.forms_used'), record.forms_used.map { |p| "#{p.code} · #{p.display_title}" }.join(", ") ] %>
+  <% rows << [ t('process_architecture.kpis'), record.kpis ] %>
+<% elsif record.service? %>
+  <% rows << [ t('pp_records.service_type'), record.service_type_label ] %>
+  <% rows << [ t('pp_records.requirements'), record.requirements ] %>
+  <% rows << [ t('pp_records.beneficiaries'), record.beneficiaries ] %>
+  <% rows << [ t('pp_records.delivery_period'), record.delivery_period ] %>
+  <% rows << [ t('pp_records.channels'), record.channels ] %>
+  <% rows << [ t('pp_records.providing_unit'), record.owner_org_unit&.display_name ] %>
+  <% rows << [ t('pp_records.participating_units'), record.participating_units.map(&:display_name).join(", ") ] %>
+  <% rows << [ t('pp_records.delivery_stages'), record.delivery_stages ] %>
+<% end %>
+<% rows = rows.reject { |_, v| v.blank? } %>
+<% if rows.any? %>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+    <h2 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t("pp_records.card_title.#{record.record_type}", default: t('pp_records.section_identity')) %></h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <% rows.each do |label, value| %>
+        <div>
+          <dt class="text-xs font-medium text-[#797C81]"><%= label %></dt>
+          <dd class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= value %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+<% end %>

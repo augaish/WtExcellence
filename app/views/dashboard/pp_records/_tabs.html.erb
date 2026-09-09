@@ -12,7 +12,7 @@
       <span class="ms-1 text-xs text-[#797C81]">(<%= total_count %>)</span>
     <% end %>
 
-    <% PpRecord::TYPES.each do |type| %>
+    <% PpRecord::TAB_TYPES.each do |type| %>
       <%= link_to dashboard_pp_records_path(record_type: type),
             class: "#{tab_base} #{(!on_packages && active_type == type) ? active_cls : idle_cls}" do %>
         <%= t("pp_records.types_plural.#{type}") %>

@@ -6,7 +6,7 @@ class RecordDocumentTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Doc Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
     @unit = @company.org_units.create!(name_en: "Institutional Excellence", name_ar: "التميز المؤسسي", level: 1)
-    @process = @company.pp_processes.create!(name_en: "Policy development", level: 1, category: "core",
+    @process = @company.pp_processes.create!(name_en: "Policy development", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "Policy development", level: 1, category: "core"),
       objective: "Govern how policies are written", trigger_text: "A new regulation is issued")
     @record = @company.pp_records.create!(record_type: "procedure", title_en: "Policy Development Procedure",
       title_ar: "إجراء تطوير السياسات", code: "PRO-01", pp_process: @process,
@@ -108,7 +108,7 @@ class RecordDocumentTest < ActiveSupport::TestCase
   test "the change log is built from the version chain, oldest first" do
     first = @company.pp_records.create!(record_type: "procedure", title_en: "First", pp_process: @process,
       version_label: "v0.9", version_number: 1)
-    @record.update!(previous_version: first, version_number: 2)
+    @record.update!(previous_version: first, version_number: 2, change_summary: @record.change_summary.presence || "Revised")
 
     log = document.sections.find { |s| s.key == "change_log" }
     assert_equal [ "v0.9", "v1.0" ], log.payload.map { |row| row[:version] }

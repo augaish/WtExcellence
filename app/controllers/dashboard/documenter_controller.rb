@@ -149,23 +149,14 @@ class Dashboard::DocumenterController < Dashboard::BaseController
       return redirect_back_to_worklist(alert: t("documenter.flash.only_closed_reopen"))
     end
 
-    new_version = nil
-    ActiveRecord::Base.transaction do
-      new_version = company.pp_records.create!(
-        record_type: record.record_type,
-        code: "#{record.code}-v#{record.version_number + 1}",
-        title_en: record.title_en, title_ar: record.title_ar,
-        description: record.description,
-        version_label: next_version_label(record),
-        owner_user_id: record.owner_user_id,
-        owner_org_unit_id: record.owner_org_unit_id,
-        pp_process_id: record.pp_process_id,
-        current_stage: PpStage::FIRST_KEY,
-        stage_entered_at: Time.current,
-        version_number: record.version_number + 1,
-        previous_version: record
-      )
+    unless record.latest_version?
+      return redirect_back_to_worklist(alert: t("pp_records.flash.already_updated"))
     end
+
+    # The same "Update existing" as in Records: everything carries forward and
+    # the author writes the reason for change on the draft.
+    new_version = RecordVersionService.open_next(record, actor: current_user)
+    new_version.update_columns(current_stage: PpStage::FIRST_KEY, stage_entered_at: Time.current)
 
     AuditLogService.log_action(
       actor_user: current_user, company: company, action: "PP_RECORD_REOPENED",
@@ -173,7 +164,7 @@ class Dashboard::DocumenterController < Dashboard::BaseController
       payload: { from: record.id, version: new_version.version_number }
     )
 
-    redirect_to dashboard_pp_record_path(new_version),
+    redirect_to edit_dashboard_pp_record_path(new_version),
       notice: t("documenter.flash.reopened", version: new_version.version_number), status: :see_other
   end
 
@@ -275,11 +266,6 @@ class Dashboard::DocumenterController < Dashboard::BaseController
 
   def working_days_for(record)
     record.working_days_in_stage
-  end
-
-  def next_version_label(record)
-    current = record.version_label.to_s[/\d+/]
-    current ? "v#{current.to_i + 1}.0" : "v#{record.version_number + 1}.0"
   end
 
   def redirect_back_to_worklist(**flash_opts)

@@ -1,0 +1,12 @@
+<%# Owning unit and, optionally, the person. Locals: f, org_units, company_users, input_class, label_class, hint_class, unit_label %>
+<div>
+  <%= f.label :owner_org_unit_id, unit_label, class: label_class %>
+  <%= f.select :owner_org_unit_id, org_units.map { |u| [ u.display_name, u.id ] },
+        { include_blank: t('process_architecture.no_owner') }, class: input_class %>
+  <p class="<%= hint_class %>"><%= t('pp_records.owner_unit_code_hint') %></p>
+</div>
+<div>
+  <%= f.label :owner_user_id, t('pp_records.owner_user'), class: label_class %>
+  <%= f.select :owner_user_id, company_users.map { |u| [ u.name, u.id ] },
+        { include_blank: t('process_architecture.no_owner') }, class: input_class %>
+</div>

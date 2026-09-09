@@ -1,0 +1,62 @@
+<%# Service card, field for field as the service template reads. %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_identity') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :title_en, t('pp_records.service_name_en'), class: label_class %>
+      <%= f.text_field :title_en, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :title_ar, t('pp_records.service_name_ar'), class: label_class %>
+      <%= f.text_field :title_ar, dir: "rtl", class: input_class %>
+    </div>
+    <div>
+      <%= f.label :service_type, t('pp_records.service_type'), class: label_class %>
+      <%= f.select :service_type, PpRecord::SERVICE_TYPES.map { |v| [ t("pp_records.service_types.#{v}"), v ] },
+            { include_blank: t('pp_records.pick') }, class: input_class %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :description, t('pp_records.service_description'), class: label_class %>
+      <%= f.text_area :description, rows: 3, class: input_class %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :requirements, t('pp_records.requirements'), class: label_class %>
+      <%= f.text_area :requirements, rows: 3, class: input_class %>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_delivery') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :beneficiaries, t('pp_records.beneficiaries'), class: label_class %>
+      <%= f.text_area :beneficiaries, rows: 2, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :delivery_period, t('pp_records.delivery_period'), class: label_class %>
+      <%= f.text_field :delivery_period, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :channels, t('pp_records.channels'), class: label_class %>
+      <%= f.text_area :channels, rows: 2, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :delivery_stages, t('pp_records.delivery_stages'), class: label_class %>
+      <%= f.text_area :delivery_stages, rows: 2, class: input_class %>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_ownership') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <%= render "dashboard/pp_records/ownership_fields", f: f, org_units: org_units, company_users: company_users,
+          input_class: input_class, label_class: label_class, hint_class: hint_class, unit_label: t('pp_records.providing_unit') %>
+    <div class="sm:col-span-2" data-controller="choices-select" data-choices-select-search-value="true">
+      <%= label_tag :participating_unit_ids, t('pp_records.participating_units'), class: label_class %>
+      <%= select_tag :participating_unit_ids, options_from_collection_for_select(org_units, :id, :display_name, record.participating_units.map(&:id)),
+            multiple: true, class: input_class, data: { choices_select_target: "select" } %>
+    </div>
+  </div>
+</div>

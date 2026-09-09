@@ -62,7 +62,7 @@ class PpStageTransitionServiceTest < ActiveSupport::TestCase
   end
 
   test "a procedure goes through the design phase and a policy does not" do
-    procedure = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding",
+    procedure = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding", pp_process: level_two_process(@company),
       current_stage: "s2_final", stage_entered_at: Time.current)
     advance(record: procedure)
     assert_equal "s3_design", procedure.reload.stage_key

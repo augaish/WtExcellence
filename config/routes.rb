@@ -182,6 +182,7 @@ Rails.application.routes.draw do
     end
 
     resources :pp_records do
+      member { post :open_next_version }
       resources :service_levels, only: [ :create, :update, :destroy ], controller: "pp_service_levels"
       member do
         post :attach_documents

@@ -1,0 +1,31 @@
+<%# Policy / form card: title, description, scope, ownership. %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_identity') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div>
+      <%= f.label :title_en, t('pp_records.title_en'), class: label_class %>
+      <%= f.text_field :title_en, class: input_class %>
+    </div>
+    <div>
+      <%= f.label :title_ar, t('pp_records.title_ar'), class: label_class %>
+      <%= f.text_field :title_ar, dir: "rtl", class: input_class %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :description, t('pp_records.description'), class: label_class %>
+      <%= f.text_area :description, rows: 3, class: input_class %>
+    </div>
+    <div class="sm:col-span-2">
+      <%= f.label :scope, t('pp_records.scope'), class: label_class %>
+      <%= f.text_area :scope, rows: 3, class: input_class %>
+      <p class="<%= hint_class %>"><%= t('pp_records.scope_hint') %></p>
+    </div>
+  </div>
+</div>
+
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.section_ownership') %></h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <%= render "dashboard/pp_records/ownership_fields", f: f, org_units: org_units, company_users: company_users,
+          input_class: input_class, label_class: label_class, hint_class: hint_class, unit_label: t('pp_records.owner_unit') %>
+  </div>
+</div>
