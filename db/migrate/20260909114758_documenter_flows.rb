@@ -18,6 +18,12 @@ class DocumenterFlows < ActiveRecord::Migration[8.0]
       DELETE FROM pp_service_levels;
       DELETE FROM evidence_attachments WHERE attachable_type = 'PpRecord';
       UPDATE pp_records SET previous_version_id = NULL, predecessor_record_id = NULL, successor_record_id = NULL;
+      -- Anything else that points at a record being removed: an authority's
+      -- basis policy, a delegation's decision record. The matrices themselves stay.
+      UPDATE authorities SET basis_record_id = NULL
+        WHERE basis_record_id IN (SELECT id FROM pp_records WHERE record_type NOT IN ('executive_doa', 'operational_doa'));
+      UPDATE authority_delegations SET decision_record_id = NULL
+        WHERE decision_record_id IN (SELECT id FROM pp_records WHERE record_type NOT IN ('executive_doa', 'operational_doa'));
       DELETE FROM pp_records WHERE record_type NOT IN ('executive_doa', 'operational_doa');
       UPDATE pp_records SET current_stage = NULL, stage_entered_at = NULL;
     SQL
