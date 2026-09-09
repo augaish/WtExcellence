@@ -6,6 +6,9 @@
           title: @record.display_title, subtitle: "#{@record.type_label}#{@record.code.present? ? " · #{@record.code}" : ''}" } do %>
       <%= link_to t('back'), dashboard_pp_records_path(record_type: @record.record_type), class: ui_btn_neutral %>
       <%= link_to t('record_document.view'), document_dashboard_pp_record_path(@record), class: ui_btn_secondary %>
+      <% unless @record.doa? %>
+        <%= link_to "#{t('documenter.title')} · #{@record.stage_label}", dashboard_documenter_record_path(@record), class: ui_btn_secondary %>
+      <% end %>
       <% if can_manage_pp_records? && @record.editable? %>
         <%= link_to t('edit'), edit_dashboard_pp_record_path(@record), class: ui_btn_primary %>
       <% end %>

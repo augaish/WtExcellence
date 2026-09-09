@@ -3,6 +3,9 @@ ar:
     sections:
       definitions: التعريفات العامة والاختصارات
       body: المحتوى
+      scope: النطاق
+      clauses: البنود
+      service_card: بطاقة الخدمة
       process_card: بطاقة الإجراء
       diagram: مخطط الإجراء
       steps: خطوات الإجراء
@@ -20,6 +23,18 @@ ar:
     contents: المحتويات
     fields:
       objective: الهدف من الإجراء
+      level0: المستوى صفر
+      level1: المستوى الأول
+      level2: المستوى الثاني
+      architecture_number: رقم المعمارية
+      service_type: نوع الخدمة
+      requirements: متطلبات الحصول على الخدمة
+      beneficiaries: المستفيدون من الخدمة
+      delivery_period: الفترة الزمنية لتقديم الخدمة
+      channels: قنوات تقديم الخدمة
+      providing_unit: الجهة المعنية بتقديم الخدمة
+      participating_units: الجهات المشاركة في تقديم الخدمة
+      delivery_stages: مراحل تقديم الخدمة
       owner: مالك الإجراء
       trigger: محرك الإجراء
       inputs: مدخلات الإجراء

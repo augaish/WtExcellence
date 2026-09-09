@@ -15,6 +15,20 @@
     <% end %>
   </dl>
 
+<% when :clauses %>
+  <ol class="space-y-3 text-sm">
+    <% section.payload.each do |row| %>
+      <li class="doc-avoid-break <%= row[:main] ? '' : 'ms-6' %>">
+        <p class="<%= row[:main] ? 'font-semibold' : 'font-medium' %>">
+          <span class="font-mono text-[#797C81] me-2"><%= row[:number] %></span><%= row[:title] %>
+        </p>
+        <% if row[:body].present? %>
+          <p class="mt-1 leading-relaxed whitespace-pre-line"><%= row[:body] %></p>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+
 <% when :diagram %>
   <div class="doc-avoid-break overflow-x-auto"><%= ProcessDiagramRenderer.render(section.payload) %></div>
 

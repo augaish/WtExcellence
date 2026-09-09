@@ -1,0 +1,110 @@
+<%# Stakeholder Review and Final Approval: the manager asks units, the heads
+    answer, everyone sees green / red / orange.
+    Locals: record, approvals, my_approval, org_units, is_manager, input, label, stage %>
+<% colour = { "green" => "bg-green-500", "red" => "bg-red-500", "orange" => "bg-amber-400" } %>
+
+<% if approvals.any? %>
+  <table class="w-full text-sm">
+    <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
+      <tr>
+        <th class="text-start p-2 text-xs font-semibold text-[#797C81]"><%= t('documenter.unit') %></th>
+        <th class="text-start p-2 text-xs font-semibold text-[#797C81]"><%= t('documenter.unit_head') %></th>
+        <th class="text-start p-2 text-xs font-semibold text-[#797C81]"><%= t('documenter.group') %></th>
+        <th class="text-start p-2 text-xs font-semibold text-[#797C81]"><%= t('documenter.status') %></th>
+        <th class="text-start p-2 text-xs font-semibold text-[#797C81]"><%= t('documenter.comment') %></th>
+        <% if is_manager %><th class="p-2"></th><% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% approvals.each do |a| %>
+        <tr class="border-b border-[#E3E3E3] last:border-b-0 align-top">
+          <td class="p-2 text-[#0D1120]"><%= a.org_unit.display_name %></td>
+          <td class="p-2 text-[#797C81]"><%= a.org_unit.head_user&.name || t('documenter.no_unit_head') %></td>
+          <td class="p-2 text-[#797C81]"><%= a.sequence_group %></td>
+          <td class="p-2">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full <%= colour[a.status_colour] %>" aria-hidden="true"></span>
+              <%= t("documenter.decisions.#{a.decision || (a.turn? ? 'pending' : 'waiting_turn')}") %>
+            </span>
+            <% if a.pending? && a.auto_approve_at %>
+              <p class="text-[11px] text-[#797C81]"><%= t('documenter.auto_approve_on', date: l(a.auto_approve_at.to_date, format: :document)) %></p>
+            <% end %>
+          </td>
+          <td class="p-2 text-[#0D1120] whitespace-pre-line"><%= a.comment %></td>
+          <% if is_manager %>
+            <td class="p-2 text-end">
+              <%= button_to t('remove'), dashboard_documenter_remove_approval_path(a), method: :delete, class: "text-xs text-red-600 hover:underline", form: { class: "inline" } %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+
+<% if my_approval %>
+  <div class="rounded-lg bg-[#F6EEFF] border border-[#5C3984]/30 p-4 space-y-2">
+    <p class="text-sm font-medium text-[#0D1120]"><%= t('documenter.your_answer_for', unit: my_approval.org_unit.display_name) %></p>
+    <p class="text-xs text-[#797C81]"><%= t('documenter.answer_hint') %></p>
+    <%= form_with url: dashboard_documenter_answer_approval_path(my_approval), method: :patch, class: "space-y-2" do %>
+      <%= text_area_tag :comment, nil, rows: 2, placeholder: t('documenter.comment_optional_reject_required'), class: input %>
+      <div class="flex gap-2">
+        <%= button_tag t('documenter.actions.approve'), name: "decision", value: "approved", class: ui_btn_primary %>
+        <%= button_tag t('documenter.actions.reject'), name: "decision", value: "rejected", class: ui_btn_danger %>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
+<% if is_manager %>
+  <%= form_with url: dashboard_documenter_request_approvals_path(record), method: :post, class: "space-y-3 pt-3 border-t border-[#E3E3E3]" do %>
+    <p class="text-sm font-medium text-[#0D1120]"><%= stage == "s4_final" ? t('documenter.pick_heads') : t('documenter.pick_stakeholders') %></p>
+    <p class="text-xs text-[#797C81]"><%= t('documenter.groups_hint') %></p>
+    <% (1..3).each do |group| %>
+      <div class="grid grid-cols-[4rem_1fr] gap-2 items-start">
+        <span class="text-xs font-medium text-[#797C81] pt-2"><%= t('documenter.group') %> <%= group %></span>
+        <div data-controller="choices-select" data-choices-select-search-value="true">
+          <%= select_tag "groups[#{group}][]", options_from_collection_for_select(org_units, :id, :display_name),
+                multiple: true, class: input, data: { choices_select_target: "select" }, "aria-label": "#{t('documenter.group')} #{group}" %>
+        </div>
+      </div>
+    <% end %>
+    <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+      <div>
+        <%= label_tag :auto_approve_days, t('documenter.auto_approve_days'), class: label %>
+        <%= number_field_tag :auto_approve_days, record.auto_approve_days, min: 1, class: "#{input} w-40" %>
+        <p class="text-[11px] text-[#797C81]"><%= t('documenter.auto_approve_hint') %></p>
+      </div>
+      <%= submit_tag t('documenter.actions.request_approvals'), class: ui_btn_primary %>
+    </div>
+  <% end %>
+
+  <div class="flex flex-wrap gap-2 pt-3 border-t border-[#E3E3E3]">
+    <% if approvals.any?(&:rejected?) %>
+      <%= button_to t('documenter.actions.resend_rejected'), dashboard_documenter_resend_approvals_path(record, scope: "rejected"), method: :post, class: ui_btn_secondary %>
+      <%= button_to t('documenter.actions.resend_all'), dashboard_documenter_resend_approvals_path(record, scope: "all"), method: :post, class: ui_btn_neutral %>
+    <% end %>
+    <% if stage == "s2_stakeholders" && approvals.empty? %>
+      <%= button_to t('documenter.actions.skip_no_stakeholders'), dashboard_documenter_skip_stakeholders_path(record), method: :post, class: ui_btn_neutral %>
+    <% end %>
+    <% if record.approvals_complete? %>
+      <%= button_to t('documenter.actions.continue'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
+    <% end %>
+    <%= link_to t('edit'), edit_dashboard_pp_record_path(record), class: ui_btn_neutral %>
+  </div>
+  <% if stage == "s4_final" %>
+    <details class="pt-2">
+      <summary class="cursor-pointer text-sm font-medium text-[#797C81] hover:text-[#0D1120]"><%= t('documenter.actions.send_back_to_stage') %></summary>
+      <%= form_with url: dashboard_documenter_return_path, method: :post, class: "mt-2 flex flex-col sm:flex-row gap-2" do %>
+        <%= hidden_field_tag :record_id, record.id %>
+        <%= select_tag :stage_key, options_for_select(record.route.take(record.route.index(stage)).map { |k| [ PpStage.label(k), k ] }), class: "#{input} sm:w-64" %>
+        <%= text_field_tag :reason, nil, required: true, placeholder: t('documenter.reason'), class: "#{input} flex-1" %>
+        <%= submit_tag t('documenter.actions.push_back'), class: ui_btn_danger %>
+      <% end %>
+    </details>
+  <% else %>
+    <%= render "dashboard/documenter/push_back", record: record, to: "s2_draftReview", input: input, label: label %>
+  <% end %>
+<% elsif my_approval.nil? %>
+  <p class="text-sm text-[#797C81]"><%= t('documenter.waiting_for_approvals') %></p>
+<% end %>

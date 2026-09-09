@@ -1,0 +1,12 @@
+<%# The record's route as a stepper: done, current, ahead. Locals: record %>
+<% route = record.route %>
+<% current = route.index(record.stage_key) || 0 %>
+<ol class="flex flex-wrap gap-2" aria-label="<%= t('documenter.route') %>">
+  <% route.each_with_index do |key, i| %>
+    <% state = i < current ? "done" : (i == current ? "current" : "ahead") %>
+    <% cls = { "done" => "bg-green-50 text-green-800 border-green-200", "current" => "bg-[#5C3984] text-white border-[#5C3984]", "ahead" => "bg-white text-[#797C81] border-[#E3E3E3]" }[state] %>
+    <li class="px-3 py-1.5 rounded-full border text-xs font-medium <%= cls %>" <%= 'aria-current="step"'.html_safe if state == "current" %>>
+      <%= i + 1 %>. <%= PpStage.label(key) %>
+    </li>
+  <% end %>
+</ol>

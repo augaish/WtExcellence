@@ -1,0 +1,13 @@
+<%# Who is involved. Locals: record, task %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+  <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('documenter.people') %></h2>
+  <dl class="space-y-2 text-sm">
+    <div><dt class="text-xs text-[#797C81]"><%= t('pp_records.owner_unit') %></dt><dd class="text-[#0D1120]"><%= record.owner_org_unit&.display_name || "—" %></dd></div>
+    <div><dt class="text-xs text-[#797C81]"><%= t('documenter.unit_head') %></dt><dd class="text-[#0D1120]"><%= record.owning_unit_head&.name || t('documenter.no_unit_head') %></dd></div>
+    <div><dt class="text-xs text-[#797C81]"><%= t('documenter.verifier') %></dt><dd class="text-[#0D1120]"><%= record.verifier_user&.name || "—" %></dd></div>
+    <% if task %>
+      <div><dt class="text-xs text-[#797C81]"><%= t('documenter.working_now') %></dt><dd class="text-[#0D1120]"><%= task.user.name %><% if task.note.present? %> · <span class="text-[#797C81]"><%= task.note %></span><% end %></dd></div>
+    <% end %>
+    <div><dt class="text-xs text-[#797C81]"><%= t('documenter.time_in_stage') %></dt><dd class="text-[#0D1120]"><%= t('documenter.working_days', count: working_days_for(record)) %></dd></div>
+  </dl>
+</div>

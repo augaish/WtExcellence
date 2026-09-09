@@ -143,6 +143,6 @@ class PpRecordTest < ActiveSupport::TestCase
   test "completed? follows the terminal lifecycle stages" do
     refute build_record(current_stage: "s2_prep").completed?
     assert build_record(current_stage: "s5_published").completed?
-    assert build_record(current_stage: "s5_closed").completed?
+    assert build_record(record_type: "glossary", current_stage: "g2_published").completed?
   end
 end

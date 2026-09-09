@@ -5,6 +5,7 @@ class Notification < ApplicationRecord
     capa_assigned capa_unassigned capa_action_assigned capa_action_unassigned capa_evidence_attached
     capa_evidence_attached_auditor tool_assigned tool_unassigned assignment_evaluated
     delegation_expiring
+    record_task_assigned record_task_submitted record_approval_requested record_approval_rejected record_published
   ].freeze
 
   belongs_to :recipient, class_name: "User"

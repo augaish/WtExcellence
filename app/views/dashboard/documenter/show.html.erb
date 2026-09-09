@@ -1,0 +1,40 @@
+<%= content_for :title, @record.display_title %>
+<% input = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+<% label = "block text-xs font-medium text-[#797C81] mb-1" %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-6xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: {
+          title: @record.display_title, subtitle: "#{@record.type_label} · #{@record.code} · V#{@record.version_number}" } do %>
+      <%= link_to t('back'), dashboard_documenter_path, class: ui_btn_neutral %>
+      <%= link_to t('pp_records.title'), dashboard_pp_record_path(@record), class: ui_btn_neutral %>
+      <%= link_to t('record_document.view'), document_dashboard_pp_record_path(@record), class: ui_btn_secondary %>
+    <% end %>
+
+    <%= render "dashboard/documenter/route", record: @record %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <div class="lg:col-span-2 space-y-6">
+        <%= render "dashboard/documenter/panel", record: @record, actions: @actions, approvals: @approvals, my_approval: @my_approval,
+              task: @task, my_task: @my_task, eligible: @eligible, org_units: @org_units, diagram: @diagram, input: input, label: label %>
+
+        <% if @record.glossary? %>
+          <%= render "dashboard/documenter/record_card", record: @record %>
+        <% elsif @record.procedure? %>
+          <%= render "dashboard/documenter/steps", record: @record, steps: @steps, org_units: @org_units,
+                can_edit: @can_edit_content, input: input, label: label %>
+        <% elsif @record.record_type == "policy" %>
+          <%= render "dashboard/documenter/clauses", record: @record, clauses: @clauses,
+                can_edit: @can_edit_content, can_comment: @can_comment, input: input, label: label %>
+        <% else %>
+          <%= render "dashboard/documenter/record_card", record: @record %>
+        <% end %>
+      </div>
+
+      <div class="space-y-6">
+        <%= render "dashboard/documenter/people", record: @record, task: @task %>
+        <%= render "dashboard/documenter/history", record: @record %>
+      </div>
+    </div>
+  </div>
+</div>

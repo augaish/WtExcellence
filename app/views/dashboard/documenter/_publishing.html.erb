@@ -1,0 +1,38 @@
+<%# Send for Publishing: the manager either hands it to a publisher who pastes
+    the link, or publishes in the system only.
+    Locals: record, task, my_task, eligible, is_manager, input, label %>
+<% if my_task && !is_manager %>
+  <p class="text-sm text-[#0D1120]"><%= t('documenter.publisher_hint') %></p>
+  <%= form_with url: dashboard_documenter_submit_publication_path(record), method: :post, class: "flex flex-col sm:flex-row gap-2" do %>
+    <%= url_field_tag :link, record.published_link, required: true, placeholder: "https://…", class: "#{input} flex-1" %>
+    <%= submit_tag t('documenter.actions.publish'), class: ui_btn_primary %>
+  <% end %>
+<% elsif is_manager %>
+  <div class="space-y-3">
+    <%= form_with url: dashboard_documenter_publish_mode_path(record), method: :patch, class: "flex flex-wrap items-center gap-3" do %>
+      <% PpRecord::PUBLISH_MODES.each do |mode| %>
+        <label class="flex items-center gap-2 text-sm text-[#0D1120]">
+          <%= radio_button_tag :mode, mode, record.publish_mode == mode, class: "text-[#5C3984] focus:ring-[#5C3984]" %>
+          <%= t("documenter.publish_modes.#{mode}") %>
+        </label>
+      <% end %>
+      <%= submit_tag t('save'), class: ui_btn_neutral %>
+    <% end %>
+
+    <% if record.publish_mode == "assign" %>
+      <% if task %>
+        <p class="text-sm text-[#797C81]"><%= t('documenter.with_person', name: task.user.name) %></p>
+      <% elsif record.published_link.present? %>
+        <p class="text-sm text-[#0D1120]"><%= t('documenter.link_received') %> <a class="underline break-all" href="<%= record.published_link %>" target="_blank" rel="noopener"><%= record.published_link %></a></p>
+        <%= button_to t('documenter.actions.confirm_publish'), dashboard_documenter_publish_path(record), method: :post, class: ui_btn_primary %>
+      <% end %>
+      <%= render "dashboard/documenter/hand_out", record: record, eligible: eligible, input: input, label: label,
+            title: t('documenter.actions.hand_to_publisher'), hint: t('documenter.hand_hint_publish') %>
+    <% elsif record.publish_mode == "system" %>
+      <p class="text-xs text-[#797C81]"><%= t('documenter.system_publish_hint') %></p>
+      <%= button_to t('documenter.actions.publish_now'), dashboard_documenter_publish_path(record), method: :post, class: ui_btn_primary %>
+    <% end %>
+  </div>
+<% else %>
+  <p class="text-sm text-[#797C81]"><%= t('documenter.waiting_for_manager') %></p>
+<% end %>

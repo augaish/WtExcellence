@@ -27,13 +27,14 @@ module DiagramStepSync
     Thread.current[SYNC_FLAG] = false
   end
 
-  # Builds or refreshes the diagram from the process's steps. Idempotent: a
-  # linked task is updated in place, a new step gets a new task, and a task
-  # whose step is gone is removed. Tasks the user added by hand are kept.
-  def generate(diagram, process)
+  # Builds or refreshes the diagram from the owner's steps (a procedure record,
+  # or a process for older diagrams). Idempotent: a linked task is updated in
+  # place, a new step gets a new task, and a task whose step is gone is
+  # removed. Tasks the user added by hand are kept.
+  def generate(diagram, owner)
     quietly do
       diagram.transaction do
-        steps = process.steps.ordered.to_a
+        steps = owner.steps.ordered.to_a
         start = ensure_event(diagram, "startEvent", I18n.t("architect.sync.start"))
         finish = ensure_event(diagram, "endEvent", I18n.t("architect.sync.end"))
 

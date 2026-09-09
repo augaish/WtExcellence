@@ -28,6 +28,12 @@ class CompanyUser < ApplicationRecord
     role == ROLES[:company_admin]
   end
 
+  # A quality manager the company admin has named as P&P Manager: the person
+  # who runs the Documenter flows.
+  def pp_manager?
+    pp_manager && company_quality_manager?
+  end
+
   def company_quality_manager?
     role == ROLES[:company_quality_manager]
   end

@@ -74,7 +74,7 @@ class PpDiagram < ApplicationRecord
   private
 
   def inherited(field)
-    return nil unless owner.is_a?(PpProcess)
+    return nil unless owner.is_a?(PpProcess) || owner.is_a?(PpRecord)
 
     owner.public_send(field) if owner.respond_to?(field)
   end

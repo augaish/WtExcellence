@@ -1,5 +1,8 @@
 FROM ruby:3.4.5 as base
 
+# Headless Chromium prints the governed documents to PDF on publication.
+ENV CHROMIUM_BIN=/usr/bin/chromium
+
 RUN apt-get update -qq && apt-get install -y \
   build-essential \
   apt-utils \
@@ -14,6 +17,8 @@ RUN apt-get update -qq && apt-get install -y \
   tesseract-ocr-eng \
   tesseract-ocr-ara \
   poppler-utils \
+  chromium \
+  fonts-noto-core \
   openssh-client \
   default-jre && \
   # Install Apache Tika (using Maven Central for reliability)

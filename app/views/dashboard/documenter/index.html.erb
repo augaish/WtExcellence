@@ -3,31 +3,53 @@
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: { title: t('documenter.title'), subtitle: t('documenter.subtitle') } do %>
-      <% if can_manage_documenter? %>
-      <% end %>
     <% end %>
 
-    <!-- One screen per lifecycle phase -->
-    <div class="border-b border-[#E3E3E3] mb-6 overflow-x-auto">
-      <nav class="flex items-center gap-1 min-w-max" aria-label="<%= t('documenter.title') %>">
-        <% PpStage::PHASES.each do |phase| %>
-          <% active = (@phase == phase) %>
-          <%= link_to dashboard_documenter_path(phase: phase),
-                class: "px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#5C3984] #{active ? 'border-[#5C3984] text-[#5C3984]' : 'border-transparent text-[#797C81] hover:text-[#0D1120] hover:border-[#E3E3E3]'}" do %>
-            <%= PpStage.phase_label(phase) %>
-            <span class="ms-1 text-xs text-[#797C81]">(<%= @counts_by_phase[phase] %>)</span>
+    <%# What needs me: the same for everyone, from the verifier to the P&P Manager. %>
+    <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-6">
+      <div class="px-4 py-3 border-b border-[#E3E3E3] bg-[#F7F7FD]">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('documenter.inbox.title') %></h2>
+        <p class="mt-0.5 text-xs text-[#797C81]"><%= t('documenter.inbox.subtitle') %></p>
+      </div>
+      <% if @inbox.empty? %>
+        <p class="px-4 py-6 text-sm text-[#797C81] text-center"><%= t('documenter.inbox.empty') %></p>
+      <% else %>
+        <ul class="divide-y divide-[#E3E3E3]">
+          <% @inbox.items.each do |item| %>
+            <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-[#F7F7FD]">
+              <div class="min-w-0">
+                <%= link_to item.record.display_title, dashboard_documenter_record_path(item.record),
+                      class: "text-sm font-medium text-[#5C3984] hover:underline focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+                <span class="ms-1 text-xs font-mono text-[#797C81]"><%= item.record.code %></span>
+                <p class="mt-0.5 text-xs text-[#797C81]"><%= item.record.type_label %> · <%= item.record.stage_label %></p>
+              </div>
+              <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[#F6EEFF] text-[#5C3984]">
+                <%= t("documenter.inbox.reasons.#{item.reason}") %>
+              </span>
+            </li>
           <% end %>
-        <% end %>
-      </nav>
+        </ul>
+      <% end %>
     </div>
 
-    <% @stages.each do |stage| %>
-      <%= render "dashboard/documenter/stage_section",
-            stage: stage,
-            records: (@by_stage[stage[:key]] || []),
-            org_units: @org_units,
-            company_users: @company_users,
-            phase: @phase %>
+    <% if manager? %>
+      <!-- One screen per lifecycle phase -->
+      <div class="border-b border-[#E3E3E3] mb-6 overflow-x-auto">
+        <nav class="flex items-center gap-1 min-w-max" aria-label="<%= t('documenter.title') %>">
+          <% PpStage::PHASES.each do |phase| %>
+            <% active = (@phase == phase) %>
+            <%= link_to dashboard_documenter_path(phase: phase),
+                  class: "px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#5C3984] #{active ? 'border-[#5C3984] text-[#5C3984]' : 'border-transparent text-[#797C81] hover:text-[#0D1120] hover:border-[#E3E3E3]'}" do %>
+              <%= PpStage.phase_label(phase) %>
+              <span class="ms-1 text-xs text-[#797C81]">(<%= @counts_by_phase[phase] %>)</span>
+            <% end %>
+          <% end %>
+        </nav>
+      </div>
+
+      <% @stages.each do |stage| %>
+        <%= render "dashboard/documenter/stage_section", stage: stage, records: (@by_stage[stage[:key]] || []), phase: @phase %>
+      <% end %>
     <% end %>
   </div>
 </div>

@@ -4,67 +4,79 @@
 # where it can be reasoned about and tested. What varies per company (target
 # days) lives in pp_stage_targets.
 #
-# Two branches make the sequence a graph rather than a straight line:
-#   * s2_confirmation -> s2_stakeholders when the record has intersections with
-#     other org units, otherwise straight to s2_final.
-#   * s2_final -> s3_design for Procedures (they get a designed diagram),
-#     otherwise straight to s4_initial.
+# Three routes share one vocabulary of stages:
+#
+#   policy / form / service:
+#     verify → approved → prep → draftReview → stakeholders → final → toPublish → published
+#   procedure:
+#     the same, with design → designReview between stakeholders and final
+#   glossary:
+#     submitted → published (one approval by a P&P Manager)
+#
+# Each stage names who acts in it (`actor`), which is what the worklists and
+# the permission checks read:
+#   :verifier      the contributor chosen when the record was logged
+#   :pp_manager    a quality manager flagged as P&P Manager (or a task holder
+#                  they picked from their team)
+#   :unit_head     the head of the owning unit (or the reporter they assigned)
+#   :approvers     the unit heads named in the approval chain
+#   :publisher     the person assigned to post the document
 #
 # No date is ever typed. Every timestamp is stamped by the system when the
-# action happens (a transition, or marking an approval received), so durations
-# cannot drift from reality.
+# action happens, so durations cannot drift from reality.
 class PpStage
   PHASES = %w[inventory preparation documentation approval publishing].freeze
 
   # kind:
   #   :plain     - move forward, nothing captured
-  #   :branch    - captures the intersections answer, which picks the next stage
-  #   :approval  - holds a chain of org-unit approvals; duration is measured to
-  #                the LAST approval received
-  #
-  # level: the AuthorityLevel this stage exercises. The lifecycle is an
-  # execution of an authority matrix, so naming the level here lets a stage be
-  # checked against who actually holds that level. Branch stages capture an
-  # answer rather than a decision and carry no level.
+  #   :approval  - holds a chain of unit-head approvals; complete when every
+  #                unit has approved (or been auto-approved)
+  #   :publish   - captures how the document goes out
+  #   :terminal  - the end
   DEFINITIONS = [
-    { key: "s1_verify",       phase: "inventory",     kind: :plain, level: "review" },
-    { key: "s1_approved",     phase: "inventory",     kind: :plain, level: "approve" },
+    { key: "s1_verify",       phase: "inventory",     kind: :plain,    actor: :verifier,   level: "review" },
+    { key: "s1_approved",     phase: "inventory",     kind: :plain,    actor: :pp_manager, level: "approve" },
 
-    { key: "s2_prep",         phase: "preparation",   kind: :plain, level: "prepare" },
-    { key: "s2_draftReview",  phase: "preparation",   kind: :plain, level: "review" },
-    { key: "s2_ownerReview",  phase: "preparation",   kind: :plain, level: "review" },
-    { key: "s2_comments",     phase: "preparation",   kind: :plain, level: "review" },
-    { key: "s2_confirmation", phase: "preparation",   kind: :branch, level: nil },
-    { key: "s2_stakeholders", phase: "preparation",   kind: :approval, level: "approve" },
-    { key: "s2_final",        phase: "preparation",   kind: :plain, level: "approve" },
+    { key: "s2_prep",         phase: "preparation",   kind: :plain,    actor: :unit_head,  level: "prepare" },
+    { key: "s2_draftReview",  phase: "preparation",   kind: :plain,    actor: :pp_manager, level: "review" },
+    { key: "s2_stakeholders", phase: "preparation",   kind: :approval, actor: :approvers,  level: "approve" },
 
-    { key: "s3_design",       phase: "documentation", kind: :plain, level: "prepare" },
-    { key: "s3_designReview", phase: "documentation", kind: :plain, level: "review" },
+    { key: "s3_design",       phase: "documentation", kind: :plain,    actor: :pp_manager, level: "prepare" },
+    { key: "s3_designReview", phase: "documentation", kind: :plain,    actor: :pp_manager, level: "review" },
 
-    { key: "s4_initial",      phase: "approval",      kind: :plain, level: "approve" },
-    { key: "s4_ownerapprove", phase: "approval",      kind: :plain, level: "approve" },
-    { key: "s4_final",        phase: "approval",      kind: :approval, level: "authorize" },
+    { key: "s4_final",        phase: "approval",      kind: :approval, actor: :approvers,  level: "authorize" },
 
-    { key: "s5_toPublish",    phase: "publishing",    kind: :plain, level: "prepare" },
-    { key: "s5_published",    phase: "publishing",    kind: :plain, level: "inform" },
-    { key: "s5_closed",       phase: "publishing",    kind: :plain, level: "inform" }
+    { key: "s5_toPublish",    phase: "publishing",    kind: :publish,  actor: :publisher,  level: "prepare" },
+    { key: "s5_published",    phase: "publishing",    kind: :terminal, actor: nil,         level: "inform" },
+
+    # Glossary only.
+    { key: "g1_submitted",    phase: "approval",      kind: :plain,    actor: :pp_manager, level: "approve" },
+    { key: "g2_published",    phase: "publishing",    kind: :terminal, actor: nil,         level: "inform" }
   ].freeze
 
   KEYS = DEFINITIONS.map { |d| d[:key] }.freeze
-  FIRST_KEY = KEYS.first
-  TERMINAL_KEY = "s5_closed".freeze
 
-  # Types that go through the procedure-design phase.
+  DOCUMENT_ROUTE = %w[s1_verify s1_approved s2_prep s2_draftReview s2_stakeholders s4_final s5_toPublish s5_published].freeze
+  PROCEDURE_ROUTE = %w[s1_verify s1_approved s2_prep s2_draftReview s2_stakeholders s3_design s3_designReview s4_final s5_toPublish s5_published].freeze
+  GLOSSARY_ROUTE = %w[g1_submitted g2_published].freeze
+
+  TERMINAL_KEYS = %w[s5_published g2_published].freeze
+  FIRST_KEY = DOCUMENT_ROUTE.first
+
+  # Types that go through the procedure-design pair.
   DESIGN_TYPES = %w[procedure].freeze
+
+  # Stages where the content (clauses or steps) is written or reviewed.
+  CONTENT_STAGES = %w[s2_prep s2_draftReview].freeze
 
   # Sensible starting targets (working days), overridable per company.
   DEFAULT_TARGET_DAYS = {
     "s1_verify" => 3, "s1_approved" => 3,
-    "s2_prep" => 10, "s2_draftReview" => 5, "s2_ownerReview" => 5,
-    "s2_comments" => 5, "s2_confirmation" => 3, "s2_stakeholders" => 10, "s2_final" => 5,
+    "s2_prep" => 10, "s2_draftReview" => 5, "s2_stakeholders" => 10,
     "s3_design" => 10, "s3_designReview" => 5,
-    "s4_initial" => 5, "s4_ownerapprove" => 5, "s4_final" => 10,
-    "s5_toPublish" => 3, "s5_published" => 3, "s5_closed" => 0
+    "s4_final" => 10,
+    "s5_toPublish" => 3, "s5_published" => 0,
+    "g1_submitted" => 3, "g2_published" => 0
   }.freeze
 
   class << self
@@ -92,8 +104,11 @@ class PpStage
       find(key)&.fetch(:kind, nil)
     end
 
-    # The AuthorityLevel this stage exercises, or nil for a branch that captures
-    # an answer rather than making a decision.
+    def actor_of(key)
+      find(key)&.fetch(:actor, nil)
+    end
+
+    # The AuthorityLevel this stage exercises.
     def level_of(key)
       find(key)&.fetch(:level, nil)
     end
@@ -102,12 +117,16 @@ class PpStage
       kind_of(key) == :approval
     end
 
-    def branch_stage?(key)
-      kind_of(key) == :branch
+    def publish_stage?(key)
+      kind_of(key) == :publish
     end
 
     def terminal?(key)
-      key.to_s == TERMINAL_KEY
+      TERMINAL_KEYS.include?(key.to_s)
+    end
+
+    def content_stage?(key)
+      CONTENT_STAGES.include?(key.to_s)
     end
 
     def in_phase(phase)
@@ -122,57 +141,45 @@ class PpStage
       I18n.t("documenter.phases.#{phase}", locale: locale, default: phase.to_s)
     end
 
+    # The full route a record takes, decided by its type alone.
+    def route_for(record_type:, **)
+      case record_type.to_s
+      when "glossary" then GLOSSARY_ROUTE
+      when *DESIGN_TYPES then PROCEDURE_ROUTE
+      else DOCUMENT_ROUTE
+      end
+    end
+
+    def first_key_for(record_type)
+      route_for(record_type: record_type).first
+    end
+
     # THE routing rule. The client never chooses a destination: given where a
-    # record is and what it is, exactly one stage comes next.
-    #
-    #   record_type       - decides whether the design phase applies
-    #   has_intersections - decides whether stakeholder review applies
-    #
-    # Returns nil at the terminal stage.
-    def next_key(current_key, record_type:, has_intersections: false)
-      return nil if terminal?(current_key)
+    # record is and what it is, exactly one stage comes next. nil at the end.
+    def next_key(current_key, record_type:, **)
+      route = route_for(record_type: record_type)
+      idx = route.index(current_key.to_s)
+      return nil if idx.nil?
 
-      case current_key.to_s
-      when "s2_confirmation"
-        has_intersections ? "s2_stakeholders" : "s2_final"
-      when "s2_final"
-        DESIGN_TYPES.include?(record_type.to_s) ? "s3_design" : "s4_initial"
-      else
-        idx = index(current_key)
-        return nil if idx.nil?
-
-        # Walk forward past stages this record's route skips, so the plain
-        # sequence never drops a Policy into the procedure-design phase.
-        candidate = KEYS[idx + 1]
-        while candidate && skipped?(candidate, record_type: record_type, has_intersections: has_intersections)
-          candidate = KEYS[index(candidate) + 1]
-        end
-        candidate
-      end
+      route[idx + 1]
     end
 
-    # Stages that are not part of this record's route at all.
-    def skipped?(key, record_type:, has_intersections: false)
-      case key.to_s
-      when "s2_stakeholders" then !has_intersections
-      when "s3_design", "s3_designReview" then !DESIGN_TYPES.include?(record_type.to_s)
-      else false
-      end
-    end
+    def previous_key(current_key, record_type:)
+      route = route_for(record_type: record_type)
+      idx = route.index(current_key.to_s)
+      return nil if idx.nil? || idx.zero?
 
-    # The full route a record will take, used for progress and the funnel.
-    def route_for(record_type:, has_intersections: false)
-      KEYS.reject { |k| skipped?(k, record_type: record_type, has_intersections: has_intersections) }
+      route[idx - 1]
     end
 
     # True when `to_key` is the single legal forward step from `from_key`.
-    def forward?(from_key, to_key, record_type:, has_intersections: false)
-      next_key(from_key, record_type: record_type, has_intersections: has_intersections) == to_key.to_s
+    def forward?(from_key, to_key, record_type:, **)
+      next_key(from_key, record_type: record_type) == to_key.to_s
     end
 
     # Any earlier stage on this record's route is a legal return target.
-    def backward?(from_key, to_key, record_type:, has_intersections: false)
-      route = route_for(record_type: record_type, has_intersections: has_intersections)
+    def backward?(from_key, to_key, record_type:, **)
+      route = route_for(record_type: record_type)
       from_i = route.index(from_key.to_s)
       to_i = route.index(to_key.to_s)
       return false if from_i.nil? || to_i.nil?

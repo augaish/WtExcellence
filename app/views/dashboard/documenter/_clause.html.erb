@@ -1,0 +1,43 @@
+<%# One clause, editable in place when the viewer holds the work, with its
+    comments. Locals: record, clause, can_edit, can_comment, input %>
+<div class="space-y-2">
+  <% if can_edit %>
+    <%= form_with url: dashboard_pp_record_clause_path(record, clause), method: :patch, class: "space-y-2" do %>
+      <div class="flex gap-2 items-start">
+        <span class="font-mono text-xs text-[#797C81] pt-2 w-8"><%= clause.number %></span>
+        <div class="flex-1 space-y-2">
+          <%= text_field_tag "pp_record_clause[title]", clause.title, placeholder: t('documenter.clauses.clause_title'), class: input, "aria-label": t('documenter.clauses.clause_title') %>
+          <%= text_area_tag "pp_record_clause[body]", clause.body, rows: 3, placeholder: t('documenter.clauses.clause_body'), class: input, "aria-label": t('documenter.clauses.clause_body') %>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2">
+        <%= submit_tag t('save'), class: ui_btn_neutral %>
+      </div>
+    <% end %>
+    <%= button_to t('delete'), dashboard_pp_record_clause_path(record, clause), method: :delete,
+          class: "text-xs text-red-600 hover:underline", form: { class: "inline", data: { turbo_confirm: t('documenter.clauses.confirm_delete') } } %>
+  <% else %>
+    <p class="text-sm font-semibold text-[#0D1120]"><span class="font-mono text-xs text-[#797C81] me-2"><%= clause.number %></span><%= clause.title %></p>
+    <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= clause.body %></p>
+  <% end %>
+
+  <% comments = clause.comments.to_a %>
+  <% if comments.any? %>
+    <ul class="space-y-1">
+      <% comments.each do |c| %>
+        <li class="text-xs rounded px-2 py-1 <%= c.resolved? ? 'bg-gray-50 text-[#797C81]' : 'bg-amber-50 text-amber-900' %>">
+          <span class="font-medium"><%= c.user.name %></span>: <%= c.body %>
+          <% if !c.resolved? && can_edit %>
+            <%= button_to t('documenter.clauses.resolve'), dashboard_pp_record_resolve_comment_path(record, c), method: :patch, class: "ms-2 underline", form: { class: "inline" } %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+  <% if can_comment %>
+    <%= form_with url: dashboard_pp_record_clause_comments_path(record, clause), method: :post, class: "flex gap-2" do %>
+      <%= text_field_tag :body, nil, placeholder: t('documenter.clauses.comment_placeholder'), class: "#{input} flex-1", "aria-label": t('documenter.comment') %>
+      <%= submit_tag t('documenter.clauses.comment'), class: ui_btn_neutral %>
+    <% end %>
+  <% end %>
+</div>

@@ -155,3 +155,9 @@ processes; nothing to build until there is content to hang on it.
 - Procedure steps still hang off `PpProcess`; Phase 4 moves them to the procedure record (and the diagram with them).
 - Existing procedure records without a level-2 process are now invalid on edit (rule requested by the owner). Prod had only test data.
 
+## Documenter (Phase 4) — follow-ups
+- Chromium is installed by the Dockerfile; the first deploy after this rebuilds the image. If `RecordPdfRenderer.available?` is false in production the record publishes without a PDF and the log says so — check `kamal app exec 'bin/rails runner "puts RecordPdfRenderer.available?"'` after deploy.
+- Help topics still describe the old lifecycle stages; rewrite `_policies_procedures` for the new flows.
+- The Records index "stage" column and the monitoring funnel use the new stages; the P&P dashboard tiles were not redesigned.
+- Email for Documenter notices stays in-app only (owner's choice).
+

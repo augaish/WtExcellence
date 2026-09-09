@@ -1,0 +1,20 @@
+<%# One line on where a record's current stage stands. Locals: record %>
+<% task = record.current_task %>
+<% approvals = record.stage_approvals.select { |a| a.stage_key == record.stage_key } %>
+<p class="text-xs text-[#797C81]">
+  <% if task %>
+    <%= t('documenter.with_person', name: task.user.name) %>
+  <% elsif approvals.any? %>
+    <% approvals.each do |a| %>
+      <span class="inline-block w-2.5 h-2.5 rounded-full align-middle <%= { 'green' => 'bg-green-500', 'red' => 'bg-red-500', 'orange' => 'bg-amber-400' }[a.status_colour] %>"
+            title="<%= a.org_unit.display_name %>"></span>
+    <% end %>
+    <%= t('documenter.approvals_status', approved: approvals.count(&:approved?), total: approvals.size) %>
+  <% elsif PpStage.actor_of(record.stage_key) == :unit_head %>
+    <%= record.owning_unit_head ? t('documenter.with_person', name: record.owning_unit_head.name) : t('documenter.no_unit_head') %>
+  <% elsif PpStage.actor_of(record.stage_key) == :verifier %>
+    <%= record.verifier_user ? t('documenter.with_person', name: record.verifier_user.name) : t('documenter.no_verifier') %>
+  <% else %>
+    <%= t('documenter.with_manager') %>
+  <% end %>
+</p>

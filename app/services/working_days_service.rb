@@ -38,6 +38,18 @@ class WorkingDaysService
     count
   end
 
+  # The moment `days` working days after `from` have passed: the deadline a
+  # silent approver is held to. Weekends and holidays are skipped.
+  def add_working_days(from, days)
+    cursor = to_date(from)
+    remaining = days.to_i
+    while remaining.positive?
+      cursor += 1
+      remaining -= 1 if working_day?(cursor)
+    end
+    cursor.end_of_day
+  end
+
   def working_day?(date)
     return false if weekend_days.include?(date.wday)
 

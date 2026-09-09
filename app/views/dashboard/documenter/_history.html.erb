@@ -1,0 +1,18 @@
+<%# The moves so far, newest first. Locals: record %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+  <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('documenter.history') %></h2>
+  <% transitions = record.stage_transitions.order(created_at: :desc).limit(12).to_a %>
+  <% if transitions.empty? %>
+    <p class="text-xs text-[#797C81]"><%= t('documenter.no_history') %></p>
+  <% else %>
+    <ol class="space-y-2 text-xs">
+      <% transitions.each do |tr| %>
+        <li>
+          <span class="text-[#797C81]"><%= l(tr.created_at, format: :short) %></span>
+          <span class="text-[#0D1120]"><%= PpStage.label(tr.from_stage) if tr.from_stage %> → <%= PpStage.label(tr.to_stage) %></span>
+          <% if tr.reason.present? %><p class="text-[#797C81] ms-2">“<%= tr.reason %>”</p><% end %>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+</div>

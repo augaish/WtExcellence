@@ -73,7 +73,7 @@ class PpMonitoringService
 
   # Still at the very first stage and never moved.
   def untouched?(record)
-    record.stage_key == PpStage::FIRST_KEY && record.stage_transitions.none?
+    record.stage_key == PpStage.first_key_for(record.record_type) && record.stage_transitions.none?
   end
 
   # Finished, but at least one stage it has since moved past ran longer than
@@ -84,7 +84,7 @@ class PpMonitoringService
     return false if transitions.empty?
 
     entered_at = record.created_at
-    current = PpStage::FIRST_KEY
+    current = PpStage.first_key_for(record.record_type)
 
     transitions.any? do |transition|
       stage = transition.from_stage.presence || current

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -570,6 +570,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "assigned_credits", default: 0, null: false
+    t.boolean "pp_manager", default: false, null: false
     t.index ["company_id", "user_id"], name: "index_company_users_on_company_id_and_user_id", unique: true
     t.index ["company_id"], name: "index_company_users_on_company_id"
     t.index ["user_id"], name: "index_company_users_on_user_id"
@@ -772,6 +773,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
     t.index ["pp_process_authority_id"], name: "index_pp_authority_assignments_on_pp_process_authority_id"
   end
 
+  create_table "pp_clause_comments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_clause_id", null: false
+    t.uuid "user_id", null: false
+    t.string "stage_key", limit: 50
+    t.text "body", null: false
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_record_clause_id"], name: "index_pp_clause_comments_on_pp_record_clause_id"
+    t.index ["user_id"], name: "index_pp_clause_comments_on_user_id"
+  end
+
   create_table "pp_diagram_elements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pp_diagram_id", null: false
     t.integer "position", default: 0, null: false
@@ -848,7 +861,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
   end
 
   create_table "pp_process_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "pp_process_id", null: false
+    t.uuid "pp_process_id"
     t.integer "position", default: 1, null: false
     t.string "activity", limit: 300
     t.text "description"
@@ -859,8 +872,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
     t.string "system_used", limit: 250
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "pp_record_id"
     t.index ["pp_process_id", "position"], name: "index_pp_process_steps_on_pp_process_id_and_position"
     t.index ["pp_process_id"], name: "index_pp_process_steps_on_pp_process_id"
+    t.index ["pp_record_id", "position"], name: "index_pp_process_steps_on_pp_record_id_and_position"
+    t.index ["pp_record_id"], name: "index_pp_process_steps_on_pp_record_id"
     t.index ["responsible_org_unit_id"], name: "index_pp_process_steps_on_responsible_org_unit_id"
   end
 
@@ -901,6 +917,18 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
     t.index ["parent_id"], name: "index_pp_processes_on_parent_id"
     t.index ["predecessor_process_id"], name: "index_pp_processes_on_predecessor_process_id"
     t.index ["successor_process_id"], name: "index_pp_processes_on_successor_process_id"
+  end
+
+  create_table "pp_record_clauses", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.uuid "parent_id"
+    t.integer "position", default: 1, null: false
+    t.string "title", limit: 300
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_record_id", "parent_id", "position"], name: "idx_on_pp_record_id_parent_id_position_a7e24f1b89"
+    t.index ["pp_record_id"], name: "index_pp_record_clauses_on_pp_record_id"
   end
 
   create_table "pp_record_links", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -991,6 +1019,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
     t.string "delivery_period", limit: 250
     t.text "channels"
     t.text "delivery_stages"
+    t.uuid "verifier_user_id"
+    t.integer "auto_approve_days"
+    t.string "publish_mode", limit: 20
+    t.string "published_link", limit: 1000
+    t.datetime "published_at"
+    t.uuid "published_pdf_upload_id"
     t.index ["company_id", "classification"], name: "index_pp_records_on_company_id_and_classification"
     t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"
@@ -1031,6 +1065,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "decision", limit: 20
+    t.text "comment"
+    t.integer "sequence_group", default: 1, null: false
+    t.datetime "auto_approve_at"
     t.index ["org_unit_id"], name: "index_pp_stage_approvals_on_org_unit_id"
     t.index ["pp_record_id", "stage_key", "org_unit_id"], name: "idx_pp_stage_approvals_unique", unique: true
     t.index ["pp_record_id"], name: "index_pp_stage_approvals_on_pp_record_id"
@@ -1057,6 +1095,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
     t.datetime "updated_at", null: false
     t.index ["company_id", "stage_key"], name: "index_pp_stage_targets_on_company_id_and_stage_key", unique: true
     t.index ["company_id"], name: "index_pp_stage_targets_on_company_id"
+  end
+
+  create_table "pp_stage_tasks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.string "stage_key", limit: 50, null: false
+    t.uuid "user_id", null: false
+    t.uuid "assigned_by_id"
+    t.datetime "assigned_at", null: false
+    t.datetime "submitted_at"
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_record_id", "stage_key"], name: "index_pp_stage_tasks_on_pp_record_id_and_stage_key"
+    t.index ["pp_record_id"], name: "index_pp_stage_tasks_on_pp_record_id"
+    t.index ["user_id"], name: "index_pp_stage_tasks_on_user_id"
   end
 
   create_table "pp_stage_transitions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1448,6 +1501,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
   add_foreign_key "org_units", "users", column: "head_user_id"
   add_foreign_key "pp_authority_assignments", "org_units"
   add_foreign_key "pp_authority_assignments", "pp_process_authorities"
+  add_foreign_key "pp_clause_comments", "pp_record_clauses"
+  add_foreign_key "pp_clause_comments", "users"
   add_foreign_key "pp_diagram_elements", "pp_diagrams"
   add_foreign_key "pp_diagram_elements", "pp_process_steps"
   add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "from_element_id"
@@ -1459,12 +1514,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
   add_foreign_key "pp_process_authorities", "pp_processes"
   add_foreign_key "pp_process_steps", "org_units", column: "responsible_org_unit_id"
   add_foreign_key "pp_process_steps", "pp_processes"
+  add_foreign_key "pp_process_steps", "pp_records"
   add_foreign_key "pp_processes", "companies"
   add_foreign_key "pp_processes", "org_units", column: "owner_org_unit_id"
   add_foreign_key "pp_processes", "pp_processes", column: "parent_id"
   add_foreign_key "pp_processes", "pp_processes", column: "predecessor_process_id"
   add_foreign_key "pp_processes", "pp_processes", column: "successor_process_id"
   add_foreign_key "pp_processes", "users", column: "owner_user_id"
+  add_foreign_key "pp_record_clauses", "pp_record_clauses", column: "parent_id", on_delete: :cascade
+  add_foreign_key "pp_record_clauses", "pp_records"
   add_foreign_key "pp_record_links", "pp_records"
   add_foreign_key "pp_record_links", "pp_records", column: "linked_record_id"
   add_foreign_key "pp_record_participants", "org_units"
@@ -1480,7 +1538,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
   add_foreign_key "pp_records", "pp_records", column: "predecessor_record_id", on_delete: :nullify
   add_foreign_key "pp_records", "pp_records", column: "previous_version_id"
   add_foreign_key "pp_records", "pp_records", column: "successor_record_id", on_delete: :nullify
+  add_foreign_key "pp_records", "uploads", column: "published_pdf_upload_id", on_delete: :nullify
   add_foreign_key "pp_records", "users", column: "owner_user_id"
+  add_foreign_key "pp_records", "users", column: "verifier_user_id", on_delete: :nullify
   add_foreign_key "pp_service_levels", "pp_records"
   add_foreign_key "pp_stage_approvals", "org_units"
   add_foreign_key "pp_stage_approvals", "pp_records"
@@ -1489,6 +1549,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_112946) do
   add_foreign_key "pp_stage_assignees", "pp_records"
   add_foreign_key "pp_stage_assignees", "users"
   add_foreign_key "pp_stage_targets", "companies"
+  add_foreign_key "pp_stage_tasks", "pp_records"
+  add_foreign_key "pp_stage_tasks", "users"
   add_foreign_key "pp_stage_transitions", "pp_records"
   add_foreign_key "pp_stage_transitions", "users", column: "actor_user_id"
   add_foreign_key "questionnaires", "capas"

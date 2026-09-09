@@ -1,9 +1,9 @@
-<%# One stage section: checklist + stage-specific fields + bulk move.
-    Locals: stage, records, org_units, company_users, phase %>
+<%# One stage section of the manager's view: the records sitting here, how
+    long each has sat, and a bulk move for the plain stages.
+    Locals: stage, records, phase %>
 <% stage_key = stage[:key] %>
 <% target = stage_target_for(stage_key) %>
 <% is_approval = PpStage.approval_stage?(stage_key) %>
-<% is_branch = PpStage.branch_stage?(stage_key) %>
 
 <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden mb-4"
      data-controller="bulk-select">
@@ -76,10 +76,9 @@
                 <% end %>
               </td>
               <td class="p-3">
-                <%= render "dashboard/documenter/stage_fields",
-                      record: record, stage_key: stage_key, phase: phase,
-                      is_approval: is_approval, is_branch: is_branch,
-                      org_units: org_units, target: target %>
+                <%= render "dashboard/documenter/stage_summary", record: record %>
+                <%= link_to t('documenter.open_flow'), dashboard_documenter_record_path(record),
+                      class: "inline-block mt-1 text-xs font-medium text-[#5C3984] hover:underline focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
               </td>
             </tr>
           <% end %>

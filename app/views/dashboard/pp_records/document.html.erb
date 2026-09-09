@@ -16,11 +16,11 @@
     <div class="flex items-center justify-between gap-6 mb-10">
       <%# The company's logo sits beside the platform's, never replacing it. %>
       <div class="flex items-center gap-3">
-        <%= image_tag asset_path('logo.png'), class: "h-10 w-10 rounded-full", alt: "Way to Excellence" %>
-        <% if @record.company&.brand_logo&.attached? %>
+        <%= image_tag document_logo_src, class: "h-10 w-10 rounded-full", alt: "Way to Excellence" %>
+        <% brand_src = document_brand_logo_src(@record.company) %>
+        <% if brand_src %>
           <span class="h-8 w-px" style="background: #E3E3E3;" aria-hidden="true"></span>
-          <%= image_tag signed_file_url(@record.company.brand_logo, disposition: "inline"),
-              class: "h-10 w-auto max-w-[160px] object-contain", alt: cover[:company_name] %>
+          <%= image_tag brand_src, class: "h-10 w-auto max-w-[160px] object-contain", alt: cover[:company_name] %>
         <% end %>
       </div>
       <span class="text-xs font-semibold px-3 py-1 rounded-full" style="background: <%= accent %>; color: <%= primary %>;">

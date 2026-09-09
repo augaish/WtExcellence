@@ -1,0 +1,13 @@
+<%# Return the record to an earlier stage, with a reason. Managers only.
+    Locals: record, to, input, label %>
+<% if manager? %>
+  <details class="pt-2 border-t border-[#E3E3E3]">
+    <summary class="cursor-pointer text-sm font-medium text-[#797C81] hover:text-[#0D1120]"><%= t('documenter.actions.push_back_to', stage: PpStage.label(to)) %></summary>
+    <%= form_with url: dashboard_documenter_return_path, method: :post, class: "mt-2 flex flex-col sm:flex-row gap-2" do %>
+      <%= hidden_field_tag :record_id, record.id %>
+      <%= hidden_field_tag :stage_key, to %>
+      <%= text_field_tag :reason, nil, required: true, placeholder: t('documenter.reason'), class: "#{input} flex-1" %>
+      <%= submit_tag t('documenter.actions.push_back'), class: ui_btn_danger %>
+    <% end %>
+  </details>
+<% end %>

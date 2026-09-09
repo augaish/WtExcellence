@@ -263,7 +263,7 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   # side — so package_id is deliberately NOT permitted here.
   def record_params
     params.require(:pp_record).permit(
-      :record_type, :title_en, :title_ar, :description, :scope,
+      :record_type, :title_en, :title_ar, :description, :scope, :verifier_user_id,
       :effective_date, :review_date, :owner_user_id, :owner_org_unit_id,
       :pp_process_id, :active, :classification, :counterparty, :change_summary,
       :trigger_text, :inputs, :outputs, :predecessor_record_id, :successor_record_id,

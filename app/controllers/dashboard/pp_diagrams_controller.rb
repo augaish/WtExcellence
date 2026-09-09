@@ -59,11 +59,11 @@ class Dashboard::PpDiagramsController < Dashboard::BaseController
   # Draws the diagram from the owning process's steps: start, one task per
   # step, end. Safe to run again after the steps change.
   def generate_from_steps
-    process = @diagram.owner.is_a?(PpProcess) ? @diagram.owner : @diagram.owner.try(:pp_process)
-    return redirect_to dashboard_pp_diagram_path(@diagram), alert: t("architect.sync.no_steps"), status: :see_other if process.nil? || process.steps.none?
+    owner = @diagram.owner
+    return redirect_to dashboard_pp_diagram_path(@diagram), alert: t("architect.sync.no_steps"), status: :see_other if owner.nil? || !owner.respond_to?(:steps) || owner.steps.none?
 
-    DiagramStepSync.generate(@diagram, process)
-    redirect_to dashboard_pp_diagram_path(@diagram), notice: t("architect.sync.generated", count: process.steps.count), status: :see_other
+    DiagramStepSync.generate(@diagram, owner)
+    redirect_to dashboard_pp_diagram_path(@diagram), notice: t("architect.sync.generated", count: owner.steps.count), status: :see_other
   end
 
   # ---- Elements ----------------------------------------------------------

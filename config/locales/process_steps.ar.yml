@@ -4,12 +4,14 @@ ar:
     errors:
       unit_required: اختر وحدة المدة.
       other_company: يجب أن تنتمي إلى نفس الشركة
+      owner_required: تنتمي الخطوة إلى إجراء.
     flash:
       created: تمت إضافة الخطوة.
       updated: تم تحديث الخطوة.
       deleted: تم حذف الخطوة.
       not_found: هذه الخطوة لم تعد موجودة.
     add: إضافة خطوة
+    responsible_title: المنصب المسؤول
     number: "#"
     activity: النشاط
     description: وصف الخطوة

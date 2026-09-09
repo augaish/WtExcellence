@@ -59,7 +59,6 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
   # Both become sections of the generated document, so they are edited on a
   # page of their own rather than in the drawer used for the process card.
   def show
-    @steps = @process.steps.includes(:responsible_org_unit).to_a
     @authorities = @process.authorities.includes(assignments: :org_unit).to_a
     @org_units = company.org_units.active.ordered.to_a
 

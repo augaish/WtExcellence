@@ -4,12 +4,14 @@ en:
     errors:
       unit_required: "Choose a unit for the duration."
       other_company: "must belong to the same company"
+      owner_required: "A step belongs to a procedure."
     flash:
       created: "Step added."
       updated: "Step updated."
       deleted: "Step removed."
       not_found: "That step no longer exists."
     add: "Add step"
+    responsible_title: "Responsible position"
     number: "#"
     activity: "Activity"
     description: "Step description"

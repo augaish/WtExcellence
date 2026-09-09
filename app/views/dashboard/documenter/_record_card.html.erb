@@ -1,0 +1,11 @@
+<%# The record's own content, for the types that have no clauses or steps. Locals: record %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+  <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t("pp_records.card_title.#{record.record_type}", default: t('pp_records.section_identity')) %></h2>
+  <% if record.description.present? %>
+    <p class="text-sm text-[#0D1120] whitespace-pre-line mb-3"><%= record.description %></p>
+  <% end %>
+  <%= render "dashboard/pp_records/card", record: record %>
+  <% if record.editable? %>
+    <%= link_to t('edit'), edit_dashboard_pp_record_path(record), class: "inline-block mt-3 text-xs font-medium text-[#5C3984] hover:underline" %>
+  <% end %>
+</div>

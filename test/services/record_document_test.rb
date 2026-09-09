@@ -10,6 +10,7 @@ class RecordDocumentTest < ActiveSupport::TestCase
       objective: "Govern how policies are written", trigger_text: "A new regulation is issued")
     @record = @company.pp_records.create!(record_type: "procedure", title_en: "Policy Development Procedure",
       title_ar: "إجراء تطوير السياسات", code: "PRO-01", pp_process: @process,
+      description: "Govern how policies are written", trigger_text: "A new regulation is issued",
       owner_org_unit: @unit, classification: "internal", version_label: "v1.0")
   end
 
@@ -58,7 +59,7 @@ class RecordDocumentTest < ActiveSupport::TestCase
     assert_includes references.payload.first[:name], "7.5.3"
   end
 
-  test "the procedure card prints the fields the process already carries" do
+  test "the procedure card prints the fields the procedure carries" do
     card = document.sections.find { |s| s.key == "process_card" }
 
     assert_equal "Govern how policies are written", card.payload["objective"]
@@ -67,9 +68,9 @@ class RecordDocumentTest < ActiveSupport::TestCase
   end
 
   test "the total time quoted is the one the steps add up to" do
-    @process.update!(total_time_value: 99, total_time_unit: "hours")
-    @process.steps.create!(position: 1, duration_value: 2, duration_unit: "hours")
-    @process.steps.create!(position: 2, duration_value: 3, duration_unit: "hours")
+    @record.update!(total_time_value: 99, total_time_unit: "hours")
+    @record.steps.create!(position: 1, duration_value: 2, duration_unit: "hours")
+    @record.steps.create!(position: 2, duration_value: 3, duration_unit: "hours")
 
     card = document.sections.find { |s| s.key == "process_card" }
     assert_equal "5 Hours", card.payload["total_time"],
@@ -77,8 +78,8 @@ class RecordDocumentTest < ActiveSupport::TestCase
   end
 
   test "steps print in order with their responsible position" do
-    @process.steps.create!(position: 2, activity: "Review", responsible_title: "Quality Manager")
-    @process.steps.create!(position: 1, activity: "Draft", responsible_title: "Policies Specialist")
+    @record.steps.create!(position: 2, activity: "Review", responsible_title: "Quality Manager")
+    @record.steps.create!(position: 1, activity: "Draft", responsible_title: "Policies Specialist")
 
     steps = document.sections.find { |s| s.key == "steps" }
     assert_equal [ "Draft", "Review" ], steps.payload.map { |row| row[:activity] }

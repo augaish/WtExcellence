@@ -28,15 +28,10 @@ class AuthorityLevelTest < ActiveSupport::TestCase
     assert_not AuthorityLevel.segregation_conflict?(%w[recommend inform])
   end
 
-  test "every lifecycle stage names a level it exercises, except the branch" do
+  test "every lifecycle stage names a level it exercises" do
     PpStage::KEYS.each do |key|
       level = PpStage.level_of(key)
-
-      if PpStage.branch_stage?(key)
-        assert_nil level, "#{key} is a branch and should exercise no authority level"
-      else
-        assert AuthorityLevel.exists?(level), "#{key} names an unknown level: #{level.inspect}"
-      end
+      assert AuthorityLevel.exists?(level), "#{key} names an unknown level: #{level.inspect}"
     end
   end
 

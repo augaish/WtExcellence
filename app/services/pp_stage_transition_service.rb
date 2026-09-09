@@ -3,11 +3,16 @@
 # return to a named earlier stage with a reason. Everything else is derived.
 #
 # Guarantees:
-#   * forward goes to exactly ONE computed stage (branching on record type and
-#     the intersections answer) — a crafted request cannot skip ahead
+#   * forward goes to exactly ONE computed stage — a crafted request cannot
+#     skip ahead
+#   * forward is allowed only to the stage's actor (see PpStage), or to a P&P
+#     Manager / admin
+#   * a stage with open work (a task handed to someone) cannot be left until
+#     that work comes back
+#   * an approval-chain stage cannot be left until every unit has approved;
+#     Stakeholder Review alone may be skipped when nobody was asked
 #   * backward is allowed only to an earlier stage ON THIS RECORD'S ROUTE, only
-#     for permitted users, and always with a reason
-#   * an approval-chain stage cannot be left until every unit has responded
+#     for a P&P Manager / admin, and always with a reason
 #   * every move writes a transition row and stamps stage_entered_at, which is
 #     what the duration/lateness maths reads
 class PpStageTransitionService
@@ -15,13 +20,14 @@ class PpStageTransitionService
   class NotPermitted < TransitionError; end
   class InvalidTransition < TransitionError; end
   class ApprovalsPending < TransitionError; end
+  class WorkOutstanding < TransitionError; end
 
   Result = Struct.new(:moved, :skipped, :errors, keyword_init: true) do
     def success? = errors.empty?
   end
 
-  def self.advance(record:, user:, company:)
-    new(record: record, user: user, company: company).advance
+  def self.advance(record:, user:, company:, skip_stakeholders: false)
+    new(record: record, user: user, company: company).advance(skip_stakeholders: skip_stakeholders)
   end
 
   def self.return_to(record:, user:, company:, stage_key:, reason:)
@@ -46,22 +52,43 @@ class PpStageTransitionService
     Result.new(moved: moved, skipped: skipped, errors: errors)
   end
 
+  # Who runs the flows: platform admins, company admins and P&P Managers.
+  def self.manager?(user, company)
+    return false if user.nil?
+    return true if user.platform_admin?
+
+    cu = user.company_user
+    cu.present? && cu.company_id == company.id && (cu.company_admin? || cu.pp_manager?)
+  end
+
   def initialize(record:, user:, company:)
     @record = record
     @user = user
     @company = company
   end
 
-  def advance
+  def advance(skip_stakeholders: false)
     ensure_can_move_forward!
 
     from = @record.stage_key
     to = @record.next_stage_key
     raise InvalidTransition, I18n.t("documenter.errors.no_next_stage") if to.blank?
 
-    # An approval-chain stage is only complete when every unit has responded.
+    # Work handed to someone must come back before the stage is left.
+    if @record.stage_tasks.for_stage(from).open.exists?
+      raise WorkOutstanding, I18n.t("documenter.errors.work_outstanding")
+    end
+
     if PpStage.approval_stage?(from) && !@record.approvals_complete?(from)
-      raise ApprovalsPending, I18n.t("documenter.errors.approvals_pending")
+      unless from == "s2_stakeholders" && skip_stakeholders && @record.stage_approvals.for_stage(from).none?
+        raise ApprovalsPending, I18n.t("documenter.errors.approvals_pending")
+      end
+    end
+
+    # Publishing has its own door (RecordPublisher), so the terminal stage is
+    # never reached by a plain "forward".
+    if PpStage.terminal?(to) && !@record.glossary?
+      raise InvalidTransition, I18n.t("documenter.errors.publish_via_publisher")
     end
 
     apply!(from: from, to: to, direction: "forward", reason: nil)
@@ -75,51 +102,51 @@ class PpStageTransitionService
     end
 
     from = @record.stage_key
-    unless PpStage.backward?(from, target_stage,
-                             record_type: @record.record_type,
-                             has_intersections: @record.has_intersections?)
+    unless PpStage.backward?(from, target_stage, record_type: @record.record_type)
       raise InvalidTransition, I18n.t("documenter.errors.not_an_earlier_stage")
     end
 
     apply!(from: from, to: target_stage.to_s, direction: "backward", reason: reason.to_s.strip)
   end
 
+  # Used by RecordPublisher once the publishing conditions are met.
+  def publish!
+    from = @record.stage_key
+    to = @record.next_stage_key
+    raise InvalidTransition, I18n.t("documenter.errors.no_next_stage") unless to && PpStage.terminal?(to)
+
+    apply!(from: from, to: to, direction: "forward", reason: nil)
+  end
+
   private
 
-  # Forward: admins, the quality manager, the record owner, or someone assigned
-  # to the CURRENT stage.
+  def manager?
+    self.class.manager?(@user, @company)
+  end
+
+  # Forward: the stage's own actor, or a manager.
   def ensure_can_move_forward!
-    return if platform_admin? || company_manager? || record_owner? || stage_assignee?
+    return if manager? || stage_actor?
 
     raise NotPermitted, I18n.t("documenter.errors.not_permitted_forward")
   end
 
-  # Backward is a separate, narrower permission: admins, the quality manager, or
-  # someone assigned to the current stage. Never the owner by default.
+  # Backward: managers only. Unit heads push work back to a person (a task),
+  # never the record to a stage.
   def ensure_can_move_backward!
-    return if platform_admin? || company_manager? || stage_assignee?
+    return if manager?
 
     raise NotPermitted, I18n.t("documenter.errors.not_permitted_backward")
   end
 
-  def platform_admin?
-    @user&.platform_admin?
-  end
-
-  def company_manager?
-    cu = @user&.company_user
-    cu.present? && cu.company_id == @record.company_id &&
-      (cu.has_admin_privileges? || cu.company_quality_manager?)
-  end
-
-  def record_owner?
-    @user.present? && @record.owner_user_id == @user.id
-  end
-
-  def stage_assignee?
+  def stage_actor?
     return false if @user.nil?
 
-    @record.stage_assignees.for_stage(@record.stage_key).exists?(user_id: @user.id)
+    case PpStage.actor_of(@record.stage_key)
+    when :verifier then @record.verifier_user_id == @user.id
+    when :unit_head then @record.owning_unit_head&.id == @user.id
+    else false
+    end
   end
 
   def apply!(from:, to:, direction:, reason:)

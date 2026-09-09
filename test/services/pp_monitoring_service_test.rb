@@ -28,7 +28,7 @@ class PpMonitoringServiceTest < ActiveSupport::TestCase
   # "reached" counts everything at or PAST the phase, not just sitting in it.
   test "reached counts records at or past each phase" do
     record(stage: "s1_verify")
-    record(stage: "s4_initial")
+    record(stage: "s4_final")
 
     funnel = PpMonitoringService.for(@company.reload).funnel
     by_phase = funnel.index_by { |f| f[:phase] }

@@ -40,7 +40,7 @@ class Dashboard::RecordVersionsTest < ActionDispatch::IntegrationTest
     assert_equal 2, draft.version_number
     assert_equal "POL-HR-001-V2", draft.code
     assert_equal "All staff", draft.scope
-    assert_nil draft.current_stage
+    assert_equal "s1_verify", draft.stage_key, "a new version starts its flow from the beginning"
     refute draft.completed?
 
     # Saving without a reason is refused; with one it goes through.

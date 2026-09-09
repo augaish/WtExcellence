@@ -145,17 +145,24 @@ Rails.application.routes.draw do
       get "/", action: :index, as: :documenter
       post "/advance", action: :advance, as: :documenter_advance
       post "/return", action: :return_to, as: :documenter_return
-      patch "/:id/intersections", action: :update_intersections, as: :documenter_intersections
-      post "/:id/approvals", action: :add_approval, as: :documenter_add_approval
-      patch "/approvals/:approval_id/receive", action: :receive_approval, as: :documenter_receive_approval
-      delete "/approvals/:approval_id", action: :remove_approval, as: :documenter_remove_approval
-      post "/:id/assignees", action: :add_assignee, as: :documenter_add_assignee
-      delete "/:id/assignees/:assignee_id", action: :remove_assignee, as: :documenter_remove_assignee
-      post "/:id/reopen", action: :reopen, as: :documenter_reopen
       get "/settings", action: :settings, as: :documenter_settings
       patch "/settings", action: :update_settings, as: :update_documenter_settings
       post "/holidays", action: :create_holiday, as: :documenter_holidays
       delete "/holidays/:holiday_id", action: :destroy_holiday, as: :documenter_holiday
+      patch "/approvals/:approval_id/answer", action: :answer_approval, as: :documenter_answer_approval
+      delete "/approvals/:approval_id", action: :remove_approval, as: :documenter_remove_approval
+
+      get "/:id", action: :show, as: :documenter_record
+      post "/:id/advance", action: :advance_one, as: :documenter_advance_record
+      post "/:id/tasks", action: :assign_task, as: :documenter_assign_task
+      post "/:id/tasks/submit", action: :submit_task, as: :documenter_submit_task
+      post "/:id/approvals", action: :request_approvals, as: :documenter_request_approvals
+      post "/:id/approvals/resend", action: :resend_approvals, as: :documenter_resend_approvals
+      post "/:id/skip_stakeholders", action: :skip_stakeholders, as: :documenter_skip_stakeholders
+      post "/:id/design", action: :design, as: :documenter_design
+      patch "/:id/publish_mode", action: :publish_mode, as: :documenter_publish_mode
+      post "/:id/submit_publication", action: :submit_publication, as: :documenter_submit_publication
+      post "/:id/publish", action: :publish, as: :documenter_publish
     end
 
     # Records + Packages (P&P)
@@ -183,6 +190,10 @@ Rails.application.routes.draw do
 
     resources :pp_records do
       member { post :open_next_version }
+      resources :clauses, only: [ :create, :update, :destroy ], controller: "pp_record_clauses"
+      post "clauses/:clause_id/comments", to: "pp_clause_comments#create", as: :clause_comments
+      patch "comments/:id/resolve", to: "pp_clause_comments#resolve", as: :resolve_comment
+      resources :record_steps, only: [ :create, :update, :destroy ], controller: "pp_record_steps"
       resources :service_levels, only: [ :create, :update, :destroy ], controller: "pp_service_levels"
       member do
         post :attach_documents
@@ -213,7 +224,6 @@ Rails.application.routes.draw do
 
       # The procedure's own detail: its steps and its operational authority
       # matrix, both of which become sections of the generated document.
-      resources :steps, only: [ :create, :update, :destroy ], controller: "pp_process_steps"
       resources :authorities, only: [ :create, :destroy ], controller: "pp_process_authorities" do
         resources :assignments, only: [ :create, :destroy ], controller: "pp_authority_assignments"
       end
@@ -235,6 +245,7 @@ Rails.application.routes.draw do
       patch "/users/:id/status", action: :update_user_status, as: :update_user_status
       patch "/users/:id/change_password", action: :change_password, as: :change_user_password
       patch "/users/:id/change_role", action: :change_role, as: :change_user_role
+      patch "/users/:id/pp_manager", action: :toggle_pp_manager, as: :toggle_pp_manager
       delete "/users/:id", action: :destroy_user, as: :destroy_user
       delete "/companies/:id", action: :destroy_company, as: :destroy_company
     end

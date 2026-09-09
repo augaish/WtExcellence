@@ -62,7 +62,8 @@ class RetestBatchOneTest < ActiveSupport::TestCase
 
   # R14 — nothing internal reaches the page.
   test "the process card prints enum values in words" do
-    record = @company.pp_records.create!(record_type: "procedure", title_en: "PO procedure", pp_process: @process)
+    record = @company.pp_records.create!(record_type: "procedure", title_en: "PO procedure", pp_process: @process,
+      frequency: "on_demand", automation_status: "partially_automated")
     card = RecordDocument.new(record).sections.find { |s| s.key == "process_card" }
 
     assert_equal "On demand", card.payload["frequency"]

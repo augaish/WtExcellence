@@ -28,8 +28,8 @@ class Dashboard::RetestBatchThreeTest < ActionDispatch::IntegrationTest
   end
 
   test "a rejected step keeps what was typed" do
-    process = @company.pp_processes.create!(name_en: "P", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "P", level: 1, category: "core"))
-    post dashboard_pp_process_steps_path(process), params: {
+    procedure = @company.pp_records.create!(record_type: "procedure", title_en: "P", pp_process: level_two_process(@company), current_stage: "s2_prep")
+    post dashboard_pp_record_record_steps_path(procedure), params: {
       pp_process_step: { activity: "Draft", responsible_title: "Officer", duration_value: 2 }
     }
     follow_redirect!

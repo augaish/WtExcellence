@@ -1,6 +1,6 @@
 # Plan: Org chart fixes, Process Architecture levels, Records journeys, Documenter flows
 
-Status: DRAFT — awaiting answers to the open questions at the end. Nothing here is built yet.
+Status: BUILT — Phases 1–4 are on the branch. Decisions are recorded below; follow-ups live in BACKLOG.md.
 
 ## What exists today (relevant facts)
 
@@ -69,3 +69,11 @@ Procedure: same, with Procedure Design → Design Review inserted after Stakehol
 - Translation: dropped (it would cost credits). Both languages are typed by hand as today.
 - Procedure number = Level 0 . Level 1 . Level 2 . procedure sequence (e.g. 1.2.4.12).
 - Who may add records: the company admin, everyone who reports to the admin's unit directly or through the chain, and quality managers.
+
+## Phase 4 as built
+- Roles: P&P Manager = a quality manager flagged by the company admin in Account Management (`company_users.pp_manager`). Company admins act as managers too.
+- Stages (PpStage): document route verify → approved → prep → draftReview → stakeholders → final → toPublish → published; procedures add design → designReview; glossary submitted → published.
+- Tasks (PpStageTask): work handed to one person inside a stage (reporter, team member, designer, publisher); a stage cannot be left while a task is open.
+- Approvals (PpStageApproval): unit heads answer in their own worklist; sequence groups; auto-approval after N working days (daily job); resend to rejecting units or all; skip only Stakeholder Review and only when nobody was asked.
+- Content: clauses + sub-clauses with comments for policies; steps on the procedure record (drawn into the diagram and kept in sync); forms/services/glossary show their card.
+- Publishing: assign a publisher (link, then manager confirms) or system-only; PDF printed by headless Chromium into the owning unit's Library folder; in-app notification to everyone; glossary approval creates the company term.

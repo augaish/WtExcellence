@@ -473,6 +473,24 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     end
   end
 
+  # The company admin names which quality managers run the Documenter flows.
+  def toggle_pp_manager
+    membership = CompanyUser.find_by(user_id: params[:id], company_id: current_company&.id)
+    unless current_user&.super_admin? || current_user&.company_user&.company_admin?
+      return redirect_to dashboard_account_management_users_path, alert: t("documenter.flash.no_permission"), status: :see_other
+    end
+    return redirect_to dashboard_account_management_users_path, alert: t("user_not_found", default: "User not found."), status: :see_other if membership.nil?
+    unless membership.company_quality_manager?
+      return redirect_to dashboard_account_management_users_path, alert: t("documenter.flash.pp_manager_needs_qm"), status: :see_other
+    end
+
+    membership.update!(pp_manager: !membership.pp_manager)
+    AuditLogService.log_action(actor_user: current_user, company: membership.company, action: "TOGGLE_PP_MANAGER",
+      entity_type: "user", entity_id: membership.user_id, payload: { pp_manager: membership.pp_manager })
+    key = membership.pp_manager ? "pp_manager_set" : "pp_manager_unset"
+    redirect_to dashboard_account_management_users_path, notice: t("documenter.flash.#{key}", name: membership.user.name), status: :see_other
+  end
+
   def change_role
     unless current_user&.super_admin?
       render json: { success: false, message: "Only Super Admins can change user roles." }, status: :forbidden

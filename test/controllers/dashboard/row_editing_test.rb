@@ -27,20 +27,20 @@ class Dashboard::RowEditingTest < ActionDispatch::IntegrationTest
   end
 
   test "a step can be corrected in place and the total follows" do
-    process = @company.pp_processes.create!(name_en: "P", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "P", level: 1, category: "core"))
-    step = process.steps.create!(position: 1, activity: "Draft", duration_value: 2, duration_unit: "hours")
+    procedure = @company.pp_records.create!(record_type: "procedure", title_en: "P", pp_process: level_two_process(@company), current_stage: "s2_prep")
+    step = procedure.steps.create!(position: 1, activity: "Draft", duration_value: 2, duration_unit: "hours")
 
-    patch dashboard_pp_process_step_path(process, step), params: { pp_process_step: { duration_value: 5 } }
+    patch dashboard_pp_record_record_step_path(procedure, step), params: { pp_process_step: { duration_value: 5 } }
 
     assert_equal 5, step.reload.duration_value
-    assert_equal 300, process.reload.computed_total_minutes
+    assert_equal 300, procedure.reload.computed_total_minutes
   end
 
   test "the step and SLA pages offer an edit for each row" do
-    process = @company.pp_processes.create!(name_en: "P", level: 2, category: "core", parent: @company.pp_processes.create!(name_en: "L1 " + "P", level: 1, category: "core"))
-    step = process.steps.create!(position: 1, activity: "Draft")
-    get dashboard_pp_process_path(process)
-    assert_select "form[action=?]", dashboard_pp_process_step_path(process, step)
+    procedure = @company.pp_records.create!(record_type: "procedure", title_en: "P", pp_process: level_two_process(@company), current_stage: "s2_prep")
+    step = procedure.steps.create!(position: 1, activity: "Draft")
+    get dashboard_documenter_record_path(procedure)
+    assert_select "form[action=?]", dashboard_pp_record_record_step_path(procedure, step)
 
     sla = @company.pp_records.create!(record_type: "sla", title_en: "SLA")
     level = sla.service_levels.create!(service_name: "Portal", metric: "availability")

@@ -4,7 +4,10 @@
 # whoever currently holds the post, which is the same reason the DoA delegates
 # «للمنصب وليس للشخص».
 class PpProcessStep < ApplicationRecord
-  belongs_to :pp_process, class_name: "PpProcess"
+  # Steps belong to the procedure record and are filled in the Documenter. The
+  # process link remains only for rows that pre-date the move.
+  belongs_to :pp_record, class_name: "PpRecord", optional: true
+  belongs_to :pp_process, class_name: "PpProcess", optional: true
   belongs_to :responsible_org_unit, class_name: "OrgUnit", optional: true
 
   # The diagram task drawn from this step, if the diagram has been generated.
@@ -36,6 +39,7 @@ class PpProcessStep < ApplicationRecord
   validates :duration_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validate :duration_needs_a_unit
   validate :responsible_unit_must_be_same_company
+  validate :must_belong_somewhere
 
   scope :ordered, -> { order(:position, :created_at) }
 
@@ -71,9 +75,19 @@ class PpProcessStep < ApplicationRecord
   end
 
   def responsible_unit_must_be_same_company
-    return if responsible_org_unit.nil? || pp_process.nil?
-    return if responsible_org_unit.company_id == pp_process.company_id
+    return if responsible_org_unit.nil? || owner.nil?
+    return if responsible_org_unit.company_id == owner.company_id
 
     errors.add(:responsible_org_unit, I18n.t("process_steps.errors.other_company"))
+  end
+
+  def owner
+    pp_record || pp_process
+  end
+
+  def must_belong_somewhere
+    return if pp_record_id.present? || pp_process_id.present?
+
+    errors.add(:base, I18n.t("process_steps.errors.owner_required"))
   end
 end

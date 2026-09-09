@@ -44,6 +44,18 @@ Sidekiq.configure_server do |config|
   rescue => e
     Rails.logger.error "Failed to register delegation_expiry_notice cron: #{e.class}: #{e.message}"
   end
+
+  # Silence counts as approval once the P&P Manager's period has passed.
+  config.on(:startup) do
+    Sidekiq::Cron::Job.create(
+      name: "approval_auto_approve",
+      cron: "0 7 * * *",
+      class: "ApprovalAutoApproveJob",
+      queue: "cron_small"
+    )
+  rescue => e
+    Rails.logger.error "Failed to register approval_auto_approve cron: #{e.class}: #{e.message}"
+  end
 end
 
 Sidekiq.configure_client do |config|

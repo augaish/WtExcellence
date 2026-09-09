@@ -1,0 +1,46 @@
+<%# The policy's clauses: main clauses with sub-clauses beneath, each with its
+    review comments. Locals: record, clauses, can_edit, can_comment, input, label %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+  <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('documenter.clauses.title') %></h2>
+
+  <% if clauses.empty? %>
+    <p class="text-sm text-[#797C81]"><%= t('documenter.clauses.empty') %></p>
+  <% end %>
+
+  <ol class="space-y-4">
+    <% clauses.each do |clause| %>
+      <li class="border border-[#E3E3E3] rounded-lg p-4 space-y-3">
+        <%= render "dashboard/documenter/clause", record: record, clause: clause, can_edit: can_edit, can_comment: can_comment, input: input %>
+        <% if clause.children.any? %>
+          <ol class="ms-6 space-y-3">
+            <% clause.children.each do |sub| %>
+              <li class="border-s-2 border-[#E3E3E3] ps-3">
+                <%= render "dashboard/documenter/clause", record: record, clause: sub, can_edit: can_edit, can_comment: can_comment, input: input %>
+              </li>
+            <% end %>
+          </ol>
+        <% end %>
+        <% if can_edit %>
+          <details class="ms-6">
+            <summary class="cursor-pointer text-xs font-medium text-[#5C3984]"><%= t('documenter.clauses.add_sub') %></summary>
+            <%= form_with url: dashboard_pp_record_clauses_path(record), method: :post, class: "mt-2 space-y-2" do |f| %>
+              <%= hidden_field_tag "pp_record_clause[parent_id]", clause.id %>
+              <%= text_field_tag "pp_record_clause[title]", nil, placeholder: t('documenter.clauses.clause_title'), class: input %>
+              <%= text_area_tag "pp_record_clause[body]", nil, rows: 2, placeholder: t('documenter.clauses.clause_body'), class: input %>
+              <%= submit_tag t('add'), class: ui_btn_secondary %>
+            <% end %>
+          </details>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+
+  <% if can_edit %>
+    <%= form_with url: dashboard_pp_record_clauses_path(record), method: :post, class: "pt-3 border-t border-[#E3E3E3] space-y-2" do %>
+      <p class="text-sm font-medium text-[#0D1120]"><%= t('documenter.clauses.add_main') %></p>
+      <%= text_field_tag "pp_record_clause[title]", nil, placeholder: t('documenter.clauses.clause_title'), class: input %>
+      <%= text_area_tag "pp_record_clause[body]", nil, rows: 3, placeholder: t('documenter.clauses.clause_body'), class: input %>
+      <%= submit_tag t('documenter.clauses.add_main'), class: ui_btn_primary %>
+    <% end %>
+  <% end %>
+</div>

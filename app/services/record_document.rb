@@ -61,7 +61,10 @@ class RecordDocument
     [
       definitions_section,
       body_section,
+      scope_section,
+      clauses_section,
       process_card_section,
+      service_card_section,
       diagram_section,
       steps_section,
       authority_matrix_section,
@@ -91,9 +94,42 @@ class RecordDocument
     section("body", :prose, record.description)
   end
 
+  def scope_section
+    section("scope", :prose, record.scope)
+  end
+
+  # The clauses of a policy, numbered 1, 1.1, 1.2, 2 … as they were written in
+  # the Documenter.
+  def clauses_section
+    rows = record.clauses.main.flat_map do |clause|
+      [ { number: clause.number, title: clause.title, body: clause.body, main: true } ] +
+        clause.children.map { |sub| { number: sub.number, title: sub.title, body: sub.body, main: false } }
+    end
+    section("clauses", :clauses, rows)
+  end
+
+  # بطاقة الخدمة
+  def service_card_section
+    return nil unless record.service?
+
+    fields = {
+      "service_type" => record.service_type_label(locale),
+      "requirements" => record.requirements,
+      "beneficiaries" => record.beneficiaries,
+      "delivery_period" => record.delivery_period,
+      "channels" => record.channels,
+      "providing_unit" => unit_label(record.owner_org_unit),
+      "participating_units" => record.participating_units.map { |u| u.display_name(locale) }.join(", "),
+      "delivery_stages" => record.delivery_stages
+    }.compact_blank
+    section("service_card", :fields, fields)
+  end
+
   # بطاقة الإجراء — every field the procedure template asks for, all of which the
   # process already carries.
   def process_card_section
+    return procedure_card_section if record.procedure?
+
     process = record.pp_process
     return nil if process.nil? || !PROCESS_SECTION_TYPES.include?(record.record_type)
 
@@ -114,6 +150,33 @@ class RecordDocument
       "kpis" => process.kpis
     }.compact_blank
 
+    section("process_card", :fields, fields)
+  end
+
+  # A procedure record carries its own card: its place in the architecture,
+  # then every field of the procedure template.
+  def procedure_card_section
+    process = record.pp_process
+    fields = {
+      "level0" => process && company.process_band_name(process.effective_category, locale),
+      "level1" => process&.parent && "#{process.parent.architecture_number} · #{process.parent.display_name(locale)}",
+      "level2" => process && "#{process.architecture_number} · #{process.display_name(locale)}",
+      "architecture_number" => record.architecture_number,
+      "objective" => record.description,
+      "owner" => unit_label(record.owner_org_unit),
+      "trigger" => record.trigger_text,
+      "inputs" => record.inputs,
+      "outputs" => record.outputs,
+      "predecessor" => record.predecessor_record&.display_title(locale),
+      "successor" => record.successor_record&.display_title(locale),
+      "frequency" => enum_label("process_architecture.frequencies", record.frequency),
+      "total_time" => total_time_for(record),
+      "automation_status" => enum_label("process_architecture.automation", record.automation_status),
+      "related_policies" => record.related_policies.map { |r| r.display_title(locale) }.join(", "),
+      "technical_systems" => record.technical_systems,
+      "forms_used" => record.forms_used.map { |r| r.display_title(locale) }.join(", "),
+      "kpis" => record.kpis
+    }.compact_blank
     section("process_card", :fields, fields)
   end
 
@@ -151,7 +214,7 @@ class RecordDocument
   # مخطط الإجراء — rendered server-side, so the document carries the same diagram
   # the app shows.
   def diagram_section
-    diagram = record.pp_process&.diagrams&.first || record.diagrams.first
+    diagram = record.diagrams.first || record.pp_process&.diagrams&.first
     return nil if diagram.nil?
 
     section("diagram", :diagram, diagram)
@@ -159,10 +222,10 @@ class RecordDocument
 
   # خطوات الإجراء
   def steps_section
-    process = record.pp_process
-    return nil if process.nil?
+    owner = record.steps.any? ? record : record.pp_process
+    return nil if owner.nil?
 
-    rows = process.steps.map do |step|
+    rows = owner.steps.map do |step|
       {
         position: step.position,
         activity: step.activity,

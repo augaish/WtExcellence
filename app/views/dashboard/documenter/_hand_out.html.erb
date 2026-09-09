@@ -1,0 +1,17 @@
+<%# Hand the stage's work to one person. Locals: record, eligible, input, label, title, hint %>
+<% if eligible.any? %>
+  <%= form_with url: dashboard_documenter_assign_task_path(record), method: :post, class: "space-y-2" do %>
+    <p class="text-sm font-medium text-[#0D1120]"><%= title %></p>
+    <p class="text-xs text-[#797C81]"><%= hint %></p>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <div class="flex-1" data-controller="choices-select" data-choices-select-search-value="true">
+        <%= select_tag :user_id, options_from_collection_for_select(eligible, :id, :name), prompt: t('pp_records.pick'),
+              class: input, data: { choices_select_target: "select" }, "aria-label": title %>
+      </div>
+      <%= text_field_tag :note, nil, placeholder: t('documenter.note_optional'), class: "#{input} flex-1" %>
+      <%= submit_tag t('documenter.actions.hand_over'), class: ui_btn_secondary %>
+    </div>
+  <% end %>
+<% else %>
+  <p class="text-xs text-[#797C81]"><%= t('documenter.nobody_to_hand_to') %></p>
+<% end %>

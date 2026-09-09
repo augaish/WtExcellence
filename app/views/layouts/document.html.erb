@@ -7,7 +7,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
-    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <% if @inline_css %>
+      <%# Printed to PDF from a file on disk, where a stylesheet link would not resolve. %>
+      <style><%= RecordPdfRenderer.stylesheet.html_safe %></style>
+    <% else %>
+      <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <% end %>
     <style>
       @page { size: A4; margin: 18mm 16mm; }
 

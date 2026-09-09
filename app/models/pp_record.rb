@@ -40,7 +40,9 @@ class PpRecord < ApplicationRecord
 
   # Stages that count as "done" for package progress. The Documenter (Phase 3)
   # owns the full sequence; these are the terminal ones.
-  COMPLETED_STAGES = %w[s5_published s5_closed].freeze
+  COMPLETED_STAGES = PpStage::TERMINAL_KEYS
+
+  PUBLISH_MODES = %w[assign system].freeze
 
   # Raised when a record already sits in another package and the caller has not
   # explicitly asked to move it.
@@ -79,6 +81,13 @@ class PpRecord < ApplicationRecord
   has_many :stage_transitions, class_name: "PpStageTransition", dependent: :destroy
   has_many :stage_approvals, class_name: "PpStageApproval", dependent: :destroy
   has_many :stage_assignees, class_name: "PpStageAssignee", dependent: :destroy
+  has_many :stage_tasks, class_name: "PpStageTask", dependent: :destroy
+  belongs_to :verifier_user, class_name: "User", optional: true
+  belongs_to :published_pdf_upload, class_name: "Upload", optional: true
+
+  # What the document says: clauses for a policy, steps for a procedure.
+  has_many :clauses, -> { ordered }, class_name: "PpRecordClause", foreign_key: "pp_record_id", dependent: :destroy
+  has_many :steps, -> { ordered }, class_name: "PpProcessStep", foreign_key: "pp_record_id", dependent: :destroy
   has_many :diagrams, -> { order(created_at: :desc) }, as: :owner, class_name: "PpDiagram", dependent: :destroy
   belongs_to :previous_version, class_name: "PpRecord", optional: true
   has_one :next_version, class_name: "PpRecord", foreign_key: "previous_version_id", dependent: :nullify
@@ -116,12 +125,16 @@ class PpRecord < ApplicationRecord
   validates :total_time_unit, inclusion: { in: TIME_UNITS }, allow_blank: true
   validates :total_time_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :service_type, inclusion: { in: SERVICE_TYPES }, allow_blank: true
+  validates :publish_mode, inclusion: { in: PUBLISH_MODES }, allow_blank: true
+  validates :auto_approve_days, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
+  validates :published_link, length: { maximum: 1000 }
   validates :scope, :requirements, :beneficiaries, :channels, :delivery_stages, :inputs, :outputs,
     :technical_systems, :kpis, length: { maximum: 5000 }
   validates :trigger_text, length: { maximum: 500 }
   validates :delivery_period, length: { maximum: 250 }
 
   before_validation :assign_code_and_sequence
+  before_create :enter_first_stage
 
   scope :active, -> { where(active: true) }
   scope :ordered, -> { order(:record_type, :code, :created_at) }
@@ -249,7 +262,7 @@ class PpRecord < ApplicationRecord
   # ---- Lifecycle (Documenter) -------------------------------------------
 
   def stage_key
-    current_stage.presence || PpStage::FIRST_KEY
+    current_stage.presence || PpStage.first_key_for(record_type)
   end
 
   def stage_label(locale = I18n.locale)
@@ -264,14 +277,41 @@ class PpRecord < ApplicationRecord
     PpStage.terminal?(stage_key)
   end
 
-  # The one legal forward destination for THIS record, computed from its type
-  # and its intersections answer. nil at the end of the route.
+  # The one legal forward destination for THIS record, computed from its type.
+  # nil at the end of the route.
   def next_stage_key
-    PpStage.next_key(stage_key, record_type: record_type, has_intersections: has_intersections?)
+    PpStage.next_key(stage_key, record_type: record_type)
   end
 
   def route
-    PpStage.route_for(record_type: record_type, has_intersections: has_intersections?)
+    PpStage.route_for(record_type: record_type)
+  end
+
+  def published?
+    completed?
+  end
+
+  # The head of the owning unit acts in preparation; a record with no owning
+  # unit has nobody to prepare it, which the flow reports rather than hides.
+  def owning_unit_head
+    owner_org_unit&.head_user
+  end
+
+  def current_task
+    stage_tasks.for_stage(stage_key).open.order(:assigned_at).last
+  end
+
+  # Steps in minutes, for the procedure card total.
+  def computed_total_minutes
+    durations = steps.filter_map(&:duration_in_minutes)
+    durations.empty? ? nil : durations.sum
+  end
+
+  def computed_total_in(unit)
+    minutes = computed_total_minutes
+    return nil if minutes.nil?
+
+    (minutes / PpProcessStep::MINUTES_PER_UNIT.fetch(unit.to_s, 1).to_d).round(2)
   end
 
   # How far along the route the record is, 0..1 — used by the funnel.
@@ -304,9 +344,10 @@ class PpRecord < ApplicationRecord
     stage_approvals.for_stage(stage_key)
   end
 
+  # Complete when every unit in the chain has approved, by hand or by silence.
   def approvals_complete?(key = stage_key)
     scope = stage_approvals.for_stage(key)
-    scope.any? && scope.pending.none?
+    scope.any? && scope.where(decision: [ nil, "rejected" ]).none?
   end
 
   private
@@ -360,6 +401,12 @@ class PpRecord < ApplicationRecord
   # The sequence is fixed the first time the record is saved and the code is
   # built from it; both stay put after that, so a code never changes under a
   # reader's feet. A typed code is kept as typed.
+  # A record starts its flow the moment it is logged.
+  def enter_first_stage
+    self.current_stage ||= PpStage.first_key_for(record_type)
+    self.stage_entered_at ||= Time.current
+  end
+
   def assign_code_and_sequence
     return if company.nil?
 
