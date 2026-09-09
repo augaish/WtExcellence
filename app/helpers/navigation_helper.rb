@@ -53,26 +53,28 @@ module NavigationHelper
     items
   end
 
+  # Process Architecture and the Records/Documenter pair are separate modules,
+  # so the super admin can switch each on for a company on its own.
   def nav_pp_items
-    return [] unless nav_module?(:pp)
-
-    [
-      nav_item(label: t("process_architecture.title"), path: dashboard_pp_processes_path,
-        icon: "standards-icon.svg", active: request.path.include?("pp_processes")),
-      nav_item(label: t("pp_records.title"), path: dashboard_pp_records_path,
-        icon: "library-icon.svg", active: request.path.include?("pp_records") || request.path.include?("pp_packages")),
-      nav_item(label: t("documenter.title"), path: dashboard_documenter_path,
-        icon: "calendar-03.png", active: request.path.include?("documenter")),
-      nav_item(label: t("evaluation.title"), path: dashboard_process_evaluations_path,
+    items = []
+    if nav_module?(:processes)
+      items << nav_item(label: t("process_architecture.title"), path: dashboard_pp_processes_path,
+        icon: "standards-icon.svg", active: request.path.include?("pp_processes"))
+    end
+    if nav_module?(:pp)
+      items << nav_item(label: t("pp_records.title"), path: dashboard_pp_records_path,
+        icon: "library-icon.svg", active: request.path.include?("pp_records") || request.path.include?("pp_packages"))
+      items << nav_item(label: t("documenter.title"), path: dashboard_documenter_path,
+        icon: "calendar-03.png", active: request.path.include?("documenter"))
+      items << nav_item(label: t("evaluation.title"), path: dashboard_process_evaluations_path,
         icon: "score-start-icon.svg", active: request.path.include?("evaluation"))
-    ]
+    end
+    items
   end
 
   def nav_governance_items
     items = []
-    # Delegation of Authority sits with Governance, though it is still gated on
-    # the P&P module that its records and matrices belong to.
-    if nav_module?(:pp)
+    if nav_module?(:authorities)
       items << nav_item(label: t("doa.title"), path: dashboard_authorities_path,
         icon: "account-management-icon.svg", active: request.path.include?("authorities"))
     end
@@ -125,7 +127,7 @@ module NavigationHelper
 
   # A risk-manager licence works Governance and reads Standards and P&P; the
   # rest of the product stays hidden from it.
-  READABLE_BY_RISK_MANAGERS = %i[pp standards org_structure].freeze
+  READABLE_BY_RISK_MANAGERS = %i[pp processes standards org_structure authorities].freeze
 
   def nav_module?(key)
     return false unless module_enabled_for_current?(key)

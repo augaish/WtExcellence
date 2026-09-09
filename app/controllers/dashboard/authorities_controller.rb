@@ -1,7 +1,7 @@
 # The executive authority matrix: the authorities a company's Executive DoA
 # grants, the thresholds they are split by, and who holds each level.
 class Dashboard::AuthoritiesController < Dashboard::BaseController
-  requires_module :pp
+  requires_module :authorities
   before_action :authenticate_user!
   before_action :ensure_company_present
   before_action :ensure_can_manage, except: [ :index, :answer_review, :download_pdf ]

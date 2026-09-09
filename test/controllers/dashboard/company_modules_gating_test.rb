@@ -97,4 +97,11 @@ class Dashboard::CompanyModulesGatingTest < ActionDispatch::IntegrationTest
     assert_select "a[data-action='click->account-management#toggleModule']",
       count: Company::MODULES.size
   end
+
+  test "Process Architecture, P&P and Authorities are separate switches" do
+    assert Company::MODULES.key?(:processes)
+    assert Company::MODULES.key?(:pp)
+    assert Company::MODULES.key?(:authorities)
+    assert_equal I18n.t("doa.title"), I18n.t(Company::MODULES[:authorities][:label_key])
+  end
 end

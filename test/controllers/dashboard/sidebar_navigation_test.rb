@@ -34,21 +34,34 @@ class Dashboard::SidebarNavigationTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", dashboard_org_units_path, count: 0
   end
 
-  test "disabling the pp module hides the whole P&P group" do
+  test "disabling the P&P and Process Architecture modules hides the whole P&P group" do
     @company.set_module!(:pp, false)
+    @company.set_module!(:processes, false)
     sign_in @admin
 
     get dashboard_overview_path
     assert_response :success
     assert_select "a[href=?]", dashboard_pp_processes_path, count: 0
+    assert_select "a[href=?]", dashboard_pp_records_path, count: 0
     assert_select "aside#sidebar p", text: I18n.t("pp.title"), count: 0
   end
 
-  test "a disabled module also blocks the URL server-side" do
+  test "Process Architecture stays when only Records and Documenter are off, and each switch blocks its own URL" do
     @company.set_module!(:pp, false)
     sign_in @admin
 
+    get dashboard_overview_path
+    assert_select "a[href=?]", dashboard_pp_processes_path
+    assert_select "a[href=?]", dashboard_pp_records_path, count: 0
+    get dashboard_pp_records_path
+    assert_redirected_to dashboard_overview_path
+
+    @company.set_module!(:processes, false)
     get dashboard_pp_processes_path
+    assert_redirected_to dashboard_overview_path
+
+    @company.set_module!(:authorities, false)
+    get dashboard_authorities_path
     assert_redirected_to dashboard_overview_path
   end
 

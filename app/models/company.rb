@@ -13,7 +13,9 @@ class Company < ApplicationRecord
     vendors:         { label_key: "vendor_management" },
     commitments:     { label_key: "customer_commitments" },
     org_structure:   { label_key: "org_structure.title" },
+    processes:       { label_key: "process_architecture.title" },
     pp:              { label_key: "pp.title" },
+    authorities:     { label_key: "doa.title" },
     trust_center:    { label_key: "trust_center", column: :trust_center_enabled },
     ai_instructions: { label_key: "ai_instructions" },
     tools:           { label_key: "tool_setup" }

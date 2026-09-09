@@ -1,5 +1,5 @@
 class Dashboard::PpProcessesController < Dashboard::BaseController
-  requires_module :pp
+  requires_module :processes
   before_action :authenticate_user!
   before_action :ensure_company_present
   before_action :ensure_can_manage, only: [

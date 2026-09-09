@@ -162,7 +162,7 @@ processes; nothing to build until there is content to hang on it.
 - Email for Documenter notices stays in-app only (owner's choice).
 
 ## Phase 5 — follow-ups
-- Module-wide licence rule (owner, answer 2): risk-manager licence holders work Governance and only view Standards/P&P; quality managers work P&P/Standards and only view Governance. Only the Authorities page enforces the new rule so far; the other Governance registers (risks, commitments, vendors) and the P&P pages still use the older role checks. Needs the owner's confirmation on whether unflagged risk managers keep managing the risk register.
+- Licence rule is applied across Governance, P&P, Standards and the Library. CAPA and the AI tools stay closed to risk-manager licences (the owner named Standards and P&P only); say if CAPA should open for reading too.
 - `authority_bands` table is kept with one default band per authority (the page no longer shows bands). Collapsing the table is a later cleanup.
 - `org_level_definitions` table is kept but unused since levels are numbered only.
 
