@@ -12,6 +12,10 @@ class Authority < ApplicationRecord
 
   has_many :bands, -> { ordered }, class_name: "AuthorityBand", dependent: :destroy
   has_many :delegations, class_name: "AuthorityDelegation", dependent: :destroy
+  # Operational decisions that say they exercise this authority keep their row
+  # and lose the link when the authority goes.
+  has_many :operational_uses, class_name: "PpProcessAuthority", foreign_key: "authority_id", dependent: :nullify
+  has_many :consultations, class_name: "AuthorityConsultation", foreign_key: "authority_id", dependent: :nullify
   has_many :assignments, through: :bands
 
   validates :name_en, length: { maximum: 500 }
