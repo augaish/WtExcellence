@@ -26,7 +26,88 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     get dashboard_authorities_path
 
     assert_response :success
-    assert_includes response.body, I18n.t("doa.no_matrix")
+    assert_includes response.body, I18n.t("doa.empty_start")
+    assert_select "form[action=?]", dashboard_create_authority_category_path
+  end
+
+  test "the first category creates version 1 of the matrix" do
+    @matrix.destroy
+    sign_in @admin
+    assert_difference -> { @company.pp_records.of_type("executive_doa").count }, 1 do
+      post dashboard_create_authority_category_path, params: { authority_category: { name_en: "Financial" } }
+    end
+    matrix = @company.pp_records.of_type("executive_doa").sole
+    assert_equal 1, matrix.version_number
+    assert_redirected_to dashboard_authorities_path(matrix_id: matrix.id)
+  end
+
+  test "categories are numbered by position and reordered by drag" do
+    sign_in @admin
+    second = @company.authority_categories.create!(name_en: "Second")
+    assert_equal [ 1, 2 ], [ @category.reload.number, second.number ]
+
+    patch dashboard_reorder_authority_categories_path(matrix_id: @matrix.id), params: { ids: [ second.id, @category.id ] }, as: :json
+    assert_response :no_content
+    assert_equal [ 2, 1 ], [ @category.reload.number, second.reload.number ]
+  end
+
+  test "a Governance Manager may manage; a plain risk manager or quality manager may only read" do
+    rm = create_user("doa-rm", CompanyUser::ROLES[:company_risk_manager])
+    qm = create_user("doa-qm", CompanyUser::ROLES[:company_quality_manager])
+    [ rm, qm ].each do |user|
+      sign_in user
+      post dashboard_create_authority_category_path, params: { matrix_id: @matrix.id, authority_category: { name_en: "Sneak" } }
+      assert_redirected_to dashboard_authorities_path
+      sign_out user
+    end
+    rm.company_user.update!(gov_manager: true)
+    sign_in rm
+    post dashboard_create_authority_category_path, params: { matrix_id: @matrix.id, authority_category: { name_en: "Allowed" } }
+    assert @company.authority_categories.exists?(name_en: "Allowed")
+    get dashboard_authorities_path
+    assert_select "input[type=search]"
+  end
+
+  test "an authority carries its limit as text and shows it" do
+    sign_in @admin
+    post dashboard_create_authority_path, params: { matrix_id: @matrix.id,
+      authority: { authority_category_id: @category.id, name_en: "Direct purchase", limit_text: "Up to SAR 100,000" } }
+    follow_redirect!
+    assert_includes response.body, "Up to SAR 100,000"
+    assert_not_includes response.body, I18n.t("doa.add_band")
+  end
+
+  test "the review round: send, everyone accepts, the admin publishes, and the version locks" do
+    gov = create_user("doa-gov", CompanyUser::ROLES[:company_risk_manager])
+    gov.company_user.update!(gov_manager: true)
+    reviewer = create_user("doa-rev", CompanyUser::ROLES[:company_contributor])
+    @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "Sign contracts")
+
+    sign_in gov
+    post dashboard_send_authority_review_path(matrix_id: @matrix.id), params: { user_ids: [ reviewer.id ] }
+    review = @matrix.matrix_reviews.sole
+    assert review.pending?
+    assert Notification.exists?(recipient: reviewer, kind: "authority_review_requested")
+    post dashboard_publish_authority_matrix_path(matrix_id: @matrix.id)
+    refute @matrix.reload.published?, "a Governance Manager does not publish"
+    sign_out gov
+
+    sign_in reviewer
+    get dashboard_authorities_path(matrix_id: @matrix.id)
+    assert_select "form[action=?]", dashboard_answer_authority_review_path(review, matrix_id: @matrix.id)
+    patch dashboard_answer_authority_review_path(review, matrix_id: @matrix.id), params: { decision: "rejected", comment: "" }
+    assert review.reload.pending?, "rejecting needs a reason"
+    patch dashboard_answer_authority_review_path(review, matrix_id: @matrix.id), params: { decision: "accepted" }
+    assert review.reload.accepted?
+    sign_out reviewer
+
+    sign_in @admin
+    post dashboard_publish_authority_matrix_path(matrix_id: @matrix.id)
+    @matrix.reload
+    assert @matrix.published?
+    assert @matrix.published_at.present?
+    post dashboard_create_authority_path, params: { matrix_id: @matrix.id, authority: { name_en: "Too late" } }
+    assert_equal 1, @matrix.authorities.count, "a published version is locked"
   end
 
   test "the matrix lists a level column per authority level" do
@@ -49,7 +130,6 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_authorities_path(matrix_id: @matrix.id)
     authority = @matrix.authorities.sole
     assert_equal 1, authority.number
-    assert_equal 1, authority.bands.count, "an authority is created with one unbounded band"
 
     follow_redirect!
     assert_includes response.body, "Sign contracts"
@@ -75,41 +155,28 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     sign_in @admin
     get dashboard_authorities_path
 
-    assert_includes response.body, I18n.t("doa.findings.none")
+    assert_response :success
+    assert_not_includes response.body, I18n.t("doa.findings.title"), "the findings box is shown only when there is something to say"
   end
 
   test "a holder can be assigned by unit or by dynamic role" do
     authority = @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "Sign contracts")
-    band = authority.bands.sole
 
     sign_in @admin
-    post dashboard_create_authority_assignment_path(band_id: band.id), params: {
+    post dashboard_create_authority_assignment_path(authority_id: authority.id), params: {
       matrix_id: @matrix.id, holder: "unit:#{@minister.id}",
       authority_assignment: { level: "authorize" }
     }
-    post dashboard_create_authority_assignment_path(band_id: band.id), params: {
+    post dashboard_create_authority_assignment_path(authority_id: authority.id), params: {
       matrix_id: @matrix.id, holder: "role:owning_unit",
       authority_assignment: { level: "review", condition: "Where above SAR 1m" }
     }
 
-    levels = band.reload.assignments.map(&:level)
+    levels = authority.reload.assignments.map(&:level)
     assert_equal %w[authorize review], levels.sort.reverse.sort
-    assert_equal "Where above SAR 1m", band.assignments.find_by(level: "review").condition
+    assert_equal "Where above SAR 1m", authority.assignments.find_by(level: "review").condition
   end
 
-  test "overlapping bands are refused with a readable reason" do
-    authority = @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "Sign contracts")
-    authority.bands.sole.update!(max_amount: 3_000_000)
-
-    sign_in @admin
-    post dashboard_create_authority_band_path(authority_id: authority.id), params: {
-      matrix_id: @matrix.id,
-      authority_band: { min_amount: 1_000_000, max_amount: 5_000_000 }
-    }
-
-    assert_equal 1, authority.reload.bands.count
-    assert_includes flash[:alert], I18n.t("doa.errors.bands_overlap")
-  end
 
   test "a viewer can read the matrix but not change it" do
     sign_in @viewer
@@ -252,7 +319,6 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     # assert_select decodes entities; the note contains an apostrophe.
     assert_select "h2", text: I18n.t("doa.catalogue.title")
-    assert_select "p", text: I18n.t("doa.catalogue.note")
     assert_equal 0, @matrix.authorities.count, "suggestions must not create anything by being shown"
   end
 

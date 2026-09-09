@@ -4,12 +4,15 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   requires_module :pp
   before_action :authenticate_user!
   before_action :ensure_company_present
-  before_action :ensure_can_manage, except: [ :index ]
+  before_action :ensure_can_manage, except: [ :index, :answer_review, :download_pdf ]
   before_action :set_matrix
+  before_action :ensure_matrix_present, except: [ :index, :create_category, :apply_suggestions ]
 
-  helper_method :can_manage_authorities?
+  helper_method :can_manage_authorities?, :company_admin?
 
   def index
+    @suggested_categories = AuthorityCatalogue.categories
+    @company_users = company.users.order(:name).to_a
     return if @matrix.nil?
 
     @report = AuthorityMatrixReport.new(@matrix)
@@ -22,6 +25,11 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @suggested_categories = AuthorityCatalogue.categories
     @delegations = company.authority_delegations
       .includes(:authority, :from_org_unit, :to_org_unit, :parent_delegation).to_a
+    @reviews = @matrix.matrix_reviews.includes(:user).ordered.to_a
+    @my_review = @reviews.find { |r| r.user_id == current_user.id && r.pending? }
+    @has_changes = @diff ? @diff.any? : @authorities.any?
+    @published_version = company.pp_records.of_type("executive_doa").where(current_stage: PpStage::TERMINAL_KEYS)
+      .order(version_number: :desc).first
   end
 
   # Suggestions are applied only when asked for, and become ordinary editable
@@ -29,6 +37,8 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   def apply_suggestions
     keys = Array(params[:category_keys]).map(&:to_s)
     return back_to_matrix(alert: t("doa.catalogue.none_selected")) if keys.empty?
+
+    @matrix ||= AuthorityMatrixVersionService.first_version(company, actor: current_user)
 
     created = AuthorityCatalogue.apply(@matrix, category_keys: keys, locale: I18n.locale)
     back_to_matrix(notice: t("doa.catalogue.applied",
@@ -46,6 +56,54 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     return back_to_matrix(alert: t("doa.flash.not_found")) if delegation.nil?
 
     save_and_return_updated(delegation, revocation_params.merge(status: "revoked"), "delegation_revoked")
+  end
+
+  # The Governance Manager or admin picks people to look over the changes.
+  # Every one of them must accept before the admin can publish.
+  def send_for_review
+    ids = Array(params[:user_ids]).reject(&:blank?)
+    users = company.users.where(id: ids).to_a
+    return back_to_matrix(alert: t("doa.review.pick_someone")) if users.empty?
+
+    users.each do |user|
+      review = @matrix.matrix_reviews.find_or_initialize_by(user: user)
+      review.assign_attributes(requested_by: current_user, requested_at: Time.current, decision: nil, comment: nil, decided_at: nil)
+      review.save!
+      Notification.create!(recipient: user, source: @matrix, kind: "authority_review_requested",
+        title: I18n.t("user_notifications.authority_review_requested_title", actor_name: current_user.name),
+        link_path: dashboard_authorities_path(matrix_id: @matrix.id), payload: { matrix_id: @matrix.id })
+    end
+    back_to_matrix(notice: t("doa.review.sent", count: users.size))
+  end
+
+  def answer_review
+    review = @matrix.matrix_reviews.find_by(id: params[:id], user_id: current_user.id)
+    return back_to_matrix(alert: t("doa.flash.not_found")) if review.nil? || !review.pending?
+    return back_to_matrix(alert: t("doa.review.comment_required")) if params[:decision] == "rejected" && params[:comment].to_s.strip.blank?
+
+    review.answer!(params[:decision] == "accepted" ? "accepted" : "rejected", comment: params[:comment])
+    back_to_matrix(notice: t("doa.review.answered"))
+  end
+
+  # The company admin makes the version take effect once everyone accepted.
+  def publish
+    return back_to_matrix(alert: t("doa.flash.no_permission")) unless company_admin?
+    return back_to_matrix(alert: t("doa.review.not_all_accepted")) unless @matrix.matrix_reviews.any? && @matrix.matrix_reviews.pending.none? && @matrix.matrix_reviews.rejected.none?
+
+    @matrix.update!(current_stage: PpStage::TERMINAL_KEYS.first, stage_entered_at: Time.current, published_at: Time.current)
+    back_to_matrix(notice: t("doa.review.published", version: @matrix.version_number))
+  end
+
+  # The matrix as a file. Chromium prints it where it is installed; otherwise
+  # the print-ready page opens for the browser's own "Save as PDF".
+  def download_pdf
+    pdf = RecordPdfRenderer.new(@matrix, locale: I18n.locale)
+    bytes = pdf.render
+    if bytes
+      send_data bytes, filename: pdf.filename, type: "application/pdf", disposition: "attachment"
+    else
+      redirect_to document_dashboard_pp_record_path(@matrix), status: :see_other
+    end
   end
 
   # A new version is a copy, so the approved one stays exactly as approved while
@@ -70,11 +128,21 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     save_and_return_updated(consultation, consultation_ruling_params, "consultation_ruled")
   end
 
+  # The page starts empty; the first category brings the matrix into being.
   def create_category
+    @matrix ||= AuthorityMatrixVersionService.first_version(company, actor: current_user)
     category = company.authority_categories.new(category_params)
-    category.sort_order = company.authority_categories.maximum(:sort_order).to_i + 1
 
     save_and_return(category, "category_created")
+  end
+
+  # Drag order from the page: ids in the order they now sit.
+  def reorder_categories
+    ids = Array(params[:ids]).reject(&:blank?)
+    company.authority_categories.where(id: ids).each do |category|
+      category.update_columns(sort_order: ids.index(category.id) + 1)
+    end
+    head :no_content
   end
 
   def create_authority
@@ -84,42 +152,6 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     authority.sort_order = authority.number
 
     save_and_return(authority, "authority_created")
-  end
-
-  def create_band
-    authority = @matrix.authorities.find_by(id: params[:authority_id])
-    return back_to_matrix(alert: t("doa.flash.not_found")) if authority.nil?
-
-    # An authority starts with one "all amounts" band so it has somewhere to
-    # hang holders. The first thresholds a user enters bound that band rather
-    # than colliding with it — which is what made every band submission vanish
-    # into an overlap error.
-    placeholder = authority.bands.first if authority.bands.one? && !authority.bands.first.bounded?
-    if placeholder
-      return save_and_return_updated(placeholder, band_params, "band_created")
-    end
-
-    band = authority.bands.new(band_params)
-    band.sort_order = authority.bands.maximum(:sort_order).to_i + 1
-
-    save_and_return(band, "band_created")
-  end
-
-  def update_band
-    band = matrix_band(params[:id])
-    return back_to_matrix(alert: t("doa.flash.not_found")) if band.nil?
-
-    save_and_return_updated(band, band_params, "band_updated")
-  end
-
-  # A band's holders go with it. An authority always keeps at least one band.
-  def destroy_band
-    band = matrix_band(params[:id])
-    return back_to_matrix(alert: t("doa.flash.not_found")) if band.nil?
-    return back_to_matrix(alert: t("doa.flash.last_band")) if band.authority.bands.one?
-
-    band.destroy
-    back_to_matrix(notice: t("doa.flash.deleted"))
   end
 
   def update_category
@@ -147,11 +179,11 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   # "unit:<id>", "user:<id>" or "role:<key>" — from one searchable list, so a
   # user picks from units and people together without knowing the model.
   def create_assignment
-    band = matrix_band(params[:band_id])
-    return back_to_matrix(alert: t("doa.flash.not_found")) if band.nil?
+    authority = @matrix.authorities.find_by(id: params[:authority_id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if authority.nil?
 
     attributes = assignment_params.to_h.merge(holder_attributes(params[:holder]))
-    save_and_return(band.assignments.new(attributes), "assignment_created")
+    save_and_return(authority.default_band.assignments.new(attributes), "assignment_created")
   end
 
   def destroy_authority
@@ -172,15 +204,17 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @company ||= current_company
   end
 
+  def ensure_matrix_present
+    return if @matrix
+
+    redirect_to dashboard_authorities_path, alert: t("doa.no_matrix"), status: :see_other
+  end
+
   # The matrix being viewed: the one asked for, or the company's most recent.
   def set_matrix
     matrices = company.pp_records.of_type("executive_doa").order(version_number: :desc, created_at: :desc)
     @matrices = matrices.to_a
     @matrix = params[:matrix_id].present? ? matrices.find_by(id: params[:matrix_id]) : matrices.first
-  end
-
-  def matrix_band(id)
-    AuthorityBand.joins(:authority).where(authorities: { matrix_id: @matrix.id }).find_by(id: id)
   end
 
   # Decodes the holder picker's value into the column it belongs in.
@@ -227,11 +261,17 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     redirect_to dashboard_overview_path, alert: t("process_architecture.flash.no_company"), status: :see_other
   end
 
+  # The company admin and the Governance Managers run this page; everyone
+  # else reads it.
   def can_manage_authorities?
     return true if current_user&.platform_admin?
 
     membership = current_user&.company_user
-    membership.present? && (membership.has_admin_privileges? || membership.company_quality_manager?)
+    membership.present? && (membership.company_admin? || membership.gov_manager?)
+  end
+
+  def company_admin?
+    current_user&.platform_admin? || current_user&.company_user&.company_admin? || false
   end
 
   def ensure_can_manage
@@ -245,12 +285,8 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   end
 
   def authority_params
-    params.require(:authority).permit(:authority_category_id, :name_en, :name_ar, :notes,
+    params.require(:authority).permit(:authority_category_id, :name_en, :name_ar, :notes, :limit_text,
       :basis_record_id, :basis_clause_id, :conflict_sensitive)
-  end
-
-  def band_params
-    params.require(:authority_band).permit(:label_en, :label_ar, :min_amount, :max_amount)
   end
 
   def delegation_params

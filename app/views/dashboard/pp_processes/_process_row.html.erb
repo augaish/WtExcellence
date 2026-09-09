@@ -51,8 +51,6 @@
           <%= link_to t('process_architecture.add_child'), new_dashboard_pp_process_path(parent_id: process.id),
                 class: "px-2 py-1 text-xs font-medium text-[#5C3984] rounded hover:bg-[#F6EEFF] focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
         <% end %>
-        <%= link_to t('process_steps.title'), dashboard_pp_process_path(process),
-              class: "px-2 py-1 text-xs font-medium text-[#5C3984] rounded hover:bg-[#F6EEFF] focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
         <%= link_to t('edit'), edit_dashboard_pp_process_path(process),
               class: "px-2 py-1 text-xs font-medium text-[#5C3984] rounded hover:bg-[#F6EEFF] focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
         <%= link_to t('architect.diagram'), new_dashboard_pp_diagram_path(owner_type: "PpProcess", owner_id: process.id),

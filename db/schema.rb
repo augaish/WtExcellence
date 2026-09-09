@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_09_132304) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -151,6 +151,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "stable_key", limit: 64
+    t.string "limit_text", limit: 250
     t.index ["authority_category_id"], name: "index_authorities_on_authority_category_id"
     t.index ["basis_clause_id"], name: "index_authorities_on_basis_clause_id"
     t.index ["basis_record_id"], name: "index_authorities_on_basis_record_id"
@@ -254,6 +255,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
     t.index ["parent_delegation_id"], name: "index_authority_delegations_on_parent_delegation_id"
     t.index ["revoked_by_id"], name: "index_authority_delegations_on_revoked_by_id"
     t.index ["to_org_unit_id"], name: "index_authority_delegations_on_to_org_unit_id"
+  end
+
+  create_table "authority_matrix_reviews", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "matrix_id", null: false
+    t.uuid "user_id", null: false
+    t.uuid "requested_by_id"
+    t.datetime "requested_at", null: false
+    t.string "decision", limit: 20
+    t.text "comment"
+    t.datetime "decided_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["matrix_id", "user_id"], name: "index_authority_matrix_reviews_on_matrix_id_and_user_id", unique: true
+    t.index ["matrix_id"], name: "index_authority_matrix_reviews_on_matrix_id"
+    t.index ["user_id"], name: "index_authority_matrix_reviews_on_user_id"
   end
 
   create_table "capa_action_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -571,6 +587,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
     t.datetime "updated_at", null: false
     t.integer "assigned_credits", default: 0, null: false
     t.boolean "pp_manager", default: false, null: false
+    t.boolean "gov_manager", default: false, null: false
     t.index ["company_id", "user_id"], name: "index_company_users_on_company_id_and_user_id", unique: true
     t.index ["company_id"], name: "index_company_users_on_company_id"
     t.index ["user_id"], name: "index_company_users_on_user_id"
@@ -849,15 +866,19 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
   end
 
   create_table "pp_process_authorities", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "pp_process_id", null: false
+    t.uuid "pp_process_id"
     t.string "item", limit: 300
     t.string "decision", limit: 300
     t.integer "sort_order", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "authority_id"
+    t.uuid "pp_record_id"
+    t.uuid "pp_process_step_id"
     t.index ["authority_id"], name: "index_pp_process_authorities_on_authority_id"
     t.index ["pp_process_id"], name: "index_pp_process_authorities_on_pp_process_id"
+    t.index ["pp_process_step_id"], name: "index_pp_process_authorities_on_pp_process_step_id"
+    t.index ["pp_record_id"], name: "index_pp_process_authorities_on_pp_record_id"
   end
 
   create_table "pp_process_steps", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1435,6 +1456,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
   add_foreign_key "authority_delegations", "pp_records", column: "decision_record_id"
   add_foreign_key "authority_delegations", "users", column: "grantor_approved_by_id"
   add_foreign_key "authority_delegations", "users", column: "revoked_by_id"
+  add_foreign_key "authority_matrix_reviews", "pp_records", column: "matrix_id"
+  add_foreign_key "authority_matrix_reviews", "users"
   add_foreign_key "capa_action_assignments", "capa_actions"
   add_foreign_key "capa_action_assignments", "company_users"
   add_foreign_key "capa_actions", "capas"
@@ -1511,7 +1534,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_114758) do
   add_foreign_key "pp_diagrams", "companies"
   add_foreign_key "pp_packages", "companies"
   add_foreign_key "pp_process_authorities", "authorities"
+  add_foreign_key "pp_process_authorities", "pp_process_steps"
   add_foreign_key "pp_process_authorities", "pp_processes"
+  add_foreign_key "pp_process_authorities", "pp_records"
   add_foreign_key "pp_process_steps", "org_units", column: "responsible_org_unit_id"
   add_foreign_key "pp_process_steps", "pp_processes"
   add_foreign_key "pp_process_steps", "pp_records"

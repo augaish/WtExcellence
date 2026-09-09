@@ -6,7 +6,12 @@
 # job Institutional Excellence does today by reading two spreadsheets side by
 # side.
 class PpProcessAuthority < ApplicationRecord
-  belongs_to :pp_process, class_name: "PpProcess"
+  # Operational authorities belong to the procedure record and are written in
+  # the Documenter beside the step they decide. The process link remains only
+  # for rows that pre-date the move.
+  belongs_to :pp_record, class_name: "PpRecord", optional: true
+  belongs_to :pp_process, class_name: "PpProcess", optional: true
+  belongs_to :pp_process_step, class_name: "PpProcessStep", optional: true
 
   # The executive authority this operational decision exercises. Optional: an
   # operational matrix covers day-to-day decisions the executive one never
@@ -19,6 +24,7 @@ class PpProcessAuthority < ApplicationRecord
   validates :item, length: { maximum: 300 }
   validates :decision, length: { maximum: 300 }
   validate :must_describe_a_decision
+  validate :must_belong_somewhere
 
   scope :ordered, -> { order(:sort_order, :created_at) }
 
@@ -44,7 +50,25 @@ class PpProcessAuthority < ApplicationRecord
     end
   end
 
+  def owner
+    pp_record || pp_process
+  end
+
+  # Red on the page when the operational holder of the final authorization sits
+  # below the executive one, computed by AuthorityConformanceCheck.
+  def conforms_to_executive?
+    return true if authority.nil? || owner.nil?
+
+    AuthorityConformanceCheck.new(owner).findings.none? { |f| f.operational.id == id }
+  end
+
   private
+
+  def must_belong_somewhere
+    return if pp_record_id.present? || pp_process_id.present?
+
+    errors.add(:base, I18n.t("process_authorities.errors.owner_required"))
+  end
 
   def must_describe_a_decision
     return if item.present? || decision.present?

@@ -1,0 +1,37 @@
+<%# Send the changed version to people who look it over; publish once all accepted.
+    Locals: matrix, reviews, company_users, input %>
+<section class="bg-white border border-[#E3E3E3] rounded-lg p-5 space-y-4">
+  <div>
+    <h2 class="text-base font-semibold text-[#0D1120]"><%= t('doa.review.title') %></h2>
+    <p class="mt-1 text-sm text-[#797C81]"><%= t('doa.review.subtitle') %></p>
+  </div>
+
+  <% if reviews.any? %>
+    <ul class="divide-y divide-[#E3E3E3] text-sm">
+      <% reviews.each do |review| %>
+        <li class="py-2 flex items-start gap-3">
+          <span class="w-2.5 h-2.5 mt-1.5 rounded-full <%= { 'accepted' => 'bg-green-500', 'rejected' => 'bg-red-500' }[review.decision] || 'bg-amber-400' %>" aria-hidden="true"></span>
+          <div class="min-w-0">
+            <p class="text-[#0D1120]"><%= review.user.name %> · <%= t("doa.review.decisions.#{review.decision || 'pending'}") %></p>
+            <% if review.comment.present? %><p class="text-xs text-[#797C81] whitespace-pre-line"><%= review.comment %></p><% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <%= form_with url: dashboard_send_authority_review_path(matrix_id: matrix.id), method: :post, class: "space-y-2" do %>
+    <label class="block text-xs font-medium text-[#797C81]"><%= t('doa.review.pick') %></label>
+    <div data-controller="choices-select" data-choices-select-search-value="true">
+      <%= select_tag :user_ids, options_from_collection_for_select(company_users, :id, :name), multiple: true, class: input, data: { choices_select_target: "select" } %>
+    </div>
+    <%= submit_tag (reviews.any? ? t('doa.review.send_again') : t('doa.review.send')), class: ui_btn_secondary %>
+  <% end %>
+
+  <% if company_admin? && reviews.any? && reviews.all?(&:accepted?) %>
+    <%= button_to t('doa.review.publish'), dashboard_publish_authority_matrix_path(matrix_id: matrix.id), method: :post,
+          class: ui_btn_primary, form: { data: { turbo_confirm: t('doa.review.publish_confirm', version: matrix.version_number) } } %>
+  <% elsif reviews.any? %>
+    <p class="text-xs text-[#797C81]"><%= t('doa.review.waiting') %></p>
+  <% end %>
+</section>

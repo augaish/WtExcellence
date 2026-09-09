@@ -9,6 +9,19 @@ class AuthorityMatrixVersionService
     new(matrix, actor: actor).open_next
   end
 
+  # The page starts empty. The first category (or the first pick from the
+  # catalogue) creates version 1 of the company's executive matrix.
+  def self.first_version(company, actor: nil)
+    company.pp_records.create!(
+      record_type: "executive_doa",
+      title_en: I18n.t("doa.matrix", locale: :en),
+      title_ar: I18n.t("doa.matrix", locale: :ar),
+      owner_user: actor,
+      version_number: 1,
+      version_label: "v1"
+    )
+  end
+
   def initialize(matrix, actor: nil)
     @matrix = matrix
     @actor = actor

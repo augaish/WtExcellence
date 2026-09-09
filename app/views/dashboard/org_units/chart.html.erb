@@ -10,7 +10,7 @@
     <div class="flex items-center gap-3">
       <%# The company's own mark sits on its own chart, beside the platform's. %>
       <% if current_company&.brand_logo&.attached? %>
-        <%= image_tag signed_file_url(current_company.brand_logo, disposition: "inline"),
+        <%= image_tag dashboard_branding_logo_path,
             class: "h-9 w-auto max-w-[150px] object-contain", alt: current_company.name %>
       <% end %>
       <p class="text-sm font-semibold text-[#0D1120]"><%= current_company&.name %></p>
@@ -35,8 +35,13 @@
   <% else %>
     <div class="grid gap-5 lg:grid-cols-3">
       <%# The chart scrolls inside its own box rather than the page. %>
-      <div class="lg:col-span-2 bg-white border border-[#E3E3E3] rounded-lg p-4 overflow-x-auto">
-        <%= OrgChartRenderer.render(@units) %>
+      <div class="lg:col-span-2 bg-white border border-[#E3E3E3] rounded-lg p-4 overflow-auto relative" data-org-chart-target="frame">
+        <%# Zoom sits in the corner; the drawing scales around its top-start. %>
+        <div class="absolute top-3 end-3 z-10 flex gap-1">
+          <button type="button" class="w-8 h-8 rounded-lg border border-[#E3E3E3] bg-white text-[#0D1120] hover:bg-[#F6EEFF]" data-action="click->org-chart#zoomIn" aria-label="<%= t('org_structure.chart.zoom_in') %>" title="<%= t('org_structure.chart.zoom_in') %>">+</button>
+          <button type="button" class="w-8 h-8 rounded-lg border border-[#E3E3E3] bg-white text-[#0D1120] hover:bg-[#F6EEFF]" data-action="click->org-chart#zoomOut" aria-label="<%= t('org_structure.chart.zoom_out') %>" title="<%= t('org_structure.chart.zoom_out') %>">−</button>
+        </div>
+        <div data-org-chart-target="canvas" class="origin-top-left transition-transform"><%= OrgChartRenderer.render(@units) %></div>
         <%# The same structure as a list, for screen readers and anyone who
             cannot use the drawing. %>
         <ul class="sr-only" aria-label="<%= t('org_structure.chart.text_tree') %>">
@@ -49,10 +54,13 @@
         </ul>
       </div>
 
-      <aside class="bg-white border border-[#E3E3E3] rounded-lg p-5">
-        <h2 class="text-base font-semibold text-[#0D1120] mb-3"><%= t('org_structure.chart.details') %></h2>
-
-        <p data-org-chart-target="placeholder" class="text-sm text-[#797C81]">
+      <%# The details box appears only once a unit is chosen. %>
+      <aside class="bg-white border border-[#E3E3E3] rounded-lg p-5" data-org-chart-target="details" hidden>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-semibold text-[#0D1120]"><%= t('org_structure.chart.details') %></h2>
+          <button type="button" class="text-[#797C81] hover:text-[#0D1120]" data-action="click->org-chart#close" aria-label="<%= t('close') %>">×</button>
+        </div>
+        <p data-org-chart-target="placeholder" class="text-sm text-[#797C81]" hidden>
           <%= t('org_structure.chart.select_a_unit') %>
         </p>
 

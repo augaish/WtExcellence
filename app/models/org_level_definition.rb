@@ -1,5 +1,5 @@
 class OrgLevelDefinition < ApplicationRecord
-  MAX_LEVEL = 6
+  MAX_LEVEL = 9
 
   belongs_to :company
 

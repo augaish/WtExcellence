@@ -11,6 +11,13 @@ class AuthorityCategory < ApplicationRecord
 
   scope :ordered, -> { order(:sort_order, :name_en, :name_ar) }
 
+  # A new category takes the last number; the page reorders by drag.
+  before_create { self.sort_order = (company.authority_categories.maximum(:sort_order) || 0) + 1 if sort_order.to_i.zero? }
+
+  def number
+    sort_order
+  end
+
   def display_name(locale = I18n.locale)
     primary, fallback = locale.to_s == "ar" ? [ name_ar, name_en ] : [ name_en, name_ar ]
     primary.presence || fallback.presence || code.to_s

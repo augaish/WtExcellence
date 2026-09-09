@@ -13,6 +13,7 @@ class PpProcessStep < ApplicationRecord
   # The diagram task drawn from this step, if the diagram has been generated.
   # A step that no longer exists has no business in the picture.
   has_one :diagram_element, class_name: "PpDiagramElement", foreign_key: "pp_process_step_id", dependent: :destroy
+  has_many :operational_authorities, -> { ordered }, class_name: "PpProcessAuthority", foreign_key: "pp_process_step_id", dependent: :destroy
 
   # The association is consulted on create, before any element exists, and
   # Rails caches that nil on the instance. A later destroy of the same object

@@ -44,6 +44,8 @@ class Dashboard::DocumenterController < Dashboard::BaseController
     @org_units = company.org_units.active.ordered.includes(:head_user).to_a
     @clauses = @record.clauses.main.includes(:children, comments: :user).to_a
     @steps = @record.steps.includes(:responsible_org_unit).to_a
+    @authorities_by_step = @record.operational_authorities.includes(:authority, assignments: :org_unit).group_by(&:pp_process_step_id)
+    @executive_authorities = company.authorities.where(matrix_id: company.pp_records.of_type("executive_doa").select(:id)).ordered.to_a
     @diagram = @record.diagrams.first
     @can_edit_content = can_edit_content?
     @can_comment = can_comment?

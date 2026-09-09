@@ -22,7 +22,8 @@
           <%= render "dashboard/documenter/record_card", record: @record %>
         <% elsif @record.procedure? %>
           <%= render "dashboard/documenter/steps", record: @record, steps: @steps, org_units: @org_units,
-                can_edit: @can_edit_content, input: input, label: label %>
+                can_edit: @can_edit_content, input: input, label: label,
+                executive_authorities: @executive_authorities, authorities_by_step: @authorities_by_step %>
         <% elsif @record.record_type == "policy" %>
           <%= render "dashboard/documenter/clauses", record: @record, clauses: @clauses,
                 can_edit: @can_edit_content, can_comment: @can_comment, input: input, label: label %>

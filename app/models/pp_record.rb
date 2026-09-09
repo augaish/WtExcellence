@@ -88,6 +88,8 @@ class PpRecord < ApplicationRecord
   # What the document says: clauses for a policy, steps for a procedure.
   has_many :clauses, -> { ordered }, class_name: "PpRecordClause", foreign_key: "pp_record_id", dependent: :destroy
   has_many :steps, -> { ordered }, class_name: "PpProcessStep", foreign_key: "pp_record_id", dependent: :destroy
+  has_many :operational_authorities, -> { ordered }, class_name: "PpProcessAuthority", foreign_key: "pp_record_id", dependent: :destroy
+  has_many :matrix_reviews, class_name: "AuthorityMatrixReview", foreign_key: "matrix_id", dependent: :destroy
   has_many :diagrams, -> { order(created_at: :desc) }, as: :owner, class_name: "PpDiagram", dependent: :destroy
   belongs_to :previous_version, class_name: "PpRecord", optional: true
   has_one :next_version, class_name: "PpRecord", foreign_key: "previous_version_id", dependent: :nullify

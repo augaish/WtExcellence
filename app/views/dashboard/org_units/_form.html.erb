@@ -37,10 +37,7 @@
           <div>
             <%= f.label :level, t('org_structure.level'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
             <%= f.select :level,
-                  (1..OrgLevelDefinition::MAX_LEVEL).map { |lvl|
-                    name = level_definitions.detect { |d| d.level == lvl }&.display_name
-                    [ name.presence || "#{t('org_structure.level')} #{lvl}", lvl ]
-                  },
+                  (1..OrgLevelDefinition::MAX_LEVEL).map { |lvl| [ "#{t('org_structure.level')} #{lvl}", lvl ] },
                   {}, class: "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
             <p class="mt-1 text-[11px] text-[#797C81]"><%= t('org_structure.level_hint') %></p>
           </div>

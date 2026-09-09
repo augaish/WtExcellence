@@ -18,11 +18,13 @@ class AuthorityConformanceCheck
     end
   end
 
-  def initialize(process)
-    @process = process
+  # `owner` is the procedure record (or, for older rows, the process).
+  def initialize(owner)
+    @owner = owner
   end
 
-  attr_reader :process
+  attr_reader :owner
+  alias process owner
 
   def findings
     @findings ||= operational_authorities.flat_map { |row| findings_for(row) }
@@ -43,7 +45,8 @@ class AuthorityConformanceCheck
 
   def operational_authorities
     @operational_authorities ||=
-      process.authorities.includes(:assignments, authority: { bands: { assignments: :org_unit } }).to_a
+      rows = owner.respond_to?(:operational_authorities) ? owner.operational_authorities : owner.authorities
+      rows.includes(:assignments, authority: { bands: { assignments: :org_unit } }).to_a
   end
 
   def findings_for(operational)

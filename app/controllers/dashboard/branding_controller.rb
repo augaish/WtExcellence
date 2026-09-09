@@ -2,10 +2,20 @@
 # this company's own surfaces and generated documents. Company-scoped and
 # admin-only, so it is kept apart from the user's own general settings.
 class Dashboard::BrandingController < Dashboard::BaseController
-  before_action :ensure_can_manage_branding
+  before_action :ensure_can_manage_branding, except: [ :logo ]
   before_action :set_company
 
   def index
+  end
+
+  # The logo is served by the app itself, whatever storage holds it, so a
+  # page never shows a broken image because of how a storage URL was signed.
+  def logo
+    logo = @company.brand_logo
+    return head :not_found unless logo.attached?
+
+    expires_in 10.minutes, public: false
+    send_data logo.download, type: logo.content_type.presence || "image/png", disposition: "inline", filename: logo.filename.to_s
   end
 
   def update

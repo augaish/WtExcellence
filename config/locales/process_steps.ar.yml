@@ -27,8 +27,10 @@ ar:
       days: أيام
   process_authorities:
     title: مصفوفة الصلاحيات الإجرائية
+    not_conforming: صلاحية الاعتماد النهائي أدنى من مصفوفة الصلاحيات التنفيذية
     errors:
       decision_required: حدد البند أو القرار.
+      owner_required: تنتمي الصلاحية الإجرائية إلى إجراء.
       holder_required: حدد المنصب أو الوحدة التنظيمية صاحبة هذا المستوى.
     flash:
       created: تمت إضافة القرار.

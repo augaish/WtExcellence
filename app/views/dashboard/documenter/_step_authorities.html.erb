@@ -1,0 +1,74 @@
+<%# The operational authorities a step exercises: who prepares, reviews,
+    approves … the decision made at this step. A row linked to an executive
+    authority turns red when its final authorizer sits below the executive one.
+    Locals: record, step, authorities, executive_authorities, org_units, can_edit, input %>
+<div class="rounded-lg border border-[#E3E3E3] bg-[#F7F7FD] p-3 space-y-3">
+  <p class="text-xs font-semibold text-[#797C81] uppercase tracking-wide"><%= t('process_authorities.title') %></p>
+
+  <% authorities.each do |authority| %>
+    <% ok = authority.conforms_to_executive? %>
+    <div class="rounded-lg border p-3 space-y-2 bg-white <%= ok ? 'border-[#E3E3E3]' : 'border-red-400' %>">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold <%= ok ? 'text-[#0D1120]' : 'text-red-700' %>"><%= authority.decision.presence || authority.item %></p>
+          <% if authority.authority %>
+            <p class="text-xs <%= ok ? 'text-[#797C81]' : 'text-red-700' %>">
+              <%= t('doa.conformance.link') %>: <%= authority.authority.display_name %>
+              <% unless ok %> · <%= t('process_authorities.not_conforming') %><% end %>
+            </p>
+          <% end %>
+          <% unless authority.single_authorizer? %>
+            <p class="text-xs text-amber-800"><%= authority.authorizers.empty? ? t('process_authorities.no_authorizer') : t('process_authorities.many_authorizers') %></p>
+          <% end %>
+          <% if authority.segregation_breaches.any? %>
+            <p class="text-xs text-amber-800"><%= t('process_authorities.segregation_breach') %></p>
+          <% end %>
+        </div>
+        <% if can_edit %>
+          <%= button_to t('delete'), dashboard_pp_record_operational_authority_path(record, authority), method: :delete,
+                class: "text-xs text-[#797C81] hover:text-[#0D1120]", form: { class: "inline", data: { turbo_confirm: t('are_you_sure') } } %>
+        <% end %>
+      </div>
+
+      <div class="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <% AuthorityLevel::KEYS.each do |level| %>
+          <div class="rounded border border-[#E3E3E3] p-2 min-h-[4rem] flex flex-col gap-1">
+            <p class="text-[10px] font-semibold text-[#797C81] uppercase"><%= AuthorityLevel.label(level) %></p>
+            <% authority.assignments.select { |a| a.level == level }.each do |a| %>
+              <span class="inline-flex items-center gap-1 rounded-full bg-[#F6EEFF] px-2 py-0.5 text-[11px] text-[#0D1120]">
+                <%= render "dashboard/authorities/holder_icon", kind: (a.org_unit ? :unit : :person) %>
+                <%= a.holder_label %>
+                <% if can_edit %>
+                  <%= button_to "×", dashboard_pp_record_operational_authority_assignment_path(record, authority, a), method: :delete,
+                        class: "text-[#797C81] hover:text-[#0D1120] leading-none", form: { class: "inline" } %>
+                <% end %>
+              </span>
+            <% end %>
+            <% if can_edit %>
+              <details class="mt-auto">
+                <summary class="cursor-pointer text-[10px] text-[#5C3984] hover:underline"><%= t('doa.assign') %></summary>
+                <%= form_with url: dashboard_pp_record_operational_authority_assignments_path(record, authority), method: :post,
+                              scope: :pp_authority_assignment, class: "mt-1 space-y-1" do |f| %>
+                  <%= f.hidden_field :level, value: level %>
+                  <%= f.text_field :holder_title, placeholder: t('process_authorities.holder'), class: "w-full border border-[#E3E3E3] rounded px-2 py-1 text-[11px]" %>
+                  <%= f.select :org_unit_id, options_from_collection_for_select(org_units, :id, :display_name), { include_blank: t('doa.picker.units') }, class: "w-full border border-[#E3E3E3] rounded px-2 py-1 text-[11px]" %>
+                  <%= f.submit t('doa.assign'), class: "w-full px-2 py-1 text-[11px] font-medium text-white bg-[#5C3984] rounded hover:bg-[#4A2F6B]" %>
+                <% end %>
+              </details>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if can_edit %>
+    <%= form_with url: dashboard_pp_record_operational_authorities_path(record, step_id: step.id), method: :post,
+                  scope: :pp_process_authority, class: "grid gap-2 md:grid-cols-4" do |f| %>
+      <%= f.text_field :decision, placeholder: t('process_authorities.decision'), class: input %>
+      <%= f.text_field :item, placeholder: t('process_authorities.item'), class: input %>
+      <%= f.collection_select :authority_id, executive_authorities, :id, :display_name, { include_blank: t('doa.conformance.link') }, class: input %>
+      <%= f.submit t('process_authorities.add'), class: ui_btn_secondary %>
+    <% end %>
+  <% end %>
+</div>

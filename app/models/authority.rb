@@ -16,6 +16,7 @@ class Authority < ApplicationRecord
 
   validates :name_en, length: { maximum: 500 }
   validates :name_ar, length: { maximum: 500 }
+  validates :limit_text, length: { maximum: 250 }
   validate :must_have_a_name
   validate :matrix_must_be_an_executive_doa
   validate :matrix_must_be_editable
@@ -33,9 +34,21 @@ class Authority < ApplicationRecord
   end
 
   # True when the authority is split by money or volume thresholds rather than
-  # holding one unbounded band.
+  # holding one unbounded band. Bands are no longer offered on the page; every
+  # authority keeps one default band that its holders hang off.
   def banded?
     bands.size > 1 || bands.any?(&:bounded?)
+  end
+
+  # The one band holders are written into now that thresholds are text.
+  def default_band
+    bands.first || bands.create!
+  end
+
+  # A delegated holder is shown in the matrix in a different colour; this
+  # gathers the delegations in force so the page can mark them.
+  def delegations_in_force
+    delegations.select(&:in_force?)
   end
 
   # An authority nobody may finally authorize cannot be exercised; one with two

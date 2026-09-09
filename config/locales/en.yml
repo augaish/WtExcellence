@@ -188,6 +188,7 @@ en:
 
   # In-app notification titles (for notification records)
   user_notifications:
+    authority_review_requested_title: "%{actor_name} asked you to review the authority matrix"
     record_task_assigned_title: "%{actor_name} handed you work on \"%{title}\" (%{stage})"
     record_task_submitted_title: "%{actor_name} sent \"%{title}\" back to you (%{stage})"
     record_approval_requested_title: "Your unit's approval is requested for \"%{title}\" (%{stage})"
@@ -282,6 +283,8 @@ en:
       chart_view: "Chart view"
       details: "Unit details"
       select_a_unit: "Select a unit in the chart to see its mandate."
+      zoom_in: "Zoom in"
+      zoom_out: "Zoom out"
       no_mandates: "No mandates recorded for this unit."
       empty: "Add your first organizational unit to see the chart."
       show_inactive: "Show inactive"
@@ -673,6 +676,9 @@ en:
     add_holiday: "Add holiday"
     no_holidays: "No holidays configured."
     pp_manager: "P&P Manager"
+    gov_manager: "Governance Manager"
+    set_gov_manager: "Make Governance Manager"
+    unset_gov_manager: "Remove Governance Manager"
     set_pp_manager: "Make P&P Manager"
     unset_pp_manager: "Remove P&P Manager"
     open_flow: "Open flow"
@@ -875,6 +881,9 @@ en:
       pp_manager_set: "%{name} is now a P&P Manager."
       pp_manager_unset: "%{name} is no longer a P&P Manager."
       pp_manager_needs_qm: "Only a quality manager can be a P&P Manager."
+      gov_manager_set: "%{name} is now a Governance Manager."
+      gov_manager_unset: "%{name} is no longer a Governance Manager."
+      gov_manager_needs_rm: "Only a risk manager can be a Governance Manager."
   pp_records:
     title: "Records"
     subtitle: "The register of governed content: policies, procedures, forms and more."

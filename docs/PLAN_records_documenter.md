@@ -79,7 +79,7 @@ Procedure: same, with Procedure Design → Design Review inserted after Stakehol
 - Publishing: assign a publisher (link, then manager confirms) or system-only; PDF printed by headless Chromium into the owning unit's Library folder; in-app notification to everyone; glossary approval creates the company term.
 
 ## Phase 5 (planned): Branding preview, Authorities & Delegations redesign, Org tab polish
-Status: DRAFT — questions open (see chat). Nothing built yet.
+Status: BUILT (decisions: bands replaced by limit text; Governance Manager = flagged risk manager; review round with reviewers then admin publishes; delegated chip swaps to the original for a minute; operational DoA lives behind each step in the Documenter and is checked, not copied; levels numbered up to 9; logo served by the app and previewed live).
 
 ### Branding
 - Logo shown broken after upload: the page builds a signed storage URL for the image; the fix is to serve the logo through the app itself (`/dashboard/branding/logo`), which works whatever the storage is, and to use that same route on the document cover.

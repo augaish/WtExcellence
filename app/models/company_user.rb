@@ -34,6 +34,12 @@ class CompanyUser < ApplicationRecord
     pp_manager && company_quality_manager?
   end
 
+  # A risk manager the company admin has named as Governance Manager: the
+  # person who maintains the Authorities & Delegations matrix.
+  def gov_manager?
+    gov_manager && company_risk_manager?
+  end
+
   def company_quality_manager?
     role == ROLES[:company_quality_manager]
   end

@@ -5,7 +5,7 @@
   <h2 class="text-base font-semibold text-[#0D1120]"><%= t('doa.catalogue.title') %></h2>
   <p class="mt-1 text-sm text-[#797C81]"><%= t('doa.catalogue.subtitle') %></p>
 
-  <%= form_with url: dashboard_apply_authority_suggestions_path(matrix_id: matrix.id),
+  <%= form_with url: dashboard_apply_authority_suggestions_path(matrix_id: matrix&.id),
                 method: :post, class: "mt-4 space-y-4" do %>
     <div class="grid gap-2 md:grid-cols-3">
       <% suggestions.each do |category| %>

@@ -94,24 +94,23 @@ class Dashboard::OrgUnitsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_org_units_path
   end
 
-  test "settings page lists all six levels" do
+  test "settings page holds the colour groups only; levels are numbered, not named" do
     sign_in @admin
     get settings_dashboard_org_units_path
 
     assert_response :success
-    assert_select "input[name='levels[1][name_en]']"
-    assert_select "input[name='levels[6][name_en]']"
+    assert_select "input[name='levels[1][name_en]']", count: 0
+    assert_select "body", text: /#{Regexp.escape(I18n.t('org_structure.groups'))}/
   end
 
-  test "saving level names creates definitions" do
+  test "the chart hides the details box until a unit is chosen and offers zoom" do
     sign_in @admin
+    get dashboard_org_units_chart_path
 
-    patch settings_dashboard_org_units_path, params: {
-      levels: { "1" => { name_en: "CEO", name_ar: "الرئيس التنفيذي" }, "2" => { name_en: "VP", name_ar: "" } }
-    }
-
-    assert_equal "CEO", @company.org_level_definitions.find_by(level: 1).name_en
-    assert_equal "VP", @company.org_level_definitions.find_by(level: 2).name_en
+    assert_response :success
+    assert_select "aside[data-org-chart-target=details][hidden]"
+    assert_select "button[data-action='click->org-chart#zoomIn']"
+    assert_select "button[data-action='click->org-chart#zoomOut']"
   end
 
   test "the CSV template downloads with the documented headers" do

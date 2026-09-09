@@ -12,7 +12,7 @@ module DocumentHelper
   def document_brand_logo_src(company)
     logo = company&.brand_logo
     return nil unless logo&.attached?
-    return signed_file_url(logo, disposition: "inline") unless @inline_css
+    return dashboard_branding_logo_path unless @inline_css
 
     data_uri(logo.content_type.presence || "image/png", logo.download)
   rescue => e

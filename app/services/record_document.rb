@@ -248,10 +248,10 @@ class RecordDocument
   # مصفوفة الصلاحيات الإجرائية, with the conditions rendered as footnotes rather
   # than lost.
   def authority_matrix_section
-    process = record.pp_process
-    return nil if process.nil?
+    rows_source = record.operational_authorities.any? ? record.operational_authorities : record.pp_process&.authorities
+    return nil if rows_source.nil?
 
-    rows = process.authorities.map do |authority|
+    rows = rows_source.map do |authority|
       {
         item: authority.item,
         decision: authority.decision,

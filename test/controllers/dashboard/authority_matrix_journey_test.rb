@@ -29,42 +29,17 @@ class Dashboard::AuthorityMatrixJourneyTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", dashboard_create_authority_path(m)
   end
 
-  test "the first thresholds a user enters bound the authority instead of vanishing" do
+
+
+  test "each authority shows six boxes and a holder can be a unit or a person" do
     authority = @company.authorities.create!(matrix: @matrix, name_en: "Approve purchase orders")
 
-    post dashboard_create_authority_band_path(authority_id: authority.id), params: m.merge(authority_band: { min_amount: 0, max_amount: 10_000 })
-    post dashboard_create_authority_band_path(authority_id: authority.id), params: m.merge(authority_band: { min_amount: 10_000, max_amount: 50_000 })
-    post dashboard_create_authority_band_path(authority_id: authority.id), params: m.merge(authority_band: { min_amount: 50_000 })
-
-    bands = authority.reload.bands.ordered
-    assert_equal 3, bands.count, "three non-overlapping bands must all survive"
-    assert_equal [ [ 0, 10_000 ], [ 10_000, 50_000 ], [ 50_000, nil ] ],
-      bands.map { |b| [ b.min_amount&.to_i, b.max_amount&.to_i ] }
-
-    get dashboard_authorities_path(m)
-    assert_includes response.body, bands.first.display_label
-    assert_includes response.body, bands.last.display_label
-  end
-
-  test "an overlapping band is refused with a reason and the others are untouched" do
-    authority = @company.authorities.create!(matrix: @matrix, name_en: "Approve purchase orders")
-    post dashboard_create_authority_band_path(authority_id: authority.id), params: m.merge(authority_band: { min_amount: 0, max_amount: 10_000 })
-    post dashboard_create_authority_band_path(authority_id: authority.id), params: m.merge(authority_band: { min_amount: 5_000, max_amount: 20_000 })
-
-    assert_equal 1, authority.reload.bands.count
-    assert_includes flash[:alert], I18n.t("doa.errors.bands_overlap")
-  end
-
-  test "each band shows six boxes and a holder can be a unit or a person" do
-    authority = @company.authorities.create!(matrix: @matrix, name_en: "Approve purchase orders")
-    band = authority.bands.sole
-
-    post dashboard_create_authority_assignment_path(band_id: band.id), params: m.merge(holder: "unit:#{@procurement.id}",
+    post dashboard_create_authority_assignment_path(authority_id: authority.id), params: m.merge(holder: "unit:#{@procurement.id}",
       authority_assignment: { level: "prepare" })
-    post dashboard_create_authority_assignment_path(band_id: band.id), params: m.merge(holder: "user:#{@colleague.id}",
+    post dashboard_create_authority_assignment_path(authority_id: authority.id), params: m.merge(holder: "user:#{@colleague.id}",
       authority_assignment: { level: "authorize" })
 
-    assignments = band.reload.assignments
+    assignments = authority.reload.assignments
     assert_equal @procurement, assignments.find_by(level: "prepare").org_unit
     assert_equal @colleague, assignments.find_by(level: "authorize").user
 
@@ -79,12 +54,12 @@ class Dashboard::AuthorityMatrixJourneyTest < ActionDispatch::IntegrationTest
     stranger = User.create!(email: "stranger-#{SecureRandom.hex(4)}@example.com", password: "password123",
       password_confirmation: "password123", name: "Stranger", is_active: true)
     CompanyUser.create!(company: other, user: stranger, role: CompanyUser::ROLES[:company_viewer])
-    band = @company.authorities.create!(matrix: @matrix, name_en: "X").bands.sole
+    authority = @company.authorities.create!(matrix: @matrix, name_en: "X")
 
-    post dashboard_create_authority_assignment_path(band_id: band.id), params: m.merge(holder: "user:#{stranger.id}",
+    post dashboard_create_authority_assignment_path(authority_id: authority.id), params: m.merge(holder: "user:#{stranger.id}",
       authority_assignment: { level: "authorize" })
 
-    assert_equal 0, band.reload.assignments.count
+    assert_equal 0, authority.reload.assignments.count
   end
 
   test "a category and an authority can be renamed without losing their relationships" do
@@ -110,18 +85,10 @@ class Dashboard::AuthorityMatrixJourneyTest < ActionDispatch::IntegrationTest
     assert_nil authority.reload.authority_category_id
   end
 
-  test "an authority keeps at least one band" do
-    authority = @company.authorities.create!(matrix: @matrix, name_en: "X")
-    delete dashboard_destroy_authority_band_path(authority.bands.sole), params: m
-
-    assert_equal 1, authority.reload.bands.count
-    assert_includes flash[:alert], I18n.t("doa.flash.last_band")
-  end
 
   test "an empty matrix does not claim every authority is in order" do
     get dashboard_authorities_path(m)
 
-    assert_includes response.body, I18n.t("doa.findings.nothing_yet")
     assert_not_includes response.body, I18n.t("doa.findings.none")
   end
 end

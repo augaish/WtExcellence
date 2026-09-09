@@ -171,13 +171,15 @@ Rails.application.routes.draw do
       get "/", action: :index, as: :authorities
       post "categories", action: :create_category, as: :create_authority_category
       post "authorities", action: :create_authority, as: :create_authority
-      post "authorities/:authority_id/bands", action: :create_band, as: :create_authority_band
-      patch "bands/:id", action: :update_band, as: :update_authority_band
-      delete "bands/:id", action: :destroy_band, as: :destroy_authority_band
+      patch "categories/reorder", action: :reorder_categories, as: :reorder_authority_categories
+      post "review", action: :send_for_review, as: :send_authority_review
+      patch "reviews/:id", action: :answer_review, as: :answer_authority_review
+      post "publish", action: :publish, as: :publish_authority_matrix
+      get "pdf", action: :download_pdf, as: :authority_matrix_pdf
       patch "categories/:id", action: :update_category, as: :update_authority_category
       delete "categories/:id", action: :destroy_category, as: :destroy_authority_category
       patch "authorities/:id", action: :update_authority, as: :update_authority
-      post "bands/:band_id/assignments", action: :create_assignment, as: :create_authority_assignment
+      post "authorities/:authority_id/assignments", action: :create_assignment, as: :create_authority_assignment
       delete "authorities/:id", action: :destroy_authority, as: :destroy_authority
       delete "assignments/:id", action: :destroy_assignment, as: :destroy_authority_assignment
       post "versions", action: :open_next_version, as: :open_next_authority_version
@@ -194,6 +196,9 @@ Rails.application.routes.draw do
       post "clauses/:clause_id/comments", to: "pp_clause_comments#create", as: :clause_comments
       patch "comments/:id/resolve", to: "pp_clause_comments#resolve", as: :resolve_comment
       resources :record_steps, only: [ :create, :update, :destroy ], controller: "pp_record_steps"
+      resources :operational_authorities, only: [ :create, :destroy ], controller: "pp_record_authorities" do
+        resources :assignments, only: [ :create, :destroy ], controller: "pp_record_authority_assignments"
+      end
       resources :service_levels, only: [ :create, :update, :destroy ], controller: "pp_service_levels"
       member do
         post :attach_documents
@@ -210,7 +215,7 @@ Rails.application.routes.draw do
     end
 
     # Process Architecture (P&P)
-    resources :pp_processes do
+    resources :pp_processes, except: [ :show ] do
       collection do
         get :settings
         patch :settings, action: :update_settings
@@ -222,11 +227,6 @@ Rails.application.routes.draw do
       end
       member { patch :toggle_active }
 
-      # The procedure's own detail: its steps and its operational authority
-      # matrix, both of which become sections of the generated document.
-      resources :authorities, only: [ :create, :destroy ], controller: "pp_process_authorities" do
-        resources :assignments, only: [ :create, :destroy ], controller: "pp_authority_assignments"
-      end
     end
 
     # Account Management routes
@@ -246,6 +246,7 @@ Rails.application.routes.draw do
       patch "/users/:id/change_password", action: :change_password, as: :change_user_password
       patch "/users/:id/change_role", action: :change_role, as: :change_user_role
       patch "/users/:id/pp_manager", action: :toggle_pp_manager, as: :toggle_pp_manager
+      patch "/users/:id/gov_manager", action: :toggle_gov_manager, as: :toggle_gov_manager
       delete "/users/:id", action: :destroy_user, as: :destroy_user
       delete "/companies/:id", action: :destroy_company, as: :destroy_company
     end
@@ -259,6 +260,7 @@ Rails.application.routes.draw do
     # General settings routes
     get "branding", to: "branding#index", as: :branding
     patch "branding", to: "branding#update", as: :update_branding
+    get "branding/logo", to: "branding#logo", as: :branding_logo
 
     get "general_settings", to: "general_settings#index", as: :general_settings
     get "general_settings/documenter", to: "documenter#settings", as: :general_settings_documenter

@@ -1,27 +1,42 @@
-<%# One level of authority for one band: who holds it, and a picker to add
-    someone. The picker lists units and people together in one searchable
-    list, so a user chooses a holder without knowing how it is stored. %>
+<%# One level of authority: who holds it, and a picker to add someone. A
+    delegated holder shows in a different colour; pressing the swap icon shows
+    the original holder for a minute, then it returns by itself.
+    Locals: authority, level, matrix, delegations, can_manage, org_units, company_users %>
+<% holders = authority.default_band.assignments.select { |a| a.level == level } %>
+<% delegated_here = level == AuthorityLevel::FINAL_KEY ? delegations : [] %>
 <div class="rounded-lg border border-[#E3E3E3] bg-white p-2 min-h-[5.5rem] flex flex-col gap-1.5">
   <p class="text-[11px] font-semibold text-[#797C81] uppercase tracking-wide" title="<%= AuthorityLevel.description(level) %>">
     <%= AuthorityLevel.label(level) %>
   </p>
 
-  <% holders = band.assignments.select { |a| a.level == level } %>
   <% holders.each do |holder| %>
-    <span class="inline-flex items-center gap-1 rounded-full bg-[#F6EEFF] px-2 py-0.5 text-xs text-[#0D1120]">
-      <span><%= holder.holder_label %></span>
-      <% if holder.condition.present? %><span class="text-[#797C81]">(<%= holder.condition %>)</span><% end %>
-      <% if can_manage %>
-        <%= button_to "×", dashboard_destroy_authority_assignment_path(holder, matrix_id: matrix.id),
-            method: :delete, class: "text-[#797C81] hover:text-[#0D1120] leading-none", title: t('delete') %>
-      <% end %>
-    </span>
+    <% delegation = delegated_here.find { |d| d.from_org_unit_id == holder.org_unit_id } %>
+    <% if delegation %>
+      <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs" data-controller="delegated-holder"
+            data-delegated-holder-original-value="<%= holder.holder_label %>" data-delegated-holder-delegate-value="<%= delegation.to_org_unit.display_name %>">
+        <span class="rounded-full bg-amber-100 text-amber-900 px-1.5" data-delegated-holder-target="label">
+          <%= render "dashboard/authorities/holder_icon", kind: :unit %><%= delegation.to_org_unit.display_name %>
+        </span>
+        <button type="button" class="text-[#797C81] hover:text-[#0D1120]" data-action="click->delegated-holder#swap"
+                title="<%= t('doa.show_original') %>" aria-label="<%= t('doa.show_original') %>">⇄</button>
+      </span>
+    <% else %>
+      <span class="inline-flex items-center gap-1 rounded-full bg-[#F6EEFF] px-2 py-0.5 text-xs text-[#0D1120]">
+        <%= render "dashboard/authorities/holder_icon", kind: (holder.org_unit ? :unit : (holder.user ? :person : (holder.dynamic_role == "direct_manager" ? :person : :unit))) %>
+        <span><%= holder.holder_label %></span>
+        <% if holder.condition.present? %><span class="text-[#797C81]">(<%= holder.condition %>)</span><% end %>
+        <% if can_manage %>
+          <%= button_to "×", dashboard_destroy_authority_assignment_path(holder, matrix_id: matrix.id),
+              method: :delete, class: "text-[#797C81] hover:text-[#0D1120] leading-none", title: t('delete') %>
+        <% end %>
+      </span>
+    <% end %>
   <% end %>
 
   <% if can_manage %>
     <details class="mt-auto">
       <summary class="cursor-pointer text-[11px] text-[#5C3984] hover:underline"><%= t('doa.assign') %></summary>
-      <%= form_with url: dashboard_create_authority_assignment_path(band_id: band.id, matrix_id: matrix.id),
+      <%= form_with url: dashboard_create_authority_assignment_path(authority_id: authority.id, matrix_id: matrix.id),
                     method: :post, scope: :authority_assignment, class: "mt-1 space-y-1" do |f| %>
         <%= f.hidden_field :level, value: level %>
         <div data-controller="choices-select" data-choices-select-search-value="true">

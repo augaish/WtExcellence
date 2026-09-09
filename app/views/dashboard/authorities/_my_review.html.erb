@@ -1,0 +1,12 @@
+<%# The reviewer's own answer box. Locals: matrix, review, diff, input %>
+<section class="bg-[#F6EEFF] border border-[#5C3984]/30 rounded-lg p-5 space-y-3">
+  <h2 class="text-base font-semibold text-[#0D1120]"><%= t('doa.review.your_turn') %></h2>
+  <p class="text-sm text-[#797C81]"><%= t('doa.review.your_turn_hint') %></p>
+  <%= form_with url: dashboard_answer_authority_review_path(review, matrix_id: matrix.id), method: :patch, class: "space-y-2" do %>
+    <%= text_area_tag :comment, nil, rows: 2, placeholder: t('documenter.comment_optional_reject_required'), class: input %>
+    <div class="flex gap-2">
+      <%= button_tag t('doa.review.accept'), name: "decision", value: "accepted", class: ui_btn_primary %>
+      <%= button_tag t('doa.review.reject'), name: "decision", value: "rejected", class: ui_btn_danger %>
+    </div>
+  <% end %>
+</section>

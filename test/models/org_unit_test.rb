@@ -85,8 +85,10 @@ class OrgUnitTest < ActiveSupport::TestCase
     assert_equal [ @ceo.id, vp.id ], gm.ancestors.map(&:id)
   end
 
-  test "level must be within 1..6" do
-    refute @company.org_units.new(name_en: "X", level: 7).valid?
+  test "level must be within 1..9 and is shown as a number" do
+    assert @company.org_units.new(name_en: "X", level: 9).valid?
+    refute @company.org_units.new(name_en: "X", level: 10).valid?
     refute @company.org_units.new(name_en: "X", level: 0).valid?
+    assert_equal "Level 3", @company.org_units.new(name_en: "X", level: 3).level_name(:en)
   end
 end

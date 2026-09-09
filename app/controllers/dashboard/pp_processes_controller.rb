@@ -6,7 +6,7 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
     :new, :create, :edit, :update, :destroy, :toggle_active, :import, :run_import,
     :settings, :update_settings
   ]
-  before_action :set_process, only: [ :show, :edit, :update, :destroy, :toggle_active ]
+  before_action :set_process, only: [ :edit, :update, :destroy, :toggle_active ]
 
   helper_method :can_manage_processes?
 
@@ -53,20 +53,6 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
       flash.now[:alert] = company.errors.full_messages.to_sentence
       render :settings, status: :unprocessable_entity
     end
-  end
-
-  # The procedure's own detail: its steps and its operational authority matrix.
-  # Both become sections of the generated document, so they are edited on a
-  # page of their own rather than in the drawer used for the process card.
-  def show
-    @authorities = @process.authorities.includes(assignments: :org_unit).to_a
-    @org_units = company.org_units.active.ordered.to_a
-
-    # The operational matrix must stay consistent with the executive one; today
-    # that is a person reading two spreadsheets side by side.
-    @conformance = AuthorityConformanceCheck.new(@process)
-    @executive_authorities = company.authorities
-      .where(matrix_id: company.pp_records.of_type("executive_doa").select(:id)).ordered.to_a
   end
 
   def new

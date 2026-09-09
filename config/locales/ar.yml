@@ -204,6 +204,7 @@ ar:
         cookies: سياسة ملفات تعريف الارتباط
       copyright: "©2026 WTE Excellence. جميع الحقوق محفوظة."
   user_notifications:
+    authority_review_requested_title: "طلب منك %{actor_name} مراجعة مصفوفة الصلاحيات"
     record_task_assigned_title: "أسند إليك %{actor_name} عملًا على «%{title}» (%{stage})"
     record_task_submitted_title: "أعاد إليك %{actor_name} «%{title}» (%{stage})"
     record_approval_requested_title: "مطلوب اعتماد وحدتك على «%{title}» (%{stage})"
@@ -302,6 +303,8 @@ ar:
       chart_view: "عرض الهيكل"
       details: "تفاصيل الوحدة"
       select_a_unit: "اختر وحدة من الهيكل لعرض اختصاصاتها."
+      zoom_in: "تكبير"
+      zoom_out: "تصغير"
       no_mandates: "لا توجد اختصاصات مسجلة لهذه الوحدة."
       empty: "أضف أول وحدة تنظيمية لعرض الهيكل."
       show_inactive: "عرض غير النشطة"
@@ -693,6 +696,9 @@ ar:
     add_holiday: "إضافة إجازة"
     no_holidays: "لم تُضف إجازات."
     pp_manager: "مدير السياسات والإجراءات"
+    gov_manager: "مدير الحوكمة"
+    set_gov_manager: "تعيين مدير حوكمة"
+    unset_gov_manager: "إلغاء مدير الحوكمة"
     set_pp_manager: "تعيين مدير سياسات وإجراءات"
     unset_pp_manager: "إلغاء مدير السياسات والإجراءات"
     open_flow: "فتح المسار"
@@ -895,6 +901,9 @@ ar:
       pp_manager_set: "أصبح %{name} مدير سياسات وإجراءات."
       pp_manager_unset: "لم يعد %{name} مدير سياسات وإجراءات."
       pp_manager_needs_qm: "لا يمكن تعيين مدير سياسات وإجراءات إلا من مديري الجودة."
+      gov_manager_set: "أصبح %{name} مدير حوكمة."
+      gov_manager_unset: "لم يعد %{name} مدير حوكمة."
+      gov_manager_needs_rm: "لا يمكن تعيين مدير حوكمة إلا من مديري المخاطر."
   pp_records:
     title: "السجلات"
     subtitle: "سجل المحتوى المحوكم: السياسات والإجراءات والنماذج وغيرها."

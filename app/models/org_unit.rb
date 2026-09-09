@@ -45,9 +45,9 @@ class OrgUnit < ApplicationRecord
     self.mandates = Array(values).map { |m| m.to_s.strip }.reject(&:blank?)
   end
 
+  # Levels are numbered, never named: "Level 3" in the reader's language.
   def level_name(locale = I18n.locale)
-    company&.org_level_definitions&.detect { |d| d.level == level }&.display_name(locale) ||
-      "#{I18n.t('org_structure.level')} #{level}"
+    "#{I18n.t('org_structure.level', locale: locale)} #{level}"
   end
 
   # Root -> ... -> self, used for breadcrumbs. Guarded against cycles.

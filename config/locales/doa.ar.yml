@@ -18,6 +18,46 @@ ar:
     max_amount: حتى
     none: لم تُسجَّل أي صلاحيات في هذه المصفوفة بعد.
     no_matrix: أنشئ سجلًا من نوع مصفوفة الصلاحيات التنفيذية للبدء.
+    download_pdf: تنزيل PDF
+    empty_start: لا شيء هنا بعد. أضف الفئة الأولى، أو اضغط النجمة لاختيار نقاط بداية شائعة.
+    category_number_hint: تأخذ الفئة الجديدة آخر رقم. اسحب الفئة من مقبضها لتغيير الترتيب.
+    search_placeholder: ابحث في الفئات والصلاحيات
+    no_match: لا نتائج.
+    drag_to_reorder: اسحب لإعادة الترتيب
+    toggle_category: طيّ أو توسيع
+    limit_placeholder: الحد، مثل حتى 100,000 ريال
+    delegated: مفوَّضة
+    show_original: إظهار صاحب الصلاحية الأصلي لدقيقة
+    review:
+      title: إرسال للاعتماد
+      subtitle: اختر من يطّلع على التغييرات. بعد قبول الجميع ينشر مدير الشركة الإصدار.
+      send: إرسال للاعتماد
+      send_again: إرسال مرة أخرى
+      pick: المراجعون
+      pick_someone: اختر شخصًا واحدًا على الأقل.
+      sent:
+        zero: لم يُرسل لأحد.
+        one: أُرسل لشخص واحد.
+        two: أُرسل لشخصين.
+        few: أُرسل إلى %{count} أشخاص.
+        many: أُرسل إلى %{count} شخصًا.
+        other: أُرسل إلى %{count} شخص.
+      answered: سُجّل ردك.
+      comment_required: اذكر السبب عند الرفض.
+      not_all_accepted: يجب أن يقبل الجميع قبل النشر.
+      published: الإصدار V%{version} منشور وساري.
+      published_on: نُشر في %{date}
+      publish: نشر هذا الإصدار
+      publish_confirm: نشر الإصدار V%{version}؟ يصبح الإصدار الساري ولا يمكن تعديله بعدها.
+      waiting: بانتظار قبول جميع المراجعين.
+      your_turn: طُلب منك مراجعة هذا الإصدار
+      your_turn_hint: اقرأ التغييرات أدناه ثم اقبل أو ارفض مع ذكر السبب.
+      accept: قبول
+      reject: رفض
+      decisions:
+        pending: قيد المراجعة
+        accepted: مقبول
+        rejected: مرفوض
     select_matrix: المصفوفة
     picker:
       prompt: "اختر وحدة أو شخصًا أو دورًا…"

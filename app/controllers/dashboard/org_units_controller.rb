@@ -107,43 +107,13 @@ class Dashboard::OrgUnitsController < Dashboard::BaseController
     redirect_to dashboard_org_units_path, notice: t("org_structure.flash.updated"), status: :see_other
   end
 
-  # --- Structure settings: level names + colour groups ---------------------
+  # --- Structure settings: colour groups (levels are numbered, up to 9) -----
   def settings
-    @level_definitions = (1..OrgLevelDefinition::MAX_LEVEL).map do |level|
-      company.org_level_definitions.detect { |d| d.level == level } ||
-        company.org_level_definitions.new(level: level)
-    end
     @groups = company.org_groups.ordered.to_a
   end
 
   def update_settings
-    submitted = params.fetch(:levels, {}).permit!.to_h
-
-    ActiveRecord::Base.transaction do
-      submitted.each do |level, attrs|
-        level_number = level.to_i
-        next unless level_number.between?(1, OrgLevelDefinition::MAX_LEVEL)
-
-        definition = company.org_level_definitions.find_or_initialize_by(level: level_number)
-        definition.name_en = attrs["name_en"].to_s.strip.presence
-        definition.name_ar = attrs["name_ar"].to_s.strip.presence
-
-        if definition.name_en.blank? && definition.name_ar.blank?
-          definition.destroy if definition.persisted?
-        else
-          definition.save!
-        end
-      end
-    end
-    log_action("UPDATE_ORG_LEVELS")
-    redirect_to settings_dashboard_org_units_path, notice: t("org_structure.flash.settings_saved"), status: :see_other
-  rescue ActiveRecord::RecordInvalid => e
-    redirect_to settings_dashboard_org_units_path, alert: e.record.errors.full_messages.to_sentence, status: :see_other
-  end
-
-  # --- Import --------------------------------------------------------------
-  def import
-    @result = nil
+    redirect_to settings_dashboard_org_units_path, status: :see_other
   end
 
   def run_import

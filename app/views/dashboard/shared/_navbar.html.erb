@@ -12,7 +12,7 @@
         <%# The company's own logo sits beside the WTE mark, never replacing it. %>
         <% if current_user&.company&.brand_logo&.attached? %>
             <span class="h-6 w-px bg-[#E3E3E3] flex-shrink-0" aria-hidden="true"></span>
-            <%= image_tag signed_file_url(current_user.company.brand_logo, disposition: "inline"),
+            <%= image_tag dashboard_branding_logo_path,
                 class: "h-8 w-auto max-w-[140px] object-contain flex-shrink-0",
                 alt: current_user.company.name %>
         <% end %>
@@ -85,7 +85,7 @@
             <button class="flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 bg-[#F7F7FD] hover:bg-purple-200 px-3 sm:px-4 py-2 sm:py-2.5 min-h-[44px] rounded-lg transition-colors duration-200 text-[15px] sm:text-sm" onclick="toggleProfileDropdown()" aria-haspopup="true" aria-expanded="false">
                 <div class="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden" data-navbar-profile-container>
                     <% if current_user.profile_image.attached? %>
-                        <%= image_tag user_profile_image_url(current_user), class: "w-full h-full max-w-full h-auto object-cover", data: { navbar_profile_image: true } %>
+                        <%= image_tag user_profile_image_url(current_user), class: "w-full h-full max-w-full h-auto object-contain", data: { navbar_profile_image: true } %>
                     <% else %>
                         <% initials = current_user.name.split(' ').map(&:first).join('').upcase[0..1] %>
                         <span class="text-white font-semibold text-xs" data-navbar-profile-initials><%= initials %></span>
@@ -200,7 +200,7 @@
                     <div class="flex items-center gap-3 mb-3">
                         <div class="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                             <% if current_user.profile_image.attached? %>
-                                <%= image_tag user_profile_image_url(current_user), class: "w-full h-full object-cover" %>
+                                <%= image_tag user_profile_image_url(current_user), class: "w-full h-full object-contain" %>
                             <% else %>
                                 <% initials = current_user.name.split(' ').map(&:first).join('').upcase[0..1] %>
                                 <span class="text-white font-semibold text-base"><%= initials %></span>

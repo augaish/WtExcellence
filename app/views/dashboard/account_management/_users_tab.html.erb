@@ -129,7 +129,9 @@
                   t('delegated_admin')
                 elsif user.company_user
                   base = user.company_user.role.gsub('company_', '').humanize
-                  user.company_user.pp_manager? ? "#{base} · #{t('documenter.pp_manager')}" : base
+                  base = "#{base} · #{t('documenter.pp_manager')}" if user.company_user.pp_manager?
+                  base = "#{base} · #{t('documenter.gov_manager')}" if user.company_user.gov_manager?
+                  base
                 else
                   t('role')
                 end
@@ -172,6 +174,12 @@
                               data-user-name="<%= user.name %>">
                         <%= t('change_password') %>
                       </button>
+                      <% if user.company_user&.company_risk_manager? && (current_user&.super_admin? || current_user&.company_user&.company_admin?) %>
+                        <%= button_to (user.company_user.gov_manager ? t('documenter.unset_gov_manager') : t('documenter.set_gov_manager')),
+                              dashboard_toggle_gov_manager_path(user), method: :patch,
+                              class: "w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto",
+                              form: { class: "block" } %>
+                      <% end %>
                       <% if user.company_user&.company_quality_manager? && (current_user&.super_admin? || current_user&.company_user&.company_admin?) %>
                         <%= button_to (user.company_user.pp_manager ? t('documenter.unset_pp_manager') : t('documenter.set_pp_manager')),
                               dashboard_toggle_pp_manager_path(user), method: :patch,

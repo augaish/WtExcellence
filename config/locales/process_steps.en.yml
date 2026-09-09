@@ -27,8 +27,10 @@ en:
       days: "Days"
   process_authorities:
     title: "Operational authority matrix"
+    not_conforming: "Final authorization sits below the executive matrix"
     errors:
       decision_required: "Describe the item or the decision."
+      owner_required: "An operational authority belongs to a procedure."
       holder_required: "Name the position or organizational unit that holds this level."
     flash:
       created: "Decision added."
