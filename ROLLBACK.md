@@ -30,7 +30,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | `docx-export` | *(this commit)* | Word export of governed documents, right-to-left aware. |
 | `retest-batches` | *(this commit)* | Second-review fixes: answer persistence, pools vs lanes, matrix redesign, executive matrix in documents, SLA output, diagram drawn from steps. |
 | `retest-batch-three` | *(this commit)* | Retry this question; rejected forms keep values; formatted AI answers and live balance; accessibility pass; Gate C delegation matrix; published-version immutability. |
-| Phase 1 of records/documenter plan: Arabic chart labels, library folders from org, settings tabs, per-tab add button | `PENDING_SHA` | Additive migration: `org_unit_id` on folders |
+| Phase 1 of records/documenter plan: Arabic chart labels, library folders from org, settings tabs, per-tab add button | `71a0c1b` | Additive migration: `org_unit_id` on folders |
 
 ## Roll the code back
 ```bash
