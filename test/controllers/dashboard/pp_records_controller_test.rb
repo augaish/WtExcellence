@@ -235,4 +235,16 @@ class Dashboard::PpRecordsControllerTest < ActionDispatch::IntegrationTest
     upload.save!
     upload
   end
+
+  test "deleting a policy that an authority names as its basis clears the link instead of failing" do
+    sign_in @admin
+    matrix = @company.pp_records.create!(record_type: "executive_doa", title_en: "DoA")
+    authority = @company.authorities.create!(matrix: matrix, name_en: "Sign contracts", basis_record: @record)
+
+    delete dashboard_pp_record_path(@record)
+
+    assert_redirected_to dashboard_pp_records_path
+    refute PpRecord.exists?(@record.id)
+    assert_nil authority.reload.basis_record_id
+  end
 end

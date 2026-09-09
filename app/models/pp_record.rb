@@ -71,6 +71,12 @@ class PpRecord < ApplicationRecord
   has_many :consultations, -> { ordered }, class_name: "AuthorityConsultation",
     foreign_key: "matrix_id", dependent: :destroy
 
+  # A policy may be named as the basis of an authority, and a record as the
+  # decision behind a delegation. Removing the record clears those links rather
+  # than failing at the database.
+  has_many :basis_authorities, class_name: "Authority", foreign_key: "basis_record_id", dependent: :nullify
+  has_many :decision_delegations, class_name: "AuthorityDelegation", foreign_key: "decision_record_id", dependent: :nullify
+
   has_many :service_levels, -> { ordered }, class_name: "PpServiceLevel",
     foreign_key: "pp_record_id", dependent: :destroy
 
