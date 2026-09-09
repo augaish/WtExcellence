@@ -3,7 +3,8 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_company_present
   before_action :ensure_can_manage, only: [
-    :new, :create, :edit, :update, :destroy, :toggle_active, :import, :run_import
+    :new, :create, :edit, :update, :destroy, :toggle_active, :import, :run_import,
+    :settings, :update_settings
   ]
   before_action :set_process, only: [ :show, :edit, :update, :destroy, :toggle_active ]
 
@@ -30,6 +31,28 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
     @roots = @by_parent[nil] || []
     @total_count = company_scope.count
     @level_counts = company_scope.group(:level).count
+
+    # Two pictures of the same tree: the list, and the model with its bands.
+    @view = params[:view] == "model" ? "model" : "list"
+    @by_band = @roots.group_by(&:effective_category)
+  end
+
+  # Level 0 names and the objective shown beside the model.
+  def settings
+  end
+
+  def update_settings
+    names = params.fetch(:band_names, {}).permit!.to_h.slice(*PpProcess::CATEGORIES)
+    names = names.transform_values { |v| { "en" => v["en"].to_s.strip, "ar" => v["ar"].to_s.strip } }
+
+    if company.update(process_band_names: names,
+                      process_objective_en: params[:process_objective_en].to_s.strip,
+                      process_objective_ar: params[:process_objective_ar].to_s.strip)
+      redirect_to dashboard_pp_processes_path(view: "model"), notice: t("process_architecture.flash.settings_saved"), status: :see_other
+    else
+      flash.now[:alert] = company.errors.full_messages.to_sentence
+      render :settings, status: :unprocessable_entity
+    end
   end
 
   # The procedure's own detail: its steps and its operational authority matrix.
@@ -48,12 +71,13 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
   end
 
   def new
+    # Reached from the "+" on Level 1 or Level 2, or from a parent's row.
     parent = company_scope.find_by(id: params[:parent_id].presence)
+    level = parent ? 2 : params[:level].to_i.clamp(1, PpProcess::MAX_LEVEL)
     @process = company_scope.new(
       parent_id: parent&.id,
-      level: parent ? [ parent.level + 1, PpProcess::MAX_LEVEL ].min : 1,
-      code: HierarchicalCodeService.next_process_code(company: company, parent: parent),
-      category: parent&.effective_category
+      level: level,
+      category: parent&.effective_category || params[:category].presence
     )
     render_drawer
   end
@@ -65,9 +89,6 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
   def create
     @process = company_scope.new(process_params)
     @process.company = company
-    if @process.code.blank?
-      @process.code = HierarchicalCodeService.next_process_code(company: company, parent: @process.parent)
-    end
 
     if @process.save
       log_action("CREATE_PROCESS")
@@ -172,7 +193,7 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
   end
 
   def render_drawer(status: :ok)
-    @parent_options = company_scope.active.where(level: 1...PpProcess::MAX_LEVEL).ordered.to_a
+    @parent_options = company_scope.active.where(level: 1).ordered.to_a
     @parent_options -= [ @process ] if @process&.persisted?
     @org_units = company.org_units.active.ordered.to_a
     @company_users = company.users.order(:name).to_a

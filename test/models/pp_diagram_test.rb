@@ -93,7 +93,7 @@ class PpDiagramTest < ActiveSupport::TestCase
   end
 
   test "summary fields fall back to the owning process card" do
-    process = @company.pp_processes.create!(name_en: "Hiring", level: 1,
+    process = @company.pp_processes.create!(name_en: "Hiring", level: 1, category: "core",
       trigger_text: "Vacancy approved", inputs: "Job description", outputs: "Signed contract")
     diagram = @company.pp_diagrams.create!(owner: process, name: "Hiring")
 

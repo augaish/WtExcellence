@@ -9,7 +9,7 @@ class Dashboard::PpDiagramsControllerTest < ActionDispatch::IntegrationTest
     @viewer = create_user("dia-viewer", CompanyUser::ROLES[:company_viewer])
 
     @record = @company.pp_records.create!(record_type: "procedure", title_en: "Onboarding", code: "PRO-01")
-    @process = @company.pp_processes.create!(name_en: "Hiring", level: 1, code: "P-01")
+    @process = @company.pp_processes.create!(name_en: "Hiring", level: 1, category: "core", code: "P-01")
     @diagram = @company.pp_diagrams.create!(owner: @record, name: "Onboarding process")
   end
 

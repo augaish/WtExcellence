@@ -4,7 +4,7 @@ require "test_helper"
 class DiagramStepSyncTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Sync Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
-    @process = @company.pp_processes.create!(name_en: "Purchase orders", level: 1)
+    @process = @company.pp_processes.create!(name_en: "Purchase orders", level: 1, category: "core")
     @s1 = @process.steps.create!(position: 1, activity: "Validate request", responsible_title: "Procurement Officer")
     @s2 = @process.steps.create!(position: 2, activity: "Verify budget", responsible_title: "Finance Officer")
     @s3 = @process.steps.create!(position: 3, activity: "Issue order", responsible_title: "Procurement Head")

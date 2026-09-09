@@ -3,7 +3,7 @@ require "test_helper"
 class PpProcessStepTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Steps Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
-    @process = @company.pp_processes.create!(name_en: "Policy development", level: 1)
+    @process = @company.pp_processes.create!(name_en: "Policy development", level: 1, category: "core")
     @unit = @company.org_units.create!(name_en: "Institutional Excellence", level: 1)
   end
 

@@ -7,7 +7,7 @@ class RecordDocxRendererTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Docx Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
     @unit = @company.org_units.create!(name_en: "Institutional Excellence", name_ar: "التميز المؤسسي", level: 1)
-    @process = @company.pp_processes.create!(name_en: "Policy development", level: 1,
+    @process = @company.pp_processes.create!(name_en: "Policy development", level: 1, category: "core",
       objective: "Govern how policies are written")
     @record = @company.pp_records.create!(record_type: "procedure", title_en: "Policy Development Procedure",
       title_ar: "إجراء تطوير السياسات", code: "PRO-01", pp_process: @process,

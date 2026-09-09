@@ -66,7 +66,6 @@ Procedure: same, with Procedure Design → Design Review inserted after Stakehol
 - Publish notification: in-app only. Published records are read-only; changes go through "Update existing".
 - Only the team under the company admin may add records, not any contributor.
 
-## Still open
-- What is "the team under the company admin"? (proposal: company admins, quality managers and the contributors assigned under a P&P Manager)
-- Translation engine: use the existing LLM provider (OpenRouter) and charge credits, or free of charge?
-- Procedure number: how is 1.2.4.12 composed? (proposal: L1 number . L2 number . procedure sequence)
+- Translation: dropped (it would cost credits). Both languages are typed by hand as today.
+- Procedure number = Level 0 . Level 1 . Level 2 . procedure sequence (e.g. 1.2.4.12).
+- Who may add records: the company admin, everyone who reports to the admin's unit directly or through the chain, and quality managers.

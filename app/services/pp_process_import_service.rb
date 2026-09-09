@@ -141,6 +141,11 @@ class PpProcessImportService
         next
       end
 
+      if parent.level >= PpProcess::MAX_LEVEL
+        @errors << { row: item[:row], message: I18n.t("process_architecture.import.too_deep", code: item[:parent_code]) }
+        next
+      end
+
       process.parent = parent
       process.level = parent.level + 1
 

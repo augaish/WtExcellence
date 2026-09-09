@@ -7,7 +7,7 @@
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-4xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: {
-          title: process.persisted? ? t('process_architecture.edit_process') : t('process_architecture.add_process'),
+          title: process.persisted? ? t('process_architecture.edit_process') : t('process_architecture.add_level', level: process.level),
           subtitle: t('process_architecture.form_subtitle') } do %>
       <%= link_to t('cancel'), dashboard_pp_processes_path, class: ui_btn_neutral %>
     <% end %>
@@ -38,24 +38,26 @@
           </div>
           <div>
             <%= f.label :code, t('process_architecture.code'), class: label_class %>
-            <%= f.text_field :code, class: "#{input_class} font-mono" %>
-            <p class="<%= hint_class %>"><%= t('process_architecture.admin_filled') %></p>
-          </div>
-          <div>
-            <%= f.label :category, t('process_architecture.category'), class: label_class %>
-            <%= f.select :category, PpProcess::CATEGORIES.map { |c| [ t("process_architecture.categories.#{c}"), c ] },
-                  { include_blank: t('process_architecture.inherit_category') }, class: input_class %>
-            <p class="<%= hint_class %>"><%= t('process_architecture.admin_filled') %></p>
-          </div>
-          <div>
-            <%= f.label :parent_id, t('process_architecture.parent'), class: label_class %>
-            <%= f.select :parent_id, parent_options.map { |p| [ "#{p.code} · #{p.display_name}", p.id ] },
-                  { include_blank: t('process_architecture.no_parent') }, class: input_class %>
+            <%= f.text_field :code, class: "#{input_class} font-mono", placeholder: t('process_architecture.code_auto') %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.code_hint') %></p>
           </div>
           <div>
             <%= f.label :level, t('process_architecture.level'), class: label_class %>
             <%= f.select :level, (1..PpProcess::MAX_LEVEL).map { |l| [ t("process_architecture.levels.l#{l}"), l ] }, {}, class: input_class %>
             <p class="<%= hint_class %>"><%= t('process_architecture.level_hint') %></p>
+          </div>
+          <div>
+            <%# Level 0: the band a level-1 process belongs to. A level-2 process takes its parent's. %>
+            <%= f.label :category, t('process_architecture.levels.l0'), class: label_class %>
+            <%= f.select :category, PpProcess::CATEGORIES.map { |c| [ @company.process_band_name(c), c ] },
+                  { include_blank: t('process_architecture.inherit_category') }, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.band_hint') %></p>
+          </div>
+          <div>
+            <%= f.label :parent_id, t('process_architecture.parent'), class: label_class %>
+            <%= f.select :parent_id, parent_options.map { |p| [ "#{p.architecture_number} · #{p.display_name}", p.id ] },
+                  { include_blank: t('process_architecture.no_parent') }, class: input_class %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.parent_hint') %></p>
           </div>
         </div>
       </div>

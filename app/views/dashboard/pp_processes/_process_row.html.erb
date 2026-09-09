@@ -2,6 +2,7 @@
 <% children = by_parent[process.id] || [] %>
 <% cat = process.effective_category %>
 <% cat_class = { "core" => "bg-[#F6EEFF] text-[#5C3984]", "support" => "bg-blue-50 text-blue-700", "management" => "bg-amber-50 text-amber-700" }[cat] || "bg-gray-100 text-gray-600" %>
+<% company = process.company %>
 <div class="border-b border-[#E3E3E3] last:border-b-0">
   <div class="flex items-center gap-3 px-4 py-3 hover:bg-[#F7F7FD]"
        style="padding-inline-start: <%= 16 + depth * 24 %>px">
@@ -28,7 +29,7 @@
         </span>
         <% if cat.present? %>
           <span class="px-2 py-0.5 text-[11px] font-medium rounded-full <%= cat_class %>">
-            <%= t("process_architecture.categories.#{cat}") %>
+            <%= company.process_band_name(cat) %>
           </span>
         <% end %>
         <% unless process.active? %>

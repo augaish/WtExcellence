@@ -3,20 +3,46 @@
 <div class="min-h-screen bg-gray-50">
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: { title: t('process_architecture.title'), subtitle: t('process_architecture.subtitle') } do %>
+      <%# Two pictures of the same tree. %>
+      <% view_base = "px-3 py-2 text-sm font-medium rounded-lg border focus-visible:outline-2 focus-visible:outline-[#5C3984]" %>
+      <%= link_to t('process_architecture.list_view'), dashboard_pp_processes_path(view: "list"),
+            class: "#{view_base} #{@view == 'list' ? 'bg-[#5C3984] text-white border-[#5C3984]' : 'bg-white text-[#0D1120] border-[#E3E3E3] hover:bg-[#F7F7FD]'}",
+            "aria-current": (@view == "list" ? "page" : nil) %>
+      <%= link_to t('process_architecture.model_view'), dashboard_pp_processes_path(view: "model"),
+            class: "#{view_base} #{@view == 'model' ? 'bg-[#5C3984] text-white border-[#5C3984]' : 'bg-white text-[#0D1120] border-[#E3E3E3] hover:bg-[#F7F7FD]'}",
+            "aria-current": (@view == "model" ? "page" : nil) %>
       <% if can_manage_processes? %>
+        <%= link_to t('process_architecture.settings'), settings_dashboard_pp_processes_path, class: ui_btn_neutral %>
         <%= link_to t('process_architecture.import_title'), import_dashboard_pp_processes_path, class: ui_btn_secondary %>
-        <%= link_to t('process_architecture.add_process'), new_dashboard_pp_process_path, class: ui_btn_primary %>
       <% end %>
     <% end %>
 
+    <%# Level 0 is fixed; Level 1 and Level 2 grow from their "+" sign. %>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
+        <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('process_architecture.levels.l0') %></p>
+        <p class="mt-1 text-sm font-semibold text-[#0D1120]">
+          <%= PpProcess::CATEGORIES.map { |band| @company.process_band_name(band) }.join(" · ") %>
+        </p>
+      </div>
       <% (1..PpProcess::MAX_LEVEL).each do |lvl| %>
-        <div class="bg-white border border-[#E3E3E3] rounded-xl p-4">
-          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t("process_architecture.levels.l#{lvl}") %></p>
-          <p class="mt-1 text-xl font-semibold text-[#0D1120]"><%= @level_counts[lvl].to_i %></p>
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 flex items-start justify-between gap-3">
+          <div>
+            <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t("process_architecture.levels.l#{lvl}") %></p>
+            <p class="mt-1 text-xl font-semibold text-[#0D1120]"><%= @level_counts[lvl].to_i %></p>
+          </div>
+          <% if can_manage_processes? %>
+            <%= link_to new_dashboard_pp_process_path(level: lvl),
+                  class: "flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-[#F6EEFF] text-[#5C3984] text-xl leading-none hover:bg-[#5C3984] hover:text-white focus-visible:outline-2 focus-visible:outline-[#5C3984]",
+                  "aria-label": t("process_architecture.add_level", level: lvl), title: t("process_architecture.add_level", level: lvl) do %>+<% end %>
+          <% end %>
         </div>
       <% end %>
     </div>
+
+    <% if @view == "model" %>
+      <%= render "dashboard/pp_processes/model", by_band: @by_band, by_parent: @by_parent, company: @company, can_manage: can_manage_processes? %>
+    <% else %>
 
     <div class="bg-white border border-[#E3E3E3] rounded-xl p-4 mb-4">
       <%= form_with url: dashboard_pp_processes_path, method: :get, class: "flex flex-col sm:flex-row sm:items-end gap-3" do |f| %>
@@ -61,5 +87,6 @@
               title: t('process_architecture.empty_title'), subtitle: t('process_architecture.empty_subtitle') %>
       <% end %>
     </div>
+    <% end %>
   </div>
 </div>

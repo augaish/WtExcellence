@@ -4,7 +4,7 @@ require "test_helper"
 class RetestBatchOneTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Retest Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
-    @process = @company.pp_processes.create!(name_en: "Purchase orders", level: 1,
+    @process = @company.pp_processes.create!(name_en: "Purchase orders", level: 1, category: "core",
       frequency: "on_demand", automation_status: "partially_automated")
     @diagram = @company.pp_diagrams.create!(owner: @process, name: "PO flow")
   end

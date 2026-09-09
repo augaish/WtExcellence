@@ -200,6 +200,10 @@ Rails.application.routes.draw do
     # Process Architecture (P&P)
     resources :pp_processes do
       collection do
+        get :settings
+        patch :settings, action: :update_settings
+      end
+      collection do
         get :import
         post :import, action: :run_import
         get :template

@@ -1,8 +1,16 @@
+# One node of the Process Architecture.
+#
+# Level 0 is not a row: it is one of three fixed bands (managerial, core,
+# support) that a level-1 process belongs to. Level 1 and level 2 are rows
+# here. Level 3 — the procedure — is a governed record in Records, which
+# links back to its level-2 parent. Each node carries a number within its
+# parent so that the architecture number (1.2, 1.2.4) can be read off the tree.
 class PpProcess < ApplicationRecord
-  MAX_LEVEL = 3
+  MAX_LEVEL = 2
 
-  # فئة الإجراء — set on level 1 and inherited downward for reporting.
-  CATEGORIES = %w[core support management].freeze
+  # Level 0. Order and numbers are fixed; the names may be changed per company.
+  CATEGORIES = %w[management core support].freeze
+  BAND_NUMBERS = { "management" => 1, "core" => 2, "support" => 3 }.freeze
 
   # دورية تنفيذ الإجراء
   FREQUENCIES = %w[on_demand daily weekly monthly quarterly semi_annual annual].freeze
@@ -29,6 +37,8 @@ class PpProcess < ApplicationRecord
   validates :level, presence: true,
     numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: MAX_LEVEL }
   validates :category, inclusion: { in: CATEGORIES }, allow_blank: true
+  validates :category, presence: true, if: -> { level == 1 }
+  validates :number, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validates :frequency, inclusion: { in: FREQUENCIES }, allow_blank: true
   validates :automation_status, inclusion: { in: AUTOMATION_STATUSES }, allow_blank: true
   validates :total_time_unit, inclusion: { in: TIME_UNITS }, allow_blank: true
@@ -41,6 +51,10 @@ class PpProcess < ApplicationRecord
   validate :parent_must_be_same_company
   validate :cannot_be_own_ancestor
   validate :level_must_follow_parent
+
+  before_validation :inherit_category_from_parent
+  before_validation :assign_number
+  before_validation :default_code_to_architecture_number
 
   scope :active, -> { where(active: true) }
   scope :roots, -> { where(parent_id: nil) }
@@ -89,6 +103,21 @@ class PpProcess < ApplicationRecord
     parent&.effective_category
   end
 
+  def band_number
+    BAND_NUMBERS[effective_category]
+  end
+
+  # 1.2 for a level-1 process, 1.2.4 for a level-2 one: the band, then each
+  # node's number down the tree. A procedure appends its own sequence.
+  def architecture_number
+    parts = [ band_number ]
+    parts.concat(ancestors.map(&:number))
+    parts << number
+    return nil if parts.any?(&:nil?)
+
+    parts.join(".")
+  end
+
   def ancestors
     chain = []
     node = parent
@@ -102,6 +131,23 @@ class PpProcess < ApplicationRecord
   end
 
   private
+
+  def inherit_category_from_parent
+    self.category = parent.effective_category if level.to_i > 1 && parent
+  end
+
+  # The next free number among the siblings, so numbering never needs typing.
+  def assign_number
+    return if number.present? || company_id.nil?
+
+    siblings = company.pp_processes.where(parent_id: parent_id)
+    siblings = siblings.where(category: category) if parent_id.nil?
+    self.number = siblings.maximum(:number).to_i + 1
+  end
+
+  def default_code_to_architecture_number
+    self.code = architecture_number if code.blank?
+  end
 
   def must_have_a_name
     return if name_en.to_s.strip.present? || name_ar.to_s.strip.present?

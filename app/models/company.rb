@@ -102,6 +102,18 @@ class Company < ApplicationRecord
   end
 
   # The colours to render for this company, falling back to the WTE palette.
+  # Level 0 of the Process Architecture: fixed bands the company may rename.
+  def process_band_name(band, locale = I18n.locale)
+    names = process_band_names.fetch(band.to_s, {})
+    names[locale.to_s].presence || names[(locale.to_s == "ar" ? "en" : "ar")].presence ||
+      I18n.t("process_architecture.categories.#{band}", locale: locale)
+  end
+
+  def process_objective(locale = I18n.locale)
+    primary, fallback = locale.to_s == "ar" ? [ process_objective_ar, process_objective_en ] : [ process_objective_en, process_objective_ar ]
+    primary.presence || fallback.presence
+  end
+
   def brand_palette
     @brand_palette ||= BrandPalette.new(self)
   end

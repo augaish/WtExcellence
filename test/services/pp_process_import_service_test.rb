@@ -37,7 +37,7 @@ class PpProcessImportServiceTest < ActiveSupport::TestCase
 
   test "links the owning org unit by code" do
     unit = @company.org_units.create!(name_en: "Quality", level: 1, code: "01")
-    csv = "code,name_en,level,parent_code,owner_unit_code\nP-01,Gov,1,,01\n"
+    csv = "code,name_en,level,parent_code,category,owner_unit_code\nP-01,Gov,1,,core,01\n"
 
     result = PpProcessImportService.import(file: csv_upload(csv), company: @company)
 
@@ -46,7 +46,7 @@ class PpProcessImportServiceTest < ActiveSupport::TestCase
   end
 
   test "ignores enum values that are not recognised" do
-    csv = "code,name_en,level,parent_code,frequency,automation_status\nP-01,Gov,1,,fortnightly,magic\n"
+    csv = "code,name_en,level,parent_code,category,frequency,automation_status\nP-01,Gov,1,,core,fortnightly,magic\n"
 
     result = PpProcessImportService.import(file: csv_upload(csv), company: @company)
 
@@ -67,5 +67,14 @@ class PpProcessImportServiceTest < ActiveSupport::TestCase
 
   test "the template lists every supported header" do
     assert_equal PpProcessImportService::HEADERS, PpProcessImportService.template_csv.lines.first.strip.split(",")
+  end
+
+  test "refuses a row that would sit below level 2" do
+    csv = "code,name_en,level,parent_code,category\nP-01,Gov,1,,core\nP-01-01,Child,2,P-01,\nP-01-01-01,Grandchild,3,P-01-01,\n"
+
+    result = PpProcessImportService.import(file: csv_upload(csv), company: @company)
+
+    refute result.success?
+    assert result.errors.any? { |e| e[:message].include?("Level 2") }, result.errors.inspect
   end
 end

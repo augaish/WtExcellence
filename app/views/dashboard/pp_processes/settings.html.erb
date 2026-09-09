@@ -1,0 +1,58 @@
+<%= content_for :title, t('process_architecture.settings') %>
+
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-3xl mx-auto px-6 py-8">
+    <%= render layout: "dashboard/shared/page_header", locals: { title: t('process_architecture.settings'), subtitle: t('process_architecture.settings_subtitle') } do %>
+      <%= link_to t('back'), dashboard_pp_processes_path(view: "model"), class: ui_btn_neutral %>
+    <% end %>
+
+    <% input_class = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+    <% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
+
+    <%= form_with url: settings_dashboard_pp_processes_path, method: :patch, class: "space-y-6" do %>
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.levels.l0') %></h2>
+        <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('process_architecture.band_names_hint') %></p>
+        <div class="space-y-4">
+          <% PpProcess::CATEGORIES.each do |band| %>
+            <% names = @company.process_band_names.fetch(band, {}) %>
+            <fieldset class="grid grid-cols-1 sm:grid-cols-[6rem_1fr_1fr] gap-3 items-end">
+              <legend class="sr-only"><%= t("process_architecture.categories.#{band}") %></legend>
+              <p class="text-sm font-medium text-[#0D1120] pb-2"><%= PpProcess::BAND_NUMBERS[band] %>. <%= t("process_architecture.categories.#{band}") %></p>
+              <div>
+                <%= label_tag "band_names_#{band}_en", t('process_architecture.name_en'), class: label_class %>
+                <%= text_field_tag "band_names[#{band}][en]", names["en"], id: "band_names_#{band}_en", class: input_class,
+                      placeholder: t("process_architecture.categories.#{band}", locale: :en) %>
+              </div>
+              <div>
+                <%= label_tag "band_names_#{band}_ar", t('process_architecture.name_ar'), class: label_class %>
+                <%= text_field_tag "band_names[#{band}][ar]", names["ar"], id: "band_names_#{band}_ar", dir: "rtl", class: input_class,
+                      placeholder: t("process_architecture.categories.#{band}", locale: :ar) %>
+              </div>
+            </fieldset>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('process_architecture.company_objective') %></h2>
+        <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('process_architecture.company_objective_hint') %></p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= label_tag :process_objective_en, t('process_architecture.name_en'), class: label_class %>
+            <%= text_field_tag :process_objective_en, @company.process_objective_en, maxlength: 300, class: input_class %>
+          </div>
+          <div>
+            <%= label_tag :process_objective_ar, t('process_architecture.name_ar'), class: label_class %>
+            <%= text_field_tag :process_objective_ar, @company.process_objective_ar, maxlength: 300, dir: "rtl", class: input_class %>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <%= link_to t('cancel'), dashboard_pp_processes_path(view: "model"), class: ui_btn_neutral %>
+        <%= submit_tag t('save'), class: ui_btn_primary %>
+      </div>
+    <% end %>
+  </div>
+</div>

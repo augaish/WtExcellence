@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_09_111241) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_09_112245) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -466,6 +466,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_111241) do
     t.string "brand_primary_color", limit: 7
     t.string "brand_accent_color", limit: 7
     t.integer "risk_appetite_score"
+    t.jsonb "process_band_names", default: {}, null: false
+    t.string "process_objective_en", limit: 300
+    t.string "process_objective_ar", limit: 300
     t.index ["status"], name: "index_companies_on_status"
   end
 
@@ -889,6 +892,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_111241) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "number"
     t.index ["company_id", "code"], name: "index_pp_processes_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "level"], name: "index_pp_processes_on_company_id_and_level"
     t.index ["company_id"], name: "index_pp_processes_on_company_id"

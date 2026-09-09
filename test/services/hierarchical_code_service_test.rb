@@ -24,7 +24,7 @@ class HierarchicalCodeServiceTest < ActiveSupport::TestCase
   test "process root codes carry the P- prefix" do
     assert_equal "P-01", HierarchicalCodeService.next_process_code(company: @company)
 
-    @company.pp_processes.create!(name_en: "A", level: 1, code: "P-01")
+    @company.pp_processes.create!(name_en: "A", level: 1, category: "core", code: "P-01")
     assert_equal "P-02", HierarchicalCodeService.next_process_code(company: @company)
   end
 

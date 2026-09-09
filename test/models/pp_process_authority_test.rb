@@ -3,7 +3,7 @@ require "test_helper"
 class PpProcessAuthorityTest < ActiveSupport::TestCase
   setup do
     @company = Company.create!(name: "Matrix Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
-    @process = @company.pp_processes.create!(name_en: "Procurement", level: 1)
+    @process = @company.pp_processes.create!(name_en: "Procurement", level: 1, category: "core")
     @authority = @process.authorities.create!(item: "Direct purchase", decision: "Award below SAR 1m")
   end
 
