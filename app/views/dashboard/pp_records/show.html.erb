@@ -135,7 +135,12 @@
             <ul class="divide-y divide-[#E3E3E3] mb-4">
               <% @attachments.each do |attachment| %>
                 <li class="flex items-center justify-between py-2.5 gap-3">
-                  <span class="text-sm text-[#0D1120] truncate"><%= attachment.upload&.filename %></span>
+                  <span class="min-w-0 text-sm text-[#0D1120] truncate">
+                    <% if attachment.upload %>
+                      <%= link_to attachment.upload.display_name, attachment.upload.file_url(disposition: "inline"), target: "_blank", rel: "noopener", class: "text-[#5C3984] hover:underline" %>
+                      <span class="text-xs text-[#797C81]">· <%= attachment.upload.filename %><% if attachment.upload.folder %> · <%= attachment.upload.folder.name %><% end %></span>
+                    <% end %>
+                  </span>
                   <% if can_manage_pp_records? %>
                     <%= button_to t('remove'), detach_document_dashboard_pp_record_path(@record, upload_id: attachment.upload_id),
                           method: :delete,
@@ -163,7 +168,7 @@
                   <select name="upload_ids[]" multiple size="4"
                           class="w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]">
                     <% @available_uploads.each do |upload| %>
-                      <option value="<%= upload.id %>"><%= upload.filename %></option>
+                      <option value="<%= upload.id %>"><%= upload.display_name %><% if upload.folder %> (<%= upload.folder.name %>)<% end %> · <%= upload.filename %></option>
                     <% end %>
                   </select>
                 </div>

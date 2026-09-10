@@ -87,6 +87,15 @@
     <%= render "dashboard/shared/activity_trail", record: @risk %>
 
     <div class="mt-6">
+      <% if @risk.closed? %>
+        <div class="mt-4 rounded-xl border border-[#E3E3E3] bg-[#F7F7FD] p-4">
+          <p class="text-xs font-semibold text-[#797C81] uppercase tracking-wide"><%= t('risk.closure_title') %></p>
+          <p class="mt-1 text-sm text-[#0D1120] whitespace-pre-line"><%= @risk.closure_reason.presence || "—" %></p>
+          <p class="mt-2 text-xs text-[#797C81]">
+            <%= t('risk.closed_by_on', name: @risk.closed_by&.name || "—", date: (@risk.closed_at ? l(@risk.closed_at.to_date, format: :document) : "—")) %>
+          </p>
+        </div>
+      <% end %>
       <%= link_to t('back_to_risk_register'), dashboard_risk_management_index_path, class: "text-sm text-blue-500 hover:text-blue-700" %>
     </div>
   </div>

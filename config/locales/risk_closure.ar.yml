@@ -3,3 +3,5 @@ ar:
     closure_reason: سبب الإغلاق
     closure_reason_placeholder: لماذا يتم إغلاق هذا الخطر؟
     closure_reason_hint: مطلوب عند اختيار الحالة "مغلق". يُسجَّل مع اسم من أغلق الخطر وتاريخ الإغلاق.
+    closure_title: الإغلاق
+    closed_by_on: "أغلقه %{name} في %{date}"

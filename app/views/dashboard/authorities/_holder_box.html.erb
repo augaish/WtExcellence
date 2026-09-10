@@ -34,12 +34,13 @@
   <% end %>
 
   <% if can_manage %>
-    <details class="mt-auto">
+    <details class="mt-auto" data-controller="lazy-choices" data-action="toggle->lazy-choices#opened">
       <summary class="cursor-pointer text-[11px] text-[#5C3984] hover:underline"><%= t('doa.assign') %></summary>
       <%= form_with url: dashboard_create_authority_assignment_path(authority_id: authority.id, matrix_id: matrix.id),
                     method: :post, scope: :authority_assignment, class: "mt-1 space-y-1" do |f| %>
         <%= f.hidden_field :level, value: level %>
-        <div data-controller="choices-select" data-choices-select-search-value="true">
+        <%# The searchable picker is heavy; six per authority would slow the page. It is built on first open. %>
+        <div data-lazy-choices-target="picker" data-choices-select-search-value="true">
           <%= select_tag :holder, grouped_options_for_select({
                 t('doa.picker.units') => org_units.map { |u| [ u.display_name, "unit:#{u.id}" ] },
                 t('doa.picker.people') => company_users.map { |u| [ u.name, "user:#{u.id}" ] },

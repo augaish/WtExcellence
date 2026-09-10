@@ -3,3 +3,5 @@ en:
     closure_reason: "Closure reason"
     closure_reason_placeholder: "Why is this risk being closed?"
     closure_reason_hint: "Required when the status is Closed. Recorded with who closed the risk and when."
+    closure_title: "Closure"
+    closed_by_on: "Closed by %{name} on %{date}"

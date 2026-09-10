@@ -64,9 +64,9 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   end
 
   def show
-    @attachments = @record.evidence_attachments.includes(:upload).order(created_at: :desc)
+    @attachments = @record.evidence_attachments.includes(upload: :folder).order(created_at: :desc)
     @folders_for_upload = company.folders.order(:name)
-    @available_uploads = company.uploads.where.not(id: @attachments.map(&:upload_id)).order(created_at: :desc).limit(100)
+    @available_uploads = company.uploads.where.not(id: @attachments.map(&:upload_id)).includes(:folder).order(created_at: :desc).limit(100)
   end
 
   # The type comes from the tab the button was pressed on; it is not chosen

@@ -115,7 +115,7 @@ class OrgChartRenderer
 
       # Elbowed rather than diagonal, which is how an org chart is read.
       %(<path d="M #{parent_x} #{parent_bottom} V #{elbow} H #{child_x} V #{position[:y]}"
-              fill="none" stroke="#{LINE}" stroke-width="1.5" />)
+              fill="none" stroke="#{LINE}" stroke-width="1.5" data-child-id="#{position[:unit].id}" />)
     end.join("\n")
   end
 
@@ -135,6 +135,8 @@ class OrgChartRenderer
       <g class="org-chart-node" role="button" tabindex="0"
          data-action="click->org-chart#select keydown.enter->org-chart#select"
          data-org-chart-unit-id-param="#{unit.id}"
+         data-unit-id="#{unit.id}" data-parent-id="#{unit.parent_id}"
+         data-search-text="#{escape([ name, unit.code ].compact_blank.join(' ').downcase)}"
          aria-label="#{escape(name)}">
         <rect x="#{position[:x]}" y="#{position[:y]}" width="#{BOX_WIDTH}" height="#{BOX_HEIGHT}"
               rx="8" fill="#FFFFFF" stroke="#{BORDER}" stroke-width="1" />
