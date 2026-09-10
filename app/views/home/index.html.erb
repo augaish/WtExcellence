@@ -227,7 +227,7 @@
           <a class="lang-switch" href="<%= localized_home_path(locale: :ar) %>" hreflang="ar" lang="ar"><%= t("home.header.switch_to_ar") %></a>
         <% end %>
         <a class="btn btn-ghost" href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
-        <a class="btn btn-primary" href="<%= new_waitlist_path %>"><%= rtl? ? "انضم للقائمة" : "Join the waitlist" %></a>
+        <a class="btn btn-primary" href="<%= new_waitlist_path %>"><%= rtl? ? "اطلب عرضًا توضيحيًا" : "Request a demo" %></a>
       </div>
     </div>
   </header>
@@ -240,9 +240,9 @@
         <span class="eyebrow reveal in"><%= rtl? ? "إدارة الجودة والامتثال" : "Quality & compliance management" %></span>
         <h1 class="reveal in" data-d="1">
           <% if rtl? %>
-            برنامج الجودة والامتثال بالكامل<br><span class="accent">في مكان واحد.</span>
+            التميّز والمخاطر والحوكمة،<br><span class="accent">كلها في مكان واحد.</span>
           <% else %>
-            Your whole compliance program,<br><span class="accent">in one place.</span>
+            Excellence, Risk, Governance,<br><span class="accent">all in one place.</span>
           <% end %>
         </h1>
         <p class="lead reveal in" data-d="2">
@@ -253,7 +253,7 @@
           <% end %>
         </p>
         <div class="hero-cta reveal in" data-d="3">
-          <a class="btn btn-primary btn-lg" href="<%= new_waitlist_path %>"><%= rtl? ? "انضم للقائمة" : "Join the waitlist" %></a>
+          <a class="btn btn-primary btn-lg" href="<%= new_waitlist_path %>"><%= rtl? ? "اطلب عرضًا توضيحيًا" : "Request a demo" %></a>
           <a class="btn btn-ghost btn-lg" href="<%= app_sign_in %>"><%= rtl? ? "لديك حساب؟ سجّل الدخول" : "Sign in to your workspace" %></a>
         </div>
         <p class="hero-note reveal in" data-d="3">
@@ -470,9 +470,9 @@
   <section class="cta-final">
     <div class="wrap reveal">
       <h2><%= rtl? ? "ابدأ رحلة التميّز مع مؤسستك." : "Start your organization's journey to excellence." %></h2>
-      <p class="lead"><%= rtl? ? "انضم إلى قائمة الانتظار، أو سجّل الدخول إذا كان لديك حساب بالفعل." : "Join the waitlist, or sign in if you already have a workspace." %></p>
+      <p class="lead"><%= rtl? ? "اطلب عرضًا توضيحيًا لفريقك، أو سجّل الدخول إذا كان لديك مساحة عمل بالفعل." : "Request a demo for your team, or sign in if you already have a workspace." %></p>
       <div class="hero-cta" style="justify-content:center">
-        <a class="btn btn-primary btn-lg" href="<%= new_waitlist_path %>"><%= rtl? ? "انضم للقائمة" : "Join the waitlist" %></a>
+        <a class="btn btn-primary btn-lg" href="<%= new_waitlist_path %>"><%= rtl? ? "اطلب عرضًا توضيحيًا" : "Request a demo" %></a>
         <a class="btn btn-ghost btn-lg" href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
       </div>
     </div>
@@ -486,6 +486,10 @@
         <%= image_tag asset_path('logo-tr.png'), alt: "Way to Excellence", style: "height:26px", width: 120, height: 26, loading: "lazy" %>
       </div>
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
+        <a href="<%= page_path(:privacy) %>"><%= rtl? ? "الخصوصية" : "Privacy" %></a>
+        <a href="<%= page_path(:terms) %>"><%= rtl? ? "الشروط" : "Terms" %></a>
+        <a href="<%= page_path(:security) %>"><%= rtl? ? "الأمن" : "Security" %></a>
+        <a href="<%= page_path(:about) %>"><%= rtl? ? "من نحن" : "About" %></a>
         <a href="mailto:info@wtexcellence.com">info@wtexcellence.com</a>
         <a href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
         <% if rtl? %><a href="<%= localized_home_path(locale: :en) %>" hreflang="en" lang="en">English</a><% else %><a href="<%= localized_home_path(locale: :ar) %>" hreflang="ar" lang="ar">العربية</a><% end %>

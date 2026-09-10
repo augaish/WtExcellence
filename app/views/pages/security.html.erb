@@ -1,0 +1,31 @@
+<%= render layout: "pages/shell", locals: { title: (rtl? ? "الأمن" : "Security") } do %>
+<% if rtl? %>
+  <p>ما يلي هو ما تفعله المنصة اليوم. لا ندّعي شهادات لم نحصل عليها؛ عند الحصول على شهادة مستقلة سنذكرها هنا مع تاريخها.</p>
+  <h2>عزل بيانات كل مؤسسة</h2>
+  <p>كل مؤسسة عميلة في مساحة مستقلة. كل استعلام في المنصة مقيد بالمؤسسة، ولا يصل مستخدم إلى سجل مؤسسة أخرى.</p>
+  <h2>الوصول والأدوار</h2>
+  <p>تسجيل دخول بكلمة مرور مع تأمين الجلسات، وأدوار محددة (مدير الشركة، مدير الجودة، مدير المخاطر، مدقق، مساهم، مشاهد) مع رخص تحدد ما يعمل عليه كل دور وما يقرؤه فقط. تُسجَّل الأفعال الحساسة في سجل تدقيق.</p>
+  <h2>التشفير</h2>
+  <p>النقل عبر TLS. الملفات مخزنة لدى مزوّد تخزين سحابي بتشفير عند السكون، وتُقدَّم عبر روابط موقّعة قصيرة الأجل أو عبر المنصة نفسها.</p>
+  <h2>النسخ الاحتياطي</h2>
+  <p>نسخ احتياطية لقاعدة البيانات قبل كل نشر وبشكل دوري، مع التحقق من سلامة النسخة قبل الاعتماد عليها.</p>
+  <h2>الذكاء الاصطناعي</h2>
+  <p>تُرسل إلى مزوّد النماذج النصوص التي يختارها المستخدم فقط، وتُعرض النتائج كمسودات للمراجعة. لا تُستخدم بياناتك لتدريب نماذج المزوّد وفق شروطه.</p>
+  <h2>الإبلاغ عن ثغرة</h2>
+  <p>راسلنا على info@wtexcellence.com بعنوان «Security». نرد خلال يومي عمل ونشكر الإبلاغ المسؤول.</p>
+<% else %>
+  <p>This page says what the platform does today. We claim no certification we do not hold; when an independent one is obtained it will be listed here with its date.</p>
+  <h2>Tenant isolation</h2>
+  <p>Each customer organisation lives in its own space. Every query in the platform is scoped to the organisation, and no user can reach another organisation's records.</p>
+  <h2>Access and roles</h2>
+  <p>Password sign-in with secured sessions, and defined roles (company admin, quality manager, risk manager, auditor, contributor, viewer) with licences that decide what each role works on and what it only reads. Sensitive actions are written to an audit log.</p>
+  <h2>Encryption</h2>
+  <p>In transit over TLS. Files are stored with a cloud storage provider encrypted at rest, and served through short-lived signed links or through the platform itself.</p>
+  <h2>Backups</h2>
+  <p>Database backups before every deployment and on a schedule, verified for integrity before they are relied on.</p>
+  <h2>AI features</h2>
+  <p>Only the text a user chooses is sent to the model provider, and results come back as drafts for review. Under the provider's terms your data is not used to train its models.</p>
+  <h2>Reporting a vulnerability</h2>
+  <p>Email info@wtexcellence.com with the subject "Security". We reply within two working days and are grateful for responsible disclosure.</p>
+<% end %>
+<% end %>

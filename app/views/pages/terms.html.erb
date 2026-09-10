@@ -1,0 +1,35 @@
+<%= render layout: "pages/shell", locals: { title: (rtl? ? "شروط الخدمة" : "Terms of service") } do %>
+<% if rtl? %>
+  <p>تحكم هذه الشروط استخدام منصة WTExcel من Way to Excellence. يُبرم مع كل مؤسسة عميلة اتفاق اشتراك يحدد النطاق والمدة والسعر، وتسري هذه الشروط فيما لم ينص عليه الاتفاق.</p>
+  <h2>الحساب والاستخدام</h2>
+  <p>تنشئ المؤسسة حساباتها وتدير مستخدميها وأدوارهم ورخصهم. المستخدم مسؤول عن سرية بيانات دخوله، والمؤسسة مسؤولة عن استخدام مستخدميها للخدمة.</p>
+  <h2>بياناتك</h2>
+  <p>ما تدخله المؤسسة في المنصة يبقى ملكًا لها. نستخدمه فقط لتقديم الخدمة كما في إشعار الخصوصية، ونعيده أو نحذفه عند انتهاء الاشتراك.</p>
+  <h2>الذكاء الاصطناعي</h2>
+  <p>اقتراحات الذكاء الاصطناعي مساعدة وليست قرارًا. تبقى مسودات حتى يعتمدها مستخدم، وتُخصم أرصدة الاستخدام عند التوليد وفق ما يظهر في الواجهة.</p>
+  <h2>التوافر والدعم</h2>
+  <p>نبذل جهدًا تجاريًا معقولًا لإبقاء الخدمة متاحة، ونعلن عن الصيانة المجدولة مسبقًا. مستوى الخدمة والدعم يحددهما اتفاق الاشتراك.</p>
+  <h2>المسؤولية</h2>
+  <p>المنصة أداة لإدارة الجودة والحوكمة ولا تُغني عن حكم المختصين أو عن متطلبات الجهات المنظمة؛ الامتثال مسؤولية المؤسسة. تُحدد حدود المسؤولية في اتفاق الاشتراك.</p>
+  <h2>الإنهاء</h2>
+  <p>يجوز لأي طرف إنهاء الاشتراك وفق اتفاقه. عند الإنهاء تحصل المؤسسة على مهلة لتصدير بياناتها قبل حذفها.</p>
+  <h2>التواصل</h2>
+  <p>للاستفسارات: info@wtexcellence.com.</p>
+<% else %>
+  <p>These terms govern use of the WTExcel platform by Way to Excellence. Each customer organisation signs a subscription agreement that sets scope, term and price; these terms apply where that agreement is silent.</p>
+  <h2>Accounts and use</h2>
+  <p>The organisation creates its accounts and manages its users, roles and licences. A user is responsible for keeping sign-in details private; the organisation is responsible for its users' use of the service.</p>
+  <h2>Your data</h2>
+  <p>What an organisation enters in the platform stays its own. We use it only to provide the service as described in the privacy notice, and return or delete it when the subscription ends.</p>
+  <h2>AI features</h2>
+  <p>AI suggestions assist; they do not decide. They stay drafts until a user keeps them, and usage credits are charged at generation as shown in the interface.</p>
+  <h2>Availability and support</h2>
+  <p>We make commercially reasonable efforts to keep the service available and announce planned maintenance in advance. Service levels and support are set in the subscription agreement.</p>
+  <h2>Liability</h2>
+  <p>The platform is a tool for quality and governance management. It does not replace professional judgement or a regulator's requirements; compliance remains the organisation's responsibility. Limits of liability are set in the subscription agreement.</p>
+  <h2>Termination</h2>
+  <p>Either party may end the subscription as its agreement allows. On termination the organisation gets a period to export its data before deletion.</p>
+  <h2>Contact</h2>
+  <p>Questions: info@wtexcellence.com.</p>
+<% end %>
+<% end %>

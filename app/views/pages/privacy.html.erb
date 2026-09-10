@@ -1,0 +1,39 @@
+<%= render layout: "pages/shell", locals: { title: (rtl? ? "إشعار الخصوصية" : "Privacy notice") } do %>
+<% if rtl? %>
+  <p>يوضح هذا الإشعار ما نجمعه من بيانات عند استخدام موقع Way to Excellence ومنصة WTExcel، ولماذا، وكيف نحفظها.</p>
+  <h2>ما نجمعه</h2>
+  <ul>
+    <li><strong>طلب العرض التوضيحي:</strong> الاسم، بريد العمل، اسم المؤسسة، حجمها، ودورك. نستخدمها للتواصل بشأن العرض فقط.</li>
+    <li><strong>حساب المنصة:</strong> بيانات المستخدم التي تنشئها مؤسستك، وما تُدخله من سجلات وتقييمات ووثائق وأدلة. مؤسستك هي المتحكم في هذه البيانات، ونحن نعالجها نيابةً عنها.</li>
+    <li><strong>بيانات تقنية:</strong> سجلات الدخول وعناوين الشبكة وأخطاء التشغيل، لتأمين الخدمة وتشغيلها.</li>
+  </ul>
+  <h2>كيف نستخدمها</h2>
+  <p>لتقديم الخدمة ودعمها وتأمينها، وللتواصل معك بشأن طلبك. لا نبيع البيانات ولا نستخدمها للإعلانات.</p>
+  <h2>الذكاء الاصطناعي</h2>
+  <p>بعض الميزات ترسل نصوصًا اخترتها (مثل وصف إجراء تصحيحي) إلى مزوّد نماذج لغوية لإنتاج اقتراحات. يُذكر ذلك في الواجهة عند كل استخدام، ولا تُستخدم بياناتك لتدريب نماذج المزوّد وفق شروطه.</p>
+  <h2>المعالجون من الباطن</h2>
+  <p>نستضيف الخدمة ونخزّن الملفات لدى مزوّدي بنية تحتية سحابية، ونرسل البريد عبر مزوّد بريد، ونجمع تقارير الأخطاء عبر خدمة مراقبة. تتوفر قائمة المزوّدين الحالية عند الطلب.</p>
+  <h2>الاحتفاظ والحذف</h2>
+  <p>نحتفظ ببيانات المنصة ما دام حساب مؤسستك نشطًا، ونحذفها أو نعيدها عند إنهاء العقد. تُحذف طلبات العرض التوضيحي بعد اكتمال التواصل أو خلال اثني عشر شهرًا.</p>
+  <h2>حقوقك</h2>
+  <p>يمكنك طلب الاطلاع على بياناتك أو تصحيحها أو حذفها عبر info@wtexcellence.com. إذا كنت مستخدمًا داخل مؤسسة عميلة فوجّه طلبك إلى مديرها أولًا.</p>
+<% else %>
+  <p>This notice explains what we collect when you use the Way to Excellence website and the WTExcel platform, why, and how we keep it.</p>
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Demo requests:</strong> your name, work email, organisation, its size and your role. Used only to arrange the demo.</li>
+    <li><strong>Platform accounts:</strong> the user details your organisation creates, and the records, assessments, documents and evidence it enters. Your organisation controls that data; we process it on its behalf.</li>
+    <li><strong>Technical data:</strong> sign-in logs, network addresses and error reports, to run and secure the service.</li>
+  </ul>
+  <h2>How we use it</h2>
+  <p>To provide, support and secure the service, and to answer your request. We do not sell data and do not use it for advertising.</p>
+  <h2>AI features</h2>
+  <p>Some features send text you choose (for example a corrective action's description) to a language-model provider to produce suggestions. The interface says so at each use, and under the provider's terms your data is not used to train its models.</p>
+  <h2>Sub-processors</h2>
+  <p>We host the service and store files with cloud infrastructure providers, send email through a mail provider, and collect error reports through a monitoring service. The current list is available on request.</p>
+  <h2>Retention and deletion</h2>
+  <p>Platform data is kept while your organisation's account is active and deleted or returned when the contract ends. Demo requests are deleted once the conversation is complete, or after twelve months.</p>
+  <h2>Your rights</h2>
+  <p>You may ask to see, correct or delete your data at info@wtexcellence.com. If you are a user inside a customer organisation, ask its administrator first.</p>
+<% end %>
+<% end %>

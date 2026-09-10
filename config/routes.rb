@@ -333,6 +333,7 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   root "home#index"
+  get "/pages/:slug", to: "pages#show", constraints: { slug: /privacy|terms|security|about/ }, as: :page
   # Stable language URLs for the public homepage, so a shared link opens the
   # intended language without depending on a cookie.
   get "/:locale", to: "home#index", constraints: { locale: /en|ar/ }, as: :localized_home

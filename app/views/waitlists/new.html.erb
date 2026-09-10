@@ -13,8 +13,8 @@
       <div class="flex justify-center mb-6">
         <%= image_tag asset_path('logo.png'), alt: (rtl? ? 'Way To Excellence' : 'Way To Excellence'), class: "h-16 w-auto rounded-full" %>
       </div>
-      <h2 class="text-2xl font-semibold text-[#0D1120] mb-2"><%= rtl? ? 'احصل على إشعار عند الإطلاق' : 'Get notified when we launch' %></h2>
-      <p class="text-sm text-gray-600"><%= rtl? ? 'سجل اهتمامك وكن من بين أول من يصل إلى Way to Excellence عند الإطلاق.' : 'Register your interest and be among the first to access Way to Excellence when we launch.' %></p>
+      <h2 class="text-2xl font-semibold text-[#0D1120] mb-2"><%= rtl? ? 'اطلب عرضًا توضيحيًا' : 'Request a demo' %></h2>
+      <p class="text-sm text-gray-600"><%= rtl? ? 'أخبرنا عن مؤسستك وسنتواصل معك خلال يومي عمل لتحديد موعد عرض توضيحي يناسبك.' : 'Tell us about your organisation and we will get back to you within two working days to set up a demo.' %></p>
     </div>
 
     <!-- Card Container -->
@@ -176,14 +176,14 @@
           <button 
             type="submit" 
             class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-[#5C3984] hover:bg-[#4A2F6B] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#5C3984] transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-            <%= rtl? ? 'انضم إلى قائمة الانتظار' : 'Join Waitlist' %>
+            <%= rtl? ? 'اطلب العرض التوضيحي' : 'Request the demo' %>
           </button>
         </div>
       <% end %>
 
       <div class="mt-6 text-center">
         <p class="text-sm text-gray-600">
-            <%= rtl? ? 'سنستخدم تفاصيلك فقط لإشعارك بتحديثات الإطلاق.' : 'We\'ll only use your details to notify you about launch updates.' %>
+            <%= rtl? ? 'نستخدم بياناتك فقط للتواصل معك بشأن العرض التوضيحي. اقرأ ' : 'We use your details only to arrange the demo. Read our ' %><a href="<%= page_path(:privacy) %>" class="text-[#5C3984] hover:underline"><%= rtl? ? 'سياسة الخصوصية' : 'privacy notice' %></a>.
         </p>
       </div>
     </div>

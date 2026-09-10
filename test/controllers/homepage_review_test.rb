@@ -41,4 +41,28 @@ class HomepageReviewTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", root_path, text: /Back to homepage/
     assert_select "a[lang=ar]"
   end
+
+  test "the hero is the owner's line, the call to action is a demo, and the footer links the policy pages" do
+    get "/en"
+    assert_select "h1", text: /Excellence, Risk, Governance/
+    assert_select "a.btn-primary", text: "Request a demo"
+    refute_match(/Join the waitlist/, response.body)
+    %w[privacy terms security about].each { |slug| assert_select "footer a[href=?]", page_path(slug) }
+
+    get "/ar"
+    assert_select "h1", text: /التميّز والمخاطر والحوكمة/
+  end
+
+  test "the policy pages open in both languages without signing in" do
+    %w[privacy terms security about].each do |slug|
+      get page_path(slug)
+      assert_response :success, slug
+      assert_select "main h1"
+      get page_path(slug, locale: :ar)
+      assert_response :success
+      assert_select "html[dir=rtl]"
+    end
+    get "/pages/nonsense"
+    assert_response :not_found
+  end
 end
