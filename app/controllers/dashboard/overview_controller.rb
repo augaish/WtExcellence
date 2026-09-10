@@ -25,6 +25,13 @@ class Dashboard::OverviewController < Dashboard::BaseController
     @filter_by_company = !current_user&.platform_admin?
     @company_id = current_company&.id if @filter_by_company
 
+    # Before any chart: what needs me, and (for admins of a new company) what
+    # is still to set up.
+    if current_company && current_user&.company_user
+      @work_queue = WorkQueue.new(user: current_user, company: current_company)
+      @setup_checklist = SetupChecklist.new(current_company) if current_user.company_user.company_admin?
+    end
+
     # Show Total Active Standards and Total Users only to super admin, company admin, quality manager
     @show_admin_metrics = overview_show_admin_metrics?
 

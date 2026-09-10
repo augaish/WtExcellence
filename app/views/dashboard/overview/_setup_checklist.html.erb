@@ -1,0 +1,27 @@
+<%# First company setup, in the order things depend on each other. Locals: checklist %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl mb-6 p-4">
+  <div class="flex items-center justify-between gap-3 mb-3">
+    <div>
+      <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('setup_checklist.title') %></h2>
+      <p class="text-xs text-[#797C81]"><%= t('setup_checklist.subtitle', done: checklist.done_count, total: checklist.steps.size) %></p>
+    </div>
+    <div class="w-32 h-2 rounded-full bg-[#E3E3E3] overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="<%= checklist.steps.size %>" aria-valuenow="<%= checklist.done_count %>">
+      <div class="h-full bg-[#5C3984]" style="width: <%= (checklist.done_count * 100.0 / checklist.steps.size).round %>%"></div>
+    </div>
+  </div>
+  <ol class="grid grid-cols-1 md:grid-cols-2 gap-2">
+    <% checklist.steps.each_with_index do |step, i| %>
+      <li class="flex items-start gap-2 text-sm">
+        <span class="mt-0.5 w-5 h-5 flex-shrink-0 rounded-full flex items-center justify-center text-[11px] font-semibold <%= step.done? ? 'bg-green-100 text-green-800' : 'bg-[#F6EEFF] text-[#5C3984]' %>"><%= step.done? ? "✓" : i + 1 %></span>
+        <div>
+          <% if step.done? %>
+            <span class="text-[#797C81] line-through"><%= t("setup_checklist.steps.#{step.key}") %></span>
+          <% else %>
+            <%= link_to t("setup_checklist.steps.#{step.key}"), step.path, class: "text-[#5C3984] hover:underline font-medium" %>
+            <p class="text-xs text-[#797C81]"><%= t("setup_checklist.hints.#{step.key}") %></p>
+          <% end %>
+        </div>
+      </li>
+    <% end %>
+  </ol>
+</div>

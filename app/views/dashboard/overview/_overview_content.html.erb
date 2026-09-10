@@ -29,6 +29,13 @@
     <%= render partial: "layout_toolbar" %>
   <% end %>
 
+  <% if @setup_checklist && !@setup_checklist.complete? %>
+    <%= render "dashboard/overview/setup_checklist", checklist: @setup_checklist %>
+  <% end %>
+  <% if @work_queue %>
+    <%= render "dashboard/overview/work_queue", queue: @work_queue %>
+  <% end %>
+
   <div data-overview-customize-target="list" class="space-y-0">
     <% @dashboard_layout.ordered_widgets.each do |key| %>
       <% meta = widget_partials[key] %>

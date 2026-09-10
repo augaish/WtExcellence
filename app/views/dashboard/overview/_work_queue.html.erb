@@ -1,0 +1,30 @@
+<%# What needs my action, before anything else on the page. Locals: queue %>
+<div class="bg-white border border-[#5C3984]/30 rounded-xl mb-6 overflow-hidden">
+  <div class="flex items-center justify-between px-4 py-3 border-b border-[#E3E3E3] bg-[#F6EEFF]/50">
+    <div>
+      <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('work_queue.title') %></h2>
+      <p class="text-xs text-[#797C81]"><%= t('work_queue.subtitle') %></p>
+    </div>
+    <span class="px-2.5 py-1 rounded-full text-xs font-semibold <%= queue.empty? ? 'bg-green-100 text-green-800' : 'bg-[#5C3984] text-white' %>"><%= queue.count %></span>
+  </div>
+  <% if queue.empty? %>
+    <p class="px-4 py-5 text-sm text-[#797C81]"><%= t('work_queue.empty') %></p>
+  <% else %>
+    <ul class="divide-y divide-[#E3E3E3]">
+      <% queue.items.first(12).each do |item| %>
+        <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 hover:bg-[#F7F7FD]">
+          <div class="min-w-0">
+            <%= link_to item.title, item.path, class: "text-sm font-medium text-[#5C3984] hover:underline" %>
+            <p class="text-xs text-[#797C81]"><%= t("work_queue.kinds.#{item.kind}") %> · <%= item.reason %></p>
+          </div>
+          <% if item.due_on %>
+            <span class="text-xs <%= item.due_on < Date.current ? 'text-red-700 font-medium' : 'text-[#797C81]' %>"><%= l(item.due_on, format: :document) %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+    <% if queue.count > 12 %>
+      <p class="px-4 py-2 text-xs text-[#797C81] border-t border-[#E3E3E3]"><%= t('work_queue.more', count: queue.count - 12) %></p>
+    <% end %>
+  <% end %>
+</div>

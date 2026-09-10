@@ -1,0 +1,42 @@
+en:
+  work_queue:
+    title: "Needs your action"
+    subtitle: "Across documents, actions, risks, commitments, suppliers and approvals."
+    empty: "Nothing is waiting for you."
+    more:
+      one: "and 1 more"
+      other: "and %{count} more"
+    kinds:
+      documenter: "Document"
+      capa_action: "CAPA action"
+      risk: "Risk"
+      commitment: "Commitment"
+      vendor: "Supplier"
+      authority_review: "Authority matrix"
+    reasons:
+      action_open: "assigned to you"
+      action_overdue:
+        one: "1 day overdue"
+        other: "%{count} days overdue"
+      risk_needs_acceptance: "above appetite, not accepted"
+      review_overdue: "review overdue"
+      authority_review: "waiting for your review"
+  setup_checklist:
+    title: "Set up your company"
+    subtitle: "%{done} of %{total} done. Each step unlocks the next."
+    steps:
+      branding: "Add your logo"
+      working_days: "Set your non-working days"
+      org_units: "Build the organisation structure"
+      unit_heads: "Name a head for every top-level unit"
+      managers: "Name a P&P Manager or a Governance Manager"
+      standards: "Assign your first standard"
+      first_record: "Log your first policy or procedure"
+    hints:
+      branding: "It appears on every document the platform generates."
+      working_days: "Stage durations and approval periods are counted in working days."
+      org_units: "Units, reporting lines and heads drive ownership and approvals."
+      unit_heads: "Unit heads prepare drafts and answer for their unit in reviews."
+      managers: "Managers run the Documenter and the authority matrix."
+      standards: "Assessments and compliance figures need an assigned standard."
+      first_record: "Records enter the Documenter and become branded documents."
