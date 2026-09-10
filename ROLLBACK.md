@@ -51,6 +51,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Users from Excel (super admin), Arabic sign-in, matrix hidden from Records, category reset on a fresh matrix | `7316b12` | No migration. |
 | Record pages per type (policy/procedure/form/service/agreement/glossary boxes) | `ba29b82` | No migration. |
 | Activity log on every model + Activity page + record History | `be7f721` | No migration (entries go to the existing audit_logs table). |
+| Activity log: duplicate entries folded into one | `e00759f` | No migration. |
 
 ## Roll the code back
 ```bash
