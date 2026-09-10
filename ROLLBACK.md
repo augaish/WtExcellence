@@ -40,7 +40,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Phase 7 (Review 03 Arabic and help): Q09 translated statuses, validation and weekday names, Q18 help topics rewritten | `563328f` | No migration. |
 | Phase 8 (Review 03 chart, speed, closure, evidence): Q06 fit/search/fold, Q16 lazy pickers, Q13 closure block, Q11 evidence titles | `b67f9a9` | No migration. |
 | Phase 9 (Review 03 Q12): vendor assessments with sign-off, criticality, approval as its own state, manual rating needs a reason | `489aef2` | Additive migration: columns on vendors, `vendor_assessments` table. Existing vendors keep their rating, marked "set by hand". |
-| Homepage review: /en and /ar URLs with hreflang and share metadata, main landmark and skip link, Documents section, illustrative tags, Prove in nav, waitlist navigation | `PENDING_SHA` | No migration. Hero kept as is. |
+| Homepage review: /en and /ar URLs with hreflang and share metadata, main landmark and skip link, Documents section, illustrative tags, Prove in nav, waitlist navigation | `b5551f0` | No migration. Hero kept as is. |
 
 ## Roll the code back
 ```bash
