@@ -3,9 +3,9 @@
     <nav class="flex items-center justify-between mb-6 text-sm" aria-label="<%= rtl? ? 'التنقل' : 'Navigation' %>">
       <a href="<%= root_path %>" class="text-[#5C3984] hover:underline"><%= rtl? ? '← العودة إلى الصفحة الرئيسية' : '← Back to homepage' %></a>
       <% if rtl? %>
-        <a href="<%= switch_language_path(:en) %>" lang="en" class="text-[#797C81] hover:text-[#0D1120]">English</a>
+        <a href="<%= root_path(locale: :en) %>" lang="en" class="text-[#797C81] hover:text-[#0D1120]">English</a>
       <% else %>
-        <a href="<%= switch_language_path(:ar) %>" lang="ar" class="text-[#797C81] hover:text-[#0D1120]">العربية</a>
+        <a href="<%= root_path(locale: :ar) %>" lang="ar" class="text-[#797C81] hover:text-[#0D1120]">العربية</a>
       <% end %>
     </nav>
     <!-- Logo and Heading -->
@@ -183,7 +183,7 @@
 
       <div class="mt-6 text-center">
         <p class="text-sm text-gray-600">
-            <%= rtl? ? 'نستخدم بياناتك فقط للتواصل معك بشأن العرض التوضيحي. اقرأ ' : 'We use your details only to arrange the demo. Read our ' %><a href="<%= page_path(:privacy) %>" class="text-[#5C3984] hover:underline"><%= rtl? ? 'سياسة الخصوصية' : 'privacy notice' %></a>.
+            <%= rtl? ? 'نستخدم بياناتك فقط للتواصل معك بشأن العرض التوضيحي. اقرأ ' : 'We use your details only to arrange the demo. Read our ' %><a href="<%= root_path(page: :privacy) %>" class="text-[#5C3984] hover:underline"><%= rtl? ? 'سياسة الخصوصية' : 'privacy notice' %></a>.
         </p>
       </div>
     </div>

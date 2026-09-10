@@ -222,9 +222,9 @@
       </nav>
       <div class="nav-right">
         <% if rtl? %>
-          <a class="lang-switch" href="<%= localized_home_path(locale: :en) %>" hreflang="en" lang="en"><%= t("home.header.switch_to_en") %></a>
+          <a class="lang-switch" href="<%= root_path(locale: :en) %>" hreflang="en" lang="en"><%= t("home.header.switch_to_en") %></a>
         <% else %>
-          <a class="lang-switch" href="<%= localized_home_path(locale: :ar) %>" hreflang="ar" lang="ar"><%= t("home.header.switch_to_ar") %></a>
+          <a class="lang-switch" href="<%= root_path(locale: :ar) %>" hreflang="ar" lang="ar"><%= t("home.header.switch_to_ar") %></a>
         <% end %>
         <a class="btn btn-ghost" href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
         <a class="btn btn-primary" href="<%= new_waitlist_path %>"><%= rtl? ? "اطلب عرضًا توضيحيًا" : "Request a demo" %></a>
@@ -486,13 +486,13 @@
         <%= image_tag asset_path('logo-tr.png'), alt: "Way to Excellence", style: "height:26px", width: 120, height: 26, loading: "lazy" %>
       </div>
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
-        <a href="<%= page_path(:privacy) %>"><%= rtl? ? "الخصوصية" : "Privacy" %></a>
-        <a href="<%= page_path(:terms) %>"><%= rtl? ? "الشروط" : "Terms" %></a>
-        <a href="<%= page_path(:security) %>"><%= rtl? ? "الأمن" : "Security" %></a>
-        <a href="<%= page_path(:about) %>"><%= rtl? ? "من نحن" : "About" %></a>
+        <a href="<%= root_path(page: :privacy) %>"><%= rtl? ? "الخصوصية" : "Privacy" %></a>
+        <a href="<%= root_path(page: :terms) %>"><%= rtl? ? "الشروط" : "Terms" %></a>
+        <a href="<%= root_path(page: :security) %>"><%= rtl? ? "الأمن" : "Security" %></a>
+        <a href="<%= root_path(page: :about) %>"><%= rtl? ? "من نحن" : "About" %></a>
         <a href="mailto:info@wtexcellence.com">info@wtexcellence.com</a>
         <a href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
-        <% if rtl? %><a href="<%= localized_home_path(locale: :en) %>" hreflang="en" lang="en">English</a><% else %><a href="<%= localized_home_path(locale: :ar) %>" hreflang="ar" lang="ar">العربية</a><% end %>
+        <% if rtl? %><a href="<%= root_path(locale: :en) %>" hreflang="en" lang="en">English</a><% else %><a href="<%= root_path(locale: :ar) %>" hreflang="ar" lang="ar">العربية</a><% end %>
         <span>© <%= Time.current.year %> Way to Excellence</span>
       </div>
     </div>

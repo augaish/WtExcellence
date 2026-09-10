@@ -6,7 +6,7 @@
         <%= image_tag asset_path('logo.png'), alt: "Way to Excellence", class: "h-8 w-8 rounded-full", width: 32, height: 32 %>
         <span class="font-semibold">Way to Excellence</span>
       </a>
-      <% if rtl? %><a href="<%= switch_language_path(:en) %>" lang="en" class="text-[#797C81] hover:text-[#0D1120]">English</a><% else %><a href="<%= switch_language_path(:ar) %>" lang="ar" class="text-[#797C81] hover:text-[#0D1120]">العربية</a><% end %>
+      <% if rtl? %><a href="<%= root_path(locale: :en) %>" lang="en" class="text-[#797C81] hover:text-[#0D1120]">English</a><% else %><a href="<%= root_path(locale: :ar) %>" lang="ar" class="text-[#797C81] hover:text-[#0D1120]">العربية</a><% end %>
     </nav>
     <main class="bg-white border border-[#E3E3E3] rounded-xl p-8 prose prose-sm max-w-none text-[#0D1120]">
       <h1 class="text-2xl font-bold mb-2"><%= title %></h1>
@@ -14,10 +14,10 @@
       <%= yield %>
     </main>
     <p class="mt-6 text-xs text-[#797C81]">
-      <a href="<%= page_path(:privacy) %>" class="hover:underline"><%= rtl? ? "الخصوصية" : "Privacy" %></a> ·
-      <a href="<%= page_path(:terms) %>" class="hover:underline"><%= rtl? ? "الشروط" : "Terms" %></a> ·
-      <a href="<%= page_path(:security) %>" class="hover:underline"><%= rtl? ? "الأمن" : "Security" %></a> ·
-      <a href="<%= page_path(:about) %>" class="hover:underline"><%= rtl? ? "من نحن" : "About" %></a> ·
+      <a href="<%= root_path(page: :privacy) %>" class="hover:underline"><%= rtl? ? "الخصوصية" : "Privacy" %></a> ·
+      <a href="<%= root_path(page: :terms) %>" class="hover:underline"><%= rtl? ? "الشروط" : "Terms" %></a> ·
+      <a href="<%= root_path(page: :security) %>" class="hover:underline"><%= rtl? ? "الأمن" : "Security" %></a> ·
+      <a href="<%= root_path(page: :about) %>" class="hover:underline"><%= rtl? ? "من نحن" : "About" %></a> ·
       <a href="mailto:info@wtexcellence.com" class="hover:underline">info@wtexcellence.com</a>
     </p>
   </div>

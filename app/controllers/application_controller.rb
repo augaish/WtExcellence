@@ -28,8 +28,12 @@ class ApplicationController < ActionController::Base
 
     if I18n.available_locales.include?(new_locale)
       session[:locale] = new_locale
-      # Force full page reload by redirecting with status :see_other
-      redirect_to request.referer || root_path, allow_other_host: false, status: :see_other
+      # Force full page reload by redirecting with status :see_other. A referer
+      # that names the other language (/en, /ar) would undo the switch, so it
+      # goes to the language's own URL instead.
+      back = request.referer.to_s
+      back = localized_home_path(locale: new_locale) if back.blank? || back.match?(%r{/(en|ar)/?(\?|$)})
+      redirect_to back, allow_other_host: false, status: :see_other
     else
       redirect_back(fallback_location: root_path, alert: "Invalid language", status: :see_other)
     end

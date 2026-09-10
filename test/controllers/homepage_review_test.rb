@@ -16,7 +16,32 @@ class HomepageReviewTest < ActionDispatch::IntegrationTest
     get "/en"
     assert_response :success
     assert_select "html[lang=en][dir=ltr]"
-    assert_select "a[hreflang=ar][href$='/ar']"
+    assert_select "a[hreflang=ar][href=?]", root_path(locale: :ar)
+    assert_equal "no-store", response.headers["Cache-Control"]
+  end
+
+  test "clicking the other language switches the page through the homepage URL and stays switched" do
+    get "/"
+    assert_select "html[lang=en]"
+    get root_path(locale: :ar)
+    assert_response :success
+    assert_select "html[lang=ar][dir=rtl]"
+    get "/"
+    assert_select "html[lang=ar]", 1, "the choice sticks on the next visit"
+    get root_path(locale: :en)
+    assert_select "html[lang=en][dir=ltr]"
+  end
+
+  test "the policy pages open through the homepage URL in both languages" do
+    %w[privacy terms security about].each do |slug|
+      get root_path(page: slug)
+      assert_response :success, slug
+      assert_select "main h1"
+      get root_path(page: slug, locale: :ar)
+      assert_select "html[dir=rtl]"
+    end
+    get root_path(page: "nonsense")
+    assert_select "section.hero", 1, "an unknown page name shows the homepage"
   end
 
   test "the page has a main landmark, a skip link, and Prove and Documents in the navigation" do
@@ -47,7 +72,7 @@ class HomepageReviewTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: /Excellence, Risk, Governance/
     assert_select "a.btn-primary", text: "Request a demo"
     refute_match(/Join the waitlist/, response.body)
-    %w[privacy terms security about].each { |slug| assert_select "footer a[href=?]", page_path(slug) }
+    %w[privacy terms security about].each { |slug| assert_select "footer a[href=?]", root_path(page: slug) }
 
     get "/ar"
     assert_select "h1", text: /التميّز والمخاطر والحوكمة/
