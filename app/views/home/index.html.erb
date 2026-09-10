@@ -204,7 +204,8 @@
     }
   </style>
 </head>
-<% app_sign_in = "#{ENV['ROOT_URL']}/users/sign_in" %>
+<%# The app is on its own host, so the sign-in link carries the language the visitor chose here. %>
+<% app_sign_in = "#{ENV['ROOT_URL']}/users/sign_in?locale=#{I18n.locale}" %>
 <body>
   <a class="skip-link" href="#main"><%= rtl? ? "انتقل إلى المحتوى" : "Skip to content" %></a>
   <header>

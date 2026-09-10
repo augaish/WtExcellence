@@ -17,3 +17,18 @@ class SignInPageTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", switch_language_path(:en)
   end
 end
+
+class SignInFollowsHomepageLanguageTest < ActionDispatch::IntegrationTest
+  test "the homepage's Sign in link carries its language and the sign-in page opens in it" do
+    get "/ar"
+    assert_select "a.btn-ghost[href$=?]", "/users/sign_in?locale=ar"
+    get "/en"
+    assert_select "a.btn-ghost[href$=?]", "/users/sign_in?locale=en"
+
+    get new_user_session_path(locale: :ar)
+    assert_select "html[lang=ar][dir=rtl]"
+    assert_select "h2", text: I18n.t("sign_in_page.title", locale: :ar)
+    get new_user_session_path
+    assert_select "html[lang=ar]", 1, "the language sticks for the next page on the app host"
+  end
+end
