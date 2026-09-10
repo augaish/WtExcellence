@@ -10,7 +10,13 @@
     <p class="text-xs text-[#797C81] mb-3"><%= t('registers.showing', count: @filter.results.count, total: @total_count) %></p>
 
     <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
-      <div class="overflow-x-auto">
+      <% if @vendors.any? %>
+        <%= render "dashboard/shared/mobile_cards", items: @vendors.map { |v|
+              { title: v.name, path: dashboard_vendor_path(v),
+                facts: [ [ t('category'), v.category ], [ t('vendor_assessment.criticality'), v.criticality_label ], [ t('vendor_assessment.approval'), v.approval_label ], [ t('vendor_assessment.next_review_on'), (v.next_review_on ? l(v.next_review_on, format: :document) : nil) ] ],
+                status: [ t("risk_level_#{v.risk_level}", default: v.risk_level), { "unassessed" => "bg-gray-100 text-gray-700", "low" => "bg-green-100 text-green-800", "medium" => "bg-yellow-100 text-yellow-800", "high" => "bg-orange-100 text-orange-800", "critical" => "bg-red-100 text-red-800" }[v.risk_level] ] } } %>
+      <% end %>
+      <div class="overflow-x-auto <%= 'hidden sm:block' if @vendors.any? %>">
         <table class="w-full">
           <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
             <tr>

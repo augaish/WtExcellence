@@ -108,7 +108,11 @@
               <%= link_to t('view_workspace'), dashboard_risk_workspace_path(workspace), class: "text-sm text-[#5C3984] hover:underline" %>
             <% end %>
           </div>
-          <div class="overflow-x-auto">
+          <%= render "dashboard/shared/mobile_cards", items: risks.map { |r|
+                { title: r.title, path: dashboard_risk_management_path(r),
+                  facts: [ [ t('category'), r.category ], [ t('owner'), r.owner&.user&.name ], [ t('inherent_score'), "#{r.inherent_score} (#{t("risk_level_#{r.inherent_level.to_s.downcase}", default: r.inherent_level)})" ], [ t('residual_score'), r.residual_score ] ],
+                  status: [ t("risk_status.#{r.status}"), 'bg-[#F6EEFF] text-[#5C3984]' ] } } %>
+          <div class="overflow-x-auto hidden sm:block">
             <table class="w-full">
               <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
                 <tr>
@@ -126,7 +130,7 @@
                   <tr class="border-b border-[#E3E3E3] hover:bg-[#F7F7FD]">
                     <td class="p-4 text-sm font-medium text-[#0D1120]"><%= risk.title %></td>
                     <td class="p-4 text-sm text-[#797C81]"><%= risk.category.presence || "-" %></td>
-                    <td class="p-4 text-sm text-[#797C81]"><%= risk.owner&.user&.name || "Unassigned" %></td>
+                    <td class="p-4 text-sm text-[#797C81]"><%= risk.owner&.user&.name || t('unassigned') %></td>
                     <td class="p-4">
                       <span class="px-2 py-1 text-xs font-medium rounded-full <%= risk.inherent_level == 'low' ? 'bg-green-100 text-green-800' : risk.inherent_level == 'medium' ? 'bg-yellow-100 text-yellow-800' : risk.inherent_level == 'high' ? 'bg-orange-100 text-orange-800' : 'bg-red-100 text-red-800' %>">
                         <%= risk.inherent_score %> (<%= risk.inherent_level %>)
@@ -141,7 +145,7 @@
                     </td>
                     <td class="p-4 text-sm text-[#797C81]"><%= t("risk_status.#{risk.status}") %></td>
                     <td class="p-4">
-                      <%= link_to "View", dashboard_risk_management_path(risk), class: "text-blue-500 hover:text-blue-700 text-sm" %>
+                      <%= link_to t('view'), dashboard_risk_management_path(risk), class: "text-blue-500 hover:text-blue-700 text-sm" %>
                     </td>
                   </tr>
                 <% end %>

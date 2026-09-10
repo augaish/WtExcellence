@@ -47,14 +47,14 @@
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex flex-col gap-2 flex-1" data-controller="choices-select">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.assign_action.action_type_label") %>*</label>
-            <select name="capa_action[action_type]" required data-choices-select-target="select" class="w-full" data-capas--capa-action-target="actionType">
+            <select name="capa_action[action_type]" required data-choices-select-target="select" class="w-full" aria-label="<%= t("capa_management_ui.modals.assign_action.action_type_label") %>" data-capas--capa-action-target="actionType">
               <option value="corrective"><%= t("capa_actions.types.corrective") %></option>
               <option value="preventive"><%= t("capa_actions.types.preventive") %></option>
             </select>
           </div>
           <div class="flex flex-col gap-2 flex-1" data-controller="choices-select">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("status") %>*</label>
-            <select name="capa_action[status]" required data-choices-select-target="select" class="w-full" data-capas--capa-action-target="status">
+            <select name="capa_action[status]" required data-choices-select-target="select" class="w-full" aria-label="<%= t("status") %>" data-capas--capa-action-target="status">
               <option value="started"><%= t("capa_actions.statuses.started") %></option>
               <option value="in_progress"><%= t("capa_actions.statuses.in_progress") %></option>
               <option value="done"><%= t("capa_actions.statuses.done") %></option>
@@ -64,7 +64,7 @@
 
         <div class="flex flex-col gap-2">
           <label class="text-sm font-semibold text-[#0D1120]"><%= t("due_date_optional") %></label>
-          <input type="date" name="capa_action[due_date]" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" data-capas--capa-action-target="dueDate">
+          <input type="date" name="capa_action[due_date]" aria-label="<%= t("due_date_optional") %>" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all" data-capas--capa-action-target="dueDate">
         </div>
 
         <div class="flex flex-col gap-2">

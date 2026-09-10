@@ -1,4 +1,5 @@
-<%= form_with model: @risk, url: (@risk.new_record? ? dashboard_risk_management_index_path : dashboard_update_risk_path(@risk)), method: (@risk.new_record? ? :post : :patch), class: "space-y-6" do |f| %>
+<%= form_with model: @risk, url: (@risk.new_record? ? dashboard_risk_management_index_path : dashboard_update_risk_path(@risk)), method: (@risk.new_record? ? :post : :patch), class: "space-y-6", data: { turbo: false } do |f| %>
+  <% if f.object.new_record? %><%= hidden_field_tag :submission_token, SecureRandom.hex(16) %><% end %>
 
   <% if @risk.errors.any? %>
     <div class="bg-red-50 border-l-4 border-l-red-500 border border-red-200 rounded-lg p-4 mb-6">

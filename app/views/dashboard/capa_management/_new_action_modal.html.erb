@@ -34,7 +34,7 @@
         <div class="flex flex-col sm:flex-row gap-4 choices-overflow-visible">
           <div class="flex flex-col gap-2 flex-1 choices-overflow-visible" data-controller="choices-select">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.new_action.source_label") %>*</label>
-            <select name="capa[source]" required data-choices-select-target="select" class="w-full">
+            <select name="capa[source]" required data-choices-select-target="select" class="w-full" aria-label="<%= t("capa_management_ui.modals.new_action.source_label") %>">
               <option value="internal_audit"><%= t("capa_sources.internal_audit") %></option>
               <option value="external_audit"><%= t("capa_sources.external_audit") %></option>
               <option value="customer_complaint"><%= t("capa_sources.customer_complaint") %></option>
@@ -42,7 +42,7 @@
           </div>
           <div class="flex flex-col gap-2 flex-1 choices-overflow-visible" data-controller="choices-select" data-choices-select-search-value="true">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.new_action.related_standard_label") %></label>
-            <select name="capa[standard_id]" data-choices-select-target="select" class="w-full">
+            <select name="capa[standard_id]" data-choices-select-target="select" class="w-full" aria-label="<%= t("capa_management_ui.modals.new_action.related_standard_label") %>">
               <option value=""><%= t("capa_management_ui.modals.new_action.select_standard_placeholder") %></option>
               <% @standards&.each do |standard| %>
                 <option value="<%= standard.id %>"><%= standard.display_name %></option>
@@ -55,7 +55,7 @@
         <div class="flex flex-col sm:flex-row gap-4 choices-overflow-visible">
           <div class="flex flex-col gap-2 flex-1 choices-overflow-visible" data-controller="choices-select">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("capa_management_ui.modals.new_action.priority_label") %></label>
-            <select name="capa[priority]" data-choices-select-target="select" class="w-full">
+            <select name="capa[priority]" data-choices-select-target="select" class="w-full" aria-label="<%= t("capa_management_ui.modals.new_action.priority_label") %>">
               <option value="high"><%= t("priority_levels.high") %></option>
               <option value="medium" selected><%= t("priority_levels.medium") %></option>
               <option value="low"><%= t("priority_levels.low") %></option>
@@ -63,7 +63,7 @@
           </div>
           <div class="flex flex-col gap-2 flex-1">
             <label class="text-sm font-semibold text-[#0D1120]"><%= t("due_date_optional") %></label>
-            <input type="date" name="capa[due_date]" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all">
+            <input type="date" name="capa[due_date]" aria-label="<%= t("due_date_optional") %>" class="min-h-[44px] px-4 py-2 border border-[#E3E3E3] rounded-lg text-sm w-full focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-transparent transition-all">
           </div>
         </div>
 

@@ -16,7 +16,13 @@
     <% end %>
 
     <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
-      <div class="overflow-x-auto">
+      <% if @commitments.any? %>
+        <%= render "dashboard/shared/mobile_cards", items: @commitments.map { |c|
+              { title: c.title, path: dashboard_customer_commitment_path(c),
+                facts: [ [ t('customer'), c.customer_name ], [ t('due_date'), (c.due_date ? l(c.due_date, format: :document) : nil) ], [ t('owner'), c.owner&.user&.name ] ],
+                status: [ t("commitment_status.#{c.status}"), (c.status == 'fulfilled' ? 'bg-green-100 text-green-800' : c.past_due? ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') ] } } %>
+      <% end %>
+      <div class="overflow-x-auto <%= 'hidden sm:block' if @commitments.any? %>">
         <table class="w-full">
           <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
             <tr>

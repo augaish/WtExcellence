@@ -43,10 +43,17 @@ class Dashboard::VendorsController < Dashboard::BaseController
   end
 
   def create
+    # A retry after an uncertain response lands on the record already made.
+    token = params[:submission_token].presence
+    if token && (existing = Vendor.active.find_by(company_id: current_company&.id, submission_token: token))
+      return redirect_to dashboard_vendor_path(existing), status: :see_other
+    end
+
     @vendor = Vendor.new(vendor_params)
     @vendor.company = current_company
     @vendor.created_by = current_user
     @vendor.rating_source = "manual"
+    @vendor.submission_token = params[:submission_token].presence
     sanitize_company_owner!(@vendor)
 
     if @vendor.save

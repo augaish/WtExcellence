@@ -42,6 +42,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Phase 9 (Review 03 Q12): vendor assessments with sign-off, criticality, approval as its own state, manual rating needs a reason | `489aef2` | Additive migration: columns on vendors, `vendor_assessments` table. Existing vendors keep their rating, marked "set by hand". |
 | Homepage review: /en and /ar URLs with hreflang and share metadata, main landmark and skip link, Documents section, illustrative tags, Prove in nav, waitlist navigation | `b5551f0` | No migration. Hero kept as is. |
 | Homepage: owner's hero line, Request a demo, privacy/terms/security/about pages, footer links | `47c2715` | No migration. |
+| Phase 10 (Q14, Q15): one-time submission tokens on governance creates, plain-submit forms, mobile cards on four registers, named CAPA controls | `PENDING_SHA` | Additive migration: `submission_token` on risks, vendors, commitments. |
 
 ## Roll the code back
 ```bash

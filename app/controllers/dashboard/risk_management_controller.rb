@@ -53,9 +53,16 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   end
 
   def create
+    # A retry after an uncertain response lands on the record already made.
+    token = params[:submission_token].presence
+    if token && (existing = Risk.active.find_by(company_id: current_company&.id, submission_token: token))
+      return redirect_to dashboard_risk_management_path(existing), status: :see_other
+    end
+
     @risk = Risk.new(risk_params)
     @risk.company = current_company
     @risk.created_by = current_user
+    @risk.submission_token = params[:submission_token].presence
     reject_cross_company_workspace(@risk)
     sanitize_company_owner!(@risk)
 

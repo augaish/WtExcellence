@@ -1,0 +1,21 @@
+<%# On a phone a wide table hides its status and actions off-screen. Each row
+    becomes a card: title, two or three facts, a status and one primary link.
+    Locals: items — array of { title:, path:, facts: [[label, value], ...], status: [text, classes] or nil } %>
+<ul class="sm:hidden divide-y divide-[#E3E3E3]">
+  <% items.each do |item| %>
+    <li class="p-4 space-y-2">
+      <div class="flex items-start justify-between gap-3">
+        <%= link_to item[:title], item[:path], class: "text-sm font-medium text-[#5C3984] hover:underline min-w-0 break-words" %>
+        <% if item[:status] %>
+          <span class="flex-shrink-0 px-2 py-0.5 text-[11px] font-medium rounded-full <%= item[:status][1] %>"><%= item[:status][0] %></span>
+        <% end %>
+      </div>
+      <dl class="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
+        <% item[:facts].each do |label, value| %>
+          <div><dt class="text-[#797C81]"><%= label %></dt><dd class="text-[#0D1120]"><%= value.presence || "—" %></dd></div>
+        <% end %>
+      </dl>
+      <%= link_to t('view'), item[:path], class: "inline-block text-xs font-medium text-[#5C3984] hover:underline" %>
+    </li>
+  <% end %>
+</ul>

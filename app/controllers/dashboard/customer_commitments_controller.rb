@@ -24,9 +24,16 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   end
 
   def create
+    # A retry after an uncertain response lands on the record already made.
+    token = params[:submission_token].presence
+    if token && (existing = CustomerCommitment.active.find_by(company_id: current_company&.id, submission_token: token))
+      return redirect_to dashboard_customer_commitment_path(existing), status: :see_other
+    end
+
     @commitment = CustomerCommitment.new(commitment_params)
     @commitment.company = current_company
     @commitment.created_by = current_user
+    @commitment.submission_token = params[:submission_token].presence
     sanitize_company_owner!(@commitment)
 
     if @commitment.save

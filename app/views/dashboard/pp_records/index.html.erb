@@ -47,7 +47,11 @@
 
     <div class="bg-white border border-[#E3E3E3] rounded-xl overflow-hidden">
       <% if @records.any? %>
-        <div class="overflow-x-auto">
+        <%= render "dashboard/shared/mobile_cards", items: @records.map { |r|
+              { title: r.display_title, path: dashboard_pp_record_path(r),
+                facts: [ [ t('pp_records.code'), r.code ], [ t('pp_records.type'), r.type_label ], [ t('pp_records.owner'), (r.owner_org_unit&.display_name.presence || r.owner_user&.name) ], [ t('pp_records.version'), "V#{r.version_number}" ] ],
+                status: [ r.stage_label, (r.published? ? 'bg-green-100 text-green-800' : 'bg-[#F6EEFF] text-[#5C3984]') ] } } %>
+        <div class="overflow-x-auto hidden sm:block">
           <table class="w-full">
             <thead class="bg-[#F7F7FD] border-b border-[#E3E3E3]">
               <tr>
