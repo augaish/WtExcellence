@@ -41,7 +41,11 @@ class RecordDocument
       version: record.version_label.presence || "v#{record.version_number}",
       owner: record.owner_org_unit&.display_name(locale) || record.owner_user&.name,
       effective_date: record.effective_date,
+      published_at: record.published_at&.to_date,
       review_date: record.review_date,
+      # A document that has not been published says so on its face.
+      draft: !record.published?,
+      stage_label: record.published? ? nil : record.stage_label(locale),
       classification: record.classification_label(locale),
       company_name: company&.name,
       counterparty: record.counterparty,
@@ -118,7 +122,7 @@ class RecordDocument
       "beneficiaries" => record.beneficiaries,
       "delivery_period" => record.delivery_period,
       "channels" => record.channels,
-      "providing_unit" => unit_label(record.owner_org_unit),
+      "providing_unit" => record.owner_org_unit&.display_name(locale),
       "participating_units" => record.participating_units.map { |u| u.display_name(locale) }.join(", "),
       "delivery_stages" => record.delivery_stages
     }.compact_blank
@@ -163,7 +167,7 @@ class RecordDocument
       "level2" => process && "#{process.architecture_number} · #{process.display_name(locale)}",
       "architecture_number" => record.architecture_number,
       "objective" => record.description,
-      "owner" => unit_label(record.owner_org_unit),
+      "owner" => record.owner_org_unit&.display_name(locale),
       "trigger" => record.trigger_text,
       "inputs" => record.inputs,
       "outputs" => record.outputs,
@@ -267,25 +271,24 @@ class RecordDocument
 
   # The executive matrix is the principal content of an executive_doa record;
   # a document that omits it has left out the thing it exists to publish. One
-  # row per band, grouped under the authority, so a reader can find the
-  # applicable threshold without opening anything else.
+  # row per authority, with the limit exactly as the company wrote it: a blank
+  # limit prints blank, never "all amounts".
   def executive_matrix_section
     return nil unless record.record_type == "executive_doa"
 
-    rows = record.authorities.includes(:authority_category, bands: { assignments: [ :org_unit, :user ] }).flat_map do |authority|
-      authority.bands.map do |band|
-        {
-          category: authority.authority_category&.display_name(locale),
-          number: authority.number,
-          authority: authority.display_name(locale),
-          band: band.display_label(locale),
-          basis: authority.basis_label(locale),
-          assignments: AuthorityLevel::KEYS.index_with do |level|
-            band.assignments.select { |a| a.level == level }
-                .map { |a| { holder: a.holder_label(locale), condition: a.condition } }
-          end
-        }
-      end
+    rows = record.authorities.includes(:authority_category, bands: { assignments: [ :org_unit, :user ] }).map do |authority|
+      holders = authority.bands.flat_map(&:assignments)
+      {
+        category: authority.authority_category&.display_name(locale),
+        number: authority.number,
+        authority: authority.display_name(locale),
+        band: authority.limit_text.to_s,
+        basis: authority.basis_label(locale),
+        assignments: AuthorityLevel::KEYS.index_with do |level|
+          holders.select { |a| a.level == level }
+                 .map { |a| { holder: a.holder_label(locale), condition: a.condition } }
+        end
+      }
     end
 
     section("executive_matrix", :executive_matrix, rows)

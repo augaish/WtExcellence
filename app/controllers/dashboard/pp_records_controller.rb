@@ -72,6 +72,11 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   # The type comes from the tab the button was pressed on; it is not chosen
   # inside the form.
   def new
+    # The authority matrices are built on their own page, never through this form.
+    if PpRecord::DOA_TYPES.include?(params[:record_type])
+      return redirect_to dashboard_authorities_path, notice: t("pp_records.flash.doa_lives_in_authorities"), status: :see_other
+    end
+
     type = PpRecord::TAB_TYPES.include?(params[:record_type]) ? params[:record_type] : PpRecord::TAB_TYPES.first
     @record = company_scope.new(record_type: type)
     render_form

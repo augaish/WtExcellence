@@ -77,6 +77,9 @@ class RecordDocxRenderer
   def cover_xml
     cover = document.cover
     parts = []
+    if cover[:draft]
+      parts << paragraph(I18n.t("record_document.cover.draft", stage: cover[:stage_label], locale: locale), size: BODY_SIZE, color: "B45309", bold: true)
+    end
     parts << paragraph(cover[:type_label], size: BODY_SIZE, color: primary, bold: true)
     parts << paragraph(cover[:title], size: TITLE_SIZE, bold: true)
     parts << paragraph(cover[:company_name], size: BODY_SIZE, color: "797C81")
@@ -85,7 +88,8 @@ class RecordDocxRenderer
       "code" => cover[:code],
       "owner" => cover[:owner],
       "version" => cover[:version],
-      "publish_date" => format_value(cover[:effective_date]),
+      "effective_date" => format_value(cover[:effective_date]),
+      "publish_date" => format_value(cover[:published_at]),
       "review_date" => format_value(cover[:review_date]),
       "classification" => cover[:classification],
       "counterparty" => cover[:counterparty]

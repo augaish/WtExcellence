@@ -30,6 +30,10 @@
           <%= f.label :name, t('architect.diagram_name'), class: label_class %>
           <%= f.text_field :name, class: input_class %>
         </div>
+        <% if diagram.owner.respond_to?(:trigger_text) && diagram.owner.respond_to?(:inputs) %>
+          <%# The procedure already carries these; the drawing reads them rather than asking twice. %>
+          <p class="text-xs text-[#797C81]"><%= t('architect.summary_from_owner') %></p>
+        <% else %>
         <p class="text-xs text-[#797C81]"><%= t('architect.summary_hint') %></p>
         <div>
           <%= f.label :trigger_text, t('process_architecture.trigger'), class: label_class %>
@@ -45,6 +49,7 @@
             <%= f.text_area :outputs_summary, rows: 2, class: input_class %>
           </div>
         </div>
+        <% end %>
       </div>
 
       <div class="flex justify-end gap-2">

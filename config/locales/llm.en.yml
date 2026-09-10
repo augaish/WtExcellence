@@ -6,3 +6,4 @@ en:
       provider_error: "The AI service reported an error. Nothing was saved or charged."
       empty: "The AI service returned an empty answer. Nothing was saved or charged; please try again."
       truncated: "The AI answer was cut off before it finished. Nothing was saved or charged; please try again."
+      answers_kept: "Your accepted answers are kept. Retry the step, or continue and write the root cause yourself."

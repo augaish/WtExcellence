@@ -28,6 +28,11 @@
       </span>
     </div>
 
+    <% if cover[:draft] %>
+      <p class="inline-block mb-3 px-3 py-1 rounded border border-amber-400 bg-amber-50 text-amber-900 text-xs font-semibold uppercase tracking-wide">
+        <%= t('record_document.cover.draft', stage: cover[:stage_label]) %>
+      </p>
+    <% end %>
     <p class="text-sm font-medium mb-2" style="color: <%= primary %>;"><%= cover[:type_label] %></p>
     <h1 class="text-3xl font-bold mb-2"><%= cover[:title] %></h1>
     <p class="text-sm text-[#797C81]"><%= cover[:company_name] %></p>
@@ -37,7 +42,8 @@
            "code" => cover[:code],
            "owner" => cover[:owner],
            "version" => cover[:version],
-           "publish_date" => cover[:effective_date],
+           "effective_date" => cover[:effective_date],
+           "publish_date" => cover[:published_at],
            "review_date" => cover[:review_date]
          }.compact_blank.each do |key, value| %>
         <div class="flex justify-between gap-4 border-b border-[#E3E3E3] pb-2">

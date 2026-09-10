@@ -1,0 +1,44 @@
+<%# What the AI suggested, waiting to be kept or discarded. Nothing here is a
+    task yet: keeping one needs an owner and a due date (or a written reason).
+    Locals: capa, proposals, company_users %>
+<% input = "w-full px-3 py-2 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+<div class="border border-[#5C3984]/30 bg-[#F6EEFF]/40 rounded-xl p-4 mb-4 space-y-3">
+  <div>
+    <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('capa_actions.proposed.title', count: proposals.size) %></h3>
+    <p class="text-xs text-[#797C81]"><%= t('capa_actions.proposed.hint') %></p>
+  </div>
+  <% proposals.each do |action| %>
+    <div class="bg-white border border-[#E3E3E3] rounded-lg p-4">
+      <%= form_with url: dashboard_accept_capa_action_path(capa, action), method: :patch, class: "space-y-3" do %>
+        <div class="grid grid-cols-1 md:grid-cols-[1fr_12rem_10rem] gap-3">
+          <div>
+            <%= label_tag "proposed_title_#{action.id}", t('title'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= text_field_tag :title, action.title, id: "proposed_title_#{action.id}", class: input %>
+            <p class="mt-1 text-xs text-[#797C81]">
+              <span class="font-medium"><%= t("capa_actions.types.#{action.action_type}", default: action.action_type.to_s.humanize) %></span>
+              <% if action.notes.present? %> · <%= action.notes %><% end %>
+            </p>
+          </div>
+          <div data-controller="choices-select" data-choices-select-search-value="true">
+            <%= label_tag "proposed_owner_#{action.id}", t('capa_actions.proposed.owner'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= select_tag "company_user_ids[]", options_from_collection_for_select(company_users || [], :id, ->(cu) { cu.user.name }),
+                  multiple: true, id: "proposed_owner_#{action.id}", class: input, data: { choices_select_target: "select" } %>
+          </div>
+          <div>
+            <%= label_tag "proposed_due_#{action.id}", t('due_date'), class: "block text-xs font-medium text-[#797C81] mb-1" %>
+            <%= date_field_tag :due_date, capa.due_date, id: "proposed_due_#{action.id}", class: input %>
+          </div>
+        </div>
+        <details>
+          <summary class="cursor-pointer text-xs text-[#797C81] hover:text-[#0D1120]"><%= t('capa_actions.proposed.exception_toggle') %></summary>
+          <%= text_field_tag :exception_reason, nil, placeholder: t('capa_actions.proposed.exception_placeholder'), class: "#{input} mt-2" %>
+        </details>
+        <div class="flex flex-wrap items-center gap-2">
+          <%= submit_tag t('capa_actions.proposed.keep'), class: ui_btn_primary %>
+          <%= button_to t('capa_actions.proposed.discard'), dashboard_discard_capa_action_path(capa, action), method: :delete,
+                class: ui_btn_neutral, form: { class: "inline", data: { turbo_confirm: t('capa_actions.proposed.discard_confirm') } } %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

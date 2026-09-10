@@ -16,8 +16,8 @@ class Dashboard::PpPackagesController < Dashboard::BaseController
   # A package is composed here: one sub-tab per record type, each a checklist of
   # that type's records.
   def show
-    @record_type = params[:record_type].presence || PpRecord::TYPES.first
-    @record_type = PpRecord::TYPES.first unless PpRecord::TYPES.include?(@record_type)
+    @record_type = params[:record_type].presence || PpRecord::TAB_TYPES.first
+    @record_type = PpRecord::TAB_TYPES.first unless PpRecord::TAB_TYPES.include?(@record_type)
 
     @records = company.pp_records.active.of_type(@record_type)
       .includes(:package, :owner_org_unit).ordered.to_a

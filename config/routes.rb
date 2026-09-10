@@ -68,6 +68,8 @@ Rails.application.routes.draw do
       patch "/:id", action: :update, as: :update_capa
       get "/:capa_id/capa_actions/:id", action: :show_capa_action, as: :capa_action_show
       post "/:capa_id/capa_actions", action: :create_capa_action, as: :create_capa_action
+      patch "/:capa_id/capa_actions/:id/accept", action: :accept_capa_action, as: :accept_capa_action
+      delete "/:capa_id/capa_actions/:id/discard", action: :discard_capa_action, as: :discard_capa_action
       patch "/:capa_id/capa_actions/:id", action: :update_capa_action, as: :update_capa_action
       delete "/:capa_id/capa_actions/:id", action: :destroy_capa_action, as: :destroy_capa_action
       post "/:capa_id/capa_actions/:id/link_documents", action: :link_capa_action_documents, as: :link_capa_action_documents

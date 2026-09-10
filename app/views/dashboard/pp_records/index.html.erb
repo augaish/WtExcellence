@@ -4,7 +4,9 @@
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: { title: t('pp_records.title'), subtitle: t('pp_records.subtitle') } do %>
       <%= link_to t('pp_records.packages.title'), dashboard_pp_packages_path, class: ui_btn_secondary %>
-      <% if can_manage_pp_records? %>
+      <% if @record_type && PpRecord::DOA_TYPES.include?(@record_type) %>
+        <%= link_to t('doa.title'), dashboard_authorities_path, class: ui_btn_primary %>
+      <% elsif can_manage_pp_records? %>
         <%# The button names what the open tab holds: "Add policy" on Policies. %>
         <% add_label = @record_type ? t('pp_records.add_typed', type: t("pp_records.types.#{@record_type}")) : t('pp_records.add_record') %>
         <%= link_to add_label, new_dashboard_pp_record_path(record_type: @record_type), class: ui_btn_primary %>

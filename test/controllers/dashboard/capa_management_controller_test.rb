@@ -330,6 +330,41 @@ class Dashboard::CapaManagementControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, body["actions_count"]
     assert_equal 15, @company_user.reload.assigned_credits
     assert_equal 1, @capa.reload.capa_actions.count
+    assert_equal "proposed", @capa.capa_actions.sole.status, "a suggestion is not a task until someone keeps it"
+    assert_nil @capa.capa_actions.sole.due_date
+  end
+
+  test "a proposed action is kept only with an owner and a due date, or a written reason" do
+    action = @capa.capa_actions.create!(title: "Retrain staff", action_type: "corrective", status: "proposed", created_by_id: @user.id)
+
+    patch dashboard_accept_capa_action_path(@capa, action), params: { title: "Retrain staff" }
+    assert_equal "proposed", action.reload.status
+
+    patch dashboard_accept_capa_action_path(@capa, action), params: { title: "Retrain all staff", due_date: "2026-12-01", company_user_ids: [ @company_user.id ] }
+    action.reload
+    assert_equal "started", action.status
+    assert_equal "Retrain all staff", action.title
+    assert_equal Date.new(2026, 12, 1), action.due_date
+    assert action.capa_action_assignments.exists?(company_user_id: @company_user.id)
+
+    other = @capa.capa_actions.create!(title: "Note only", action_type: "preventive", status: "proposed", created_by_id: @user.id)
+    patch dashboard_accept_capa_action_path(@capa, other), params: { exception_reason: "Owner to be named at the next review" }
+    assert_equal "started", other.reload.status
+    assert_includes other.notes.to_s, "Owner to be named"
+  end
+
+  test "a discarded proposal leaves no trace in the action list" do
+    action = @capa.capa_actions.create!(title: "Drop me", action_type: "corrective", status: "proposed", created_by_id: @user.id)
+    delete dashboard_discard_capa_action_path(@capa, action)
+    refute CapaAction.exists?(action.id)
+  end
+
+  test "proposals are shown apart from the action table" do
+    @capa.capa_actions.create!(title: "Suggested only", action_type: "corrective", status: "proposed", created_by_id: @user.id)
+    get dashboard_capa_management_show_path(@capa, tab: "analysis")
+    assert_response :success
+    assert_select "form[action=?]", dashboard_accept_capa_action_path(@capa, @capa.capa_actions.sole)
+    assert_select "tr[data-action-id]", count: 0
   end
 
   private

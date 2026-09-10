@@ -465,6 +465,10 @@
     </div>
   </div>
 
+  <% if @proposed_actions.present? %>
+    <%= render "dashboard/capa_management/proposed_actions", capa: @capa, proposals: @proposed_actions, company_users: @company_users %>
+  <% end %>
+
   <!-- Actions Table (contributor/auditor see only actions assigned to them) -->
   <% if @capa_actions_visible.any? %>
     <div class="border border-[#E3E3E3] rounded-xl overflow-x-auto -mx-4 sm:mx-0">

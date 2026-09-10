@@ -75,7 +75,7 @@ ar:
       position: "#"
       category: "الفئة"
       authority: "الصلاحية"
-      band: "الشريحة"
+      band: "الحد"
       basis: "المرجع النظامي"
       remedy: "المعالجة عند الإخلال"
       status_label: "الحالة"
@@ -86,6 +86,8 @@ ar:
       counterparty: "الطرف الآخر"
       owner: مالك الوثيقة
       publish_date: تاريخ النشر
+      effective_date: تاريخ السريان
+      draft: مسودة — %{stage} — لم تُنشر بعد
       review_date: تاريخ المراجعة
       version: رقم النسخة
       code: الرمز المرجعي

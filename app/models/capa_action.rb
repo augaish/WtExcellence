@@ -12,11 +12,17 @@ class CapaAction < ApplicationRecord
     preventive: "Preventive"
   }
 
+  # "Proposed" is a suggestion from the AI that nobody has taken on yet. It is
+  # not work until someone keeps it with an owner and a due date.
   enum :status, {
+    proposed: "Proposed",
     started: "Started",
     in_progress: "In Progress",
     done: "Done"
   }, default: "Started"
+
+  scope :active, -> { where.not(status: "proposed") }
+  scope :proposals, -> { where(status: "proposed") }
 
   validates :title, presence: true
 end

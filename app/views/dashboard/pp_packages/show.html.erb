@@ -30,7 +30,7 @@
     <!-- One sub-tab per record type -->
     <div class="border-b border-[#E3E3E3] mb-4 overflow-x-auto">
       <nav class="flex items-center gap-1 min-w-max">
-        <% PpRecord::TYPES.each do |type| %>
+        <% PpRecord::TAB_TYPES.each do |type| %>
           <% is_active = (@record_type == type) %>
           <%= link_to dashboard_pp_package_path(@package, record_type: type),
                 class: "px-3 py-2.5 text-sm font-medium border-b-2 -mb-px whitespace-nowrap focus-visible:outline-2 focus-visible:outline-[#5C3984] #{is_active ? 'border-[#5C3984] text-[#5C3984]' : 'border-transparent text-[#797C81] hover:text-[#0D1120] hover:border-[#E3E3E3]'}" do %>

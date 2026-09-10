@@ -4,7 +4,7 @@
   <div class="max-w-5xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: {
           title: @record.display_title, subtitle: "#{@record.type_label}#{@record.code.present? ? " · #{@record.code}" : ''}" } do %>
-      <%= link_to t('back'), dashboard_pp_records_path(record_type: @record.record_type), class: ui_btn_neutral %>
+      <%= link_to t('back'), (@record.doa? ? dashboard_authorities_path(matrix_id: @record.id) : dashboard_pp_records_path(record_type: @record.record_type)), class: ui_btn_neutral %>
       <%= link_to t('record_document.view'), document_dashboard_pp_record_path(@record), class: ui_btn_secondary %>
       <% unless @record.doa? %>
         <%= link_to "#{t('documenter.title')} · #{@record.stage_label}", dashboard_documenter_record_path(@record), class: ui_btn_secondary %>

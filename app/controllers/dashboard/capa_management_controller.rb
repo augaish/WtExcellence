@@ -230,8 +230,10 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
     # Determine if current user can see the activity log for this CAPA
     @can_view_activity_log = can_view_capa_activity_log?(@capa)
 
-    # For contributor/auditor: only actions assigned to them; for admin/QM: all actions
-    @capa_actions_visible = capa_actions_visible_to_current_user(@capa)
+    # For contributor/auditor: only actions assigned to them; for admin/QM: all actions.
+    # Proposals are shown apart, to the people who may keep or discard them.
+    @capa_actions_visible = capa_actions_visible_to_current_user(@capa).active
+    @proposed_actions = can_manage_capa?(@capa) ? @capa.capa_actions.proposals.order(:created_at).to_a : []
 
     # Load activities for the activity log (using audit logs) only when allowed
     @activities = if @can_view_activity_log
@@ -912,13 +914,13 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
 
       created_actions = []
       actions_data["actions"].each do |action_data|
+        # A suggestion, not a task: it waits to be kept or discarded.
         action = CapaAction.create!(
           capa: capa,
           title: action_data["title"],
           action_type: action_data["action_type"],
           notes: action_data["notes"],
-          status: "started",
-          due_date: capa.due_date,
+          status: "proposed",
           created_by_id: current_user.id
         )
 
@@ -1122,7 +1124,7 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
     rescue => e
       Rails.logger.error "Failed to accept question pair for CAPA #{capa.id}: #{e.message}"
       Rails.logger.error e.backtrace.first(5).join("\n")
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: { error: user_facing_ai_error(e) }, status: :unprocessable_entity
     end
   end
 
@@ -1166,7 +1168,7 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
     rescue => e
       Rails.logger.error "Failed to regenerate question pair for CAPA #{capa.id}: #{e.message}"
       Rails.logger.error e.backtrace.first(5).join("\n")
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: { error: user_facing_ai_error(e) }, status: :unprocessable_entity
     end
   end
 
@@ -1237,8 +1239,45 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
     rescue => e
       Rails.logger.error "Failed to regenerate root cause for CAPA #{capa&.id}: #{e.message}"
       Rails.logger.error e.backtrace.first(5).join("\n")
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: { error: user_facing_ai_error(e) }, status: :unprocessable_entity
     end
+  end
+
+  # Keep a proposed action: it becomes a started task, with an owner and a
+  # due date, or a written reason for having neither.
+  def accept_capa_action
+    capa = current_company ? capa_visible_scope(base: Capa.where(company_id: current_company.id)).find_by(id: params[:capa_id]) : nil
+    action = capa&.capa_actions&.proposals&.find_by(id: params[:id])
+    return redirect_back(fallback_location: dashboard_capa_management_path, alert: t("capa_actions.proposed.not_found")) if action.nil?
+    return redirect_back(fallback_location: dashboard_capa_management_path, alert: t("capa_actions.proposed.no_permission")) unless can_manage_capa?(capa)
+
+    assignee_ids = allowed_company_user_ids_for_capa(Array(params[:company_user_ids]).reject(&:blank?))
+    due_date = params[:due_date].presence
+    exception = params[:exception_reason].to_s.strip
+
+    if (assignee_ids.empty? || due_date.blank?) && exception.blank?
+      return redirect_to dashboard_capa_management_show_path(capa, tab: "analysis"), alert: t("capa_actions.proposed.needs_owner_and_date"), status: :see_other
+    end
+
+    ActiveRecord::Base.transaction do
+      action.update!(title: params[:title].presence || action.title, status: "started", due_date: due_date,
+        notes: [ action.notes, (exception.present? ? "#{t('capa_actions.proposed.exception_label')}: #{exception}" : nil) ].compact.join("\n"))
+      assignee_ids.each { |cid| CapaActionAssignment.find_or_create_by!(capa_action: action, company_user_id: cid) }
+    end
+    AuditLogService.log_action(actor_user: current_user, company: current_company, action: "ACCEPT_CAPA_ACTION",
+      entity_type: "capa_action", entity_id: action.id, payload: { capa_id: capa.id, title: action.title })
+
+    redirect_to dashboard_capa_management_show_path(capa, tab: "analysis"), notice: t("capa_actions.proposed.kept", title: action.title), status: :see_other
+  end
+
+  def discard_capa_action
+    capa = current_company ? capa_visible_scope(base: Capa.where(company_id: current_company.id)).find_by(id: params[:capa_id]) : nil
+    action = capa&.capa_actions&.proposals&.find_by(id: params[:id])
+    return redirect_back(fallback_location: dashboard_capa_management_path, alert: t("capa_actions.proposed.not_found")) if action.nil?
+    return redirect_back(fallback_location: dashboard_capa_management_path, alert: t("capa_actions.proposed.no_permission")) unless can_manage_capa?(capa)
+
+    action.destroy
+    redirect_to dashboard_capa_management_show_path(capa, tab: "analysis"), notice: t("capa_actions.proposed.discarded"), status: :see_other
   end
 
   def create_questionnaire
@@ -2725,6 +2764,19 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
   def capa_params
     # Permit analysis_method now that it's in the database
     params.require(:capa).permit(:title, :description, :source, :standard_id, :priority, :due_date, :status, :analysis_method)
+  end
+
+  # What the person reads when the AI step fails. The parser's own words stay
+  # in the log; the reader learns that their answers are kept and can retry.
+  def user_facing_ai_error(error)
+    reason = case error
+             when LlmResponse::Empty then error.reason.to_s
+             when JSON::ParserError then "unreadable"
+             else nil
+             end
+    return error.message if reason.nil? && !error.message.to_s.match?(/unexpected|token|JSON|parse|quote/i)
+
+    "#{I18n.t("llm.errors.#{reason.presence || 'unreadable'}")} #{I18n.t('llm.errors.answers_kept')}"
   end
 
   def capa_action_params
