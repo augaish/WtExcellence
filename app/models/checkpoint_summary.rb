@@ -1,4 +1,5 @@
 class CheckpointSummary < ApplicationRecord
+  skip_activity_trail
   belongs_to :tool_clause
   belongs_to :checklist_item
   belongs_to :tool_checkpoint

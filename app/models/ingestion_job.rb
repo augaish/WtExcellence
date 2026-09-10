@@ -1,4 +1,5 @@
 class IngestionJob < ApplicationRecord
+  skip_activity_trail
   # Validations
   validates :standard_id, presence: true
   validates :input_pdf_id, presence: true

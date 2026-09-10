@@ -1,4 +1,5 @@
 class AiActionCredit < ApplicationRecord
+  skip_activity_trail
   DISPLAY_NAMES = {
     "GENERATE_CAPA_ACTIONS" => "Generate Actions",
     "GENERATE_CAPA_QUESTIONNAIRE" => "Generate Questionnaire",

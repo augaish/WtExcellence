@@ -227,6 +227,7 @@ en:
   settings_tabs:
     profile: "My profile"
     documenter: "Documenter"
+    activity: "Activity"
   overview: "Overview"
   total_active_standards: "Total Active Standards"
   total_companies: "Total Companies"

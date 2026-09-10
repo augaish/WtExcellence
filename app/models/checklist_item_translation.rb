@@ -1,4 +1,5 @@
 class ChecklistItemTranslation < ApplicationRecord
+  skip_activity_trail
   # Validations
   validates :checklist_item_id, presence: true
   validates :language_code, presence: true, length: { maximum: 10 }

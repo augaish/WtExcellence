@@ -1,4 +1,5 @@
 class AuditLog < ApplicationRecord
+  skip_activity_trail
   belongs_to :actor_user, class_name: "User", optional: true
   belongs_to :company
 

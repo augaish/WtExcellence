@@ -1,4 +1,5 @@
 class ClauseScoreCache < ApplicationRecord
+  skip_activity_trail
   belongs_to :clause
   belongs_to :company
 

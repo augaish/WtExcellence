@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Notification < ApplicationRecord
+  skip_activity_trail
   KINDS = %w[
     capa_assigned capa_unassigned capa_action_assigned capa_action_unassigned capa_evidence_attached
     capa_evidence_attached_auditor tool_assigned tool_unassigned assignment_evaluated

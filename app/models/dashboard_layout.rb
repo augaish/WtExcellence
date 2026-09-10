@@ -1,4 +1,5 @@
 class DashboardLayout < ApplicationRecord
+  skip_activity_trail
   belongs_to :company, optional: true
 
   # Ordered list of every movable/hideable widget on the overview. The stored

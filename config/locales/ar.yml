@@ -247,6 +247,7 @@ ar:
   settings_tabs:
     profile: "ملفي الشخصي"
     documenter: "الموثِّق"
+    activity: "النشاط"
   overview: لوحة البيانات
   total_active_standards: إجمالي المعايير النشطة
   total_companies: إجمالي الشركات

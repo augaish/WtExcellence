@@ -168,6 +168,10 @@ processes; nothing to build until there is content to hang on it.
 - `authority_consultations` table and `AuthorityConsultation` model are kept but no longer shown; reviewer comments per authority (`authority_review_comments`) replaced them. Drop with the bands cleanup.
 - `authorities.basis_record_id` / `basis_clause_id` columns stay but are not shown or edited; the executive matrix is checked against operational authorities directly.
 
+## Activity log
+- Every model writes create/update/delete entries (ActivityTrail). A few controller actions still log their own richer entry as well (user invitations, tool changes), so those show twice on the Activity page: once as the app's description and once as the plain change. Fold them into one entry when tidying.
+- Entries are kept for as long as the company exists; no retention limit yet.
+
 ## Review 03 — status
 - Q14, Q15, sections 5, 7 and 8 are built (phases 10–13). Left for later: vendor due-diligence questionnaires that vary by category (one fixed five-criteria assessment exists), customer records as their own register (commitments name the customer and agreement in text), and a full screen-reader walk of every page.
 

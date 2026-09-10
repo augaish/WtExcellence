@@ -1,4 +1,5 @@
 class ToolSubcheckpointTranslation < ApplicationRecord
+  skip_activity_trail
   validates :tool_subcheckpoint_id, presence: true
   validates :language_code, presence: true, length: { maximum: 10 }
   validates :name, presence: true

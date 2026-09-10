@@ -1,5 +1,6 @@
 # Per-company target duration for a stage, in working days.
 class PpStageTarget < ApplicationRecord
+  skip_activity_trail
   belongs_to :company
 
   validates :stage_key, presence: true, inclusion: { in: PpStage::KEYS }

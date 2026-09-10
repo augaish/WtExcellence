@@ -211,6 +211,8 @@
         </div>
         <% end %>
 
+        <%= render "dashboard/shared/record_history", record: @record %>
+
         <% if can_manage_pp_records? %>
           <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
             <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('pp_records.danger_zone') %></h2>

@@ -1,4 +1,5 @@
 class StandardTranslation < ApplicationRecord
+  skip_activity_trail
   # Validations
   validates :standard_id, presence: true
   validates :language_code, presence: true, length: { maximum: 10 }

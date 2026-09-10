@@ -1,0 +1,81 @@
+<% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
+<%= content_for :title, t('activity.title') %>
+
+<div class="p-6">
+  <%= render "dashboard/shared/page_header", title: t('activity.title'), subtitle: t('activity.subtitle') %>
+  <%= render "dashboard/general_settings/tabs", current: :activity %>
+
+  <%= form_with url: dashboard_activity_path, method: :get, class: "bg-white border border-[#E3E3E3] rounded-lg p-4 mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" do %>
+    <div>
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('activity.filters.module') %></label>
+      <%= select_tag :module, options_for_select([ [ t('activity.filters.all'), "" ] ] + ActivityCatalogue::MODULES.keys.map { |k| [ t("activity.modules.#{k}"), k ] }, @filter.module_key), class: input %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('activity.filters.record_type') %></label>
+      <%= select_tag :entity_type, options_for_select([ [ t('activity.filters.all'), "" ] ] + ActivityCatalogue::MODULES.values.flatten.map { |e| [ activity_entity_label(e), e ] }.sort_by(&:first), @filter.entity_type), class: input %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('activity.filters.person') %></label>
+      <%= select_tag :actor_id, options_for_select([ [ t('activity.filters.all'), "" ] ] + @actors.map { |u| [ u.name, u.id ] }, @filter.actor_id), class: input %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('activity.filters.verb') %></label>
+      <%= select_tag :verb, options_for_select([ [ t('activity.filters.all'), "" ] ] + %w[create update delete].map { |v| [ t("activity.verbs_short.#{v}"), v ] }, @filter.verb), class: input %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('activity.filters.from') %></label>
+      <%= date_field_tag :from, @filter.from, class: input %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('activity.filters.to') %></label>
+      <%= date_field_tag :to, @filter.to, class: input %>
+    </div>
+    <div>
+      <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('activity.filters.search') %></label>
+      <%= search_field_tag :q, @filter.query, placeholder: t('activity.filters.search_placeholder'), class: input %>
+    </div>
+    <div class="flex items-end gap-2 flex-wrap">
+      <%= submit_tag t('activity.filters.apply'), class: ui_btn_primary %>
+      <%= link_to t('activity.filters.clear'), dashboard_activity_path, class: ui_btn_neutral %>
+      <%= link_to t('activity.export'), dashboard_activity_export_path(request.query_parameters), class: ui_btn_secondary %>
+    </div>
+  <% end %>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-lg overflow-hidden">
+    <% if @entries.any? %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-[#E3E3E3] text-sm">
+          <thead class="bg-[#F7F7FD]">
+            <tr>
+              <% %w[when who module action record changes].each do |column| %>
+                <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase"><%= t("activity.columns.#{column}") %></th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#E3E3E3]">
+            <% @entries.each do |entry| %>
+              <tr>
+                <td class="px-3 py-2 whitespace-nowrap text-[#797C81]"><%= l(entry.created_at, format: :long) %></td>
+                <td class="px-3 py-2 text-[#0D1120]"><%= entry.actor_user&.name || t('governance_activity.unknown_actor') %></td>
+                <td class="px-3 py-2 text-[#797C81]"><%= activity_module_label(entry.entity_type) %></td>
+                <td class="px-3 py-2 text-[#0D1120]"><%= activity_entry_label(entry) %></td>
+                <td class="px-3 py-2 text-[#0D1120]"><%= entry.payload_json&.dig("label") %></td>
+                <td class="px-3 py-2 text-[#0D1120]">
+                  <% sentences = activity_change_sentences(entry) %>
+                  <% if sentences.any? %>
+                    <ul class="space-y-0.5 text-xs"><% sentences.each do |sentence| %><li><%= sentence %></li><% end %></ul>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <% if @pagy.pages > 1 %>
+        <div class="px-4 py-3 border-t border-[#E3E3E3]"><%== pagy_nav(@pagy) %></div>
+      <% end %>
+    <% else %>
+      <p class="px-5 py-10 text-sm text-[#797C81] text-center"><%= @filter.any? ? t('activity.none_for_filter') : t('activity.none') %></p>
+    <% end %>
+  </div>
+</div>

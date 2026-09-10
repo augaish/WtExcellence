@@ -1,4 +1,5 @@
 class Language < ApplicationRecord
+  skip_activity_trail
   # Validations
   validates :code, presence: true, uniqueness: true, length: { maximum: 10 }
   validates :name, presence: true, length: { maximum: 100 }
