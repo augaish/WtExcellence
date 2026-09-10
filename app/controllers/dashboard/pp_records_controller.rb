@@ -273,7 +273,8 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
       :pp_process_id, :active, :classification, :counterparty, :change_summary,
       :trigger_text, :inputs, :outputs, :predecessor_record_id, :successor_record_id,
       :frequency, :total_time_value, :total_time_unit, :automation_status, :technical_systems, :kpis,
-      :service_type, :requirements, :beneficiaries, :delivery_period, :channels, :delivery_stages
+      :service_type, :requirements, :beneficiaries, :delivery_period, :channels, :delivery_stages,
+      :counterparty_kind, :counterparty_org_unit_id
     )
   end
 

@@ -211,7 +211,11 @@ Rails.application.routes.draw do
       resources :operational_authorities, only: [ :create, :destroy ], controller: "pp_record_authorities" do
         resources :assignments, only: [ :create, :destroy ], controller: "pp_record_authority_assignments"
       end
-      resources :service_levels, only: [ :create, :update, :destroy ], controller: "pp_service_levels"
+      resources :service_levels, only: [ :create, :update, :destroy ], controller: "pp_service_levels" do
+        resources :measurements, only: [ :create ], controller: "sla_measurements" do
+          member { patch :review }
+        end
+      end
       member do
         post :attach_documents
         delete :detach_document

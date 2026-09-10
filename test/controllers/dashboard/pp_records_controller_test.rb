@@ -128,11 +128,11 @@ class Dashboard::PpRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_equal [ legal ], record.participating_units.to_a
   end
 
-  test "the tabs are the five journey types" do
+  test "the tabs are the journey types, and the authority matrices are not among them" do
     sign_in @admin
     get dashboard_pp_records_path
     PpRecord::TAB_TYPES.each { |type| assert_select "a[href=?]", dashboard_pp_records_path(record_type: type) }
-    assert_select "a[href=?]", dashboard_pp_records_path(record_type: "sla"), count: 0
+    assert_select "a[href=?]", dashboard_pp_records_path(record_type: "executive_doa"), count: 0
   end
 
   test "a record cannot set its own package" do

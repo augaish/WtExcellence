@@ -901,6 +901,7 @@ en:
       form: "Title, description, scope and ownership. Code and version are assigned by the system."
       service: "The service card: what it is, who gets it, how, and which units deliver it."
       glossary: "A term and its definition. Approved terms are visible to everyone."
+      sla: "The agreement between the providing unit and its other party; its service levels and measurements are added after saving."
     code_on_save: "Assigned on save"
     code_rule: "Code = type - unit - number - version (POL-HR-001-V1); a procedure uses its architecture number (PROC-HR-1.2.4.12-V1)."
     reason_for_change: "Reason for change"
@@ -935,6 +936,7 @@ en:
     total_time_hint: "Once the steps are entered, the total is computed from them."
     architecture_number: "Architecture number"
     card_title:
+      sla: "Agreement"
       policy: "Policy card"
       form: "Form card"
       procedure: "Procedure card"

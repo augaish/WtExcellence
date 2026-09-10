@@ -19,6 +19,26 @@ class PpServiceLevel < ApplicationRecord
     "other" => %w[percent minutes hours days weeks months count]
   }.freeze
 
+  COMPARATORS = %w[at_least at_most].freeze
+  PERIODS = %w[monthly quarterly annual].freeze
+
+  # "At least" for availability and accuracy; "at most" for times. The row
+  # says which, so a measurement can be judged without guessing.
+  DEFAULT_COMPARATOR = {
+    "availability" => "at_least", "accuracy" => "at_least",
+    "response_time" => "at_most", "resolution_time" => "at_most", "delivery_frequency" => "at_most", "other" => "at_least"
+  }.freeze
+
+  belongs_to :accountable_org_unit, class_name: "OrgUnit", optional: true
+  has_many :measurements, -> { ordered }, class_name: "SlaMeasurement", foreign_key: "pp_service_level_id", dependent: :destroy
+
+  validates :comparator, inclusion: { in: COMPARATORS }, allow_blank: true
+  validates :measurement_period, inclusion: { in: PERIODS }, allow_blank: true
+  validates :measurement_source, length: { maximum: 250 }
+  validates :exclusions, length: { maximum: 2000 }
+  validate :effective_dates_ordered
+  before_validation { self.comparator = DEFAULT_COMPARATOR[metric] if comparator.blank? && METRICS.include?(metric.to_s) }
+
   validates :metric, inclusion: { in: METRICS }
   validates :service_name, length: { maximum: 250 }
   validates :coverage, length: { maximum: 250 }
@@ -53,7 +73,34 @@ class PpServiceLevel < ApplicationRecord
     target_value.present? && measurement_method.present?
   end
 
+  def comparator_label(locale = I18n.locale)
+    comparator.present? ? I18n.t("sla.comparators.#{comparator}", locale: locale) : ""
+  end
+
+  def period_label(locale = I18n.locale)
+    measurement_period.present? ? I18n.t("sla.periods.#{measurement_period}", locale: locale) : ""
+  end
+
+  # Attainment over the reviewed periods: met ÷ measured. Nil until something
+  # has been measured, so an unmeasured level never reads as 100%.
+  def attainment_percent
+    counted = measurements.reviewed
+    return nil if counted.none?
+
+    (counted.where(met: true).count * 100.0 / counted.count).round(1)
+  end
+
+  def breaches
+    measurements.reviewed.where(met: false).count
+  end
+
   private
+
+  def effective_dates_ordered
+    return if effective_from.blank? || effective_to.blank? || effective_to >= effective_from
+
+    errors.add(:effective_to, I18n.t("sla.errors.period_order"))
+  end
 
   def unit_must_suit_the_metric
     return if target_unit.blank? || !METRICS.include?(metric)

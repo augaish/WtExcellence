@@ -64,7 +64,11 @@
               <%# Both sides of an agreement, readable without opening the edit form. %>
               <div>
                 <dt class="text-xs font-medium text-[#797C81]"><%= t('sla.counterparty') %></dt>
-                <dd class="mt-0.5 text-[#0D1120]"><%= @record.counterparty.presence || "—" %></dd>
+                <dd class="mt-0.5 text-[#0D1120]"><%= @record.counterparty_label.presence || "—" %></dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-[#797C81]"><%= t('sla.attainment') %></dt>
+                <dd class="mt-0.5 text-[#0D1120]"><%= @record.sla_attainment_percent ? "#{@record.sla_attainment_percent}%" : t('sla.not_measured_yet') %></dd>
               </div>
             <% end %>
             <div>

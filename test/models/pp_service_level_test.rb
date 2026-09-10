@@ -52,7 +52,7 @@ class PpServiceLevelTest < ActiveSupport::TestCase
     section = RecordDocument.new(@sla.reload).sections.find { |s| s.key == "service_levels" }
     assert section, "an SLA should print its service levels"
     assert_equal "Portal", section.payload.first[:service]
-    assert_equal "99.9 %", section.payload.first[:target]
+    assert_equal "at least 99.9 %", section.payload.first[:target], "the comparator prints with the target"
   end
 
   test "a policy prints no service levels section" do

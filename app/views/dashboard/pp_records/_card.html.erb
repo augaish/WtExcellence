@@ -1,6 +1,10 @@
 <%# The type's own card, read back the way the form asked for it. Locals: record %>
 <% rows = [] %>
-<% if record.record_type.in?(%w[policy form]) %>
+<% if record.sla? %>
+  <% rows << [ t('sla.provider'), record.owner_org_unit&.display_name ] %>
+  <% rows << [ t('sla.counterparty'), record.counterparty_label ] %>
+  <% rows << [ t('sla.attainment'), (record.sla_attainment_percent ? "#{record.sla_attainment_percent}%" : t('sla.not_measured_yet')) ] %>
+<% elsif record.record_type.in?(%w[policy form]) %>
   <% rows << [ t('pp_records.scope'), record.scope ] %>
 <% elsif record.procedure? %>
   <% rows << [ t('process_architecture.levels.l0'), record.pp_process && record.company.process_band_name(record.pp_process.effective_category) ] %>

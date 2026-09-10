@@ -45,6 +45,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Phase 10 (Q14, Q15): one-time submission tokens on governance creates, plain-submit forms, mobile cards on four registers, named CAPA controls | `b3d537d` | Additive migration: `submission_token` on risks, vendors, commitments. |
 | Phase 11 (Review 03 section 8): risk statement/treatment/controls/review/acceptance, commitment agreement/acceptance/recurrence/supplier link, new register queues | `9d0d117` | Additive migration on risks and customer_commitments. Existing residual scores keep working; editing one now needs a control rationale. |
 | Phase 12 (Review 03 section 5): work queue and setup checklist on the overview, supplier-linked risks and commitments | `ea4c9b7` | No migration. |
+| Phase 13 (Review 03 section 7): SLA as its own capability — Agreements tab, typed other party, comparator/period/source/exclusions per level, measured periods with review and attainment | `PENDING_SHA` | Additive migration: columns on pp_records and pp_service_levels, `sla_measurements`, `sla_record_id` on commitments. |
 
 ## Roll the code back
 ```bash

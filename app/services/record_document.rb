@@ -48,7 +48,7 @@ class RecordDocument
       stage_label: record.published? ? nil : record.stage_label(locale),
       classification: record.classification_label(locale),
       company_name: company&.name,
-      counterparty: record.counterparty,
+      counterparty: record.sla? ? record.counterparty_label(locale) : record.counterparty,
       palette: company&.brand_palette
     }
   end
@@ -301,10 +301,11 @@ class RecordDocument
       {
         service: level.service_name,
         metric: level.metric_label(locale),
-        target: level.target_label(locale),
+        target: [ level.comparator_label(locale), level.target_label(locale) ].compact_blank.join(" "),
         measurement: level.measurement_method,
         coverage: level.coverage,
         remedy: level.remedy,
+        attainment: level.attainment_percent ? "#{level.attainment_percent}%" : I18n.t("sla.not_measured_yet", locale: locale),
         # The record screen says when a row cannot be reported on; the document
         # must say the same, or an incomplete statement prints as an obligation.
         status: measurability_label(level)

@@ -11,7 +11,11 @@ class PpRecord < ApplicationRecord
 
   # The types with a tab and a journey of their own in Records. The rest stay
   # readable under "All" (the authority matrices are managed under Governance).
-  TAB_TYPES = %w[policy procedure form service glossary].freeze
+  TAB_TYPES = %w[policy procedure form service sla glossary].freeze
+
+  # The other party of an agreement: one of our own units, a customer, or an
+  # outside organisation. The owning unit is always the provider.
+  COUNTERPARTY_KINDS = %w[internal_unit customer external_org].freeze
 
   # The two authority matrices. The operational one must conform to the
   # executive one, which is why they are named together.
@@ -61,6 +65,8 @@ class PpRecord < ApplicationRecord
   belongs_to :owner_user, class_name: "User", optional: true
   belongs_to :owner_org_unit, class_name: "OrgUnit", optional: true
   belongs_to :pp_process, class_name: "PpProcess", optional: true
+  belongs_to :counterparty_org_unit, class_name: "OrgUnit", optional: true
+  has_many :sla_commitments, class_name: "CustomerCommitment", foreign_key: "sla_record_id", dependent: :nullify
 
   has_many :evidence_attachments, as: :attachable, dependent: :destroy
   has_many :uploads, through: :evidence_attachments
@@ -134,6 +140,8 @@ class PpRecord < ApplicationRecord
   validates :total_time_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :service_type, inclusion: { in: SERVICE_TYPES }, allow_blank: true
   validates :publish_mode, inclusion: { in: PUBLISH_MODES }, allow_blank: true
+  validates :counterparty_kind, inclusion: { in: COUNTERPARTY_KINDS }, allow_blank: true
+  validate :agreement_names_its_other_party
   validates :auto_approve_days, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
   validates :published_link, length: { maximum: 1000 }
   validates :scope, :requirements, :beneficiaries, :channels, :delivery_stages, :inputs, :outputs,
@@ -223,6 +231,21 @@ class PpRecord < ApplicationRecord
 
   def automation_label(locale = I18n.locale)
     automation_status.present? ? I18n.t("process_architecture.automation.#{automation_status}", locale: locale) : nil
+  end
+
+  # "Finance Department" or "Bank A (customer)": the other party as printed.
+  def counterparty_label(locale = I18n.locale)
+    return counterparty_org_unit.display_name(locale) if counterparty_kind == "internal_unit" && counterparty_org_unit
+    return nil if counterparty.blank?
+
+    kind = counterparty_kind.present? ? " (#{I18n.t("sla.counterparty_kinds.#{counterparty_kind}", locale: locale)})" : ""
+    "#{counterparty}#{kind}"
+  end
+
+  # Attainment across the agreement's measurable levels, nil until measured.
+  def sla_attainment_percent
+    values = service_levels.filter_map(&:attainment_percent)
+    values.empty? ? nil : (values.sum / values.size).round(1)
   end
 
   def service_type_label(locale = I18n.locale)
@@ -389,6 +412,14 @@ class PpRecord < ApplicationRecord
     return if pp_process_id.present?
 
     errors.add(:pp_process_id, I18n.t("pp_records.errors.process_required"))
+  end
+
+  # An agreement without a second party is a statement, not an agreement.
+  def agreement_names_its_other_party
+    return unless sla?
+    return if counterparty_kind == "internal_unit" ? counterparty_org_unit_id.present? : counterparty.present?
+
+    errors.add(:counterparty, I18n.t("sla.errors.counterparty_required"))
   end
 
   def procedure_process_must_be_level_two

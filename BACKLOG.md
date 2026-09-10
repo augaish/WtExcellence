@@ -166,9 +166,6 @@ processes; nothing to build until there is content to hang on it.
 - `authority_bands` table is kept with one default band per authority (the page no longer shows bands). Collapsing the table is a later cleanup.
 - `org_level_definitions` table is kept but unused since levels are numbered only.
 
-## Review 03 — roadmap items kept (not defects)
-- Sections 5 and 8: connected governance scenario (risk ↔ vendor ↔ commitment ↔ CAPA links), risk categories and acceptance with expiry, vendor due-diligence questionnaires per category, recurring commitments and customer records. Direction for later phases.
-- Section 7: SLA as a separate capability if revived (provider, typed other party, measurable rows, attainment).
-- Q15 remaining: accessible names on the custom selectors and date fields across CAPA modals; mobile card layout for the registers.
-- Q14: reproduce the stale commitment form under throttled network before assigning a cause; submit re-enable and record link are the cheap safeguards.
+## Review 03 — status
+- Q14, Q15, sections 5, 7 and 8 are built (phases 10–13). Left for later: vendor due-diligence questionnaires that vary by category (one fixed five-criteria assessment exists), customer records as their own register (commitments name the customer and agreement in text), and a full screen-reader walk of every page.
 

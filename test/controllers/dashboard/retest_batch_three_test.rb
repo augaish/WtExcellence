@@ -14,7 +14,7 @@ class Dashboard::RetestBatchThreeTest < ActionDispatch::IntegrationTest
 
   # R13
   test "a rejected service level keeps the other fields the user typed" do
-    sla = @company.pp_records.create!(record_type: "sla", title_en: "SLA")
+    sla = @company.pp_records.create!(record_type: "sla", title_en: "SLA", counterparty_kind: "customer", counterparty: "Bank A")
     post dashboard_pp_record_service_levels_path(sla), params: {
       pp_service_level: { service_name: "Portal", metric: "availability", target_value: 4, target_unit: "hours",
                           measurement_method: "Uptime report", coverage: "24x7", remedy: "Credit" }

@@ -27,6 +27,8 @@ class PpRecordTest < ActiveSupport::TestCase
       # stand alone.
       attributes = { record_type: type }
       attributes[:pp_process] = process_for_records if PpRecord::PROCESS_ENFORCED_TYPES.include?(type)
+      # An agreement must name its other party.
+      attributes.merge!(counterparty_kind: "customer", counterparty: "Bank A") if type == "sla"
 
       assert build_record(**attributes).valid?, "#{type} should be valid"
     end

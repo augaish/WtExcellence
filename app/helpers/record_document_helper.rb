@@ -5,7 +5,7 @@ module RecordDocumentHelper
   TABLE_COLUMNS = {
     "definitions" => %i[term abbreviation definition],
     "steps" => %i[position activity description responsible duration system],
-    "service_levels" => %i[service metric target measurement coverage remedy status],
+    "service_levels" => %i[service metric target measurement coverage remedy attainment status],
     "references" => %i[name source],
     "classification" => %i[classification definition],
     "change_log" => %i[version date prepared_by change],

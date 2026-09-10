@@ -12,6 +12,55 @@ ar:
     remedy: المعالجة عند الإخلال
     counterparty: الطرف الآخر
     counterparty_hint: العميل أو الجهة الطرف في هذه الاتفاقية. الوحدة المالكة هي مقدم الخدمة.
+    scope_of_agreement: ما تغطيه الاتفاقية
+    parties: الأطراف
+    provider: مقدم الخدمة (الوحدة المالكة)
+    counterparty_kind: الطرف الآخر هو
+    counterparty_kinds:
+      internal_unit: إحدى وحداتنا
+      customer: عميل
+      external_org: جهة خارجية
+    counterparty_unit: أي وحدة
+    counterparty_placeholder: اسم العميل أو الجهة
+    levels_after_save: تُضاف مستويات الخدمة والقياسات ونسبة التحقق على الاتفاقية بعد حفظها.
+    period: الفترة
+    periods:
+      monthly: شهري
+      quarterly: ربع سنوي
+      annual: سنوي
+    comparators:
+      at_least: على الأقل
+      at_most: على الأكثر
+    comparator_auto: المقارنة (حسب الالتزام)
+    source: المصدر
+    exclusions: الاستثناءات
+    accountable_unit: الوحدة المسؤولة
+    attainment: نسبة التحقق
+    not_measured_yet: لم يُقَس بعد
+    breaches:
+      zero: لا إخلال
+      one: إخلال واحد
+      two: إخلالان
+      few: "%{count} إخلالات"
+      many: "%{count} إخلالًا"
+      other: "%{count} إخلال"
+    measurements:
+      zero: لا فترات مقاسة
+      one: فترة مقاسة واحدة
+      two: فترتان مقاستان
+      few: "%{count} فترات مقاسة"
+      many: "%{count} فترة مقاسة"
+      other: "%{count} فترة مقاسة"
+    met: متحقق
+    breached: مُخلّ
+    period_start: بداية الفترة
+    period_end: نهاية الفترة
+    actual: الفعلي
+    source_note: من أين جاء الرقم
+    record_measurement: تسجيل الفترة
+    review: مراجعة
+    reviewed_by: "راجعه %{name}"
+    awaiting_review: بانتظار المراجعة
     not_measurable: لم يُسجَّل مستهدف أو طريقة قياس، لذا لا يمكن رفع تقارير عنه.
     status:
       measurable: "قابل للقياس"
@@ -37,8 +86,14 @@ ar:
     errors:
       unit_mismatch: لا يناسب هذا الالتزام
       percent_range: لا يمكن أن يتجاوز 100%
+      period_order: يجب أن يكون في تاريخ البداية أو بعده
+      not_measurable_level: هذا المستوى بلا هدف أو طريقة قياس، فلا يمكن القياس عليه.
+      counterparty_required: يجب أن تسمّي الاتفاقية طرفها الآخر.
     flash:
       created: تمت إضافة مستوى الخدمة.
       updated: "تم تحديث مستوى الخدمة."
       deleted: تم حذف مستوى الخدمة.
       not_found: مستوى الخدمة هذا لم يعد موجودًا.
+      measured: "سُجّلت الفترة: %{state}."
+      reviewed: رُوجع القياس؛ يُحتسب الآن في نسبة التحقق.
+      own_measurement: يجب أن يراجع شخص آخر قياسًا سجّلته أنت.

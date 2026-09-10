@@ -16,9 +16,10 @@
       <table class="min-w-full divide-y divide-[#E3E3E3] text-sm">
         <thead class="bg-[#F7F7FD]">
           <tr>
-            <% %w[service metric target measurement coverage remedy].each do |column| %>
+            <% %w[service metric target measurement period coverage remedy].each do |column| %>
               <th class="<%= th %>"><%= t("sla.#{column}") %></th>
             <% end %>
+            <th class="<%= th %>"><%= t('sla.attainment') %></th>
             <th class="<%= th %>"><%= t('sla.status_label') %></th>
             <th class="<%= th %>"></th>
           </tr>
@@ -28,10 +29,23 @@
             <tr>
               <td class="px-3 py-2"><%= level.service_name %></td>
               <td class="px-3 py-2"><%= level.metric_label %></td>
-              <td class="px-3 py-2"><%= level.target_label.presence || "—" %></td>
-              <td class="px-3 py-2"><%= level.measurement_method.presence || "—" %></td>
-              <td class="px-3 py-2"><%= level.coverage %></td>
+              <td class="px-3 py-2"><%= level.target_label.present? ? "#{level.comparator_label} #{level.target_label}" : "—" %></td>
+              <td class="px-3 py-2">
+                <%= level.measurement_method.presence || "—" %>
+                <% if level.measurement_source.present? %><span class="block text-[11px] text-[#797C81]"><%= t('sla.source') %>: <%= level.measurement_source %></span><% end %>
+                <% if level.exclusions.present? %><span class="block text-[11px] text-[#797C81]"><%= t('sla.exclusions') %>: <%= level.exclusions %></span><% end %>
+              </td>
+              <td class="px-3 py-2"><%= level.period_label.presence || "—" %></td>
+              <td class="px-3 py-2"><%= level.coverage %><% if level.accountable_org_unit %><span class="block text-[11px] text-[#797C81]"><%= level.accountable_org_unit.display_name %></span><% end %></td>
               <td class="px-3 py-2"><%= level.remedy.presence || "—" %></td>
+              <td class="px-3 py-2">
+                <% if level.attainment_percent %>
+                  <span class="font-medium <%= level.breaches.positive? ? 'text-red-700' : 'text-green-800' %>"><%= level.attainment_percent %>%</span>
+                  <span class="block text-[11px] text-[#797C81]"><%= t('sla.breaches', count: level.breaches) %></span>
+                <% else %>
+                  <span class="text-[#797C81]"><%= t('sla.not_measured_yet') %></span>
+                <% end %>
+              </td>
               <td class="px-3 py-2">
                 <% if level.measurable? %>
                   <span class="inline-flex px-2 py-0.5 rounded-full text-[11px] bg-green-100 text-green-800"><%= t('sla.status.measurable') %></span>
@@ -55,7 +69,12 @@
                           <%= f.select :target_unit, PpServiceLevel::UNITS_FOR_METRIC.fetch(level.metric, []).map { |u| [ t("sla.units.#{u}"), u ] },
                               { include_blank: true, selected: level.target_unit }, class: input %>
                         </div>
+                        <%= f.select :comparator, PpServiceLevel::COMPARATORS.map { |c| [ t("sla.comparators.#{c}"), c ] }, { selected: level.comparator }, class: input %>
                         <%= f.text_field :measurement_method, value: level.measurement_method, placeholder: t('sla.measurement'), class: input %>
+                        <%= f.select :measurement_period, PpServiceLevel::PERIODS.map { |c| [ t("sla.periods.#{c}"), c ] }, { include_blank: t('sla.period'), selected: level.measurement_period }, class: input %>
+                        <%= f.text_field :measurement_source, value: level.measurement_source, placeholder: t('sla.source'), class: input %>
+                        <%= f.text_field :exclusions, value: level.exclusions, placeholder: t('sla.exclusions'), class: input %>
+                        <%= f.select :accountable_org_unit_id, (record.company.org_units.active.ordered.map { |u| [ u.display_name, u.id ] }), { include_blank: t('sla.accountable_unit'), selected: level.accountable_org_unit_id }, class: input %>
                         <%= f.text_field :coverage, value: level.coverage, placeholder: t('sla.coverage'), class: input %>
                         <%= f.text_field :remedy, value: level.remedy, placeholder: t('sla.remedy'), class: input %>
                         <%= f.submit t('save_changes'), class: ui_btn_secondary %>
@@ -68,6 +87,13 @@
                 <% end %>
               </td>
             </tr>
+            <% if level.measurable? %>
+              <tr class="bg-[#FBFBFE]">
+                <td colspan="10" class="px-3 py-2">
+                  <%= render "dashboard/pp_records/sla_measurements", record: record, level: level, can_manage: can_manage, input: input %>
+                </td>
+              </tr>
+            <% end %>
           <% end %>
         </tbody>
       </table>
@@ -90,7 +116,12 @@
             data: { sla_units_target: "unit", units: PpServiceLevel::UNITS_FOR_METRIC.to_json,
                     labels: PpServiceLevel::UNITS_FOR_METRIC.values.flatten.uniq.index_with { |u| t("sla.units.#{u}") }.to_json } %>
       </div>
+      <%= f.select :comparator, PpServiceLevel::COMPARATORS.map { |c| [ t("sla.comparators.#{c}"), c ] }, { include_blank: t('sla.comparator_auto'), selected: retained(:pp_service_level, :comparator) }, class: input %>
       <%= f.text_field :measurement_method, value: retained(:pp_service_level, :measurement_method), placeholder: t('sla.measurement'), class: input %>
+      <%= f.select :measurement_period, PpServiceLevel::PERIODS.map { |c| [ t("sla.periods.#{c}"), c ] }, { include_blank: t('sla.period'), selected: retained(:pp_service_level, :measurement_period) }, class: input %>
+      <%= f.text_field :measurement_source, value: retained(:pp_service_level, :measurement_source), placeholder: t('sla.source'), class: input %>
+      <%= f.text_field :exclusions, value: retained(:pp_service_level, :exclusions), placeholder: t('sla.exclusions'), class: input %>
+      <%= f.select :accountable_org_unit_id, (record.company.org_units.active.ordered.map { |u| [ u.display_name, u.id ] }), { include_blank: t('sla.accountable_unit'), selected: retained(:pp_service_level, :accountable_org_unit_id) }, class: input %>
       <%= f.text_field :coverage, value: retained(:pp_service_level, :coverage), placeholder: t('sla.coverage'), class: input %>
       <%= f.text_field :remedy, value: retained(:pp_service_level, :remedy), placeholder: t('sla.remedy'), class: input %>
       <%= f.submit t('sla.add'), class: ui_btn_primary %>

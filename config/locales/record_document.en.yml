@@ -78,6 +78,7 @@ en:
       band: "Limit"
       basis: "Basis"
       remedy: "Remedy if missed"
+      attainment: "Attainment"
       status_label: "Status"
       prepared_by: "Prepared by"
       change: "Description of change"

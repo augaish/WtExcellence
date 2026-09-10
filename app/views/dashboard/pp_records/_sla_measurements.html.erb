@@ -1,0 +1,33 @@
+<%# Measured periods of one level: the number, its source, met or breached,
+    and the review that makes it count. Locals: record, level, can_manage, input %>
+<details>
+  <summary class="cursor-pointer text-xs font-medium text-[#5C3984] hover:underline">
+    <%= t('sla.measurements', count: level.measurements.size) %>
+  </summary>
+  <div class="mt-2 space-y-2">
+    <% level.measurements.each do |m| %>
+      <div class="flex flex-wrap items-center gap-3 text-xs">
+        <span class="text-[#0D1120]"><%= l(m.period_start, format: :document) %> – <%= l(m.period_end, format: :document) %></span>
+        <span class="font-medium"><%= m.actual_value %> <%= level.unit_label %></span>
+        <span class="px-2 py-0.5 rounded-full <%= m.met? ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-700' %>"><%= m.met? ? t('sla.met') : t('sla.breached') %></span>
+        <% if m.source_note.present? %><span class="text-[#797C81]"><%= m.source_note %></span><% end %>
+        <% if m.reviewed? %>
+          <span class="text-[#797C81]"><%= t('sla.reviewed_by', name: m.reviewed_by&.name.to_s) %></span>
+        <% elsif can_manage && m.recorded_by_id != current_user.id %>
+          <%= button_to t('sla.review'), review_dashboard_pp_record_service_level_measurement_path(record, level, m), method: :patch, class: "text-[#5C3984] hover:underline", form: { class: "inline" } %>
+        <% else %>
+          <span class="text-amber-800"><%= t('sla.awaiting_review') %></span>
+        <% end %>
+      </div>
+    <% end %>
+    <% if can_manage %>
+      <%= form_with url: dashboard_pp_record_service_level_measurements_path(record, level), method: :post, scope: :sla_measurement, class: "flex flex-wrap items-end gap-2" do |f| %>
+        <%= f.date_field :period_start, value: retained(:sla_measurement, :period_start), class: "#{input} w-40", "aria-label": t('sla.period_start') %>
+        <%= f.date_field :period_end, value: retained(:sla_measurement, :period_end), class: "#{input} w-40", "aria-label": t('sla.period_end') %>
+        <%= f.number_field :actual_value, value: retained(:sla_measurement, :actual_value), step: :any, placeholder: t('sla.actual'), class: "#{input} w-28", "aria-label": t('sla.actual') %>
+        <%= f.text_field :source_note, value: retained(:sla_measurement, :source_note), placeholder: t('sla.source_note'), class: "#{input} flex-1 min-w-[10rem]" %>
+        <%= f.submit t('sla.record_measurement'), class: ui_btn_neutral %>
+      <% end %>
+    <% end %>
+  </div>
+</details>

@@ -12,6 +12,7 @@ class RecordVersionService
     trigger_text inputs outputs predecessor_record_id successor_record_id frequency
     total_time_value total_time_unit automation_status technical_systems kpis sequence_number
     service_type requirements beneficiaries delivery_period channels delivery_stages
+    counterparty_kind counterparty_org_unit_id
   ].freeze
 
   class NotLatest < StandardError; end

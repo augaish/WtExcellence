@@ -78,6 +78,7 @@ ar:
       band: "الحد"
       basis: "المرجع النظامي"
       remedy: "المعالجة عند الإخلال"
+      attainment: "نسبة التحقق"
       status_label: "الحالة"
       prepared_by: المعد
       change: وصف التغيير

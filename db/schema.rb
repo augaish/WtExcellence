@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_10_081748) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -618,6 +618,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
     t.string "recurrence", limit: 20, default: "none", null: false
     t.uuid "vendor_id"
     t.uuid "recurred_from_id"
+    t.uuid "sla_record_id"
     t.index ["company_id", "submission_token"], name: "index_customer_commitments_on_company_id_and_submission_token", unique: true, where: "(submission_token IS NOT NULL)"
     t.index ["company_id"], name: "index_customer_commitments_on_company_id"
     t.index ["created_by_id"], name: "index_customer_commitments_on_created_by_id"
@@ -1057,6 +1058,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
     t.string "published_link", limit: 1000
     t.datetime "published_at"
     t.uuid "published_pdf_upload_id"
+    t.string "counterparty_kind", limit: 20
+    t.uuid "counterparty_org_unit_id"
     t.index ["company_id", "classification"], name: "index_pp_records_on_company_id_and_classification"
     t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"
@@ -1082,6 +1085,13 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
     t.integer "sort_order", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "comparator", limit: 10
+    t.string "measurement_period", limit: 20
+    t.string "measurement_source", limit: 250
+    t.text "exclusions"
+    t.uuid "accountable_org_unit_id"
+    t.date "effective_from"
+    t.date "effective_to"
     t.index ["pp_record_id", "sort_order"], name: "index_pp_service_levels_on_pp_record_id_and_sort_order"
     t.index ["pp_record_id"], name: "index_pp_service_levels_on_pp_record_id"
   end
@@ -1238,6 +1248,22 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
     t.index ["risk_workspace_id"], name: "index_risks_on_risk_workspace_id"
     t.index ["riskable_type", "riskable_id"], name: "index_risks_on_riskable"
     t.index ["status"], name: "index_risks_on_status"
+  end
+
+  create_table "sla_measurements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_service_level_id", null: false
+    t.date "period_start", null: false
+    t.date "period_end", null: false
+    t.decimal "actual_value", precision: 10, scale: 2, null: false
+    t.text "source_note"
+    t.boolean "met", default: false, null: false
+    t.uuid "recorded_by_id"
+    t.uuid "reviewed_by_id"
+    t.datetime "reviewed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_service_level_id", "period_start"], name: "index_sla_measurements_on_pp_service_level_id_and_period_start", unique: true
+    t.index ["pp_service_level_id"], name: "index_sla_measurements_on_pp_service_level_id"
   end
 
   create_table "standard_translations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1566,6 +1592,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
   add_foreign_key "customer_commitments", "companies"
   add_foreign_key "customer_commitments", "company_users", column: "owner_id"
   add_foreign_key "customer_commitments", "customer_commitments", column: "recurred_from_id", on_delete: :nullify
+  add_foreign_key "customer_commitments", "pp_records", column: "sla_record_id", on_delete: :nullify
   add_foreign_key "customer_commitments", "users", column: "created_by_id"
   add_foreign_key "customer_commitments", "users", column: "verified_by_id", on_delete: :nullify
   add_foreign_key "customer_commitments", "vendors", on_delete: :nullify
@@ -1618,6 +1645,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
   add_foreign_key "pp_record_terms", "glossary_terms"
   add_foreign_key "pp_record_terms", "pp_records"
   add_foreign_key "pp_records", "companies"
+  add_foreign_key "pp_records", "org_units", column: "counterparty_org_unit_id", on_delete: :nullify
   add_foreign_key "pp_records", "org_units", column: "owner_org_unit_id"
   add_foreign_key "pp_records", "pp_packages", column: "package_id"
   add_foreign_key "pp_records", "pp_processes"
@@ -1627,6 +1655,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
   add_foreign_key "pp_records", "uploads", column: "published_pdf_upload_id", on_delete: :nullify
   add_foreign_key "pp_records", "users", column: "owner_user_id"
   add_foreign_key "pp_records", "users", column: "verifier_user_id", on_delete: :nullify
+  add_foreign_key "pp_service_levels", "org_units", column: "accountable_org_unit_id", on_delete: :nullify
   add_foreign_key "pp_service_levels", "pp_records"
   add_foreign_key "pp_stage_approvals", "org_units"
   add_foreign_key "pp_stage_approvals", "pp_records"
@@ -1647,6 +1676,9 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
   add_foreign_key "risks", "risk_workspaces"
   add_foreign_key "risks", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "risks", "users", column: "created_by_id"
+  add_foreign_key "sla_measurements", "pp_service_levels"
+  add_foreign_key "sla_measurements", "users", column: "recorded_by_id", on_delete: :nullify
+  add_foreign_key "sla_measurements", "users", column: "reviewed_by_id", on_delete: :nullify
   add_foreign_key "standard_translations", "languages", column: "language_code", primary_key: "code"
   add_foreign_key "standard_translations", "standards"
   add_foreign_key "standard_versions", "standards"

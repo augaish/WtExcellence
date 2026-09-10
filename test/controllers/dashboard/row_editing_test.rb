@@ -13,7 +13,7 @@ class Dashboard::RowEditingTest < ActionDispatch::IntegrationTest
   end
 
   test "a service level can be corrected in place" do
-    sla = @company.pp_records.create!(record_type: "sla", title_en: "SLA")
+    sla = @company.pp_records.create!(record_type: "sla", title_en: "SLA", counterparty_kind: "customer", counterparty: "Bank A")
     level = sla.service_levels.create!(service_name: "Portal", metric: "availability", target_value: 99, target_unit: "percent")
 
     patch dashboard_pp_record_service_level_path(sla, level), params: {
@@ -42,7 +42,7 @@ class Dashboard::RowEditingTest < ActionDispatch::IntegrationTest
     get dashboard_documenter_record_path(procedure)
     assert_select "form[action=?]", dashboard_pp_record_record_step_path(procedure, step)
 
-    sla = @company.pp_records.create!(record_type: "sla", title_en: "SLA")
+    sla = @company.pp_records.create!(record_type: "sla", title_en: "SLA", counterparty_kind: "customer", counterparty: "Bank A")
     level = sla.service_levels.create!(service_name: "Portal", metric: "availability")
     get dashboard_pp_record_path(sla)
     assert_select "form[action=?]", dashboard_pp_record_service_level_path(sla, level)

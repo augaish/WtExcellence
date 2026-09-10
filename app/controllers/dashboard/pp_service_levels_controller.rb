@@ -60,7 +60,8 @@ class Dashboard::PpServiceLevelsController < Dashboard::BaseController
   end
 
   def service_level_params
-    params.require(:pp_service_level).permit(:service_name, :metric, :target_value, :target_unit,
-      :measurement_method, :coverage, :escalation_path, :remedy)
+    params.require(:pp_service_level).permit(:service_name, :metric, :target_value, :target_unit, :comparator,
+      :measurement_method, :measurement_period, :measurement_source, :exclusions, :coverage, :escalation_path, :remedy,
+      :accountable_org_unit_id, :effective_from, :effective_to)
   end
 end
