@@ -3,7 +3,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   requires_module :risk
   before_action :ensure_can_view_governance, only: [ :index, :show ]
   before_action :ensure_can_manage_risks, except: [ :index, :show ]
-  before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa ]
+  before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa, :accept ]
 
   def index
     all_risks = Risk.active.where(company_id: current_company&.id)
@@ -45,6 +45,19 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
 
     redirect_to dashboard_risk_management_index_path,
       notice: t("risk_methodology.appetite_saved"), status: :see_other
+  end
+
+  # Accepting exposure above appetite: a named decision with a reason and an
+  # expiry, taken by an admin or a Governance Manager.
+  def accept
+    unless current_user&.can_manage_governance?
+      return redirect_to dashboard_risk_management_path(@risk), alert: t("risk_no_permission"), status: :see_other
+    end
+
+    @risk.accept!(by: current_user, rationale: params[:acceptance_rationale], expires_on: params[:acceptance_expires_on].presence)
+    redirect_to dashboard_risk_management_path(@risk), notice: t("risk_depth.flash.accepted"), status: :see_other
+  rescue ArgumentError => e
+    redirect_to dashboard_risk_management_path(@risk), alert: e.message, status: :see_other
   end
 
   def new
@@ -121,7 +134,9 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
       :title, :description, :category, :owner_id, :status,
       :likelihood, :impact, :residual_likelihood, :residual_impact,
       :target_likelihood, :target_impact,
-      :risk_workspace_id, :closure_reason
+      :risk_workspace_id, :closure_reason,
+      :cause, :event, :impact_statement, :treatment_strategy, :treatment_plan,
+      :control_owner_id, :control_rationale, :next_review_on
     )
   end
 

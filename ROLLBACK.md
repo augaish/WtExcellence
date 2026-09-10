@@ -43,6 +43,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Homepage review: /en and /ar URLs with hreflang and share metadata, main landmark and skip link, Documents section, illustrative tags, Prove in nav, waitlist navigation | `b5551f0` | No migration. Hero kept as is. |
 | Homepage: owner's hero line, Request a demo, privacy/terms/security/about pages, footer links | `47c2715` | No migration. |
 | Phase 10 (Q14, Q15): one-time submission tokens on governance creates, plain-submit forms, mobile cards on four registers, named CAPA controls | `b3d537d` | Additive migration: `submission_token` on risks, vendors, commitments. |
+| Phase 11 (Review 03 section 8): risk statement/treatment/controls/review/acceptance, commitment agreement/acceptance/recurrence/supplier link, new register queues | `PENDING_SHA` | Additive migration on risks and customer_commitments. Existing residual scores keep working; editing one now needs a control rationale. |
 
 ## Roll the code back
 ```bash

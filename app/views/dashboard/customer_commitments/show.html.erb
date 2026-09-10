@@ -53,6 +53,31 @@
           <%= commitment_timing_label(@commitment) %>
         </span>
       </div>
+      <div class="grid grid-cols-2 gap-4 pt-4 border-t border-[#E3E3E3]">
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_depth.agreement_reference') %></p>
+          <p class="text-sm text-[#0D1120]"><%= @commitment.agreement_reference.presence || "—" %></p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_depth.vendor') %></p>
+          <p class="text-sm text-[#0D1120]"><% if @commitment.vendor %><%= link_to @commitment.vendor.name, dashboard_vendor_path(@commitment.vendor), class: "text-[#5C3984] hover:underline" %><% else %>—<% end %></p>
+        </div>
+        <div class="col-span-2">
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_depth.acceptance_criteria') %></p>
+          <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= @commitment.acceptance_criteria.presence || "—" %></p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_depth.recurrence') %></p>
+          <p class="text-sm text-[#0D1120]"><%= @commitment.recurrence_label %></p>
+        </div>
+        <div>
+          <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_depth.delivered_on') %></p>
+          <p class="text-sm text-[#0D1120]"><%= @commitment.delivered_on ? l(@commitment.delivered_on, format: :document) : "—" %></p>
+        </div>
+      </div>
+
+      <%= render "dashboard/customer_commitments/acceptance", commitment: @commitment %>
+
       <% if @commitment.fulfillment_note.present? %>
         <div class="md:col-span-2">
           <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('commitment_timing.fulfillment_note') %></p>

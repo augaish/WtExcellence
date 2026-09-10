@@ -45,6 +45,31 @@
       </div>
     </div>
 
+    <%# Where the obligation comes from and what "done" means, before it is due. %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :agreement_reference, t('commitment_depth.agreement_reference'), class: ui_label %>
+        <%= f.text_field :agreement_reference, class: ui_input, placeholder: t('commitment_depth.agreement_placeholder') %>
+      </div>
+      <div>
+        <%= f.label :vendor_id, t('commitment_depth.vendor'), class: ui_label %>
+        <%= f.collection_select :vendor_id, Vendor.active.where(company_id: current_company&.id).order(:name), :id, :name, { include_blank: t('commitment_depth.no_vendor') }, class: ui_input %>
+      </div>
+      <div class="sm:col-span-2">
+        <%= f.label :acceptance_criteria, t('commitment_depth.acceptance_criteria'), class: ui_label %>
+        <%= f.text_area :acceptance_criteria, rows: 2, class: ui_input, placeholder: t('commitment_depth.acceptance_criteria_placeholder') %>
+      </div>
+      <div>
+        <%= f.label :recurrence, t('commitment_depth.recurrence'), class: ui_label %>
+        <%= f.select :recurrence, CustomerCommitment::RECURRENCES.map { |r| [ t("commitment_depth.recurrences.#{r}"), r ] }, {}, class: ui_input %>
+        <p class="mt-1 text-xs text-[#797C81]"><%= t('commitment_depth.recurrence_hint') %></p>
+      </div>
+      <div>
+        <%= f.label :delivered_on, t('commitment_depth.delivered_on'), class: ui_label %>
+        <%= f.date_field :delivered_on, class: ui_input %>
+      </div>
+    </div>
+
     <div>
       <%= f.label :status, t('status'), class: ui_label %>
       <%# Overdue is not offered: timing is derived from the due date, so it can

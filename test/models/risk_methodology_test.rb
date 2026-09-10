@@ -16,7 +16,7 @@ class RiskMethodologyTest < ActiveSupport::TestCase
   test "current exposure is the inherent score until a residual assessment exists" do
     assert_equal 20, @risk.current_score
 
-    @risk.update!(residual_likelihood: 2, residual_impact: 2)
+    @risk.update!(residual_likelihood: 2, residual_impact: 2, control_rationale: "Controls in place")
     assert_equal 4, @risk.current_score
   end
 
@@ -33,7 +33,7 @@ class RiskMethodologyTest < ActiveSupport::TestCase
     @risk.update!(target_likelihood: 2, target_impact: 2)
     assert_not @risk.target_met?
 
-    @risk.update!(residual_likelihood: 1, residual_impact: 2)
+    @risk.update!(residual_likelihood: 1, residual_impact: 2, control_rationale: "Controls in place")
     assert @risk.target_met?
   end
 
@@ -46,7 +46,7 @@ class RiskMethodologyTest < ActiveSupport::TestCase
 
     assert @risk.reload.above_appetite?
 
-    @risk.update!(residual_likelihood: 2, residual_impact: 2)
+    @risk.update!(residual_likelihood: 2, residual_impact: 2, control_rationale: "Controls in place")
     assert_not @risk.above_appetite?, "appetite is judged on current exposure, not inherent"
   end
 

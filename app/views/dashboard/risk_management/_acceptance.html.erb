@@ -1,0 +1,29 @@
+<%# Exposure above appetite is an exception: someone accepts it, says why, and
+    until when. Until then the page says so plainly. Locals: risk %>
+<% if risk.above_appetite? && !risk.closed? %>
+  <div class="rounded-lg border p-4 space-y-2 <%= risk.accepted? ? 'border-[#E3E3E3] bg-white' : 'border-red-300 bg-red-50' %>">
+    <div class="flex items-center justify-between gap-3">
+      <span class="text-xs font-semibold uppercase tracking-wide <%= risk.accepted? ? 'text-[#797C81]' : 'text-red-800' %>"><%= t('risk_depth.acceptance_title') %></span>
+      <% if risk.accepted? %>
+        <span class="px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-[11px] font-medium"><%= t('risk_depth.accepted_until', date: (risk.acceptance_expires_on ? l(risk.acceptance_expires_on, format: :document) : "—")) %></span>
+      <% elsif risk.acceptance_expired? %>
+        <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-medium"><%= t('risk_depth.acceptance_expired') %></span>
+      <% else %>
+        <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-medium"><%= t('risk_depth.needs_acceptance') %></span>
+      <% end %>
+    </div>
+    <% if risk.accepted_at %>
+      <p class="text-sm text-[#0D1120]"><%= t('risk_depth.accepted_by_on', name: risk.accepted_by&.name.to_s, date: l(risk.accepted_at.to_date, format: :document)) %></p>
+      <p class="text-xs text-[#797C81] whitespace-pre-line"><%= risk.acceptance_rationale %></p>
+    <% else %>
+      <p class="text-xs text-red-800"><%= t('risk_depth.needs_acceptance_hint', appetite: risk.company.risk_appetite_score, score: risk.current_score) %></p>
+    <% end %>
+    <% if current_user&.can_manage_governance? && !risk.accepted? %>
+      <%= form_with url: dashboard_accept_risk_path(risk), method: :patch, class: "flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#E3E3E3]" do %>
+        <%= text_field_tag :acceptance_rationale, nil, required: true, placeholder: t('risk_depth.acceptance_rationale'), class: "#{ui_input} flex-1" %>
+        <%= date_field_tag :acceptance_expires_on, nil, required: true, class: "#{ui_input} sm:w-44", "aria-label": t('risk_depth.acceptance_expires_on') %>
+        <%= submit_tag t('risk_depth.accept'), class: ui_btn_secondary %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

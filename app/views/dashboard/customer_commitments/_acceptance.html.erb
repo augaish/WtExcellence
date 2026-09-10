@@ -1,0 +1,21 @@
+<%# Our "fulfilled" and the customer's "accepted" are two different facts.
+    Locals: commitment %>
+<% colour = { "accepted" => "bg-green-100 text-green-800", "rejected" => "bg-red-100 text-red-700", "pending" => "bg-amber-100 text-amber-900" }[commitment.acceptance_status] %>
+<div class="rounded-lg border border-[#E3E3E3] bg-[#F7F7FD] p-4 space-y-2">
+  <div class="flex items-center justify-between gap-3">
+    <span class="text-xs font-semibold text-[#797C81] uppercase tracking-wide"><%= t('commitment_depth.acceptance_title') %></span>
+    <span class="px-2 py-0.5 rounded-full text-[11px] font-medium <%= colour %>"><%= commitment.acceptance_label %></span>
+  </div>
+  <% if commitment.verified_by %>
+    <p class="text-xs text-[#797C81]"><%= t('commitment_depth.verified_by', name: commitment.verified_by.name) %><% if commitment.acceptance_note.present? %> · <%= commitment.acceptance_note %><% end %></p>
+  <% end %>
+  <% if current_user&.can_manage_governance? && commitment.fulfilled? %>
+    <%= form_with url: acceptance_dashboard_customer_commitment_path(commitment), method: :patch, class: "flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#E3E3E3]" do %>
+      <%= select_tag :acceptance_status, options_for_select(CustomerCommitment::ACCEPTANCE_STATUSES.map { |s| [ t("commitment_depth.acceptance_statuses.#{s}"), s ] }, commitment.acceptance_status), class: "#{ui_input} sm:w-44", "aria-label": t('commitment_depth.acceptance_title') %>
+      <%= text_field_tag :acceptance_note, nil, placeholder: t('commitment_depth.acceptance_note'), class: "#{ui_input} flex-1" %>
+      <%= submit_tag t('commitment_depth.record'), class: ui_btn_secondary %>
+    <% end %>
+  <% elsif !commitment.fulfilled? %>
+    <p class="text-xs text-[#797C81]"><%= t('commitment_depth.acceptance_after_fulfilment') %></p>
+  <% end %>
+</div>

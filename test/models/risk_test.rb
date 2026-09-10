@@ -21,7 +21,7 @@ class RiskTest < ActiveSupport::TestCase
 
     assert_nil risk.residual_score
 
-    risk.update!(residual_likelihood: 2, residual_impact: 2)
+    risk.update!(residual_likelihood: 2, residual_impact: 2, control_rationale: "Controls in place")
 
     assert_equal 4, risk.residual_score
     assert_equal "low", risk.residual_level

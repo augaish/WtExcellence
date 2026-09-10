@@ -1,0 +1,24 @@
+<%# The risks raised about this supplier and the customer promises that
+    depend on it - the connected picture. Locals: vendor %>
+<% risks = Risk.active.where(riskable: vendor).order(inherent_score: :desc).to_a %>
+<% commitments = vendor.respond_to?(:customer_commitments) ? vendor.customer_commitments.active.order(:due_date).to_a : CustomerCommitment.active.where(vendor_id: vendor.id).order(:due_date).to_a %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div>
+    <h2 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('commitment_depth.linked_risks') %></h2>
+    <% if risks.empty? %><p class="text-xs text-[#797C81]"><%= t('commitment_depth.none_linked') %></p><% end %>
+    <ul class="space-y-1 text-sm">
+      <% risks.each do |r| %>
+        <li><%= link_to r.title, dashboard_risk_management_path(r), class: "text-[#5C3984] hover:underline" %> <span class="text-xs text-[#797C81]">· <%= r.current_score %></span></li>
+      <% end %>
+    </ul>
+  </div>
+  <div>
+    <h2 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('commitment_depth.linked_commitments') %></h2>
+    <% if commitments.empty? %><p class="text-xs text-[#797C81]"><%= t('commitment_depth.none_linked') %></p><% end %>
+    <ul class="space-y-1 text-sm">
+      <% commitments.each do |c| %>
+        <li><%= link_to c.title, dashboard_customer_commitment_path(c), class: "text-[#5C3984] hover:underline" %> <span class="text-xs text-[#797C81]">· <%= c.due_date ? l(c.due_date, format: :document) : "" %></span></li>
+      <% end %>
+    </ul>
+  </div>
+</div>

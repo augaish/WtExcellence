@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_10_080239) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_10_080731) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -609,6 +609,15 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080239) do
     t.uuid "fulfilled_by_id"
     t.text "fulfillment_note"
     t.string "submission_token", limit: 64
+    t.string "agreement_reference", limit: 250
+    t.text "acceptance_criteria"
+    t.date "delivered_on"
+    t.uuid "verified_by_id"
+    t.string "acceptance_status", limit: 20, default: "pending", null: false
+    t.text "acceptance_note"
+    t.string "recurrence", limit: 20, default: "none", null: false
+    t.uuid "vendor_id"
+    t.uuid "recurred_from_id"
     t.index ["company_id", "submission_token"], name: "index_customer_commitments_on_company_id_and_submission_token", unique: true, where: "(submission_token IS NOT NULL)"
     t.index ["company_id"], name: "index_customer_commitments_on_company_id"
     t.index ["created_by_id"], name: "index_customer_commitments_on_created_by_id"
@@ -1207,11 +1216,24 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080239) do
     t.integer "target_impact"
     t.integer "target_score"
     t.string "submission_token", limit: 64
+    t.text "cause"
+    t.text "event"
+    t.text "impact_statement"
+    t.string "treatment_strategy", limit: 20
+    t.text "treatment_plan"
+    t.uuid "control_owner_id"
+    t.text "control_rationale"
+    t.date "next_review_on"
+    t.uuid "accepted_by_id"
+    t.datetime "accepted_at"
+    t.text "acceptance_rationale"
+    t.date "acceptance_expires_on"
     t.index ["closed_by_id"], name: "index_risks_on_closed_by_id"
     t.index ["company_id", "submission_token"], name: "index_risks_on_company_id_and_submission_token", unique: true, where: "(submission_token IS NOT NULL)"
     t.index ["company_id"], name: "index_risks_on_company_id"
     t.index ["created_by_id"], name: "index_risks_on_created_by_id"
     t.index ["deleted_at"], name: "index_risks_on_deleted_at"
+    t.index ["next_review_on"], name: "index_risks_on_next_review_on"
     t.index ["owner_id"], name: "index_risks_on_owner_id"
     t.index ["risk_workspace_id"], name: "index_risks_on_risk_workspace_id"
     t.index ["riskable_type", "riskable_id"], name: "index_risks_on_riskable"
@@ -1543,7 +1565,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080239) do
   add_foreign_key "company_users", "users"
   add_foreign_key "customer_commitments", "companies"
   add_foreign_key "customer_commitments", "company_users", column: "owner_id"
+  add_foreign_key "customer_commitments", "customer_commitments", column: "recurred_from_id", on_delete: :nullify
   add_foreign_key "customer_commitments", "users", column: "created_by_id"
+  add_foreign_key "customer_commitments", "users", column: "verified_by_id", on_delete: :nullify
+  add_foreign_key "customer_commitments", "vendors", on_delete: :nullify
   add_foreign_key "dashboard_layouts", "companies"
   add_foreign_key "evidence_attachments", "uploads"
   add_foreign_key "folders", "companies"
@@ -1617,8 +1642,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_080239) do
   add_foreign_key "questionnaires", "capas"
   add_foreign_key "risk_workspaces", "companies"
   add_foreign_key "risks", "companies"
+  add_foreign_key "risks", "company_users", column: "control_owner_id", on_delete: :nullify
   add_foreign_key "risks", "company_users", column: "owner_id"
   add_foreign_key "risks", "risk_workspaces"
+  add_foreign_key "risks", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "risks", "users", column: "created_by_id"
   add_foreign_key "standard_translations", "languages", column: "language_code", primary_key: "code"
   add_foreign_key "standard_translations", "standards"

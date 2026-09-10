@@ -57,7 +57,7 @@ class GovernanceRegisterFilterTest < ActiveSupport::TestCase
     assert_equal [ high.id ], filter_for(@company.risks, queue: "above_appetite").results.map(&:id)
 
     # A residual assessment lowers current exposure below the threshold.
-    high.update!(residual_likelihood: 1, residual_impact: 1)
+    high.update!(residual_likelihood: 1, residual_impact: 1, control_rationale: "Controls in place")
     assert_empty filter_for(@company.risks, queue: "above_appetite").results.to_a
   end
 

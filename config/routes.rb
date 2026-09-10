@@ -88,6 +88,7 @@ Rails.application.routes.draw do
       get "/new", action: :new, as: :new_risk
       # Before "/:id", or "appetite" is read as a risk id.
       patch "/appetite", action: :update_appetite, as: :update_risk_appetite
+      patch "/:id/accept", action: :accept, as: :accept_risk
       get "/:id", action: :show, as: :risk_management
       get "/:id/edit", action: :edit, as: :edit_risk
       patch "/:id", action: :update, as: :update_risk
@@ -97,7 +98,10 @@ Rails.application.routes.draw do
 
     resources :risk_workspaces, only: [ :index, :new, :create, :show, :edit, :update, :destroy ]
     resources :customer_commitments, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
-      member { post :create_capa }
+      member do
+        post :create_capa
+        patch :acceptance
+      end
     end
     resources :vendors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
       member do

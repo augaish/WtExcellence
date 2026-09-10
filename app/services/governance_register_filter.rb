@@ -16,15 +16,15 @@ class GovernanceRegisterFilter
   CONFIGS = {
     "Risk" => {
       search_columns: %w[title description],
-      queues: %w[all mine open above_appetite closed]
+      queues: %w[all mine open above_appetite needs_acceptance review_overdue closed]
     },
     "Vendor" => {
       search_columns: %w[name category notes],
-      queues: %w[all mine unassessed critical]
+      queues: %w[all mine unassessed critical review_overdue not_approved]
     },
     "CustomerCommitment" => {
       search_columns: %w[title description customer_name],
-      queues: %w[all mine overdue due_soon fulfilled]
+      queues: %w[all mine overdue due_soon awaiting_acceptance fulfilled]
     }
   }.freeze
 
@@ -89,6 +89,10 @@ class GovernanceRegisterFilter
     when "open" then relation.where.not(status: "closed")
     when "closed" then relation.where(status: "closed")
     when "above_appetite" then above_appetite(relation)
+    when "needs_acceptance" then above_appetite(relation).where.not(status: "closed").where("accepted_at IS NULL OR acceptance_expires_on < ?", Date.current)
+    when "review_overdue" then review_overdue(relation)
+    when "not_approved" then relation.where(approval_status: %w[not_approved suspended])
+    when "awaiting_acceptance" then relation.where(status: "fulfilled", acceptance_status: "pending")
     when "unassessed" then relation.where(risk_level: "unassessed")
     when "critical" then relation.where(risk_level: "critical")
     when "overdue" then relation.where(due_date: ...Date.current).where.not(status: "fulfilled")
@@ -113,6 +117,13 @@ class GovernanceRegisterFilter
     return relation.none if appetite.blank?
 
     relation.where("COALESCE(risks.residual_score, risks.inherent_score) > ?", appetite)
+  end
+
+  # Risks and vendors both carry a next review date; only risks have a status
+  # that ends the need for one.
+  def review_overdue(relation)
+    scoped = relation.where("next_review_on < ?", Date.current)
+    relation.klass.column_names.include?("status") ? scoped.where.not(status: "closed") : scoped
   end
 
   def due_soon(relation)

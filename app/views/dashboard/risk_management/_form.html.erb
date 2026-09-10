@@ -40,6 +40,25 @@
       </div>
     </div>
 
+    <%# Cause → event → impact: a risk stated so two readers understand the same thing. %>
+    <div class="rounded-lg border border-[#E3E3E3] bg-[#F7F7FD] p-4 space-y-3">
+      <p class="text-xs font-semibold text-[#797C81] uppercase tracking-wide"><%= t('risk_depth.statement_title') %></p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <%= f.label :cause, t('risk_depth.cause'), class: ui_label %>
+          <%= f.text_area :cause, rows: 2, class: ui_input, placeholder: t('risk_depth.cause_placeholder') %>
+        </div>
+        <div>
+          <%= f.label :event, t('risk_depth.event'), class: ui_label %>
+          <%= f.text_area :event, rows: 2, class: ui_input, placeholder: t('risk_depth.event_placeholder') %>
+        </div>
+        <div>
+          <%= f.label :impact_statement, t('risk_depth.impact'), class: ui_label %>
+          <%= f.text_area :impact_statement, rows: 2, class: ui_input, placeholder: t('risk_depth.impact_placeholder') %>
+        </div>
+      </div>
+    </div>
+
     <div>
       <%= f.label :risk_workspace_id, t('risk_workspace'), class: ui_label %>
       <%= f.collection_select :risk_workspace_id, @risk_workspaces || [], :id, :name, { include_blank: t('uncategorized') }, class: ui_input %>
@@ -77,6 +96,31 @@
       <div>
         <%= f.label :target_impact, t('risk_methodology.target_impact'), class: ui_label %>
         <%= f.select :target_impact, (1..5), { include_blank: true }, class: ui_input %>
+      </div>
+    </div>
+
+    <%# What is done about it, who owns the controls, and why the residual score holds. %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :treatment_strategy, t('risk_depth.treatment'), class: ui_label %>
+        <%= f.select :treatment_strategy, Risk::TREATMENT_STRATEGIES.map { |s| [ t("risk_depth.treatments.#{s}"), s ] }, { include_blank: t('pp_records.pick') }, class: ui_input %>
+      </div>
+      <div>
+        <%= f.label :control_owner_id, t('risk_depth.control_owner'), class: ui_label %>
+        <%= f.collection_select :control_owner_id, current_company&.company_users&.includes(:user) || [], :id, ->(cu) { cu.user.name }, { include_blank: t('unassigned') }, class: ui_input %>
+      </div>
+      <div class="sm:col-span-2">
+        <%= f.label :treatment_plan, t('risk_depth.treatment_plan'), class: ui_label %>
+        <%= f.text_area :treatment_plan, rows: 2, class: ui_input %>
+      </div>
+      <div class="sm:col-span-2">
+        <%= f.label :control_rationale, t('risk_depth.control_rationale'), class: ui_label %>
+        <%= f.text_area :control_rationale, rows: 2, class: ui_input, placeholder: t('risk_depth.control_rationale_placeholder') %>
+        <p class="mt-1 text-xs text-[#797C81]"><%= t('risk_depth.control_rationale_hint') %></p>
+      </div>
+      <div>
+        <%= f.label :next_review_on, t('risk_depth.next_review_on'), class: ui_label %>
+        <%= f.date_field :next_review_on, class: ui_input %>
       </div>
     </div>
 

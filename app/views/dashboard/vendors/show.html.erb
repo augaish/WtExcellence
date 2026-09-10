@@ -61,6 +61,8 @@
     <%= render "dashboard/vendors/assessments", vendor: @vendor, assessments: @assessments, assessment: @assessment,
           available_uploads: @available_uploads %>
 
+    <%= render "dashboard/vendors/linked_records", vendor: @vendor %>
+
     <%= render "dashboard/shared/governance_capas", origin: @vendor,
           create_path: create_capa_dashboard_vendor_path(@vendor) %>
 

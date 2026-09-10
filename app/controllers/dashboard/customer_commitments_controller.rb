@@ -3,7 +3,7 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   requires_module :commitments
   before_action :ensure_can_view_governance, only: [ :index, :show ]
   before_action :ensure_can_manage_commitments, except: [ :index, :show ]
-  before_action :set_commitment, only: [ :show, :edit, :update, :destroy, :create_capa ]
+  before_action :set_commitment, only: [ :show, :edit, :update, :destroy, :create_capa, :acceptance ]
 
   def index
     all_commitments = CustomerCommitment.active.where(company_id: current_company&.id)
@@ -17,6 +17,20 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   end
 
   def show
+  end
+
+  # The customer's verdict on what was delivered, recorded by the verifier.
+  def acceptance
+    status = params[:acceptance_status].to_s
+    unless CustomerCommitment::ACCEPTANCE_STATUSES.include?(status)
+      return redirect_to dashboard_customer_commitment_path(@commitment), alert: t("commitment_depth.flash.unknown_acceptance"), status: :see_other
+    end
+    unless @commitment.fulfilled?
+      return redirect_to dashboard_customer_commitment_path(@commitment), alert: t("commitment_depth.acceptance_after_fulfilment"), status: :see_other
+    end
+
+    @commitment.record_acceptance!(status, by: current_user, note: params[:acceptance_note])
+    redirect_to dashboard_customer_commitment_path(@commitment), notice: t("commitment_depth.flash.acceptance_recorded"), status: :see_other
   end
 
   def new
@@ -77,6 +91,7 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   end
 
   def commitment_params
-    params.require(:customer_commitment).permit(:title, :description, :customer_name, :due_date, :status, :owner_id, :fulfillment_note)
+    params.require(:customer_commitment).permit(:title, :description, :customer_name, :due_date, :status, :owner_id, :fulfillment_note,
+      :agreement_reference, :acceptance_criteria, :delivered_on, :recurrence, :vendor_id)
   end
 end
