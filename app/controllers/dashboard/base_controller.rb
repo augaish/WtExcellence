@@ -34,7 +34,15 @@ class Dashboard::BaseController < ApplicationController
         end
     end
 
-    helper_method :current_company, :current_company_user, :viewer?, :module_enabled_for_current?
+    # Branding belongs to a company. A platform admin has none of their own,
+    # so they see the platform's mark, never the first company's.
+    def branding_company
+        return nil if current_user&.platform_admin?
+
+        current_company
+    end
+
+    helper_method :current_company, :current_company_user, :viewer?, :module_enabled_for_current?, :branding_company
 
     # Class macro: gate an entire controller (or a subset via before_action
     # options) behind a per-company module. Platform admins always pass.

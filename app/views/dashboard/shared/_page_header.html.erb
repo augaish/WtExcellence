@@ -1,12 +1,13 @@
 <%# Consistent page header. Render with `layout:` and a block for action buttons. Locals: title, subtitle (optional). %>
-<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-  <div class="min-w-0">
-    <h1 class="text-2xl font-bold text-[#0D1120] truncate"><%= title %></h1>
+<%# The title keeps its room; a long row of buttons wraps beneath it rather than squeezing the title. %>
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:flex-wrap gap-4 mb-6">
+  <div class="min-w-0 sm:min-w-[12rem]">
+    <h1 class="text-2xl font-bold text-[#0D1120]"><%= title %></h1>
     <% if local_assigns[:subtitle].present? %>
       <p class="mt-1 text-sm text-[#797C81]"><%= subtitle %></p>
     <% end %>
   </div>
-  <div class="flex items-center gap-2 flex-shrink-0">
+  <div class="flex items-center gap-2 flex-wrap">
     <%= yield %>
   </div>
 </div>

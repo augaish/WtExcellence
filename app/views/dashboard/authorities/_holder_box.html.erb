@@ -21,10 +21,10 @@
                 title="<%= t('doa.show_original') %>" aria-label="<%= t('doa.show_original') %>">⇄</button>
       </span>
     <% else %>
-      <span class="inline-flex items-center gap-1 rounded-full bg-[#F6EEFF] px-2 py-0.5 text-xs text-[#0D1120]">
+      <span class="inline-flex flex-wrap items-center gap-1 rounded-lg bg-[#F6EEFF] px-2 py-0.5 text-xs text-[#0D1120] max-w-full break-words">
         <%= render "dashboard/authorities/holder_icon", kind: (holder.org_unit ? :unit : (holder.user ? :person : (holder.dynamic_role == "direct_manager" ? :person : :unit))) %>
-        <span><%= holder.holder_label %></span>
-        <% if holder.condition.present? %><span class="text-[#797C81]">(<%= holder.condition %>)</span><% end %>
+        <span class="min-w-0 break-words"><%= holder.holder_label %></span>
+        <% if holder.condition.present? %><span class="text-[#797C81] min-w-0 break-words basis-full">(<%= holder.condition %>)</span><% end %>
         <% if can_manage %>
           <%= button_to "×", dashboard_destroy_authority_assignment_path(holder, matrix_id: matrix.id),
               method: :delete, class: "text-[#797C81] hover:text-[#0D1120] leading-none", title: t('delete') %>

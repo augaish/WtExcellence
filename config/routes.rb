@@ -184,6 +184,7 @@ Rails.application.routes.draw do
       post "categories", action: :create_category, as: :create_authority_category
       post "authorities", action: :create_authority, as: :create_authority
       patch "categories/reorder", action: :reorder_categories, as: :reorder_authority_categories
+      patch "authorities/reorder", action: :reorder_authorities, as: :reorder_authorities
       post "review", action: :send_for_review, as: :send_authority_review
       patch "reviews/:id", action: :answer_review, as: :answer_authority_review
       post "publish", action: :publish, as: :publish_authority_matrix
@@ -195,8 +196,11 @@ Rails.application.routes.draw do
       delete "authorities/:id", action: :destroy_authority, as: :destroy_authority
       delete "assignments/:id", action: :destroy_assignment, as: :destroy_authority_assignment
       post "versions", action: :open_next_version, as: :open_next_authority_version
-      post "consultations", action: :create_consultation, as: :create_authority_consultation
-      patch "consultations/:id", action: :rule_consultation, as: :rule_authority_consultation
+      post "authorities/:authority_id/comments", action: :create_review_comment, as: :create_authority_review_comment
+      patch "comments/:id", action: :answer_review_comment, as: :answer_authority_review_comment
+      get "import", action: :import, as: :import_authorities
+      post "import", action: :run_import
+      get "template", action: :template, as: :authorities_template
       post "suggestions", action: :apply_suggestions, as: :apply_authority_suggestions
       post "delegations", action: :create_delegation, as: :create_authority_delegation
       patch "delegations/:id/revoke", action: :revoke_delegation, as: :revoke_authority_delegation

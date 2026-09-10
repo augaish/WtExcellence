@@ -1,41 +1,41 @@
-<%# One authority: its name, limit and basis, then the six level boxes.
-    Locals: authority, matrix, can_manage, org_units, company_users, input %>
+<%# One authority: its number and wording, the six level boxes, and the review
+    comments left against it. The pencil edits the wording in the page's
+    language, in place.
+    Locals: authority, matrix, can_edit, number, comments, org_units, company_users, input %>
 <% delegated = authority.delegations_in_force %>
-<div class="p-5 space-y-4" data-search-text="<%= authority.display_name.downcase %>">
-  <div class="flex items-start justify-between gap-4">
-    <div class="min-w-0">
-      <p class="text-sm font-semibold text-[#0D1120]">
-        <span class="text-[#797C81] font-mono me-1"><%= authority.number %></span><%= authority.display_name %>
-        <% if authority.limit_text.present? %>
-          <span class="ms-2 px-2 py-0.5 rounded-full bg-[#F7F7FD] border border-[#E3E3E3] text-xs font-normal text-[#0D1120]"><%= authority.limit_text %></span>
-        <% end %>
+<% open_comments = comments.count { |c| !c.answered? } %>
+<div id="authority-<%= authority.id %>" class="p-5 space-y-4 rounded-lg" data-search-text="<%= authority.display_name.downcase %>"
+     data-authority-matrix-target="authority" data-authority-id="<%= authority.id %>"
+     <%= 'draggable="true" data-action="dragstart->authority-matrix#authorityDragStart dragover->authority-matrix#authorityDragOver drop->authority-matrix#authorityDrop dragend->authority-matrix#authorityDragEnd"'.html_safe if can_edit %>>
+  <div class="flex items-start justify-between gap-4" data-controller="inline-edit">
+    <div class="min-w-0 flex-1 flex items-start gap-2">
+      <% if can_edit %>
+        <span class="cursor-grab text-[#797C81] select-none mt-0.5" title="<%= t('doa.drag_to_reorder') %>" aria-hidden="true">⋮⋮</span>
+      <% end %>
+      <p class="text-sm font-semibold text-[#0D1120] flex-1 min-w-0" data-inline-edit-target="text">
+        <span class="text-[#797C81] font-mono me-1" data-number><%= number %></span><%= authority.display_name %>
         <% if delegated.any? %>
           <span class="ms-2 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-xs font-medium"><%= t('doa.delegated') %></span>
         <% end %>
       </p>
-      <p class="text-xs text-[#797C81] mt-0.5"><%= t('doa.basis') %>: <%= authority.basis_label.presence || t('doa.no_basis') %></p>
+      <% if can_edit %>
+        <%= form_with url: dashboard_update_authority_path(authority, matrix_id: matrix.id), method: :patch,
+                      scope: :authority, class: "flex-1 flex gap-2 items-center", html: { hidden: true, data: { inline_edit_target: "form" } } do |f| %>
+          <span class="text-[#797C81] font-mono text-sm"><%= number %></span>
+          <%= f.text_field name_field, value: authority.public_send(name_field), dir: (rtl? ? "rtl" : "ltr"), class: input %>
+          <%= f.submit t('save'), class: ui_btn_secondary %>
+          <button type="button" class="text-xs text-[#797C81] hover:underline" data-action="click->inline-edit#close"><%= t('cancel') %></button>
+        <% end %>
+      <% end %>
     </div>
-    <% if can_manage %>
+    <% if can_edit %>
       <div class="flex items-center gap-3 flex-shrink-0">
-        <details class="relative">
-          <summary class="cursor-pointer text-[#5C3984] hover:text-[#4A2F6B] list-none" title="<%= t('edit') %>" aria-label="<%= t('edit') %>">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 16z"/></svg>
-          </summary>
-          <div class="absolute end-0 mt-2 z-10 bg-white border border-[#E3E3E3] rounded-lg p-3 shadow-sm min-w-[36rem]">
-            <%= form_with url: dashboard_update_authority_path(authority, matrix_id: matrix.id), method: :patch,
-                          scope: :authority, class: "grid gap-2 md:grid-cols-5" do |f| %>
-              <%= f.text_field :name_en, value: authority.name_en, placeholder: "EN", class: input %>
-              <%= f.text_field :name_ar, value: authority.name_ar, dir: "rtl", placeholder: "AR", class: input %>
-              <%= f.text_field :limit_text, value: authority.limit_text, placeholder: t('doa.limit_placeholder'), class: input %>
-              <%= f.collection_select :basis_record_id, matrix.company.pp_records.of_type("policy").latest.ordered, :id, :display_title,
-                  { include_blank: t('doa.basis'), selected: authority.basis_record_id }, class: input %>
-              <%= f.submit t('save'), class: ui_btn_secondary %>
-            <% end %>
-          </div>
-        </details>
+        <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B]" data-action="click->inline-edit#open" title="<%= t('edit') %>" aria-label="<%= t('edit') %>">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 16z"/></svg>
+        </button>
         <%= button_to t('delete'), dashboard_destroy_authority_path(authority, matrix_id: matrix.id),
             method: :delete, form: { data: { turbo_confirm: t('are_you_sure') } },
-            class: "text-xs text-[#797C81] hover:text-[#0D1120]" %>
+            class: "text-xs text-[#797C81] hover:text-red-600" %>
       </div>
     <% end %>
   </div>
@@ -43,7 +43,16 @@
   <div class="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
     <% AuthorityLevel::KEYS.each do |level| %>
       <%= render "dashboard/authorities/holder_box", authority: authority, level: level, matrix: matrix,
-            delegations: delegated, can_manage: can_manage, org_units: org_units, company_users: company_users %>
+            delegations: delegated, can_manage: can_edit, org_units: org_units, company_users: company_users %>
     <% end %>
   </div>
+
+  <% if comments.any? || can_comment_on_matrix? %>
+    <details class="text-sm" <%= 'open' if open_comments.positive? && can_edit %>>
+      <summary class="cursor-pointer text-xs font-medium <%= open_comments.positive? ? 'text-red-700' : 'text-[#5C3984]' %> hover:underline">
+        <%= t('doa.comments.title', count: comments.size) %><% if open_comments.positive? %> · <%= t('doa.comments.open', count: open_comments) %><% end %>
+      </summary>
+      <%= render "dashboard/authorities/comments", authority: authority, matrix: matrix, comments: comments, can_edit: can_edit, input: input %>
+    </details>
+  <% end %>
 </div>

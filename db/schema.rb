@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_10_081748) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_10_092302) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -151,7 +151,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_081748) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "stable_key", limit: 64
-    t.string "limit_text", limit: 250
     t.index ["authority_category_id"], name: "index_authorities_on_authority_category_id"
     t.index ["basis_clause_id"], name: "index_authorities_on_basis_clause_id"
     t.index ["basis_record_id"], name: "index_authorities_on_basis_record_id"
@@ -270,6 +269,23 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_081748) do
     t.index ["matrix_id", "user_id"], name: "index_authority_matrix_reviews_on_matrix_id_and_user_id", unique: true
     t.index ["matrix_id"], name: "index_authority_matrix_reviews_on_matrix_id"
     t.index ["user_id"], name: "index_authority_matrix_reviews_on_user_id"
+  end
+
+  create_table "authority_review_comments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "matrix_id", null: false
+    t.uuid "authority_id", null: false
+    t.uuid "user_id", null: false
+    t.text "body", null: false
+    t.string "decision", limit: 20
+    t.text "reply"
+    t.uuid "replied_by_id"
+    t.datetime "replied_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["authority_id"], name: "index_authority_review_comments_on_authority_id"
+    t.index ["matrix_id"], name: "index_authority_review_comments_on_matrix_id"
+    t.index ["replied_by_id"], name: "index_authority_review_comments_on_replied_by_id"
+    t.index ["user_id"], name: "index_authority_review_comments_on_user_id"
   end
 
   create_table "capa_action_assignments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1542,6 +1558,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_081748) do
   add_foreign_key "authority_delegations", "users", column: "revoked_by_id"
   add_foreign_key "authority_matrix_reviews", "pp_records", column: "matrix_id"
   add_foreign_key "authority_matrix_reviews", "users"
+  add_foreign_key "authority_review_comments", "authorities"
+  add_foreign_key "authority_review_comments", "pp_records", column: "matrix_id"
+  add_foreign_key "authority_review_comments", "users"
+  add_foreign_key "authority_review_comments", "users", column: "replied_by_id"
   add_foreign_key "capa_action_assignments", "capa_actions"
   add_foreign_key "capa_action_assignments", "company_users"
   add_foreign_key "capa_actions", "capas"

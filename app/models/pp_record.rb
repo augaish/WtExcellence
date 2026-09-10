@@ -74,6 +74,8 @@ class PpRecord < ApplicationRecord
   # An executive matrix record governs the authorities it contains.
   has_many :authorities, -> { ordered }, foreign_key: "matrix_id", dependent: :destroy
 
+  has_many :review_comments, class_name: "AuthorityReviewComment", foreign_key: "matrix_id",
+    inverse_of: :matrix, dependent: :destroy
   has_many :consultations, -> { ordered }, class_name: "AuthorityConsultation",
     foreign_key: "matrix_id", dependent: :destroy
 

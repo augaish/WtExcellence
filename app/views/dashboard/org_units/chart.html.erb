@@ -9,9 +9,9 @@
   <div class="flex flex-wrap items-center justify-between gap-3">
     <div class="flex items-center gap-3">
       <%# The company's own mark sits on its own chart, beside the platform's. %>
-      <% if current_company&.brand_logo&.attached? %>
+      <% if branding_company&.brand_logo&.attached? %>
         <%= image_tag dashboard_branding_logo_path,
-            class: "h-9 w-auto max-w-[150px] object-contain", alt: current_company.name %>
+            class: "h-9 w-auto max-w-[150px] object-contain", alt: branding_company.name %>
       <% end %>
       <p class="text-sm font-semibold text-[#0D1120]"><%= current_company&.name %></p>
     </div>

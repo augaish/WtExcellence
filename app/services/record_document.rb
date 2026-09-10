@@ -271,19 +271,18 @@ class RecordDocument
 
   # The executive matrix is the principal content of an executive_doa record;
   # a document that omits it has left out the thing it exists to publish. One
-  # row per authority, with the limit exactly as the company wrote it: a blank
-  # limit prints blank, never "all amounts".
+  # row per authority, numbered as on the page, with its holders per level.
   def executive_matrix_section
     return nil unless record.record_type == "executive_doa"
 
-    rows = record.authorities.includes(:authority_category, bands: { assignments: [ :org_unit, :user ] }).map do |authority|
+    authorities = record.authorities.includes(:authority_category, bands: { assignments: [ :org_unit, :user ] }).ordered.to_a
+    numbers = Authority.numbered(authorities)
+    rows = authorities.map do |authority|
       holders = authority.bands.flat_map(&:assignments)
       {
         category: authority.authority_category&.display_name(locale),
-        number: authority.number,
+        number: numbers[authority.id],
         authority: authority.display_name(locale),
-        band: authority.limit_text.to_s,
-        basis: authority.basis_label(locale),
         assignments: AuthorityLevel::KEYS.index_with do |level|
           holders.select { |a| a.level == level }
                  .map { |a| { holder: a.holder_label(locale), condition: a.condition } }

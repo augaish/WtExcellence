@@ -165,6 +165,8 @@ processes; nothing to build until there is content to hang on it.
 - Licence rule is applied across Governance, P&P, Standards and the Library. CAPA and the AI tools stay closed to risk-manager licences (the owner named Standards and P&P only); say if CAPA should open for reading too.
 - `authority_bands` table is kept with one default band per authority (the page no longer shows bands). Collapsing the table is a later cleanup.
 - `org_level_definitions` table is kept but unused since levels are numbered only.
+- `authority_consultations` table and `AuthorityConsultation` model are kept but no longer shown; reviewer comments per authority (`authority_review_comments`) replaced them. Drop with the bands cleanup.
+- `authorities.basis_record_id` / `basis_clause_id` columns stay but are not shown or edited; the executive matrix is checked against operational authorities directly.
 
 ## Review 03 — status
 - Q14, Q15, sections 5, 7 and 8 are built (phases 10–13). Left for later: vendor due-diligence questionnaires that vary by category (one fixed five-criteria assessment exists), customer records as their own register (commitments name the customer and agreement in text), and a full screen-reader walk of every page.

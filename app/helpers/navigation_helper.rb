@@ -108,7 +108,7 @@ module NavigationHelper
       items << nav_item(label: t("credit_changes"), path: dashboard_credit_changes_path,
         icon: "account-management-icon.svg", active: request.path.include?("credit_changes"))
     end
-    if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user&.has_admin_privileges?
+    if current_user&.company_user&.has_admin_privileges?
       items << nav_item(label: t("branding.title"), path: dashboard_branding_path,
         icon: "general-settings-icon.svg", active: request.path.include?("branding"))
     end

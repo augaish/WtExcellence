@@ -22,8 +22,12 @@
 
   <%= form_with url: dashboard_send_authority_review_path(matrix_id: matrix.id), method: :post, class: "space-y-2" do %>
     <label class="block text-xs font-medium text-[#797C81]"><%= t('doa.review.pick') %></label>
-    <div data-controller="choices-select" data-choices-select-search-value="true">
-      <%= select_tag :user_ids, options_from_collection_for_select(company_users, :id, :name), multiple: true, class: input, data: { choices_select_target: "select" } %>
+    <%# The panel is hidden until its button is pressed; the searchable picker is built when it shows. %>
+    <div data-controller="lazy-choices">
+      <div data-lazy-choices-target="picker" data-choices-select-search-value="true">
+        <%= select_tag :user_ids, options_from_collection_for_select(company_users, :id, :name), multiple: true, class: input,
+            data: { choices_select_target: "select", search_placeholder: t('doa.review.search_people') } %>
+      </div>
     </div>
     <%= submit_tag (reviews.any? ? t('doa.review.send_again') : t('doa.review.send')), class: ui_btn_secondary %>
   <% end %>

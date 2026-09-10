@@ -16,16 +16,27 @@ class Authority < ApplicationRecord
   # and lose the link when the authority goes.
   has_many :operational_uses, class_name: "PpProcessAuthority", foreign_key: "authority_id", dependent: :nullify
   has_many :consultations, class_name: "AuthorityConsultation", foreign_key: "authority_id", dependent: :nullify
+  has_many :review_comments, -> { ordered }, class_name: "AuthorityReviewComment", dependent: :destroy
   has_many :assignments, through: :bands
 
   validates :name_en, length: { maximum: 500 }
   validates :name_ar, length: { maximum: 500 }
-  validates :limit_text, length: { maximum: 250 }
   validate :must_have_a_name
   validate :matrix_must_be_an_executive_doa
   validate :matrix_must_be_editable
 
   scope :ordered, -> { order(:sort_order, :number, :created_at) }
+
+  # Numbers as printed: the category number, a dot, the position inside the
+  # category (1.1, 1.2, 2.1 …). Uncategorised rows count from 0. Computed from
+  # the order the rows sit in, so dragging renumbers without a save per row.
+  def self.numbered(authorities)
+    numbers = {}
+    authorities.group_by(&:authority_category).each do |category, rows|
+      rows.each_with_index { |authority, i| numbers[authority.id] = "#{category&.number || 0}.#{i + 1}" }
+    end
+    numbers
+  end
   scope :in_category, ->(category) { where(authority_category_id: category&.id) }
   scope :without_basis, -> { where(basis_record_id: nil, basis_clause_id: nil) }
 

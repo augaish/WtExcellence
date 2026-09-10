@@ -69,3 +69,27 @@ class Dashboard::BrandingControllerTest < ActionDispatch::IntegrationTest
     assert_select "nav img[alt=?]", @company.name
   end
 end
+
+class Dashboard::BrandingPerCompanyTest < ActionDispatch::IntegrationTest
+  setup do
+    Rails.application.reload_routes!
+    @company = Company.create!(name: "Brand Co #{SecureRandom.hex(4)}", license_seats: 10, credits: 50, is_active: true)
+    @company.brand_logo.attach(io: StringIO.new("PNG"), filename: "logo.png", content_type: "image/png")
+    @super_admin = User.create!(email: "root-#{SecureRandom.hex(4)}@example.com", password: "password123",
+      password_confirmation: "password123", name: "Root", role: "super_admin", is_active: true)
+  end
+
+  test "a super admin sees the platform's mark, not a company's logo, and has no branding page" do
+    sign_in @super_admin
+    get dashboard_overview_path
+    assert_response :success
+    assert_select "img[src=?]", dashboard_branding_logo_path, 0, "a company's logo is not shown to the platform"
+    assert_select "a[href=?]", dashboard_branding_path, 0
+
+    get dashboard_branding_path
+    assert_redirected_to dashboard_overview_path
+
+    get dashboard_branding_logo_path
+    assert_redirected_to dashboard_overview_path, "there is no company logo to stream for the platform"
+  end
+end

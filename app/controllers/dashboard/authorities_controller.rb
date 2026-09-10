@@ -4,11 +4,15 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   requires_module :authorities
   before_action :authenticate_user!
   before_action :ensure_company_present
-  before_action :ensure_can_manage, except: [ :index, :answer_review, :download_pdf ]
+  before_action :ensure_can_manage, except: [ :index, :answer_review, :download_pdf, :create_review_comment ]
   before_action :set_matrix
-  before_action :ensure_matrix_present, except: [ :index, :create_category, :apply_suggestions ]
+  before_action :ensure_matrix_present, except: [ :index, :create_category, :apply_suggestions, :import, :run_import, :template ]
+  # Only the newest version can change; an older one is read on its own terms.
+  before_action :ensure_matrix_editable, except: [ :index, :answer_review, :download_pdf, :create_category,
+    :apply_suggestions, :import, :run_import, :template, :open_next_version, :create_delegation, :revoke_delegation,
+    :create_review_comment ]
 
-  helper_method :can_manage_authorities?, :company_admin?
+  helper_method :can_manage_authorities?, :can_edit_matrix?, :company_admin?, :can_comment_on_matrix?
 
   def index
     @suggested_categories = AuthorityCatalogue.categories
@@ -21,7 +25,8 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @org_units = company.org_units.active.ordered.to_a
     @company_users = company.users.order(:name).to_a
     @diff = AuthorityMatrixDiff.new(@matrix.previous_version, @matrix) if @matrix.previous_version
-    @consultations = @matrix.consultations.includes(:authority, :org_unit, :ruled_by).to_a
+    @numbers = Authority.numbered(@authorities)
+    @review_comments = @matrix.review_comments.includes(:user, :replied_by).ordered.group_by(&:authority_id)
     @suggested_categories = AuthorityCatalogue.categories
     @delegations = company.authority_delegations
       .includes(:authority, :from_org_unit, :to_org_unit, :parent_delegation).to_a
@@ -114,18 +119,24 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
       notice: t("doa.versions.opened"), status: :see_other
   end
 
-  def create_consultation
-    consultation = @matrix.consultations.new(consultation_params)
-    consultation.raised_by = current_user
+  # A reviewer writes a note against one authority; the owner answers it.
+  def create_review_comment
+    return back_to_matrix(alert: t("doa.flash.no_permission")) unless can_comment_on_matrix?
+    return back_to_matrix(alert: t("doa.errors.matrix_published")) unless @matrix.latest_version?
 
-    save_and_return(consultation, "consultation_created")
+    authority = @matrix.authorities.find_by(id: params[:authority_id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if authority.nil?
+
+    comment = @matrix.review_comments.new(authority: authority, user: current_user, body: params[:body])
+    save_and_return(comment, "comment_added")
   end
 
-  def rule_consultation
-    consultation = @matrix.consultations.find_by(id: params[:id])
-    return back_to_matrix(alert: t("doa.flash.not_found")) if consultation.nil?
+  def answer_review_comment
+    comment = @matrix.review_comments.find_by(id: params[:id])
+    return back_to_matrix(alert: t("doa.flash.not_found")) if comment.nil?
 
-    save_and_return_updated(consultation, consultation_ruling_params, "consultation_ruled")
+    attributes = { decision: params[:decision], reply: params[:reply], replied_by: current_user, replied_at: Time.current }
+    save_and_return_updated(comment, attributes, "comment_answered")
   end
 
   # The page starts empty; the first category brings the matrix into being.
@@ -152,6 +163,48 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     authority.sort_order = authority.number
 
     save_and_return(authority, "authority_created")
+  end
+
+  # Drag order inside one category, or a row dropped into another category:
+  # the ids in the order they now sit, and the category they sit in.
+  def reorder_authorities
+    ids = Array(params[:ids]).reject(&:blank?)
+    category = company.authority_categories.find_by(id: params[:category_id])
+    @matrix.authorities.where(id: ids).each do |authority|
+      authority.update_columns(sort_order: ids.index(authority.id) + 1, authority_category_id: category&.id)
+    end
+    head :no_content
+  end
+
+  # ---- Import from Excel ---------------------------------------------------
+
+  def import
+    @result = nil
+  end
+
+  def run_import
+    file = params[:file]
+    if file.blank?
+      @result = AuthorityImportService::Result.new(categories: 0, authorities: 0, errors: [ { row: 0, message: t("doa.import.no_file") } ])
+      return render :import, status: :unprocessable_entity
+    end
+
+    @matrix ||= AuthorityMatrixVersionService.first_version(company, actor: current_user)
+    @result = AuthorityImportService.import(file: file, matrix: @matrix)
+    if @result.success?
+      redirect_to dashboard_authorities_path(matrix_id: @matrix.id),
+        notice: t("doa.import.done", categories: @result.categories, authorities: @result.authorities), status: :see_other
+    else
+      render :import, status: :unprocessable_entity
+    end
+  end
+
+  # The workbook to fill in: one row per authority, one column per level, and
+  # every holder column offers the company's units and people as a dropdown.
+  def template
+    send_data AuthorityImportTemplate.new(company).to_xlsx,
+      filename: "authorities_template.xlsx",
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   end
 
   def update_category
@@ -208,6 +261,12 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     return if @matrix
 
     redirect_to dashboard_authorities_path, alert: t("doa.no_matrix"), status: :see_other
+  end
+
+  def ensure_matrix_editable
+    return if can_edit_matrix?
+
+    back_to_matrix(alert: t("doa.errors.matrix_published"))
   end
 
   # The matrix being viewed: the one asked for, or the company's most recent.
@@ -270,6 +329,20 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     membership.present? && (membership.company_admin? || membership.gov_manager?)
   end
 
+  # Editing needs the newest version on screen: an older one is a statement of
+  # record, whether or not it was ever published.
+  def can_edit_matrix?
+    can_manage_authorities? && @matrix.present? && @matrix.latest_version?
+  end
+
+  # Reviewers of this version and the people who manage the matrix.
+  def can_comment_on_matrix?
+    return false if @matrix.nil?
+    return true if can_manage_authorities?
+
+    @matrix.matrix_reviews.exists?(user_id: current_user.id)
+  end
+
   def company_admin?
     current_user&.platform_admin? || current_user&.company_user&.company_admin? || false
   end
@@ -285,8 +358,7 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   end
 
   def authority_params
-    params.require(:authority).permit(:authority_category_id, :name_en, :name_ar, :notes, :limit_text,
-      :basis_record_id, :basis_clause_id, :conflict_sensitive)
+    params.require(:authority).permit(:authority_category_id, :name_en, :name_ar, :notes, :conflict_sensitive)
   end
 
   def delegation_params
@@ -297,15 +369,6 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
 
   def revocation_params
     params.require(:authority_delegation).permit(:revocation_reason)
-  end
-
-  def consultation_params
-    params.require(:authority_consultation).permit(:authority_id, :org_unit_id, :challenge,
-      :proposal, :expected_impact)
-  end
-
-  def consultation_ruling_params
-    params.require(:authority_consultation).permit(:status, :ruling)
   end
 
   def assignment_params

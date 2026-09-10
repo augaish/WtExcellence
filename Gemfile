@@ -107,3 +107,4 @@ gem "devise"
 
 gem "sentry-ruby"
 gem "sentry-rails"
+gem "caxlsx", "~> 4.5"

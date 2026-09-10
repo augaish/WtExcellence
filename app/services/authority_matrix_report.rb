@@ -43,7 +43,6 @@ class AuthorityMatrixReport
       found << Finding.new(authority: authority, band: band, kind: "segregation") if band.segregation_breaches.any?
     end
 
-    found << Finding.new(authority: authority, kind: "missing_basis") if authority.basis_label.blank?
     found
   end
 

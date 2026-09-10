@@ -36,7 +36,7 @@ class AuthorityMatrixDiff
     end
   end
 
-  # An authority present in both versions whose name, basis, bands or holders
+  # An authority present in both versions whose name, bands or holders
   # differ. The detail names which of those changed, which is what a reader of
   # the change table actually needs.
   def amended
@@ -72,8 +72,6 @@ class AuthorityMatrixDiff
     aspects = []
     aspects << "name" if before.display_name(:en) != after.display_name(:en) ||
                          before.display_name(:ar) != after.display_name(:ar)
-    aspects << "basis" if before.basis_record_id != after.basis_record_id ||
-                          before.basis_clause_id != after.basis_clause_id
     aspects << "bands" if band_signature(before) != band_signature(after)
     aspects << "holders" if holder_signature(before) != holder_signature(after)
     aspects

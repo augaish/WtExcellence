@@ -158,11 +158,11 @@ class RecordDocxRenderer
   end
 
   def executive_matrix_table(rows)
-    headers = %w[category number authority band basis].map { |c| translate("record_document.columns.#{c}") } +
+    headers = %w[category number authority].map { |c| translate("record_document.columns.#{c}") } +
       AuthorityLevel::KEYS.map { |level| AuthorityLevel.label(level, locale) }
 
     body = rows.map do |row|
-      [ row[:category].to_s, row[:number].to_s, row[:authority].to_s, row[:band].to_s, row[:basis].to_s ] +
+      [ row[:category].to_s, row[:number].to_s, row[:authority].to_s ] +
         AuthorityLevel::KEYS.map do |level|
           holders = row[:assignments][level]
           next "-" if holders.blank?

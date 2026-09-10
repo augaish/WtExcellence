@@ -6,13 +6,12 @@ class RetestDocumentsTest < ActiveSupport::TestCase
     @company = Company.create!(name: "Doc2 Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
   end
 
-  test "an executive matrix document prints one row per authority with its limit text and holders" do
+  test "an executive matrix document prints one numbered row per authority with its holders" do
     matrix = @company.pp_records.create!(record_type: "executive_doa", title_en: "Executive DoA")
     unit = @company.org_units.create!(name_en: "Procurement", level: 1)
     category = @company.authority_categories.create!(name_en: "Contracting")
-    authority = @company.authorities.create!(matrix: matrix, name_en: "Approve purchase orders", authority_category: category,
-      limit_text: "A: SAR 0-10,000\nB: above 10,000 up to 50,000")
-    unlimited = @company.authorities.create!(matrix: matrix, name_en: "Sign NDAs", authority_category: category)
+    authority = @company.authorities.create!(matrix: matrix, name_en: "Approve purchase orders up to SAR 50,000", authority_category: category, sort_order: 1)
+    @company.authorities.create!(matrix: matrix, name_en: "Sign NDAs", authority_category: category, sort_order: 2)
     authority.default_band.assignments.create!(level: "authorize", org_unit: unit)
     authority.default_band.assignments.create!(level: "review", holder_title: "Finance Director", condition: "Above budget line")
 
@@ -20,12 +19,10 @@ class RetestDocumentsTest < ActiveSupport::TestCase
     assert section, "the principal content of the record was missing from its document"
     assert_equal 2, section.payload.size
     assert_equal "Contracting", section.payload.first[:category]
-    assert_equal "A: SAR 0-10,000\nB: above 10,000 up to 50,000", section.payload.first[:band], "the limit is printed exactly as written"
-    assert_equal "", section.payload.last[:band], "a blank limit prints blank, never 'all amounts'"
+    assert_equal [ "#{category.number}.1", "#{category.number}.2" ], section.payload.map { |r| r[:number] }
+    assert_nil section.payload.first[:band], "there is no limit column any more"
     assert_equal [ { holder: "Procurement", condition: nil } ], section.payload.first[:assignments]["authorize"]
     assert_equal "Above budget line", section.payload.first[:assignments]["review"].first[:condition]
-    refute_includes section.payload.map { |r| r[:band] }.join, "All amounts"
-    assert_nil unlimited.limit_text
   end
 
   test "a policy has no executive matrix section" do

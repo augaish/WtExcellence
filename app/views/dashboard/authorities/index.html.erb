@@ -1,18 +1,23 @@
 <% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
 <% can_manage = can_manage_authorities? %>
+<%# Editing is only offered on the newest version; an older one is read as it was. %>
+<% can_edit = can_edit_matrix? %>
 
 <div class="p-6 space-y-6" data-controller="authority-matrix"
-     data-authority-matrix-reorder-url-value="<%= @matrix ? dashboard_reorder_authority_categories_path(matrix_id: @matrix.id) : '' %>">
+     data-authority-matrix-reorder-url-value="<%= @matrix && can_edit ? dashboard_reorder_authority_categories_path(matrix_id: @matrix.id) : '' %>"
+     data-authority-matrix-reorder-authorities-url-value="<%= @matrix && can_edit ? dashboard_reorder_authorities_path(matrix_id: @matrix.id) : '' %>">
   <%= render layout: "dashboard/shared/page_header",
-      locals: { title: t('doa.title'), subtitle: @matrix ? "#{@matrix.display_title} · V#{@matrix.version_number}#{@matrix.published? ? " · #{t('doa.review.published_on', date: l(@matrix.published_at.to_date, format: :document))}" : ''}" : nil } do %>
+      locals: { title: t('doa.title'), subtitle: @matrix ? "V#{@matrix.version_number}#{@matrix.published? ? " · #{t('doa.review.published_on', date: l(@matrix.published_at.to_date, format: :document))}" : ''}#{@matrix.latest_version? ? '' : " · #{t('doa.versions.read_only')}"}" : nil } do %>
     <% if can_manage %>
-      <%# The four buttons the owner asked for, plus the catalogue as an icon. %>
-      <button type="button" class="<%= ui_btn_primary %>" data-action="click->authority-matrix#toggle" data-authority-matrix-panel-param="add-category">
-        + <%= t('doa.add_category') %>
-      </button>
+      <% if can_edit || @matrix.nil? %>
+        <button type="button" class="<%= ui_btn_primary %>" data-action="click->authority-matrix#toggle" data-authority-matrix-panel-param="add-category">
+          + <%= t('doa.add_category') %>
+        </button>
+        <%= link_to t('doa.import.title'), dashboard_import_authorities_path(matrix_id: @matrix&.id), class: ui_btn_secondary %>
+      <% end %>
       <% if @matrix %>
         <%= link_to t('doa.download_pdf'), dashboard_authority_matrix_pdf_path(matrix_id: @matrix.id), class: ui_btn_neutral %>
-        <% if @has_changes && !@matrix.published? %>
+        <% if can_edit && @has_changes && !@matrix.published? %>
           <button type="button" class="<%= ui_btn_secondary %>" data-action="click->authority-matrix#toggle" data-authority-matrix-panel-param="review">
             <%= t('doa.review.send') %>
           </button>
@@ -20,20 +25,22 @@
         <button type="button" class="<%= ui_btn_neutral %>" data-action="click->authority-matrix#toggle" data-authority-matrix-panel-param="delegations">
           <%= t('doa.delegation.title') %> (<%= @delegations.count(&:in_force?) %>)
         </button>
-        <% if @matrix.published? %>
+        <% if @matrix.published? && @matrix.latest_version? %>
           <%= button_to t('doa.versions.open_next'), dashboard_open_next_authority_version_path(matrix_id: @matrix.id), method: :post, class: ui_btn_neutral %>
         <% end %>
       <% end %>
-      <button type="button" class="w-10 h-10 flex items-center justify-center rounded-lg border border-[#E3E3E3] bg-white text-[#5C3984] hover:bg-[#F6EEFF]"
-              data-action="click->authority-matrix#toggle" data-authority-matrix-panel-param="catalogue"
-              title="<%= t('doa.catalogue.title') %>" aria-label="<%= t('doa.catalogue.title') %>">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l1.8 5.2H19l-4.2 3.1 1.6 5.2L12 13.4l-4.4 3.1 1.6-5.2L5 8.2h5.2z"/></svg>
-      </button>
+      <% if can_edit || @matrix.nil? %>
+        <button type="button" class="w-10 h-10 flex items-center justify-center rounded-lg border border-[#E3E3E3] bg-white text-[#5C3984] hover:bg-[#F6EEFF]"
+                data-action="click->authority-matrix#toggle" data-authority-matrix-panel-param="catalogue"
+                title="<%= t('doa.catalogue.title') %>" aria-label="<%= t('doa.catalogue.title') %>">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3l1.8 5.2H19l-4.2 3.1 1.6 5.2L12 13.4l-4.4 3.1 1.6-5.2L5 8.2h5.2z"/></svg>
+        </button>
+      <% end %>
     <% end %>
   <% end %>
 
   <%# ---- Panels behind the buttons ---- %>
-  <% if can_manage %>
+  <% if can_manage && (can_edit || @matrix.nil?) %>
     <section hidden data-authority-matrix-target="panel" data-panel="add-category" class="bg-white border border-[#E3E3E3] rounded-lg p-5">
       <h2 class="text-base font-semibold text-[#0D1120] mb-3"><%= t('doa.add_category') %></h2>
       <%= form_with url: dashboard_create_authority_category_path(matrix_id: @matrix&.id), method: :post,
@@ -55,9 +62,11 @@
         title: t('doa.matrix'), subtitle: (can_manage ? t('doa.empty_start') : t('doa.no_matrix')) %>
   <% else %>
     <% if can_manage %>
-      <section hidden data-authority-matrix-target="panel" data-panel="review">
-        <%= render "dashboard/authorities/review", matrix: @matrix, reviews: @reviews, company_users: @company_users, input: input %>
-      </section>
+      <% if can_edit %>
+        <section hidden data-authority-matrix-target="panel" data-panel="review">
+          <%= render "dashboard/authorities/review", matrix: @matrix, reviews: @reviews, company_users: @company_users, input: input %>
+        </section>
+      <% end %>
       <section hidden data-authority-matrix-target="panel" data-panel="delegations">
         <%= render "dashboard/authorities/delegations", delegations: @delegations, matrix: @matrix,
             authorities: @authorities, org_units: @org_units, input: input, can_manage: can_manage %>
@@ -72,27 +81,13 @@
       <%= form_with url: dashboard_authorities_path, method: :get, class: "flex items-end gap-3" do %>
         <div>
           <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('doa.select_matrix') %></label>
-          <%= select_tag :matrix_id, options_from_collection_for_select(@matrices, :id, ->(m) { "V#{m.version_number} · #{m.display_title}" }, @matrix.id),
+          <%= select_tag :matrix_id, options_for_select(@matrices.map { |m| [ version_option_label(m), m.id ] }, @matrix.id),
               class: input, onchange: "this.form.requestSubmit()" %>
         </div>
       <% end %>
     <% end %>
 
     <%= render "dashboard/authorities/changes", diff: @diff if @diff %>
-
-    <% if @report.any? %>
-      <section class="bg-white border border-[#E3E3E3] rounded-lg p-5">
-        <h2 class="text-base font-semibold text-[#0D1120] mb-3"><%= t('doa.findings.title') %></h2>
-        <ul class="space-y-2 text-sm">
-          <% @report.by_authority.each do |authority, findings| %>
-            <li class="rounded-lg bg-[#F7F7FD] border border-[#E3E3E3] px-4 py-3">
-              <p class="font-medium text-[#0D1120]"><%= authority.display_name %></p>
-              <ul class="mt-1 space-y-0.5 text-[#797C81]"><% findings.each do |finding| %><li><%= finding.message %></li><% end %></ul>
-            </li>
-          <% end %>
-        </ul>
-      </section>
-    <% end %>
 
     <%# ---- Search, then the categories in their order ---- %>
     <div class="flex flex-wrap items-center gap-3">
@@ -112,62 +107,59 @@
     <div class="space-y-4" data-authority-matrix-target="list">
       <% sections.each do |category, authorities| %>
         <section class="bg-white border border-[#E3E3E3] rounded-lg"
-                 data-authority-matrix-target="category" data-category-id="<%= category&.id %>"
+                 data-authority-matrix-target="category" data-category-id="<%= category&.id %>" data-category-number="<%= category&.number || 0 %>"
                  data-search-text="<%= [ category&.display_name, *authorities.map(&:display_name) ].compact.join(' ').downcase %>"
-                 <%= 'draggable="true" data-action="dragstart->authority-matrix#dragStart dragover->authority-matrix#dragOver drop->authority-matrix#drop dragend->authority-matrix#dragEnd"'.html_safe if can_manage && category %>>
-          <div class="flex items-center gap-3 p-4 border-b border-[#E3E3E3]">
-            <% if can_manage && category %>
+                 <%= 'draggable="true" data-action="dragstart->authority-matrix#dragStart dragover->authority-matrix#dragOver drop->authority-matrix#drop dragend->authority-matrix#dragEnd"'.html_safe if can_edit && category %>>
+          <div class="flex items-center gap-3 p-4 border-b border-[#E3E3E3]" data-controller="inline-edit">
+            <% if can_edit && category %>
               <span class="cursor-grab text-[#797C81] select-none" title="<%= t('doa.drag_to_reorder') %>" aria-hidden="true">⋮⋮</span>
             <% end %>
             <button type="button" class="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded text-[#797C81] hover:bg-[#F6EEFF]"
                     data-action="click->authority-matrix#toggleCategory" aria-expanded="true"
                     aria-label="<%= t('doa.toggle_category') %>"><span data-authority-matrix-target="chevron">▾</span></button>
-            <h2 class="text-base font-semibold text-[#0D1120] flex-1 min-w-0">
-              <% if category %><span class="text-[#797C81] font-mono me-1"><%= category.number %></span><% end %>
-              <span data-authority-matrix-target="categoryName"><%= category&.display_name || t('doa.uncategorised') %></span>
+            <h2 class="text-base font-semibold text-[#0D1120] flex-1 min-w-0 flex items-center gap-2">
+              <% if category %><span class="text-[#797C81] font-mono"><%= category.number %></span><% end %>
+              <span data-authority-matrix-target="categoryName" data-inline-edit-target="text"><%= category&.display_name || t('doa.uncategorised') %></span>
+              <% if can_edit && category %>
+                <%# The pencil edits the name in the language the page is shown in, right here. %>
+                <%= form_with url: dashboard_update_authority_category_path(category, matrix_id: @matrix.id), method: :patch,
+                              scope: :authority_category, class: "flex-1 flex gap-2 items-center", html: { hidden: true, data: { inline_edit_target: "form" } } do |f| %>
+                  <%= f.text_field name_field, value: category.public_send(name_field), dir: (rtl? ? "rtl" : "ltr"), class: "#{input} font-normal" %>
+                  <%= f.submit t('save'), class: ui_btn_secondary %>
+                  <button type="button" class="text-xs text-[#797C81] hover:underline" data-action="click->inline-edit#close"><%= t('cancel') %></button>
+                <% end %>
+              <% end %>
             </h2>
-            <% if can_manage && category %>
-              <details class="relative">
-                <summary class="cursor-pointer text-[#5C3984] hover:text-[#4A2F6B] list-none" title="<%= t('edit') %>" aria-label="<%= t('edit') %>">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 16z"/></svg>
-                </summary>
-                <div class="absolute end-0 mt-2 z-10 bg-white border border-[#E3E3E3] rounded-lg p-3 shadow-sm flex flex-wrap gap-2 items-center min-w-[24rem]">
-                  <%= form_with url: dashboard_update_authority_category_path(category, matrix_id: @matrix.id), method: :patch,
-                                scope: :authority_category, class: "flex gap-2" do |f| %>
-                    <%= f.text_field :name_en, value: category.name_en, placeholder: "EN", class: "#{input} w-40" %>
-                    <%= f.text_field :name_ar, value: category.name_ar, dir: "rtl", placeholder: "AR", class: "#{input} w-40" %>
-                    <%= f.submit t('save'), class: ui_btn_secondary %>
-                  <% end %>
-                  <%= button_to t('delete'), dashboard_destroy_authority_category_path(category, matrix_id: @matrix.id),
-                      method: :delete, form: { data: { turbo_confirm: t('doa.category_delete_confirm') } },
-                      class: "text-xs text-red-600 hover:underline" %>
-                </div>
-              </details>
+            <% if can_edit && category %>
+              <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B]" data-action="click->inline-edit#open" title="<%= t('edit') %>" aria-label="<%= t('edit') %>">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 16z"/></svg>
+              </button>
+              <%= button_to t('delete'), dashboard_destroy_authority_category_path(category, matrix_id: @matrix.id),
+                  method: :delete, form: { data: { turbo_confirm: t('doa.category_delete_confirm') } },
+                  class: "text-xs text-[#797C81] hover:text-red-600" %>
             <% end %>
           </div>
 
           <div data-authority-matrix-target="body">
-            <% if authorities.empty? %>
-              <p class="px-5 py-4 text-sm text-[#797C81]"><%= t('doa.category_empty') %></p>
-            <% end %>
+            <p class="px-5 py-4 text-sm text-[#797C81]" data-empty <%= 'hidden' if authorities.any? %>><%= t('doa.category_empty') %></p>
 
-            <div class="divide-y divide-[#E3E3E3]">
+            <div class="divide-y divide-[#E3E3E3]" data-authority-matrix-target="rows"
+                 <%= 'data-action="dragover->authority-matrix#rowsDragOver drop->authority-matrix#authorityDrop"'.html_safe if can_edit %>>
               <% authorities.each do |authority| %>
-                <%= render "dashboard/authorities/authority", authority: authority, matrix: @matrix, can_manage: can_manage,
+                <%= render "dashboard/authorities/authority", authority: authority, matrix: @matrix, can_edit: can_edit,
+                      number: @numbers[authority.id], comments: @review_comments.fetch(authority.id, []),
                       org_units: @org_units, company_users: @company_users, input: input %>
               <% end %>
             </div>
 
-            <% if can_manage %>
+            <% if can_edit %>
               <div class="p-5 border-t border-[#E3E3E3]">
+                <%# An authority is its wording; any threshold is written inside it. %>
                 <%= form_with url: dashboard_create_authority_path(matrix_id: @matrix.id), method: :post,
-                              scope: :authority, class: "grid gap-3 md:grid-cols-5" do |f| %>
+                              scope: :authority, class: "grid gap-3 md:grid-cols-[1fr_1fr_auto]" do |f| %>
                   <%= f.hidden_field :authority_category_id, value: category&.id %>
                   <%= f.text_field :name_en, placeholder: t('doa.authority') + " (EN)", class: input %>
                   <%= f.text_field :name_ar, dir: "rtl", placeholder: t('doa.authority') + " (AR)", class: input %>
-                  <%= f.text_field :limit_text, placeholder: t('doa.limit_placeholder'), class: input %>
-                  <%= f.collection_select :basis_record_id, @matrix.company.pp_records.of_type("policy").latest.ordered, :id, :display_title,
-                      { include_blank: t('doa.basis') }, class: input %>
                   <%= f.submit t('doa.add_authority'), class: ui_btn_primary %>
                 <% end %>
               </div>
@@ -177,7 +169,26 @@
       <% end %>
     </div>
 
-    <%= render "dashboard/authorities/consultation", consultations: @consultations, matrix: @matrix,
-        authorities: @authorities, org_units: @org_units, input: input, can_manage: can_manage %>
+    <%# ---- Findings last, folded, red only when there is something to fix ---- %>
+    <% if @report.any? %>
+      <details class="bg-white border border-red-200 rounded-lg" data-authority-matrix-target="findings">
+        <summary class="cursor-pointer px-5 py-4 text-base font-semibold text-red-700 list-none flex items-center gap-2">
+          <span aria-hidden="true">▸</span><%= t('doa.findings.title') %>
+          <span class="text-xs font-medium rounded-full bg-red-100 text-red-800 px-2 py-0.5"><%= @report.findings.size %></span>
+        </summary>
+        <ul class="px-5 pb-4 space-y-2 text-sm border-t border-red-100 pt-3">
+          <% @report.by_authority.each do |authority, findings| %>
+            <li class="rounded-lg bg-[#F7F7FD] border border-[#E3E3E3] px-4 py-3 flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <p class="font-medium text-[#0D1120]"><span class="text-[#797C81] font-mono me-1"><%= @numbers[authority.id] %></span><%= authority.display_name %></p>
+                <ul class="mt-1 space-y-0.5 text-[#797C81]"><% findings.each do |finding| %><li><%= finding.message %></li><% end %></ul>
+              </div>
+              <a href="#authority-<%= authority.id %>" class="<%= ui_btn_secondary %> flex-shrink-0"
+                 data-action="click->authority-matrix#reveal" data-authority-matrix-id-param="<%= authority.id %>"><%= t('doa.findings.fix') %></a>
+            </li>
+          <% end %>
+        </ul>
+      </details>
+    <% end %>
   <% end %>
 </div>

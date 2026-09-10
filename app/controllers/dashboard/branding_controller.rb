@@ -35,12 +35,12 @@ class Dashboard::BrandingController < Dashboard::BaseController
   private
 
   def set_company
-    @company = current_company
+    @company = branding_company
     redirect_to dashboard_overview_path, alert: t("branding.no_company") if @company.nil?
   end
 
+  # Each company's admin sets its own branding; the platform has none to set.
   def ensure_can_manage_branding
-    return if current_user&.super_admin? || current_user&.delegated_admin?
     return if current_user&.company_user&.has_admin_privileges?
 
     redirect_to dashboard_overview_path, alert: t("branding.not_permitted")

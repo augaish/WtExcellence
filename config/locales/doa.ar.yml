@@ -25,7 +25,6 @@ ar:
     no_match: لا نتائج.
     drag_to_reorder: اسحب لإعادة الترتيب
     toggle_category: طيّ أو توسيع
-    limit_placeholder: الحد، مثل حتى 100,000 ريال
     delegated: مفوَّضة
     show_original: إظهار صاحب الصلاحية الأصلي لدقيقة
     review:
@@ -34,6 +33,7 @@ ar:
       send: إرسال للاعتماد
       send_again: إرسال مرة أخرى
       pick: المراجعون
+      search_people: "اكتب اسمًا…"
       pick_someone: اختر شخصًا واحدًا على الأقل.
       sent:
         zero: لم يُرسل لأحد.
@@ -89,23 +89,73 @@ ar:
         basis: "المرجع النظامي"
         bands: "الشرائح"
         holders: "أصحاب الصلاحية"
-    consultation:
-      title: "الاستطلاع"
-      none: "لم تُرفع أي ملاحظات على هذه النسخة."
-      challenge: "التحدي"
-      proposal: "المقترح التحسيني"
-      expected_impact: "الأثر المتوقع"
-      ruling: "تعليق التميز المؤسسي"
-      raise: "رفع ملاحظة"
-      rule: "تسجيل القرار"
-      statuses:
-        open: "مفتوحة"
-        accepted: "مقبولة"
-        rejected: "مرفوضة"
-        deferred: "تشغيلية — تُعالج في الإجراء"
     versions:
       open_next: "فتح النسخة التالية"
       opened: "تم فتح نسخة جديدة."
+      current: "الحالية"
+      read_only: "نسخة أقدم، للقراءة فقط"
+    comments:
+      title:
+        zero: "التعليقات"
+        one: "تعليق واحد"
+        two: "تعليقان"
+        few: "%{count} تعليقات"
+        many: "%{count} تعليقًا"
+        other: "%{count} تعليق"
+      open:
+        one: "1 مفتوح"
+        two: "2 مفتوحان"
+        few: "%{count} مفتوحة"
+        many: "%{count} مفتوحًا"
+        other: "%{count} مفتوح"
+      placeholder: "تعليقك على هذه الصلاحية"
+      add: "إضافة تعليق"
+      reply_placeholder: "السبب — يقرأه المراجع"
+      accept: "قبول"
+      reject: "رفض"
+      waiting: "بانتظار الرد."
+      decisions:
+        accepted: "مقبول"
+        rejected: "مرفوض"
+    import:
+      title: "استيراد من Excel"
+      subtitle: "نزّل القالب، واملأ صفًا لكل صلاحية، ثم ارفعه. كل عمود مستوى قائمة منسدلة بوحداتك وأشخاصك."
+      step1: "1. نزّل القالب"
+      step1_hint: "القالب يحتوي مسبقًا على وحداتك التنظيمية وأشخاصك والأدوار الديناميكية، فيُختار صاحب الصلاحية ولا يُكتب."
+      step2: "2. ارفع الملف بعد تعبئته"
+      step2_hint: "تُطابق الفئات والصلاحيات الموجودة بالاسم، وتُنشأ الجديدة. لا يُحفظ شيء إن كان في أي صف مشكلة."
+      download_template: "تنزيل القالب (.xlsx)"
+      upload: "رفع"
+      no_file: "اختر ملفًا أولًا."
+      empty: "لا توجد صفوف للاستيراد في الورقة."
+      unreadable: "تعذّرت قراءة الملف: %{error}"
+      holder_unknown: "\"%{label}\" ليس من وحداتك أو أشخاصك أو أدوارك. اختره من القائمة المنسدلة."
+      failed: "لم يُستورد الملف."
+      nothing_saved: "لم يُحفظ شيء. صحّح الصفوف أعلاه وارفع الملف مجددًا."
+      row: "الصف %{number}"
+      done: "تم استيراد %{authorities} صلاحية و%{categories} فئة جديدة."
+      prefixes:
+        unit: "وحدة"
+        person: "شخص"
+        role: "دور"
+      columns:
+        category: "الفئة"
+        authority_en: "الصلاحية (EN)"
+        authority_ar: "الصلاحية (AR)"
+        prepare: "إعداد"
+        review: "مراجعة"
+        approve: "موافقة"
+        recommend: "توصية"
+        authorize: "اعتماد"
+        inform: "إبلاغ"
+        holders: "جميع أصحاب الصلاحية"
+      example:
+        category: "المشتريات"
+      help:
+        - "صف واحد لكل صلاحية. تُنشأ الفئة إن لم تكن موجودة؛ اكتبها بالطريقة نفسها في كل صف."
+        - "اكتب أي حد داخل نص الصلاحية نفسه، مثل \"اعتماد أوامر الشراء حتى 100,000 ريال\"."
+        - "كل عمود مستوى (إعداد … إبلاغ) قائمة منسدلة بوحداتك وأشخاصك وأدوارك. اختر واحدًا؛ ولأكثر من واحد افصل بينهم بـ \" | \"."
+        - "احذف صف المثال قبل الرفع."
     delegation:
       title: "التفويضات"
       none: "لم تُسجَّل أي تفويضات."
@@ -158,7 +208,7 @@ ar:
       no_authorizer: لا يوجد صاحب صلاحية اعتماد نهائي.
       many_authorizers: يوجد أكثر من صاحب صلاحية اعتماد نهائي.
       segregation: يجمع صاحب واحد بين الإعداد والمراجعة والاعتماد لهذه الصلاحية.
-      missing_basis: لم يُسجَّل نظام أو سياسة كمرجع لهذه الصلاحية.
+      fix: "إصلاح"
     dynamic_roles:
       owning_unit:
         label: الوحدة المالكة
@@ -177,8 +227,8 @@ ar:
       authority_created: تمت إضافة الصلاحية.
       band_created: تمت إضافة الشريحة.
       assignment_created: تم إسناد الصلاحية.
-      consultation_created: تم تسجيل الملاحظة.
-      consultation_ruled: تم تسجيل القرار.
+      comment_added: "تمت إضافة التعليق."
+      comment_answered: "تم تسجيل الرد."
       delegation_created: تم تسجيل التفويض.
       delegation_revoked: تم إلغاء التفويض.
       band_updated: "تم تحديث الشريحة."

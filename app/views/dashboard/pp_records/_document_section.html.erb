@@ -75,7 +75,7 @@
   <table class="doc-avoid-break">
     <thead>
       <tr>
-        <% %w[category number authority band basis].each do |column| %>
+        <% %w[category number authority].each do |column| %>
           <th><%= t("record_document.columns.#{column}") %></th>
         <% end %>
         <% AuthorityLevel::KEYS.each do |level| %><th><%= AuthorityLevel.label(level) %></th><% end %>
@@ -87,8 +87,6 @@
           <td><%= row[:category] %></td>
           <td><%= row[:number] %></td>
           <td><%= row[:authority] %></td>
-          <td class="whitespace-pre-line"><%= row[:band] %></td>
-          <td><%= row[:basis] %></td>
           <% AuthorityLevel::KEYS.each do |level| %>
             <td>
               <% holders = row[:assignments][level] %>

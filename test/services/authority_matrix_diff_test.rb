@@ -83,12 +83,12 @@ class AuthorityMatrixDiffTest < ActiveSupport::TestCase
     assert_includes change.detail, "bands"
   end
 
-  test "a newly recorded basis is reported" do
-    policy = @company.pp_records.create!(record_type: "policy", title_en: "Contracting Policy")
+  test "a basis is not shown on the page, so recording one is not a change" do
+    policy = @company.pp_records.create!(record_type: "policy", title_en: "Policy")
     v2 = open_next
     v2.authorities.sole.update!(basis_record: policy)
 
-    assert_equal [ "basis" ], diff(v2).changes.sole.detail
+    assert_not diff(v2).any?
   end
 
   test "reordering holders is not reported as a change" do

@@ -68,13 +68,68 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_select "input[type=search]"
   end
 
-  test "an authority carries its limit as text and shows it" do
+  test "an authority is numbered category.position and has no limit box" do
     sign_in @admin
     post dashboard_create_authority_path, params: { matrix_id: @matrix.id,
-      authority: { authority_category_id: @category.id, name_en: "Direct purchase", limit_text: "Up to SAR 100,000" } }
+      authority: { authority_category_id: @category.id, name_en: "Direct purchase up to SAR 100,000" } }
     follow_redirect!
-    assert_includes response.body, "Up to SAR 100,000"
+    assert_select "[data-number]", text: "#{@category.number}.1"
+    assert_select "input[name='authority[limit_text]']", 0
+    assert_select "select[name='authority[basis_record_id]']", 0
     assert_not_includes response.body, I18n.t("doa.add_band")
+  end
+
+  test "authorities are reordered and moved between categories by drag" do
+    other = @company.authority_categories.create!(name_en: "Finance")
+    first = @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "One", number: 1, sort_order: 1)
+    second = @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "Two", number: 2, sort_order: 2)
+
+    sign_in @admin
+    patch dashboard_reorder_authorities_path(matrix_id: @matrix.id), params: { ids: [ second.id, first.id ], category_id: other.id }, as: :json
+    assert_response :no_content
+
+    assert_equal [ 1, other.id ], [ second.reload.sort_order, second.authority_category_id ]
+    assert_equal [ 2, other.id ], [ first.reload.sort_order, first.authority_category_id ]
+    numbers = Authority.numbered(@matrix.authorities.ordered.to_a)
+    assert_equal "#{other.number}.1", numbers[second.id]
+    assert_equal "#{other.number}.2", numbers[first.id]
+  end
+
+  test "the pencil edits the name in the page's language, in place" do
+    authority = @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "Sign", name_ar: "توقيع")
+    sign_in @admin
+
+    get dashboard_authorities_path
+    assert_select "[data-controller=inline-edit] form[hidden] input[name='authority[name_en]'][value=Sign]"
+    assert_select "[data-controller=inline-edit] form[hidden] input[name='authority[name_ar]']", 0
+
+    get dashboard_authorities_path(locale: :ar)
+    assert_select "form[hidden] input[name='authority[name_ar]'][value=توقيع]"
+
+    patch dashboard_update_authority_path(authority, matrix_id: @matrix.id), params: { authority: { name_en: "Sign contracts" } }
+    assert_equal [ "Sign contracts", "توقيع" ], [ authority.reload.name_en, authority.name_ar ]
+  end
+
+  test "an older version is read-only and the picker names versions only" do
+    older = @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "Old")
+    @matrix.update!(current_stage: PpStage::TERMINAL_KEYS.first, published_at: Time.current)
+    sign_in @admin
+    post dashboard_open_next_authority_version_path(matrix_id: @matrix.id)
+    newest = @company.pp_records.of_type("executive_doa").order(:version_number).last
+
+    get dashboard_authorities_path(matrix_id: @matrix.id)
+    assert_select "option", text: "V1 · #{I18n.t('doa.review.published_on', date: I18n.l(Date.current, format: :document))}"
+    assert_select "option", text: "V2 · #{I18n.t('doa.versions.current')}"
+    assert_select "option", text: /Executive DoA 2026/, count: 0
+    assert_select "[draggable]", 0
+    assert_select "[data-controller=inline-edit] form", 0
+    assert_select "form[action=?]", dashboard_create_authority_path(matrix_id: @matrix.id), 0
+
+    patch dashboard_update_authority_path(older, matrix_id: @matrix.id), params: { authority: { name_en: "Changed" } }
+    assert_equal "Old", older.reload.name_en
+
+    get dashboard_authorities_path(matrix_id: newest.id)
+    assert_select "[data-controller=inline-edit] form"
   end
 
   test "the review round: send, everyone accepts, the admin publishes, and the version locks" do
@@ -143,13 +198,13 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     get dashboard_authorities_path
 
     assert_includes response.body, I18n.t("doa.findings.no_authorizer")
-    assert_includes response.body, I18n.t("doa.findings.missing_basis")
+    assert_select "details[data-authority-matrix-target=findings] summary.text-red-700", text: /#{I18n.t('doa.findings.title')}/
+    assert_select "details[data-authority-matrix-target=findings][open]", 0, "findings start folded"
+    assert_select "a[href=?]", "#authority-#{@matrix.authorities.sole.id}", text: I18n.t("doa.findings.fix")
   end
 
-  test "an authority with a single authorizer and a basis raises no findings" do
-    policy = @company.pp_records.create!(record_type: "policy", title_en: "Contracting Policy")
-    authority = @company.authorities.create!(matrix: @matrix, authority_category: @category,
-      name_en: "Sign contracts", basis_record: policy)
+  test "an authority with a single authorizer raises no findings; a basis is not asked for" do
+    authority = @company.authorities.create!(matrix: @matrix, authority_category: @category, name_en: "Sign contracts")
     authority.bands.sole.assignments.create!(level: "authorize", org_unit: @minister)
 
     sign_in @admin
@@ -217,43 +272,104 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("doa.diff.aspects.name")
   end
 
-  test "an objection can be raised and then ruled on" do
+  test "a reviewer comments on an authority and the owner answers with a reason" do
     authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+    reviewer = create_user("doa-reviewer", CompanyUser::ROLES[:company_quality_manager])
+    @matrix.matrix_reviews.create!(user: reviewer, requested_by: @admin, requested_at: Time.current)
+
+    sign_in reviewer
+    post dashboard_create_authority_review_comment_path(authority_id: authority.id, matrix_id: @matrix.id),
+      params: { body: "Approval sits with the wrong deputy" }
+    comment = @matrix.review_comments.sole
+    assert_equal reviewer, comment.user
+    assert_not comment.answered?
+
+    get dashboard_authorities_path
+    assert_includes response.body, "Approval sits with the wrong deputy"
+    assert_includes response.body, I18n.t("doa.comments.waiting")
 
     sign_in @admin
-    post dashboard_create_authority_consultation_path(matrix_id: @matrix.id), params: {
-      authority_consultation: { authority_id: authority.id, org_unit_id: @minister.id,
-                                challenge: "Approval sits with the wrong deputy",
-                                proposal: "Move approval to the concerned agency",
-                                expected_impact: "Confidential data stays with its owner" }
-    }
+    patch dashboard_answer_authority_review_comment_path(comment, matrix_id: @matrix.id),
+      params: { decision: "rejected", reply: "" }
+    assert_not comment.reload.answered?, "an answer needs a reason"
 
-    consultation = @matrix.consultations.sole
-    assert_equal "open", consultation.status
-    assert_equal @admin, consultation.raised_by
-
-    patch dashboard_rule_authority_consultation_path(consultation, matrix_id: @matrix.id), params: {
-      authority_consultation: { status: "deferred", ruling: "Operational; handle it in the procedure." }
-    }
-
-    consultation.reload
-    assert_equal "deferred", consultation.status
-    assert_equal @admin, consultation.ruled_by
-    assert_not_nil consultation.ruled_at
+    patch dashboard_answer_authority_review_comment_path(comment, matrix_id: @matrix.id),
+      params: { decision: "accepted", reply: "Moved to the concerned agency." }
+    comment.reload
+    assert_equal [ "accepted", @admin ], [ comment.decision, comment.replied_by ]
+    assert_not_nil comment.replied_at
   end
 
-  test "an objection cannot be closed without a ruling" do
+  test "someone who is not a reviewer or owner cannot comment, and the consultation box is gone" do
+    authority = @company.authorities.create!(matrix: @matrix, name_en: "Sign contracts")
+    sign_in @viewer
+    post dashboard_create_authority_review_comment_path(authority_id: authority.id, matrix_id: @matrix.id), params: { body: "x" }
+    assert_equal 0, @matrix.review_comments.count
+
+    get dashboard_authorities_path
+    assert_not_includes response.body, "Raise an objection"
+  end
+
+  test "the Excel template lists units and people as dropdown choices and the filled sheet imports" do
+    unit = @company.org_units.create!(name_en: "Procurement", level: 1)
     sign_in @admin
-    post dashboard_create_authority_consultation_path(matrix_id: @matrix.id), params: {
-      authority_consultation: { challenge: "Something is wrong" }
-    }
-    consultation = @matrix.consultations.sole
 
-    patch dashboard_rule_authority_consultation_path(consultation, matrix_id: @matrix.id), params: {
-      authority_consultation: { status: "rejected", ruling: "" }
-    }
+    get dashboard_authorities_template_path(matrix_id: @matrix.id)
+    assert_response :success
+    assert_equal "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.media_type
+    book = Roo::Excelx.new(StringIO.new(response.body), file_warning: :ignore)
+    assert_equal [ "Authorities", "Lists", "How to fill" ], book.sheets
+    lists = book.sheet("Lists")
+    assert_includes lists.column(1), "Unit: Procurement"
+    assert_includes lists.column(2), "Person: #{@admin.name}"
+    assert_includes lists.column(3), "Role: The owning unit"
 
-    assert_equal "open", consultation.reload.status
+    file = Tempfile.new([ "authorities", ".xlsx" ])
+    Axlsx::Package.new do |p|
+      p.workbook.add_worksheet(name: "Authorities") do |sheet|
+        sheet.add_row AuthorityImportTemplate::HEADERS
+        sheet.add_row [ "Contracting", "Sign contracts", "توقيع العقود", "Unit: Procurement", nil, nil, nil, "Unit: Minister", "Person: #{@admin.name}" ]
+        sheet.add_row [ "Finance", "Approve budgets", nil, nil, nil, nil, "Role: The owning unit", "Unit: Minister | Unit: Procurement", nil ]
+      end
+      p.serialize(file.path)
+    end
+
+    post dashboard_import_authorities_path(matrix_id: @matrix.id),
+      params: { file: Rack::Test::UploadedFile.new(file.path, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") }
+    assert_redirected_to dashboard_authorities_path(matrix_id: @matrix.id)
+
+    assert_equal 2, @matrix.authorities.count
+    contracts = @matrix.authorities.find_by(name_en: "Sign contracts")
+    assert_equal @category, contracts.authority_category
+    assert_equal "توقيع العقود", contracts.name_ar
+    holders = contracts.default_band.assignments
+    assert_equal [ unit.id ], holders.select { |a| a.level == "prepare" }.map(&:org_unit_id)
+    assert_equal [ @minister.id ], holders.select { |a| a.level == "authorize" }.map(&:org_unit_id)
+    assert_equal [ @admin.id ], holders.select { |a| a.level == "inform" }.map(&:user_id)
+
+    budgets = @matrix.authorities.find_by(name_en: "Approve budgets")
+    assert_equal "Finance", budgets.authority_category.name_en
+    assert_equal [ "owning_unit" ], budgets.default_band.assignments.select { |a| a.level == "recommend" }.map(&:dynamic_role)
+    assert_equal 2, budgets.default_band.assignments.count { |a| a.level == "authorize" }
+  end
+
+  test "an import with an unknown holder saves nothing and names the row" do
+    file = Tempfile.new([ "authorities", ".xlsx" ])
+    Axlsx::Package.new do |p|
+      p.workbook.add_worksheet(name: "Authorities") do |sheet|
+        sheet.add_row AuthorityImportTemplate::HEADERS
+        sheet.add_row [ "Contracting", "Sign contracts", nil, nil, nil, nil, nil, "Unit: Minister", nil ]
+        sheet.add_row [ "Contracting", "Sign NDAs", nil, nil, nil, nil, nil, "Nobody Here", nil ]
+      end
+      p.serialize(file.path)
+    end
+
+    sign_in @admin
+    post dashboard_import_authorities_path(matrix_id: @matrix.id),
+      params: { file: Rack::Test::UploadedFile.new(file.path, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") }
+    assert_response :unprocessable_entity
+    assert_includes response.body, I18n.t("doa.import.row", number: 3)
+    assert_equal 0, @matrix.authorities.count
   end
 
   test "a delegation can be recorded and shows as in force" do
