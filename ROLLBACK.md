@@ -48,6 +48,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Phase 13 (Review 03 section 7): SLA as its own capability — Agreements tab, typed other party, comparator/period/source/exclusions per level, measured periods with review and attainment | `875ce5b` | Additive migration: columns on pp_records and pp_service_levels, `sla_measurements`, `sla_record_id` on commitments. |
 | Homepage: language switch and policy pages through the homepage URL (`/?locale=ar`, `/?page=privacy`), no-store | `b570852` | No migration. |
 | Authorities rework (numbering, drag, in-place rename, findings, comments, Excel import, read-only versions) + branding per company | `b0b2d45` | Migration: adds `authority_review_comments`, drops `authorities.limit_text` (limit text is lost on rollback forward; restore from backup). |
+| Users from Excel (super admin), Arabic sign-in, matrix hidden from Records, category reset on a fresh matrix | `7316b12` | No migration. |
 
 ## Roll the code back
 ```bash
