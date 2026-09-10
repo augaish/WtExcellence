@@ -1,45 +1,41 @@
 <% if rtl? %>
-  <p>تحدد وحدة الصلاحيات والتفويض من يملك اتخاذ أي قرار، وإلى أي حد، وحتى متى.</p>
+  <p>تحدد صفحة الصلاحيات والتفويضات من يملك اتخاذ أي قرار، وإلى أي حد، وحتى متى.</p>
 
-  <h2>المصفوفة التنفيذية</h2>
-  <p>المصفوفة نفسها سجلٌّ محكوم من نوع «مصفوفة الصلاحيات التنفيذية»، أنشئه أولًا من السجلات. تُنظَّم الصلاحيات في فئات، ولكل صلاحية مرجع نظامي يُبيّن من أين استُمدت.</p>
+  <h2>البداية</h2>
+  <p>تبدأ الصفحة فارغة. أضف الفئة الأولى بزر «إضافة فئة»، أو اضغط النجمة لاختيار نقاط بداية شائعة؛ تُقترح الفئات والصلاحيات فقط، ولا يُقترح أي صاحب صلاحية أبدًا. الفئة الجديدة تأخذ آخر رقم، وتُعاد الأرقام بسحب الفئة من مقبضها. القلم بجانب الاسم يعيد التسمية، والسهم يطوي الفئة، وصندوق البحث يرشّح مع كل حرف.</p>
 
-  <h2>الشرائح</h2>
-  <p>الصلاحية التي تختلف باختلاف المبلغ تُسجَّل مرة واحدة بعدة شرائح، بدل تكرار الصف كاملًا لكل حد. لا يجوز تداخل شريحتين لنفس الصلاحية، وإلا تعذّر تحديد من يقرر مبلغًا يقع في كلتيهما.</p>
+  <h2>الصلاحية وحدّها</h2>
+  <p>لكل صلاحية اسم ومرجع (سياسة) و<strong>حد</strong> يُكتب نصًا كما تريده المنظمة، مثل «حتى 100,000 ريال». يُطبع الحد في الوثيقة حرفيًا، ويبقى فارغًا إن لم يُكتب.</p>
 
   <h2>أصحاب الصلاحية</h2>
-  <p>صاحب الصلاحية إما وحدة تنظيمية محددة بالاسم، أو <strong>دور ديناميكي</strong> مثل «الوحدة المالكة» أو «الوحدة الأعلى» — وهو ما يحل محل العبارات الغامضة مثل «الجهة المعنية» التي يتعذر تحديدها عند المراجعة.</p>
+  <p>لكل صلاحية ستة صناديق: إعداد، مراجعة، موافقة، توصية، اعتماد، إبلاغ. صاحب الصلاحية إما وحدة تنظيمية (أيقونة الهيكل)، أو شخص (أيقونة الشخص)، أو <strong>دور ديناميكي</strong> مثل «الوحدة المالكة» أو «المدير المباشر».</p>
 
-  <h2>الملاحظات</h2>
-  <p>يعرض النظام تلقائيًا: الصلاحيات بلا صاحب اعتماد، أو بأكثر من صاحب، أو التي يجمع فيها شخص واحد بين الإعداد والمراجعة والاعتماد، أو التي بلا مرجع نظامي. هذه ملاحظات إرشادية لا تمنع الحفظ.</p>
-
-  <h2>النسخ والاستطلاع</h2>
-  <p>فتح نسخة جديدة يُنشئ نسخة من المصفوفة، فتبقى المعتمدة كما هي ويُقارَن بينهما تلقائيًا. تُسجَّل ملاحظات الوحدات مع التحدي والمقترح والأثر المتوقع، ولا يُغلق أي بند دون قرار مكتوب.</p>
+  <h2>الاعتماد والنشر</h2>
+  <p>يدير الصفحة مدير الشركة ومدراء الحوكمة (مدراء المخاطر الذين يعيّنهم مدير الشركة من إدارة الحسابات). عند وجود تغييرات يظهر زر «إرسال للاعتماد»: يُختار المراجعون فيقبل كل منهم أو يرفض مع السبب. بعد قبول الجميع يضغط مدير الشركة «نشر» فيصبح الإصدار ساريًا بتاريخ نشره ويُقفل؛ التعديلات اللاحقة تُفتح في الإصدار التالي وتُقارَن تلقائيًا بالسابق.</p>
 
   <h2>التفويض</h2>
-  <p>التفويض بين المناصب لا الأشخاص، فيبقى ساريًا عند تغيّر شاغل المنصب. لا يجوز تفويض أكثر مما يملكه المفوِّض، وينتهي التفويض المؤقت تلقائيًا في تاريخه، ويحتاج التفويض الفرعي موافقة مانح الصلاحية الأصلية مع بقاء المساءلة عليه.</p>
+  <p>خلف زر «التفويضات» تُسجَّل التفويضات بين المناصب لا الأشخاص. تظهر الصلاحية المفوَّضة في الجدول بلون مختلف مع وسم «مفوَّضة»، وضغط أيقونة التبديل يعرض صاحبها الأصلي لدقيقة ثم يعود تلقائيًا. لا يجوز تفويض أكثر مما يملكه المفوِّض، وينتهي التفويض المؤقت في تاريخه.</p>
 
-  <div class="tip">تُقترح فئات وصلاحيات للبدء، لكن لا يُقترح أي صاحب صلاحية: تحديد من يقرر اجتهاد منظمتكم وحدها.</div>
+  <h2>الصلاحيات الإجرائية</h2>
+  <p>تُكتب داخل الموثِّق خلف كل خطوة من خطوات الإجراء (أيقونة الميزان). عند ربطها بصلاحية تنفيذية يتحقق النظام من أن صاحب الاعتماد النهائي ليس أدنى من المصفوفة التنفيذية، ويلوّن الصف بالأحمر إن كان كذلك.</p>
 <% else %>
   <p>Authorities &amp; Delegations records who may decide what, up to what limit, and until when.</p>
 
-  <h2>The executive matrix</h2>
-  <p>The matrix is itself a governed record of type <em>Executive Delegation of Authority</em> — create one under Records first. Authorities are organized into categories, and each records the regulation or policy it derives from.</p>
+  <h2>Starting</h2>
+  <p>The page starts empty. Add your first category with <strong>Add category</strong>, or press the star to pick common starting points; categories and authorities are suggested, holders never are. A new category takes the last number; drag a category by its handle to reorder. The pencil renames, the arrow collapses, and the search box filters as you type.</p>
 
-  <h2>Threshold bands</h2>
-  <p>An authority that varies by amount is recorded once with several bands, rather than repeating the whole row per threshold. Two bands of one authority may not overlap, or the matrix could not say who decides an amount falling in both.</p>
+  <h2>An authority and its limit</h2>
+  <p>Each authority has a name, a basis (a policy) and a <strong>limit</strong> written as text the way your organisation says it, for example "up to SAR 100,000". The limit prints on the document exactly as written, and stays blank if none was written.</p>
 
   <h2>Holders</h2>
-  <p>A holder is either a named organizational unit or a <strong>dynamic role</strong> such as "the owning unit" or "the parent unit" — which replaces vague phrasing like "the concerned department" that nobody can resolve at audit time.</p>
+  <p>Every authority has six boxes: prepare, review, approve, recommend, authorize, inform. A holder is an organisational unit (structure icon), a person (person icon) or a <strong>dynamic role</strong> such as "the owning unit" or "the direct manager".</p>
 
-  <h2>Findings</h2>
-  <p>The page continuously reports authorities nobody may finally authorize, authorities with more than one authorizer, one holder combining preparation, review and authorization, and rows with no recorded basis. These are advisory and never block a save.</p>
-
-  <h2>Versions and consultation</h2>
-  <p>Opening the next version copies the matrix, so the approved one stays exactly as approved and the two are compared automatically. Units raise objections with a challenge, proposal and expected impact, and no objection can be closed without a written ruling.</p>
+  <h2>Approval and publishing</h2>
+  <p>The page is managed by the company admin and the Governance Managers (risk managers the admin names in Account Management). When there are changes, <strong>Send for approval</strong> appears: pick the reviewers, each accepts or rejects with a reason. Once everyone accepts, the company admin presses <strong>Publish</strong>; the version takes effect with its publication date and locks. Later changes open the next version, which is compared with the previous one automatically.</p>
 
   <h2>Delegations</h2>
-  <p>A delegation runs between positions, not people, so it survives a change of postholder. Nobody may delegate more than they hold, a temporary delegation stops conferring authority the day it lapses, and a sub-delegation needs the original grantor's approval while accountability stays with them.</p>
+  <p>Behind the <strong>Delegations</strong> button, delegations run between positions, not people. A delegated authority shows in the table in a different colour with a "Delegated" tag; the swap icon shows the original holder for a minute, then returns by itself. Nobody may delegate more than they hold, and a temporary delegation ends on its date.</p>
 
-  <div class="tip">Categories and authorities are suggested to get you started, but no holder is ever suggested — who decides is your organization's judgement alone.</div>
+  <h2>Operational authorities</h2>
+  <p>These are written in the Documenter behind each step of a procedure (the scales icon). When one is linked to an executive authority, the system checks that its final authorizer sits no lower than the executive matrix, and turns the row red if it does.</p>
 <% end %>

@@ -5,7 +5,7 @@
       <div class="flex items-start gap-3">
         <div class="flex-1">
           <h3 class="text-sm font-medium text-red-800 mb-2">
-            <%= pluralize(@commitment.errors.count, "error") %> prohibited this commitment from being saved:
+            <%= t('form_errors.heading', count: @commitment.errors.count) %>
           </h3>
           <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
             <% @commitment.errors.full_messages.each do |message| %>
@@ -48,7 +48,7 @@
       <%= f.label :status, t('status'), class: ui_label %>
       <%# Overdue is not offered: timing is derived from the due date, so it can
           be reported but never chosen. %>
-      <%= f.select :status, CustomerCommitment.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: ui_input %>
+      <%= f.select :status, CustomerCommitment.statuses.keys.map { |s| [ t("commitment_status.#{s}"), s ] }, {}, class: ui_input %>
     </div>
 
     <div class="md:col-span-2">

@@ -5,7 +5,7 @@
       <div class="flex items-start gap-3">
         <div class="flex-1">
           <h3 class="text-sm font-medium text-red-800 mb-2">
-            <%= pluralize(@risk.errors.count, "error") %> prohibited this risk from being saved:
+            <%= t('form_errors.heading', count: @risk.errors.count) %>
           </h3>
           <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
             <% @risk.errors.full_messages.each do |message| %>
@@ -81,7 +81,7 @@
 
     <div>
       <%= f.label :status, t('status'), class: ui_label %>
-      <%= f.select :status, Risk.statuses.keys.map { |s| [ s.titleize, s ] }, {}, class: ui_input %>
+      <%= f.select :status, Risk.statuses.keys.map { |s| [ t("risk_status.#{s}"), s ] }, {}, class: ui_input %>
     </div>
 
     <%# Closing a risk is a governance decision and must say why. %>

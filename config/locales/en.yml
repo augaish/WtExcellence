@@ -2736,3 +2736,10 @@ en:
   risk_level_high: "High"
   risk_level_critical: "Critical"
   risk_level_unassessed: "Unassessed"
+  form_errors:
+    heading:
+      one: "1 error prevents saving:"
+      other: "%{count} errors prevent saving:"
+  delete_risk_confirm: "Delete this risk?"
+  likelihood_times_impact: "Likelihood %{likelihood} × Impact %{impact}"
+  folder: "Folder"

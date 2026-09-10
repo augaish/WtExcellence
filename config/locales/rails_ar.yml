@@ -1,0 +1,83 @@
+ar:
+  # Rails' own words, in Arabic: validation messages, day and month names.
+  # Without these a rejected Arabic form spoke English.
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "لا يمكن أن يكون فارغًا"
+      present: "يجب أن يكون فارغًا"
+      taken: "مستخدم من قبل"
+      invalid: "غير صالح"
+      inclusion: "غير مدرج في القائمة"
+      exclusion: "محجوز"
+      too_long: "أطول من المسموح (الحد الأقصى %{count} حرفًا)"
+      too_short: "أقصر من المسموح (الحد الأدنى %{count} حرفًا)"
+      wrong_length: "طول غير صحيح (يجب أن يكون %{count} حرفًا)"
+      not_a_number: "ليس رقمًا"
+      not_an_integer: "يجب أن يكون عددًا صحيحًا"
+      greater_than: "يجب أن يكون أكبر من %{count}"
+      greater_than_or_equal_to: "يجب أن يكون أكبر من أو يساوي %{count}"
+      less_than: "يجب أن يكون أصغر من %{count}"
+      less_than_or_equal_to: "يجب أن يكون أصغر من أو يساوي %{count}"
+      equal_to: "يجب أن يساوي %{count}"
+      other_than: "يجب أن يكون مختلفًا عن %{count}"
+      confirmation: "لا يطابق %{attribute}"
+      accepted: "يجب قبوله"
+      required: "يجب أن يوجد"
+      empty: "لا يمكن أن يكون فارغًا"
+  activerecord:
+    attributes:
+      risk:
+        title: "العنوان"
+        description: "الوصف"
+        likelihood: "الاحتمالية"
+        impact: "التأثير"
+        status: "الحالة"
+        closure_reason: "سبب الإغلاق"
+        residual_likelihood: "الاحتمالية المتبقية"
+        residual_impact: "التأثير المتبقي"
+        target_likelihood: "الاحتمالية المستهدفة"
+        target_impact: "التأثير المستهدف"
+        owner: "المسؤول"
+      customer_commitment:
+        title: "العنوان"
+        customer_name: "العميل"
+        due_date: "تاريخ الاستحقاق"
+        status: "الحالة"
+        fulfillment_note: "ملاحظة الوفاء"
+        basis: "الأساس"
+        owner: "المسؤول"
+      vendor:
+        name: "الاسم"
+        risk_level: "مستوى المخاطر"
+        category: "الفئة"
+        owner: "المسؤول"
+      pp_record:
+        title_en: "العنوان (إنجليزي)"
+        title_ar: "العنوان (عربي)"
+        change_summary: "سبب التغيير"
+        pp_process: "الإجراء الأب"
+        owner_org_unit: "الوحدة المالكة"
+        verifier_user: "المتحقق"
+      pp_process:
+        category: "المستوى صفر"
+        parent: "الإجراء الأب"
+        level: "المستوى"
+        code: "الرمز"
+  date:
+    day_names: [الأحد, الاثنين, الثلاثاء, الأربعاء, الخميس, الجمعة, السبت]
+    abbr_day_names: [أحد, اثنين, ثلاثاء, أربعاء, خميس, جمعة, سبت]
+    month_names: [~, يناير, فبراير, مارس, أبريل, مايو, يونيو, يوليو, أغسطس, سبتمبر, أكتوبر, نوفمبر, ديسمبر]
+    abbr_month_names: [~, يناير, فبراير, مارس, أبريل, مايو, يونيو, يوليو, أغسطس, سبتمبر, أكتوبر, نوفمبر, ديسمبر]
+    order: [day, month, year]
+  form_errors:
+    heading:
+      zero: "لا أخطاء"
+      one: "خطأ واحد يمنع الحفظ:"
+      two: "خطآن يمنعان الحفظ:"
+      few: "%{count} أخطاء تمنع الحفظ:"
+      many: "%{count} خطأً تمنع الحفظ:"
+      other: "%{count} خطأ تمنع الحفظ:"
+  delete_risk_confirm: "حذف هذا الخطر؟"
+  likelihood_times_impact: "الاحتمالية %{likelihood} × التأثير %{impact}"
+  folder: "المجلد"

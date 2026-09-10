@@ -30,7 +30,7 @@
                   <td class="p-4">
                     <% level_color = { "unassessed" => "bg-gray-100 text-gray-700", "low" => "bg-green-100 text-green-800", "medium" => "bg-yellow-100 text-yellow-800", "high" => "bg-orange-100 text-orange-800", "critical" => "bg-red-100 text-red-800" }[vendor.risk_level] %>
                     <span class="px-2 py-1 text-xs font-medium rounded-full <%= level_color %>">
-                      <%= vendor.risk_level.titleize %>
+                      <%= t("risk_level_#{vendor.risk_level}", default: vendor.risk_level.titleize) %>
                     </span>
                   </td>
                   <td class="p-4 text-sm text-[#797C81]"><%= vendor.owner&.user&.name || t('unassigned') %></td>

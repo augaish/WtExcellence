@@ -5,7 +5,7 @@
       <div class="flex items-start gap-3">
         <div class="flex-1">
           <h3 class="text-sm font-medium text-red-800 mb-2">
-            <%= pluralize(@vendor.errors.count, "error") %> prohibited this vendor from being saved:
+            <%= t('form_errors.heading', count: @vendor.errors.count) %>
           </h3>
           <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
             <% @vendor.errors.full_messages.each do |message| %>
@@ -37,7 +37,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <%= f.label :risk_level, t('risk_level'), class: ui_label %>
-        <%= f.select :risk_level, Vendor.risk_levels.keys.map { |l| [ l.titleize, l ] }, {}, class: ui_input %>
+        <%= f.select :risk_level, Vendor.risk_levels.keys.map { |l| [ t("risk_level_#{l}", default: l.titleize), l ] }, {}, class: ui_input %>
       </div>
       <div>
         <%= f.label :owner_id, t('owner'), class: ui_label %>
