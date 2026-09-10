@@ -36,12 +36,39 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= f.label :risk_level, t('risk_level'), class: ui_label %>
-        <%= f.select :risk_level, Vendor.risk_levels.keys.map { |l| [ t("risk_level_#{l}", default: l.titleize), l ] }, {}, class: ui_input %>
+        <%= f.label :criticality, t('vendor_assessment.criticality'), class: ui_label %>
+        <%= f.select :criticality, Vendor::CRITICALITIES.map { |c| [ t("vendor_assessment.criticalities.#{c}"), c ] }, { include_blank: t('pp_records.pick') }, class: ui_input %>
+        <p class="mt-1 text-xs text-[#797C81]"><%= t('vendor_assessment.criticality_hint') %></p>
       </div>
       <div>
         <%= f.label :owner_id, t('owner'), class: ui_label %>
         <%= f.collection_select :owner_id, current_company&.company_users&.includes(:user) || [], :id, ->(cu) { cu.user.name }, { include_blank: t('unassigned') }, class: ui_input %>
+      </div>
+      <div class="sm:col-span-2">
+        <%= f.label :service_description, t('vendor_assessment.service_description'), class: ui_label %>
+        <%= f.text_area :service_description, rows: 2, class: ui_input %>
+      </div>
+      <div>
+        <%= f.label :contract_end_on, t('vendor_assessment.contract_end_on'), class: ui_label %>
+        <%= f.date_field :contract_end_on, class: ui_input %>
+      </div>
+      <div>
+        <%= f.label :next_review_on, t('vendor_assessment.next_review_on'), class: ui_label %>
+        <%= f.date_field :next_review_on, class: ui_input %>
+      </div>
+    </div>
+
+    <%# The rating normally comes from a signed-off assessment. Setting it here
+        is an override and must say why. %>
+    <div class="rounded-lg border border-[#E3E3E3] bg-[#F7F7FD] p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :risk_level, t('vendor_assessment.manual_rating'), class: ui_label %>
+        <%= f.select :risk_level, Vendor.risk_levels.keys.map { |l| [ t("risk_level_#{l}", default: l.titleize), l ] }, {}, class: ui_input %>
+        <p class="mt-1 text-xs text-[#797C81]"><%= t('vendor_assessment.manual_rating_hint') %></p>
+      </div>
+      <div>
+        <%= f.label :rating_override_reason, t('vendor_assessment.override_reason'), class: ui_label %>
+        <%= f.text_field :rating_override_reason, class: ui_input, placeholder: t('vendor_assessment.override_reason_placeholder') %>
       </div>
     </div>
 

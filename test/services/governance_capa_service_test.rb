@@ -24,7 +24,7 @@ class GovernanceCapaServiceTest < ActiveSupport::TestCase
   end
 
   test "raises a linked CAPA from a vendor with priority from risk level" do
-    vendor = Vendor.create!(company: @company, name: "Acme Cloud", risk_level: "critical")
+    vendor = Vendor.create!(company: @company, name: "Acme Cloud", risk_level: "critical", rating_override_reason: "Outage last quarter")
 
     capa = GovernanceCapaService.create_from(origin: vendor, company: @company, user: @user)
 

@@ -38,7 +38,7 @@ class Dashboard::GovernanceActivityDisplayTest < ActionDispatch::IntegrationTest
   test "a vendor shows its risk-level change" do
     vendor = with_actor do
       record = @company.vendors.create!(name: "Cloud Co", risk_level: "unassessed")
-      record.update!(risk_level: "critical")
+      record.update!(risk_level: "critical", rating_override_reason: "Outage last quarter")
       record
     end
 

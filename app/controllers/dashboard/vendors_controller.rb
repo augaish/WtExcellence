@@ -3,7 +3,7 @@ class Dashboard::VendorsController < Dashboard::BaseController
   requires_module :vendors
   before_action :ensure_can_view_governance, only: [ :index, :show ]
   before_action :ensure_can_manage_vendors, except: [ :index, :show ]
-  before_action :set_vendor, only: [ :show, :edit, :update, :destroy, :create_capa ]
+  before_action :set_vendor, only: [ :show, :edit, :update, :destroy, :create_capa, :approval ]
 
   def index
     # Order by real severity (critical first), not alphabetically — the string
@@ -21,6 +21,21 @@ class Dashboard::VendorsController < Dashboard::BaseController
   end
 
   def show
+    @assessments = @vendor.assessments.includes(:assessed_by, :reviewed_by, uploads: :folder).to_a
+    @assessment = VendorAssessment.new(vendor: @vendor, assessed_on: Date.current)
+    @available_uploads = current_company.uploads.includes(:folder).order(created_at: :desc).limit(100)
+  end
+
+  # Approval to use the supplier: a decision of its own, by an admin or a
+  # Governance Manager, recorded with who took it and why.
+  def approval
+    status = params[:approval_status].to_s
+    unless Vendor::APPROVAL_STATUSES.include?(status)
+      return redirect_to dashboard_vendor_path(@vendor), alert: t("vendor_assessment.flash.unknown_approval"), status: :see_other
+    end
+
+    @vendor.record_approval!(status, by: current_user, note: params[:approval_note])
+    redirect_to dashboard_vendor_path(@vendor), notice: t("vendor_assessment.flash.approval_recorded"), status: :see_other
   end
 
   def new
@@ -31,6 +46,7 @@ class Dashboard::VendorsController < Dashboard::BaseController
     @vendor = Vendor.new(vendor_params)
     @vendor.company = current_company
     @vendor.created_by = current_user
+    @vendor.rating_source = "manual"
     sanitize_company_owner!(@vendor)
 
     if @vendor.save
@@ -45,6 +61,8 @@ class Dashboard::VendorsController < Dashboard::BaseController
 
   def update
     @vendor.assign_attributes(vendor_params)
+    # A rating typed here is a manual one; the assessment path sets its own.
+    @vendor.rating_source = "manual" if @vendor.risk_level_changed?
     sanitize_company_owner!(@vendor)
 
     if @vendor.save
@@ -74,6 +92,7 @@ class Dashboard::VendorsController < Dashboard::BaseController
   end
 
   def vendor_params
-    params.require(:vendor).permit(:name, :category, :risk_level, :contact_email, :owner_id, :notes)
+    params.require(:vendor).permit(:name, :category, :risk_level, :rating_override_reason, :contact_email, :owner_id, :notes,
+      :criticality, :service_description, :contract_end_on, :next_review_on)
   end
 end

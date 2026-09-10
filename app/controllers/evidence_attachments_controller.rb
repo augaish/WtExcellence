@@ -237,7 +237,7 @@ class EvidenceAttachmentsController < DashboardController
 
       cu.has_admin_privileges? || cu.company_quality_manager? ||
         (attachable_type.to_s == "Risk" && current_user.can_manage_risks?) ||
-        (attachable_type.to_s == "Vendor" && current_user.can_manage_vendors?) ||
+        (attachable_type.to_s.in?(%w[Vendor VendorAssessment]) && current_user.can_manage_vendors?) ||
         (attachable_type.to_s == "CustomerCommitment" && current_user.can_manage_commitments?)
     when "Standard"
       CompanyStandard.exists?(standard_id: attachable_id, company_id: current_company.id)

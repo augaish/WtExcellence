@@ -1,0 +1,22 @@
+<%# Criticality, service, contract and review dates. Locals: vendor %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6 grid grid-cols-2 gap-4">
+  <div>
+    <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('vendor_assessment.criticality') %></p>
+    <p class="text-sm text-[#0D1120]"><%= vendor.criticality_label || "—" %></p>
+  </div>
+  <div>
+    <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('vendor_assessment.next_review_on') %></p>
+    <p class="text-sm <%= vendor.review_overdue? ? 'text-red-700 font-medium' : 'text-[#0D1120]' %>">
+      <%= vendor.next_review_on ? l(vendor.next_review_on, format: :document) : "—" %>
+      <% if vendor.review_overdue? %><span class="ms-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px]"><%= t('vendor_assessment.review_overdue') %></span><% end %>
+    </p>
+  </div>
+  <div class="col-span-2">
+    <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('vendor_assessment.service_description') %></p>
+    <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= vendor.service_description.presence || "—" %></p>
+  </div>
+  <div>
+    <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('vendor_assessment.contract_end_on') %></p>
+    <p class="text-sm text-[#0D1120]"><%= vendor.contract_end_on ? l(vendor.contract_end_on, format: :document) : "—" %></p>
+  </div>
+</div>

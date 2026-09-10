@@ -39,6 +39,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Phase 6 (Review 03 correctness): Q01 limit text in document, Q02 DoA routes, Q03 owner name, Q04 AI error wording, Q05 proposed AI actions, Q07 package tabs, Q08 diagram fields, Q10 draft line and published date, Q17 wording | `5727e83` | No migration. New CapaAction status `proposed`. |
 | Phase 7 (Review 03 Arabic and help): Q09 translated statuses, validation and weekday names, Q18 help topics rewritten | `563328f` | No migration. |
 | Phase 8 (Review 03 chart, speed, closure, evidence): Q06 fit/search/fold, Q16 lazy pickers, Q13 closure block, Q11 evidence titles | `b67f9a9` | No migration. |
+| Phase 9 (Review 03 Q12): vendor assessments with sign-off, criticality, approval as its own state, manual rating needs a reason | `PENDING_SHA` | Additive migration: columns on vendors, `vendor_assessments` table. Existing vendors keep their rating, marked "set by hand". |
 
 ## Roll the code back
 ```bash

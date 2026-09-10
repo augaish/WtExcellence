@@ -1,0 +1,26 @@
+<%# Whether procurement may use this supplier: a decision of its own, never
+    implied by a low rating. Locals: vendor %>
+<% colour = { "approved" => "bg-green-100 text-green-800", "conditionally_approved" => "bg-amber-100 text-amber-900",
+              "suspended" => "bg-red-100 text-red-700", "not_approved" => "bg-gray-100 text-gray-700" }[vendor.approval_status] %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6 space-y-3">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h2 class="text-base font-semibold text-[#0D1120]"><%= t('vendor_assessment.approval_title') %></h2>
+      <p class="text-xs text-[#797C81]"><%= t('vendor_assessment.approval_hint') %></p>
+    </div>
+    <span class="px-2.5 py-1 rounded-full text-xs font-medium <%= colour %>"><%= vendor.approval_label %></span>
+  </div>
+  <% if vendor.approved_at %>
+    <p class="text-sm text-[#0D1120]">
+      <%= t('vendor_assessment.approval_by_on', name: vendor.approved_by&.name.to_s, date: l(vendor.approved_at.to_date, format: :document)) %>
+      <% if vendor.approval_note.present? %><span class="block text-xs text-[#797C81] mt-1 whitespace-pre-line"><%= vendor.approval_note %></span><% end %>
+    </p>
+  <% end %>
+  <% if current_user&.can_manage_governance? %>
+    <%= form_with url: approval_dashboard_vendor_path(vendor), method: :patch, class: "flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#E3E3E3]" do %>
+      <%= select_tag :approval_status, options_for_select(Vendor::APPROVAL_STATUSES.map { |s| [ t("vendor_assessment.approval_statuses.#{s}"), s ] }, vendor.approval_status), class: "#{ui_input} sm:w-56" %>
+      <%= text_field_tag :approval_note, nil, placeholder: t('vendor_assessment.approval_note'), class: "#{ui_input} flex-1" %>
+      <%= submit_tag t('vendor_assessment.record_approval'), class: ui_btn_secondary %>
+    <% end %>
+  <% end %>
+</div>

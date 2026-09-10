@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_09_132304) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_10_074209) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1397,6 +1397,26 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_132304) do
     t.index ["status"], name: "index_users_on_status"
   end
 
+  create_table "vendor_assessments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "vendor_id", null: false
+    t.uuid "company_id", null: false
+    t.uuid "assessed_by_id"
+    t.uuid "reviewed_by_id"
+    t.date "assessed_on", null: false
+    t.jsonb "scores", default: {}, null: false
+    t.string "rating", limit: 20, null: false
+    t.text "rationale"
+    t.date "next_review_on"
+    t.datetime "reviewed_at"
+    t.text "review_note"
+    t.integer "version", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_vendor_assessments_on_company_id"
+    t.index ["vendor_id", "version"], name: "index_vendor_assessments_on_vendor_id_and_version", unique: true
+    t.index ["vendor_id"], name: "index_vendor_assessments_on_vendor_id"
+  end
+
   create_table "vendors", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "company_id", null: false
     t.string "name", null: false
@@ -1409,6 +1429,16 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_132304) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "criticality", limit: 20
+    t.text "service_description"
+    t.date "contract_end_on"
+    t.date "next_review_on"
+    t.string "rating_source", limit: 20, default: "manual", null: false
+    t.text "rating_override_reason"
+    t.string "approval_status", limit: 30, default: "not_approved", null: false
+    t.text "approval_note"
+    t.uuid "approved_by_id"
+    t.datetime "approved_at"
     t.index ["company_id"], name: "index_vendors_on_company_id"
     t.index ["created_by_id"], name: "index_vendors_on_created_by_id"
     t.index ["deleted_at"], name: "index_vendors_on_deleted_at"
@@ -1602,7 +1632,12 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_09_132304) do
   add_foreign_key "uploads", "folders"
   add_foreign_key "users", "org_units"
   add_foreign_key "users", "users", column: "invited_by_id"
+  add_foreign_key "vendor_assessments", "companies"
+  add_foreign_key "vendor_assessments", "users", column: "assessed_by_id", on_delete: :nullify
+  add_foreign_key "vendor_assessments", "users", column: "reviewed_by_id", on_delete: :nullify
+  add_foreign_key "vendor_assessments", "vendors"
   add_foreign_key "vendors", "companies"
   add_foreign_key "vendors", "company_users", column: "owner_id"
+  add_foreign_key "vendors", "users", column: "approved_by_id", on_delete: :nullify
   add_foreign_key "vendors", "users", column: "created_by_id"
 end

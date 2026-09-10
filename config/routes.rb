@@ -100,7 +100,13 @@ Rails.application.routes.draw do
       member { post :create_capa }
     end
     resources :vendors, only: [ :index, :new, :create, :show, :edit, :update, :destroy ] do
-      member { post :create_capa }
+      member do
+        post :create_capa
+        patch :approval
+      end
+      resources :assessments, only: [ :create ], controller: "vendor_assessments" do
+        member { patch :sign_off }
+      end
     end
     resources :ai_instructions, only: [ :index, :new, :create, :edit, :update, :destroy ] do
       member { patch :toggle }

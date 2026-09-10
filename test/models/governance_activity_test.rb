@@ -35,7 +35,7 @@ class GovernanceActivityTest < ActiveSupport::TestCase
 
   test "a vendor risk-level change is now recorded, where it was not before" do
     vendor = @company.vendors.create!(name: "Cloud Co", risk_level: "unassessed")
-    vendor.update!(risk_level: "critical")
+    vendor.update!(risk_level: "critical", rating_override_reason: "Outage last quarter")
 
     entry = vendor.activity_trail.first
     assert_equal "UPDATE_VENDOR", entry.action
@@ -67,7 +67,7 @@ class GovernanceActivityTest < ActiveSupport::TestCase
     before = vendor.activity_trail.size
 
     Thread.current[:current_user] = nil
-    vendor.update!(risk_level: "critical")
+    vendor.update!(risk_level: "critical", rating_override_reason: "Outage last quarter")
 
     assert_equal before, vendor.reload.activity_trail.size
   end

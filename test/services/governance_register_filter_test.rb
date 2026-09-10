@@ -63,7 +63,7 @@ class GovernanceRegisterFilterTest < ActiveSupport::TestCase
 
   test "vendor queues separate unassessed from critical" do
     unassessed = @company.vendors.create!(name: "Newcomer")
-    critical = @company.vendors.create!(name: "Core platform", risk_level: "critical")
+    critical = @company.vendors.create!(name: "Core platform", risk_level: "critical", rating_override_reason: "Outage last quarter")
 
     assert_equal [ unassessed.id ], filter_for(@company.vendors, queue: "unassessed").results.map(&:id)
     assert_equal [ critical.id ], filter_for(@company.vendors, queue: "critical").results.map(&:id)

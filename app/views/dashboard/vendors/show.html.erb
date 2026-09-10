@@ -33,6 +33,15 @@
           <span class="inline-flex mt-1 px-2 py-1 text-xs font-medium rounded-full <%= level_color %>">
             <%= t("risk_level_#{@vendor.risk_level}", default: @vendor.risk_level.titleize) %>
           </span>
+          <p class="mt-1 text-xs text-[#797C81]">
+            <% if @vendor.assessed? %>
+              <%= t('vendor_assessment.rating_assessed', date: l(@vendor.latest_assessment.assessed_on, format: :document), name: @vendor.latest_assessment.reviewed_by&.name.to_s) %>
+            <% elsif @vendor.unassessed? %>
+              <%= t('vendor_assessment.rating_none') %>
+            <% else %>
+              <%= t('vendor_assessment.rating_manual', reason: @vendor.rating_override_reason.to_s) %>
+            <% end %>
+          </p>
         </div>
         <div>
           <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('owner') %></p>
@@ -46,6 +55,11 @@
         </div>
       <% end %>
     </div>
+
+    <%= render "dashboard/vendors/profile_facts", vendor: @vendor %>
+    <%= render "dashboard/vendors/approval", vendor: @vendor %>
+    <%= render "dashboard/vendors/assessments", vendor: @vendor, assessments: @assessments, assessment: @assessment,
+          available_uploads: @available_uploads %>
 
     <%= render "dashboard/shared/governance_capas", origin: @vendor,
           create_path: create_capa_dashboard_vendor_path(@vendor) %>

@@ -1,0 +1,97 @@
+<%# The assessments behind the rating: latest first, each with its scores,
+    rationale, evidence and sign-off; then the form for a new one.
+    Locals: vendor, assessments, assessment, available_uploads %>
+<% colour = { "low" => "bg-green-100 text-green-800", "medium" => "bg-yellow-100 text-yellow-800", "high" => "bg-orange-100 text-orange-800", "critical" => "bg-red-100 text-red-800" } %>
+<div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6 space-y-5">
+  <div>
+    <h2 class="text-base font-semibold text-[#0D1120]"><%= t('vendor_assessment.title') %></h2>
+    <p class="text-xs text-[#797C81]"><%= t('vendor_assessment.hint') %></p>
+  </div>
+
+  <% if assessments.empty? %>
+    <p class="text-sm text-[#797C81]"><%= t('vendor_assessment.none') %></p>
+  <% end %>
+
+  <% assessments.each do |a| %>
+    <div class="rounded-lg border <%= a.signed_off? ? 'border-[#E3E3E3]' : 'border-amber-300 bg-amber-50/40' %> p-4 space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono text-[#797C81]">V<%= a.version %></span>
+          <span class="px-2 py-0.5 rounded-full text-xs font-medium <%= colour[a.rating] %>"><%= t("risk_level_#{a.rating}") %></span>
+          <span class="text-xs text-[#797C81]"><%= t('vendor_assessment.average', value: a.average) %></span>
+        </div>
+        <p class="text-xs text-[#797C81]">
+          <%= t('vendor_assessment.assessed_by_on', name: a.assessed_by&.name.to_s, date: l(a.assessed_on, format: :document)) %>
+          <% if a.signed_off? %> · <%= t('vendor_assessment.signed_by_on', name: a.reviewed_by&.name.to_s, date: l(a.reviewed_at.to_date, format: :document)) %>
+          <% else %> · <span class="text-amber-800 font-medium"><%= t('vendor_assessment.awaiting_sign_off') %></span><% end %>
+        </p>
+      </div>
+      <dl class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+        <% VendorAssessment::CRITERIA.each do |c| %>
+          <div class="rounded bg-[#F7F7FD] px-2 py-1.5">
+            <dt class="text-[#797C81]"><%= t("vendor_assessment.criteria.#{c}") %></dt>
+            <dd class="font-semibold text-[#0D1120]"><%= a.score(c) %> / 5</dd>
+          </div>
+        <% end %>
+      </dl>
+      <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= a.rationale %></p>
+      <% if a.uploads.any? %>
+        <ul class="text-xs space-y-1">
+          <% a.uploads.each do |u| %>
+            <li><%= link_to u.display_name, u.file_url(disposition: "inline"), target: "_blank", rel: "noopener", class: "text-[#5C3984] hover:underline" %><% if u.folder %> <span class="text-[#797C81]">· <%= u.folder.name %></span><% end %></li>
+          <% end %>
+        </ul>
+      <% end %>
+      <% if a.review_note.present? %><p class="text-xs text-[#797C81]"><%= t('vendor_assessment.review_note') %>: <%= a.review_note %></p><% end %>
+      <% if a.next_review_on %><p class="text-xs text-[#797C81]"><%= t('vendor_assessment.next_review_on') %>: <%= l(a.next_review_on, format: :document) %></p><% end %>
+      <% if !a.signed_off? && current_user&.can_manage_governance? && a.assessed_by_id != current_user.id %>
+        <%= form_with url: sign_off_dashboard_vendor_assessment_path(vendor, a), method: :patch, class: "flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#E3E3E3]" do %>
+          <%= text_field_tag :review_note, nil, placeholder: t('vendor_assessment.review_note'), class: "#{ui_input} flex-1" %>
+          <%= submit_tag t('vendor_assessment.sign_off'), class: ui_btn_primary %>
+        <% end %>
+      <% elsif !a.signed_off? && a.assessed_by_id == current_user&.id %>
+        <p class="text-xs text-[#797C81]"><%= t('vendor_assessment.own_work_hint') %></p>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if current_user&.can_manage_governance? %>
+    <%= form_with model: assessment, url: dashboard_vendor_assessments_path(vendor), method: :post, class: "pt-4 border-t border-[#E3E3E3] space-y-4" do |f| %>
+      <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('vendor_assessment.new') %></h3>
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <% VendorAssessment::CRITERIA.each do |c| %>
+          <div>
+            <%= label_tag "scores_#{c}", t("vendor_assessment.criteria.#{c}"), class: ui_label %>
+            <%= select_tag "vendor_assessment[scores][#{c}]", options_for_select(VendorAssessment::SCALE.map { |n| [ "#{n} · #{t("vendor_assessment.scale.#{n}")}", n ] }, retained(:vendor_assessment, :scores)&.dig(c)),
+                  id: "scores_#{c}", include_blank: t('pp_records.pick'), class: ui_input %>
+          </div>
+        <% end %>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="sm:col-span-3">
+          <%= f.label :rationale, t('vendor_assessment.rationale'), class: ui_label %>
+          <%= f.text_area :rationale, rows: 3, value: retained(:vendor_assessment, :rationale), class: ui_input, placeholder: t('vendor_assessment.rationale_placeholder') %>
+        </div>
+        <div>
+          <%= f.label :assessed_on, t('vendor_assessment.assessed_on'), class: ui_label %>
+          <%= f.date_field :assessed_on, value: retained(:vendor_assessment, :assessed_on) || Date.current, class: ui_input %>
+        </div>
+        <div>
+          <%= f.label :next_review_on, t('vendor_assessment.next_review_on'), class: ui_label %>
+          <%= f.date_field :next_review_on, value: retained(:vendor_assessment, :next_review_on), class: ui_input %>
+        </div>
+        <div>
+          <%= label_tag :upload_ids, t('vendor_assessment.evidence'), class: ui_label %>
+          <select name="upload_ids[]" id="upload_ids" multiple size="3" class="<%= ui_input %>">
+            <% available_uploads.each do |u| %>
+              <option value="<%= u.id %>"><%= u.display_name %><% if u.folder %> (<%= u.folder.name %>)<% end %></option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <%= f.submit t('vendor_assessment.save'), class: ui_btn_primary %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

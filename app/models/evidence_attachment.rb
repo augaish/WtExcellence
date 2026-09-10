@@ -3,7 +3,7 @@ class EvidenceAttachment < ApplicationRecord
   validates :upload_id, presence: true
   validates :attachable_type, presence: true,
     inclusion: { in: %w[Standard Clause ChecklistItem Capa CapaAction Assessment PpRecord
-                        Risk Vendor CustomerCommitment] }
+                        Risk Vendor VendorAssessment CustomerCommitment] }
   validates :attachable_id, presence: true
   validates :purpose, length: { maximum: 50 }, allow_blank: true
   validates :upload_id, uniqueness: { scope: [:attachable_type, :attachable_id],
