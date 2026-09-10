@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= t("home.meta.title") %></title>
   <meta name="description" content="<%= t("home.meta.description") %>">
+  <% site = request.base_url %>
+  <link rel="canonical" href="<%= site %>/<%= I18n.locale %>">
+  <link rel="alternate" hreflang="en" href="<%= site %>/en">
+  <link rel="alternate" hreflang="ar" href="<%= site %>/ar">
+  <link rel="alternate" hreflang="x-default" href="<%= site %>/en">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Way to Excellence">
+  <meta property="og:title" content="<%= t("home.meta.title") %>">
+  <meta property="og:description" content="<%= t("home.meta.description") %>">
+  <meta property="og:url" content="<%= site %>/<%= I18n.locale %>">
+  <meta property="og:locale" content="<%= rtl? ? 'ar_SA' : 'en_US' %>">
+  <meta property="og:image" content="<%= image_url('logo.png') %>">
+  <meta name="twitter:card" content="summary">
   <%= csrf_meta_tags %>
   <%= favicon_link_tag asset_path('logo.png') %>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +27,7 @@
     :root{
       --ink: oklch(0.24 0.02 300);
       --ink-soft: oklch(0.44 0.02 300);
-      --ink-faint: oklch(0.60 0.015 300);
+      --ink-faint: oklch(0.50 0.02 300);
       --surface: oklch(0.985 0.004 305);
       --surface-2: oklch(0.965 0.008 305);
       --line: oklch(0.90 0.01 305);
@@ -76,12 +89,22 @@
     .nav-toggle{display:none}
 
     /* Hero */
-    .hero{padding-block:clamp(3.5rem,2rem + 8vw,7rem) clamp(2rem,1rem + 4vw,4rem)}
+    .hero{padding-block:clamp(2.5rem,1.5rem + 5vw,5rem) clamp(2rem,1rem + 4vw,4rem)}
     .hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
     .hero h1{font-size:clamp(2.6rem,1.6rem + 4.6vw,5rem);font-weight:800;letter-spacing:-0.035em;margin-block:1rem 1.4rem}
     .hero .accent{color:var(--purple)}
     .hero-cta{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
-    .hero-note{margin-top:1.4rem;font-size:0.92rem;color:var(--ink-faint)}
+    .hero-note{margin-top:1.4rem;font-size:0.92rem;color:var(--ink-soft)}
+    .skip-link{position:absolute;inset-inline-start:1rem;top:-3rem;padding:0.5rem 0.9rem;background:var(--purple);color:var(--on-dark);border-radius:8px;z-index:50}
+    .skip-link:focus{top:1rem}
+    a:focus-visible,button:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+    .demo-tag{margin-inline-start:auto;font-size:0.7rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;padding:0.1rem 0.5rem}
+    .dark .demo-tag{color:var(--on-dark-soft);border-color:oklch(0.4 0.06 307)}
+    .paths{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+    .path{padding:1.4rem;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+    .path h3{margin-bottom:0.5rem}
+    .path p{color:var(--ink-soft);font-size:0.95rem;line-height:1.55}
+    @media (max-width:860px){.paths{grid-template-columns:1fr}}
 
     /* Product visual: assessment scorecard */
     .panel{
@@ -183,22 +206,25 @@
 </head>
 <% app_sign_in = "#{ENV['ROOT_URL']}/users/sign_in" %>
 <body>
+  <a class="skip-link" href="#main"><%= rtl? ? "انتقل إلى المحتوى" : "Skip to content" %></a>
   <header>
     <div class="wrap nav">
       <a href="<%= root_path %>" class="brand">
-        <%= image_tag asset_path('logo.png'), alt: "Way to Excellence" %>
+        <%= image_tag asset_path('logo.png'), alt: "Way to Excellence", width: 36, height: 36 %>
       </a>
       <nav class="nav-links">
         <a href="#assess"><%= rtl? ? "التقييم" : "Assess" %></a>
         <a href="#act"><%= rtl? ? "المعالجة" : "Act" %></a>
         <a href="#govern"><%= rtl? ? "الحوكمة" : "Govern" %></a>
+        <a href="#documents"><%= rtl? ? "الوثائق" : "Documents" %></a>
+        <a href="#prove"><%= rtl? ? "الإثبات" : "Prove" %></a>
         <a href="#ai"><%= rtl? ? "الذكاء الاصطناعي" : "AI" %></a>
       </nav>
       <div class="nav-right">
         <% if rtl? %>
-          <a class="lang-switch" href="<%= switch_language_path(:en) %>"><%= t("home.header.switch_to_en") %></a>
+          <a class="lang-switch" href="<%= localized_home_path(locale: :en) %>" hreflang="en" lang="en"><%= t("home.header.switch_to_en") %></a>
         <% else %>
-          <a class="lang-switch" href="<%= switch_language_path(:ar) %>"><%= t("home.header.switch_to_ar") %></a>
+          <a class="lang-switch" href="<%= localized_home_path(locale: :ar) %>" hreflang="ar" lang="ar"><%= t("home.header.switch_to_ar") %></a>
         <% end %>
         <a class="btn btn-ghost" href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
         <a class="btn btn-primary" href="<%= new_waitlist_path %>"><%= rtl? ? "انضم للقائمة" : "Join the waitlist" %></a>
@@ -206,6 +232,7 @@
     </div>
   </header>
 
+  <main id="main">
   <!-- HERO -->
   <section class="hero">
     <div class="wrap hero-grid">
@@ -236,7 +263,7 @@
       <div class="hero-visual reveal in" data-d="2">
         <div class="panel">
           <div class="panel-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
-            <span class="panel-title"><%= rtl? ? "التقييم: البند 1.1 تحديد الغرض والرؤية" : "Assessment: Clause 1.1 Purpose & Vision" %></span>
+            <span class="panel-title"><%= rtl? ? "التقييم: البند 1.1 تحديد الغرض والرؤية" : "Assessment: Clause 1.1 Purpose & Vision" %></span><span class="demo-tag"><%= rtl? ? "بيانات توضيحية" : "Illustrative" %></span>
           </div>
           <div class="panel-body">
             <% approach = rtl? ? "النهج" : "Approach" %>
@@ -304,7 +331,7 @@
       <div class="m-grid flip">
         <div class="reveal">
           <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><div><h3><%= rtl? ? "دورة حياة CAPA" : "CAPA lifecycle" %></h3><p><%= rtl? ? "تتبّع كل إجراء من مفتوح إلى مُسند إلى قيد التنفيذ إلى مغلق." : "Track every action from open to assigned to in-progress to closed." %></p></div></div>
-          <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><div><h3><%= rtl? ? "توليد بمساعدة الذكاء الاصطناعي" : "AI-assisted generation" %></h3><p><%= rtl? ? "استبيانات السبب الجذري، والإجراءات المقترحة، واقتراح البنود، قابلة للمراجعة قبل الحفظ." : "Root-cause questionnaires, suggested actions, and clause suggestions, all reviewable before you save." %></p></div></div>
+          <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><div><h3><%= rtl? ? "توليد بمساعدة الذكاء الاصطناعي" : "AI-assisted generation" %></h3><p><%= rtl? ? "استبيانات السبب الجذري، وإجراءات مقترحة تبقى مسودات حتى تحتفظ بها مع مسؤول وتاريخ، واقتراح البنود." : "Root-cause questionnaires, proposed actions that stay drafts until you keep them with an owner and a date, and clause suggestions." %></p></div></div>
           <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 7h3a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2h3m6 0V5a2 2 0 00-2-2h-2a2 2 0 00-2 2v2m6 0H9"/></svg><div><h3><%= rtl? ? "دليل قابل لإعادة الاستخدام" : "Reusable evidence" %></h3><p><%= rtl? ? "اربط مستنداً واحداً بعدة بنود ومعايير وإجراءات دون إعادة رفعه." : "Link one document to many clauses, standards and actions without re-uploading." %></p></div></div>
         </div>
         <div class="m-visual reveal" data-d="1">
@@ -326,18 +353,18 @@
     <div class="wrap">
       <div class="m-head reveal">
         <span class="eyebrow"><%= rtl? ? "الحوكمة" : "Govern" %></span>
-        <h2><%= rtl? ? "احكم المخاطر والأطراف الثالثة والالتزامات في سجل واحد." : "Govern risk, third parties and commitments in one register." %></h2>
+        <h2><%= rtl? ? "أدر المخاطر والموردين والتزامات العملاء من مساحة عمل واحدة." : "Govern risk, third parties and commitments in one register." %></h2>
         <p class="lead"><%= rtl? ? "سجّل المخاطر وقيّمها على مصفوفة 5×5، وجمّعها في مساحات عمل حسب الإطار أو القسم، وتابع مخاطر الموردين والتزامات العملاء جنباً إلى جنب." : "Log and score risks on a 5×5 matrix, group them into workspaces by framework or department, and keep vendor risk and customer commitments alongside." %></p>
       </div>
       <div class="m-grid">
         <div class="reveal">
-          <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h16.9a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg><div><h3><%= rtl? ? "سجل المخاطر ومساحات العمل" : "Risk register & workspaces" %></h3><p><%= rtl? ? "درجات أصلية ومتبقية، مجمّعة حسب ISO 27001 أو القسم." : "Inherent and residual scores, grouped by ISO 27001 or by department." %></p></div></div>
-          <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 108 0 4 4 0 00-8 0zM22 21l-3-3m0 0a2 2 0 10-3-3"/></svg><div><h3><%= rtl? ? "مخاطر الأطراف الثالثة" : "Third-party risk" %></h3><p><%= rtl? ? "سجّل الموردين ومستوى مخاطرهم وفئتهم والمسؤول عنهم." : "Track vendors with their risk level, category and owner." %></p></div></div>
+          <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 3h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h16.9a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg><div><h3><%= rtl? ? "سجل المخاطر ومساحات العمل" : "Risk register & workspaces" %></h3><p><%= rtl? ? "تقييم المخاطر الكامنة والمتبقية، مجمّعة حسب الإطار أو القسم." : "Inherent and residual scores, grouped by framework or by department." %></p></div></div>
+          <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 7a4 4 0 108 0 4 4 0 00-8 0zM22 21l-3-3m0 0a2 2 0 10-3-3"/></svg><div><h3><%= rtl? ? "مخاطر الأطراف الثالثة" : "Third-party risk" %></h3><p><%= rtl? ? "تقييمات مؤرَّخة يعتمدها شخص ثانٍ، واعتماد التعامل مع المورد كقرار مستقل." : "Dated assessments signed off by a second person, and approval to use a supplier as its own decision." %></p></div></div>
           <div class="feat"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 12l2 2 4-4"/></svg><div><h3><%= rtl? ? "التزامات العملاء" : "Customer commitments" %></h3><p><%= rtl? ? "تتبّع الالتزامات التعاقدية وتواريخ استحقاقها مع تنبيهات التأخر." : "Track contractual obligations and due dates, with past-due alerts." %></p></div></div>
         </div>
         <div class="m-visual reveal" data-d="1">
           <div class="panel">
-            <div class="panel-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="panel-title"><%= rtl? ? "مصفوفة المخاطر" : "Risk matrix" %></span></div>
+            <div class="panel-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="panel-title"><%= rtl? ? "مصفوفة المخاطر" : "Risk matrix" %></span><span class="demo-tag"><%= rtl? ? "بيانات توضيحية" : "Illustrative" %></span></div>
             <div class="panel-body">
               <div class="matrix">
                 <% cols = [["#e9f7ef","#e9f7ef","#fef6e0","#fdeede","#fdeede"],
@@ -361,6 +388,31 @@
     </div>
   </section>
 
+  <!-- DOCUMENTS & DECISIONS -->
+  <section class="movement" id="documents" style="background:var(--surface-2)">
+    <div class="wrap">
+      <div class="m-head reveal">
+        <span class="eyebrow"><%= rtl? ? "الإجراءات والوثائق والقرارات" : "Processes, documents and decisions" %></span>
+        <h2><%= rtl? ? "احكم كيف يُنجَز العمل، ومن يقرر ماذا." : "Govern how work is done, and who decides what." %></h2>
+        <p class="lead"><%= rtl? ? "من معمارية الإجراءات إلى السياسات والإجراءات المعتمدة، مرورًا بدورة توثيق كاملة، وحتى مصفوفة صلاحيات منشورة." : "From the process architecture to approved policies and procedures, through a complete documentation lifecycle, to a published authority matrix." %></p>
+      </div>
+      <div class="paths">
+        <div class="path reveal">
+          <h3><%= rtl? ? "الجودة والأدلة" : "Quality & evidence" %></h3>
+          <p><%= rtl? ? "قيّم المعايير بندًا بندًا، أغلق الفجوات بإجراءات تصحيحية، واربط كل قرار بدليله في المكتبة." : "Assess standards clause by clause, close gaps with corrective actions, and tie every decision to its evidence in the Library." %></p>
+        </div>
+        <div class="path reveal" data-d="1">
+          <h3><%= rtl? ? "الإجراءات والوثائق" : "Processes & documents" %></h3>
+          <p><%= rtl? ? "معمارية إجراءات من ثلاثة مستويات، سجلات للسياسات والإجراءات والنماذج والخدمات، وموثِّق يقود كل وثيقة من التحقق إلى النشر بملف PDF يحمل هوية شركتك." : "A three-level process architecture, records for policies, procedures, forms and services, and a Documenter that carries each document from verification to publication as a PDF in your company's identity." %></p>
+        </div>
+        <div class="path reveal" data-d="2">
+          <h3><%= rtl? ? "الحوكمة والالتزامات" : "Governance & commitments" %></h3>
+          <p><%= rtl? ? "مصفوفة صلاحيات بفئات وأصحاب صلاحية وتفويضات ودورة اعتماد ونشر، إلى جانب سجل المخاطر والموردين والتزامات العملاء." : "An authority matrix with categories, holders, delegations and its own approval and publishing round, beside the risk register, vendors and customer commitments." %></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- PROVE -->
   <section class="movement" id="prove">
     <div class="wrap">
@@ -377,12 +429,12 @@
         </div>
         <div class="m-visual reveal" data-d="1">
           <div class="panel">
-            <div class="panel-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="panel-title">trust.wtexcel.com</span></div>
+            <div class="panel-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="panel-title"><%= rtl? ? "مركز الثقة" : "Trust Center" %></span><span class="demo-tag"><%= rtl? ? "بيانات توضيحية" : "Illustrative" %></span></div>
             <div class="panel-body">
               <div class="score-row"><span class="score-label">EFQM 2025</span><span class="meter"><i style="width:78%"></i></span><span class="score-val">78%</span></div>
               <div class="score-row"><span class="score-label">ISO 9001:2015</span><span class="meter"><i style="width:91%"></i></span><span class="score-val">91%</span></div>
               <div class="score-row"><span class="score-label">KAQA</span><span class="meter"><i style="width:84%"></i></span><span class="score-val">84%</span></div>
-              <div class="overall"><span class="tag" style="background:var(--purple-tint);color:var(--purple)"><%= rtl? ? "موثّق للعملاء" : "Customer-facing" %></span></div>
+              <div class="overall"><span class="tag" style="background:var(--purple-tint);color:var(--purple)"><%= rtl? ? "عرض مخصص للعملاء" : "Customer-facing" %></span></div>
             </div>
           </div>
         </div>
@@ -426,15 +478,17 @@
     </div>
   </section>
 
+  </main>
+
   <footer>
     <div class="wrap">
       <div class="brand" style="color:var(--on-dark)">
-        <%= image_tag asset_path('logo-tr.png'), alt: "Way to Excellence", style: "height:26px" %>
+        <%= image_tag asset_path('logo-tr.png'), alt: "Way to Excellence", style: "height:26px", width: 120, height: 26, loading: "lazy" %>
       </div>
       <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:center">
         <a href="mailto:info@wtexcellence.com">info@wtexcellence.com</a>
         <a href="<%= app_sign_in %>"><%= rtl? ? "تسجيل الدخول" : "Sign in" %></a>
-        <% if rtl? %><a href="<%= switch_language_path(:en) %>">English</a><% else %><a href="<%= switch_language_path(:ar) %>">العربية</a><% end %>
+        <% if rtl? %><a href="<%= localized_home_path(locale: :en) %>" hreflang="en" lang="en">English</a><% else %><a href="<%= localized_home_path(locale: :ar) %>" hreflang="ar" lang="ar">العربية</a><% end %>
         <span>© <%= Time.current.year %> Way to Excellence</span>
       </div>
     </div>

@@ -50,6 +50,9 @@ Delegation expiry (section 7): already built with a clock-driven test matrix in 
 | H11 | Desktop hero too tall; Prove missing from nav | **Cosmetic** | Shorten the headline or reduce top spacing; add Prove to the nav. |
 | H12 | Arabic marketing copy too literal | **Needs your Arabic reviewer** | The suggested replacements are reasonable; final wording is a brand decision. |
 
+## Status (10 September)
+Phases 6, 7, 8 and 9 (Q12) and the homepage items H04, H05, H07, H08, H09, H10, H11 are built. Hero kept as is (owner's decision). H02, H06 and H12 wait on the owner's text.
+
 ## Proposed plan
 
 Phase 6 — correctness (do first): Q01, Q02, Q03, Q05, Q04 message, Q10 labels, Q17 wording, Q07 hide SLA tab, Q08 duplicate fields.

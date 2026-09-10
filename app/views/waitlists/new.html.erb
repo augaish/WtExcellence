@@ -1,5 +1,13 @@
 <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8" dir="<%= rtl? ? 'rtl' : 'ltr' %>">
   <div class="w-full max-w-lg">
+    <nav class="flex items-center justify-between mb-6 text-sm" aria-label="<%= rtl? ? 'التنقل' : 'Navigation' %>">
+      <a href="<%= root_path %>" class="text-[#5C3984] hover:underline"><%= rtl? ? '← العودة إلى الصفحة الرئيسية' : '← Back to homepage' %></a>
+      <% if rtl? %>
+        <a href="<%= switch_language_path(:en) %>" lang="en" class="text-[#797C81] hover:text-[#0D1120]">English</a>
+      <% else %>
+        <a href="<%= switch_language_path(:ar) %>" lang="ar" class="text-[#797C81] hover:text-[#0D1120]">العربية</a>
+      <% end %>
+    </nav>
     <!-- Logo and Heading -->
     <div class="text-center mb-8">
       <div class="flex justify-center mb-6">
