@@ -169,7 +169,7 @@ processes; nothing to build until there is content to hang on it.
 - `authorities.basis_record_id` / `basis_clause_id` columns stay but are not shown or edited; the executive matrix is checked against operational authorities directly.
 
 ## Activity log
-- Every model writes create/update/delete entries (ActivityTrail). A few controller actions still log their own richer entry as well (user invitations, tool changes), so those show twice on the Activity page: once as the app's description and once as the plain change. Fold them into one entry when tidying.
+- Every model writes create/update/delete entries (ActivityTrail). When the app writes its own richer entry for the same record in the same request, the plain entry is folded into it.
 - Entries are kept for as long as the company exists; no retention limit yet.
 
 ## Review 03 — status

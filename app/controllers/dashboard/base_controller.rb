@@ -221,6 +221,7 @@ class Dashboard::BaseController < ApplicationController
         yield
     ensure
         Thread.current[:current_user] = nil
+        AuditLogService.clear_pending_automatic_entries
     end
 
     def set_notifications_for_navbar

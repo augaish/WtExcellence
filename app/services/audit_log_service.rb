@@ -8,7 +8,11 @@ class AuditLogService
   # @param entity_id [UUID] The ID of the entity
   # @param payload [Hash] Additional data to store in payload_json
   # @return [AuditLog] The created audit log entry
-  def self.log_action(actor_user:, company: nil, action:, entity_type: nil, entity_id: nil, payload: {})
+  # automatic: true when the entry comes from the model's own trail
+  # (ActivityTrail). An entry the app writes on purpose for the same record in
+  # the same request is the better one, so the automatic entry is folded into
+  # it: its changed values are carried over and the plain entry is removed.
+  def self.log_action(actor_user:, company: nil, action:, entity_type: nil, entity_id: nil, payload: {}, automatic: false)
     # Skip if no actor user (e.g., system actions)
     return nil unless actor_user
 
@@ -17,6 +21,8 @@ class AuditLogService
 
     # Skip if no company can be determined
     return nil unless resolved_company
+
+    payload = fold_automatic_entries(entity_type, entity_id, payload) unless automatic
 
     # Wrap the insert in a SAVEPOINT. Audit logging must never break the caller,
     # but in PostgreSQL any failed statement aborts the WHOLE transaction, so
@@ -37,6 +43,35 @@ class AuditLogService
     Rails.logger.error "Failed to create audit log: #{e.message}"
     Rails.logger.error e.backtrace.first(5).join("\n")
     nil
+  end
+
+  # The automatic entries written so far in this request, by record. Cleared
+  # by the request wrapper that sets the acting user.
+  def self.pending_automatic_entries
+    Thread.current[:activity_trail_entries] ||= Hash.new { |h, k| h[k] = [] }
+  end
+
+  def self.remember_automatic(entry)
+    pending_automatic_entries[[ entry.entity_type, entry.entity_id ]] << entry
+  end
+
+  def self.clear_pending_automatic_entries
+    Thread.current[:activity_trail_entries] = nil
+  end
+
+  def self.fold_automatic_entries(entity_type, entity_id, payload)
+    return payload if entity_type.nil? || entity_id.nil?
+
+    entries = pending_automatic_entries.delete([ entity_type.to_s, entity_id ])
+    return payload if entries.blank?
+
+    changes = entries.map { |e| e.payload_json&.dig("changes") }.compact.reduce({}, :merge)
+    label = entries.map { |e| e.payload_json&.dig("label") }.compact.last
+    entries.each(&:destroy)
+    folded = payload.dup
+    folded[:changes] = changes if changes.any? && !folded.key?(:changes) && !folded.key?("changes")
+    folded[:label] = label if label && !folded.key?(:label) && !folded.key?("label")
+    folded
   end
 
   private

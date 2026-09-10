@@ -108,14 +108,16 @@ module ActivityTrail
     company = activity_company
     return if company.nil?
 
-    AuditLogService.log_action(
+    entry = AuditLogService.log_action(
       actor_user: activity_actor,
       company: company,
       action: "#{verb}_#{self.class.activity_entity_type.upcase}",
       entity_type: self.class.activity_entity_type,
       entity_id: id,
-      payload: payload.merge(label: activity_label)
+      payload: payload.merge(label: activity_label),
+      automatic: true
     )
+    AuditLogService.remember_automatic(entry) if entry
   end
 
   # Long text is kept short in the entry; the record itself holds the rest.

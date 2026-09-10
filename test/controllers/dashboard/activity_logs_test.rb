@@ -102,3 +102,23 @@ class Dashboard::ActivityLogsTest < ActionDispatch::IntegrationTest
     assert_includes response.body, I18n.t("activity.verbs.update", record: I18n.t("activity.entities.pp_record"))
   end
 end
+
+class ActivityFoldingTest < ActionDispatch::IntegrationTest
+  setup do
+    Rails.application.reload_routes!
+    @company = Company.create!(name: "Fold Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
+    @super_admin = User.create!(email: "fold-root-#{SecureRandom.hex(4)}@example.com", password: "password123",
+      password_confirmation: "password123", name: "Root", role: "super_admin", is_active: true)
+  end
+
+  test "an action the app describes itself is one entry, carrying the changed values" do
+    sign_in @super_admin
+    email = "folded-#{SecureRandom.hex(3)}@example.com"
+    post dashboard_create_invitation_path, params: { name: "Folded Person", email: email, company_id: @company.id, company_role: "company_viewer" }
+
+    user = User.find_by(email: email)
+    entries = AuditLog.where(entity_type: "user", entity_id: user.id)
+    assert_equal [ "CREATE_USER_INVITATION" ], entries.map(&:action), "the plain 'User created' entry is folded into the invitation"
+    assert_equal "Folded Person", entries.sole.payload_json["user_name"]
+  end
+end
