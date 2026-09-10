@@ -251,6 +251,7 @@ end
 
 class ExecutiveMatrixNotInRecordsTest < ActionDispatch::IntegrationTest
   test "the authority matrix does not appear in the Records list" do
+    Rails.application.reload_routes!
     company = Company.create!(name: "Rec Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
     admin = User.create!(email: "rec-#{SecureRandom.hex(4)}@example.com", password: "password123",
       password_confirmation: "password123", name: "Admin", is_active: true)
@@ -263,5 +264,63 @@ class ExecutiveMatrixNotInRecordsTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a[href=?]", dashboard_pp_record_path(matrix), 0
     assert_includes response.body, "A Policy"
+  end
+end
+
+class RecordPageByTypeTest < ActionDispatch::IntegrationTest
+  setup do
+    Rails.application.reload_routes!
+    @company = Company.create!(name: "Type Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
+    @admin = User.create!(email: "type-#{SecureRandom.hex(4)}@example.com", password: "password123",
+      password_confirmation: "password123", name: "Admin", is_active: true)
+    CompanyUser.create!(company: @company, user: @admin, role: CompanyUser::ROLES[:company_admin])
+    sign_in @admin
+  end
+
+  test "a form page names the procedures that use it and has no process or diagrams" do
+    form = @company.pp_records.create!(record_type: "form", title_en: "Evidence Checklist", scope: "Test records only.")
+    level1 = @company.pp_processes.create!(name_en: "Operations", level: 1, category: "core")
+    process = @company.pp_processes.create!(name_en: "Review", level: 2, parent: level1)
+    procedure = @company.pp_records.create!(record_type: "procedure", title_en: "Review Procedure", pp_process: process)
+    procedure.links.create!(kind: "form_used", linked_record: form)
+
+    get dashboard_pp_record_path(form)
+    assert_response :success
+    assert_select "h2", text: I18n.t("pp_records.show_sections.used_by")
+    assert_select "a[href=?]", dashboard_pp_record_path(procedure)
+    assert_select "h2", text: I18n.t("architect.diagrams"), count: 0
+    assert_select "dt", text: I18n.t("pp_records.process"), count: 0
+    assert_select "h2", text: I18n.t("pp_records.card_title.form")
+  end
+
+  test "a procedure page shows its process, steps, decisions and diagrams" do
+    level1 = @company.pp_processes.create!(name_en: "Operations", level: 1, category: "core")
+    process = @company.pp_processes.create!(name_en: "Review", level: 2, parent: level1)
+    procedure = @company.pp_records.create!(record_type: "procedure", title_en: "Review Procedure", pp_process: process)
+    procedure.steps.create!(position: 1, activity: "Receive the request", responsible_title: "Clerk")
+
+    get dashboard_pp_record_path(procedure)
+    assert_select "dt", text: I18n.t("pp_records.process")
+    assert_select "h2", text: I18n.t("pp_records.show_sections.steps")
+    assert_includes response.body, "Receive the request"
+    assert_select "h2", text: I18n.t("pp_records.show_sections.decisions")
+    assert_select "h2", text: I18n.t("architect.diagrams")
+  end
+
+  test "a policy page lists its clauses; a glossary page is a term and definition without documents" do
+    policy = @company.pp_records.create!(record_type: "policy", title_en: "HR Policy", description: "x")
+    main = policy.clauses.create!(position: 1, title: "Purpose", body: "Why we have it")
+    policy.clauses.create!(position: 1, title: "Detail", parent: main)
+
+    get dashboard_pp_record_path(policy)
+    assert_select "h2", text: I18n.t("pp_records.show_sections.clauses")
+    assert_includes response.body, "Why we have it"
+    assert_select "h2", text: I18n.t("architect.diagrams"), count: 0
+
+    term = @company.pp_records.create!(record_type: "glossary", title_en: "CAPA", title_ar: "إجراء تصحيحي", description: "Corrective and preventive action")
+    get dashboard_pp_record_path(term)
+    assert_select "h2", text: I18n.t("pp_records.show_sections.term")
+    assert_includes response.body, "Corrective and preventive action"
+    assert_select "h2", text: I18n.t("pp_records.documents"), count: 0
   end
 end

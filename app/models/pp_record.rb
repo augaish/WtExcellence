@@ -216,6 +216,10 @@ class PpRecord < ApplicationRecord
     record_type == "service"
   end
 
+  def form?
+    record_type == "form"
+  end
+
   def glossary?
     record_type == "glossary"
   end

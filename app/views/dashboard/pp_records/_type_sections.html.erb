@@ -1,0 +1,114 @@
+<%# What a record of this type shows beneath its identity: only the boxes that
+    belong to the type. A policy has clauses; a procedure has its process,
+    steps and decisions; a form names the procedures that use it; an agreement
+    lists its service levels; a glossary entry is a term and its definition.
+    Locals: record %>
+<% box = "bg-white border border-[#E3E3E3] rounded-xl p-5" %>
+<% heading = "text-sm font-semibold text-[#0D1120] mb-3" %>
+
+<% case record.record_type %>
+<% when "policy" %>
+  <%= render "dashboard/pp_records/card", record: record %>
+  <div class="<%= box %>">
+    <h2 class="<%= heading %>"><%= t('pp_records.show_sections.clauses') %></h2>
+    <% clauses = record.clauses.to_a %>
+    <% if clauses.any? %>
+      <ol class="space-y-2 text-sm">
+        <% clauses.select(&:main?).each do |clause| %>
+          <li>
+            <p class="text-[#0D1120]"><span class="font-mono text-[#797C81] me-2"><%= clause.number %></span><span class="font-medium"><%= clause.title %></span></p>
+            <% if clause.body.present? %><p class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= clause.body %></p><% end %>
+            <% subs = clauses.select { |c| c.parent_id == clause.id } %>
+            <% if subs.any? %>
+              <ol class="mt-1.5 ms-6 space-y-1.5">
+                <% subs.each do |sub| %>
+                  <li><span class="font-mono text-[#797C81] me-2"><%= sub.number %></span><%= sub.title %><% if sub.body.present? %><p class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= sub.body %></p><% end %></li>
+                <% end %>
+              </ol>
+            <% end %>
+          </li>
+        <% end %>
+      </ol>
+    <% else %>
+      <p class="text-sm text-[#797C81]"><%= t('pp_records.show_sections.no_clauses') %></p>
+    <% end %>
+  </div>
+
+<% when "procedure" %>
+  <%= render "dashboard/pp_records/card", record: record %>
+  <div class="<%= box %>">
+    <h2 class="<%= heading %>"><%= t('pp_records.show_sections.steps') %></h2>
+    <% steps = record.steps.to_a %>
+    <% if steps.any? %>
+      <ol class="divide-y divide-[#E3E3E3] text-sm">
+        <% steps.each do |step| %>
+          <li class="py-2 flex gap-3">
+            <span class="font-mono text-[#797C81] w-6 flex-shrink-0"><%= step.position %></span>
+            <div class="min-w-0">
+              <p class="font-medium text-[#0D1120]"><%= step.activity %></p>
+              <% if step.description.present? %><p class="text-[#0D1120] whitespace-pre-line"><%= step.description %></p><% end %>
+              <p class="text-xs text-[#797C81]">
+                <%= step.responsible_label %>
+                <% if step.duration_value.present? %> · <%= step.duration_value %> <%= t("process_architecture.time_units.#{step.duration_unit}", default: step.duration_unit) %><% end %>
+                <% if step.system_used.present? %> · <%= step.system_used %><% end %>
+              </p>
+            </div>
+          </li>
+        <% end %>
+      </ol>
+    <% else %>
+      <p class="text-sm text-[#797C81]"><%= t('pp_records.show_sections.no_steps') %></p>
+    <% end %>
+  </div>
+  <div class="<%= box %>">
+    <h2 class="<%= heading %>"><%= t('pp_records.show_sections.decisions') %></h2>
+    <% decisions = record.operational_authorities.to_a %>
+    <% if decisions.any? %>
+      <ul class="divide-y divide-[#E3E3E3] text-sm">
+        <% decisions.each do |decision| %>
+          <li class="py-2">
+            <p class="text-[#0D1120] font-medium"><%= decision.item %></p>
+            <% if decision.decision.present? %><p class="text-xs text-[#797C81]"><%= decision.decision %></p><% end %>
+          </li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-[#797C81]"><%= t('pp_records.show_sections.no_decisions') %></p>
+    <% end %>
+  </div>
+
+<% when "form" %>
+  <div class="<%= box %>">
+    <h2 class="<%= heading %>"><%= t('pp_records.show_sections.used_by') %></h2>
+    <% procedures = record.company.pp_records.active.latest.joins(:links)
+         .where(pp_record_links: { kind: "form_used", linked_record_id: record.id }).ordered.to_a %>
+    <% if procedures.any? %>
+      <ul class="space-y-1.5 text-sm">
+        <% procedures.each do |procedure| %>
+          <li><%= link_to "#{procedure.code} · #{procedure.display_title}", dashboard_pp_record_path(procedure), class: "text-[#5C3984] hover:underline" %></li>
+        <% end %>
+      </ul>
+    <% else %>
+      <p class="text-sm text-[#797C81]"><%= t('pp_records.show_sections.not_used_yet') %></p>
+    <% end %>
+  </div>
+  <%= render "dashboard/pp_records/card", record: record %>
+
+<% when "service" %>
+  <%= render "dashboard/pp_records/card", record: record %>
+
+<% when "sla" %>
+  <%= render "dashboard/pp_records/card", record: record %>
+  <%= render "dashboard/pp_records/service_levels", record: record,
+      can_manage: (current_user&.platform_admin? || current_user&.company_user&.has_admin_privileges? || current_user&.company_user&.company_quality_manager?) %>
+
+<% when "glossary" %>
+  <div class="<%= box %>">
+    <h2 class="<%= heading %>"><%= t('pp_records.show_sections.term') %></h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div><dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.term_en') %></dt><dd class="mt-0.5 text-[#0D1120]"><%= record.title_en.presence || "—" %></dd></div>
+      <div><dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.term_ar') %></dt><dd class="mt-0.5 text-[#0D1120]" dir="rtl"><%= record.title_ar.presence || "—" %></dd></div>
+      <div class="sm:col-span-2"><dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.definition') %></dt><dd class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= record.description.presence || "—" %></dd></div>
+    </dl>
+  </div>
+<% end %>

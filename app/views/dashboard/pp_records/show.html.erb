@@ -16,13 +16,6 @@
         <%= button_to t('pp_records.update_existing'), open_next_version_dashboard_pp_record_path(@record), method: :post,
               class: ui_btn_primary, form: { class: "inline", data: { turbo_confirm: t('pp_records.update_existing_confirm', version: @record.version_number + 1) } } %>
       <% end %>
-
-<% if @record.sla? %>
-  <div class="px-6 pb-4">
-    <%= render "dashboard/pp_records/service_levels", record: @record,
-        can_manage: (current_user&.platform_admin? || current_user&.company_user&.has_admin_privileges? || current_user&.company_user&.company_quality_manager?) %>
-  </div>
-<% end %>
     <% end %>
 
     <% unless @record.latest_version? %>
@@ -60,27 +53,19 @@
               <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.owner_unit') %></dt>
               <dd class="mt-0.5 text-[#0D1120]"><%= @record.owner_org_unit&.display_name.presence || "—" %></dd>
             </div>
-            <% if @record.sla? %>
-              <%# Both sides of an agreement, readable without opening the edit form. %>
-              <div>
-                <dt class="text-xs font-medium text-[#797C81]"><%= t('sla.counterparty') %></dt>
-                <dd class="mt-0.5 text-[#0D1120]"><%= @record.counterparty_label.presence || "—" %></dd>
-              </div>
-              <div>
-                <dt class="text-xs font-medium text-[#797C81]"><%= t('sla.attainment') %></dt>
-                <dd class="mt-0.5 text-[#0D1120]"><%= @record.sla_attainment_percent ? "#{@record.sla_attainment_percent}%" : t('sla.not_measured_yet') %></dd>
-              </div>
-            <% end %>
             <div>
               <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.owner_user') %></dt>
               <dd class="mt-0.5 text-[#0D1120]"><%= @record.owner_user&.name.presence || "—" %></dd>
             </div>
-            <div>
-              <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.process') %></dt>
-              <dd class="mt-0.5 text-[#0D1120]">
-                <%= @record.pp_process ? "#{@record.pp_process.code} · #{@record.pp_process.display_name}" : "—" %>
-              </dd>
-            </div>
+            <% if @record.procedure? %>
+              <%# Only a procedure sits in the process architecture. %>
+              <div>
+                <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.process') %></dt>
+                <dd class="mt-0.5 text-[#0D1120]">
+                  <%= @record.pp_process ? "#{@record.pp_process.architecture_number} · #{@record.pp_process.display_name}" : "—" %>
+                </dd>
+              </div>
+            <% end %>
             <div>
               <dt class="text-xs font-medium text-[#797C81]"><%= t('pp_records.effective_date') %></dt>
               <dd class="mt-0.5 text-[#0D1120]"><%= @record.effective_date.presence || "—" %></dd>
@@ -114,9 +99,9 @@
             </div>
           </dl>
 
-          <% if @record.description.present? %>
+          <% if @record.description.present? && !@record.glossary? %>
             <div class="mt-4 pt-4 border-t border-[#E3E3E3]">
-              <dt class="text-xs font-medium text-[#797C81] mb-1"><%= @record.procedure? ? t('pp_records.purpose') : (@record.glossary? ? t('pp_records.definition') : t('pp_records.description')) %></dt>
+              <dt class="text-xs font-medium text-[#797C81] mb-1"><%= @record.procedure? ? t('pp_records.purpose') : t('pp_records.description') %></dt>
               <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= @record.description %></p>
             </div>
           <% end %>
@@ -128,12 +113,13 @@
           <% end %>
         </div>
 
-        <%= render "dashboard/pp_records/card", record: @record %>
+        <%= render "dashboard/pp_records/type_sections", record: @record %>
 
+        <% unless @record.glossary? %>
         <!-- Documents -->
         <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
           <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('pp_records.documents') %></h2>
-          <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= t('pp_records.documents_hint') %></p>
+          <p class="mt-1 mb-4 text-xs text-[#797C81]"><%= @record.form? ? t('pp_records.show_sections.form_documents_hint') : t('pp_records.documents_hint') %></p>
 
           <% if @attachments.any? %>
             <ul class="divide-y divide-[#E3E3E3] mb-4">
@@ -183,6 +169,7 @@
             <% end %>
           <% end %>
         </div>
+        <% end %>
       </div>
 
       <!-- Side column -->
@@ -198,7 +185,8 @@
           </p>
         </div>
 
-        <!-- Process Architect: open from the record's own card -->
+        <% if @record.procedure? %>
+        <!-- Process Architect: a procedure is drawn; nothing else is -->
         <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
           <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('architect.diagrams') %></h2>
           <% diagrams = @record.diagrams.to_a %>
@@ -221,6 +209,7 @@
                   class: "#{ui_btn_secondary} w-full justify-center" %>
           <% end %>
         </div>
+        <% end %>
 
         <% if can_manage_pp_records? %>
           <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
