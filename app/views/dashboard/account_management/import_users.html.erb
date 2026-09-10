@@ -1,0 +1,47 @@
+<%= content_for :title, t('user_import.title') %>
+
+<div class="p-6">
+  <div class="max-w-3xl mx-auto">
+    <%= render layout: "dashboard/shared/page_header",
+        locals: { title: t('user_import.title'), subtitle: t('user_import.subtitle', company: @company.name) } do %>
+      <%= link_to t('back'), dashboard_account_management_company_path(@company), class: ui_btn_neutral %>
+    <% end %>
+
+    <div class="bg-[#F6EEFF] border border-[#5C3984]/30 rounded-xl px-5 py-3 mb-6 text-sm text-[#0D1120]">
+      <%= t('user_import.seats_line', free: @template.free_seats, total: @company.license_seats.to_i) %>
+    </div>
+
+    <% if @result && @result.errors.any? %>
+      <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <p class="text-sm font-semibold text-red-800 mb-2"><%= t('user_import.failed') %></p>
+        <ul class="list-disc list-inside text-sm text-red-700 space-y-0.5 max-h-64 overflow-y-auto">
+          <% @result.errors.each do |err| %>
+            <li><% if err[:row].to_i.positive? %><%= t('user_import.row', number: err[:row]) %>: <% end %><%= err[:message] %></li>
+          <% end %>
+        </ul>
+        <p class="mt-2 text-xs text-red-700"><%= t('user_import.nothing_saved') %></p>
+      </div>
+    <% end %>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
+      <h2 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('user_import.step1') %></h2>
+      <p class="text-xs text-[#797C81] mb-3"><%= t('user_import.step1_hint') %></p>
+      <% if @template.free_seats.positive? %>
+        <%= link_to t('user_import.download_template'), dashboard_account_management_users_template_path(@company), class: ui_btn_secondary %>
+      <% else %>
+        <p class="text-sm text-red-700"><%= t('user_import.no_seats') %></p>
+      <% end %>
+    </div>
+
+    <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+      <h2 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('user_import.step2') %></h2>
+      <p class="text-xs text-[#797C81] mb-3"><%= t('user_import.step2_hint') %></p>
+      <%= form_with url: dashboard_account_management_import_users_path(@company), method: :post, multipart: true,
+                    class: "flex flex-col sm:flex-row sm:items-center gap-3" do %>
+        <input type="file" name="file" accept=".xlsx"
+               class="flex-1 text-sm text-[#0D1120] file:me-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-[#F6EEFF] file:text-[#5C3984] file:text-sm file:font-medium">
+        <%= submit_tag t('user_import.upload'), class: ui_btn_primary, disabled: @template.free_seats.zero? %>
+      <% end %>
+    </div>
+  </div>
+</div>

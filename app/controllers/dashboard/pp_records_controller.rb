@@ -14,7 +14,8 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   helper_method :can_manage_pp_records?, :can_see_versions?
 
   def index
-    scope = company_scope.includes(:owner_user, :owner_org_unit, :pp_process, :package)
+    # The executive authority matrix is a record, but it lives on its own page.
+    scope = company_scope.where.not(record_type: "executive_doa").includes(:owner_user, :owner_org_unit, :pp_process, :package)
     @show_inactive = params[:show_inactive] == "1"
     scope = scope.active unless @show_inactive
 
@@ -37,7 +38,7 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
 
     @records = scope.ordered.to_a
     @counts_by_type = company_scope.active.latest.group(:record_type).count
-    @total_count = company_scope.active.latest.count
+    @total_count = company_scope.active.latest.where.not(record_type: "executive_doa").count
     @packages_count = company.pp_packages.count
     @due_for_review = company_scope.active.where.not(review_date: nil)
       .select { |r| r.review_overdue? || r.review_due_soon?(review_lead_days) }

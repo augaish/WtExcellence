@@ -908,7 +908,58 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     end
   end
 
+  # ---- Invite users from Excel (super admin and delegated admins who may add users) ----
+
+  def import_users
+    return unless load_import_company
+
+    @template = UserImportTemplate.new(@company)
+    @result = nil
+  end
+
+  def run_user_import
+    return unless load_import_company
+
+    @template = UserImportTemplate.new(@company)
+    if params[:file].blank?
+      @result = UserImportService::Result.new(invited: 0, errors: [ { row: 0, message: t("user_import.no_file") } ])
+      return render :import_users, status: :unprocessable_entity
+    end
+
+    @result = UserImportService.import(file: params[:file], company: @company, actor: current_user)
+    if @result.success?
+      redirect_to dashboard_account_management_company_path(@company),
+        notice: t("user_import.done", count: @result.invited, free: UserImportTemplate.new(@company).free_seats), status: :see_other
+    else
+      render :import_users, status: :unprocessable_entity
+    end
+  end
+
+  def users_template
+    return unless load_import_company
+
+    send_data UserImportTemplate.new(@company).to_xlsx,
+      filename: "users_template_#{@company.name.parameterize}.xlsx",
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  end
+
   private
+
+  # The company whose users are imported. Only the platform side does this;
+  # a company admin adds their people one at a time.
+  def load_import_company
+    unless current_user&.can_add_users?
+      redirect_to dashboard_account_management_path, alert: t("user_import.not_permitted"), status: :see_other
+      return false
+    end
+
+    @company = Company.find_by(id: params[:id])
+    if @company.nil?
+      redirect_to dashboard_account_management_companies_path, alert: t("user_import.no_company"), status: :see_other
+      return false
+    end
+    true
+  end
 
   def ensure_super_admin_for_companies
     unless current_user&.can_manage_companies?

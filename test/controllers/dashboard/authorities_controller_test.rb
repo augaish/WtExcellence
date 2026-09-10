@@ -30,6 +30,15 @@ class Dashboard::AuthoritiesControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", dashboard_create_authority_category_path
   end
 
+  test "starting over shows only the category just added, not those of a deleted matrix" do
+    @matrix.destroy
+    sign_in @admin
+    post dashboard_create_authority_category_path, params: { authority_category: { name_en: "Fresh" } }
+    follow_redirect!
+    assert_equal [ "Fresh" ], @company.authority_categories.reload.map(&:name_en)
+    assert_select "[data-authority-matrix-target=category]", 1
+  end
+
   test "the first category creates version 1 of the matrix" do
     @matrix.destroy
     sign_in @admin

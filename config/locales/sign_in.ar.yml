@@ -1,0 +1,23 @@
+ar:
+  sign_in_page:
+    title: "تسجيل الدخول إلى حسابك"
+    subtitle: "أدخل بياناتك للوصول إلى حسابك"
+    errors:
+      zero: "لا أخطاء"
+      one: "خطأ واحد منع تسجيل الدخول:"
+      two: "خطآن منعا تسجيل الدخول:"
+      few: "%{count} أخطاء منعت تسجيل الدخول:"
+      many: "%{count} خطأً منع تسجيل الدخول:"
+      other: "%{count} خطأ منع تسجيل الدخول:"
+    email: "البريد الإلكتروني"
+    email_placeholder: "you@example.com"
+    password: "كلمة المرور"
+    password_placeholder: "أدخل كلمة المرور"
+    toggle_password: "إظهار كلمة المرور أو إخفاؤها"
+    remember_me: "تذكرني"
+    forgot_password: "نسيت كلمة المرور؟"
+    submit: "تسجيل الدخول"
+    submitting: "جارٍ تسجيل الدخول…"
+    no_account: "ليس لديك حساب؟"
+    sign_up: "إنشاء حساب"
+    rights: "Way To Excellence. جميع الحقوق محفوظة."

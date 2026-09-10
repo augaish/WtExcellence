@@ -1,0 +1,19 @@
+en:
+  sign_in_page:
+    title: "Sign in to your account"
+    subtitle: "Enter your credentials to access your account"
+    errors:
+      one: "1 error prohibited this sign in:"
+      other: "%{count} errors prohibited this sign in:"
+    email: "Email address"
+    email_placeholder: "you@example.com"
+    password: "Password"
+    password_placeholder: "Enter your password"
+    toggle_password: "Show or hide the password"
+    remember_me: "Remember me"
+    forgot_password: "Forgot password?"
+    submit: "Sign in"
+    submitting: "Signing in…"
+    no_account: "Don't have an account?"
+    sign_up: "Sign up"
+    rights: "Way To Excellence. All rights reserved."

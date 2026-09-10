@@ -255,6 +255,9 @@ Rails.application.routes.draw do
       get "/users", action: :users, as: :account_management_users
       get "/companies", action: :companies, as: :account_management_companies
       get "/companies/:id", action: :company, as: :account_management_company
+      get "/companies/:id/import_users", action: :import_users, as: :account_management_import_users
+      post "/companies/:id/import_users", action: :run_user_import
+      get "/companies/:id/users_template", action: :users_template, as: :account_management_users_template
       post "/invitations", action: :create_invitation, as: :create_invitation
       post "/companies", action: :create_company, as: :create_company
       patch "/companies/:id/license_seats", action: :update_license_seats, as: :update_company_license_seats

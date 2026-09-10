@@ -10,8 +10,11 @@ class AuthorityMatrixVersionService
   end
 
   # The page starts empty. The first category (or the first pick from the
-  # catalogue) creates version 1 of the company's executive matrix.
+  # catalogue) creates version 1 of the company's executive matrix. Categories
+  # left behind by a matrix that was deleted would otherwise reappear beside
+  # the first new one, so a fresh start clears them.
   def self.first_version(company, actor: nil)
+    company.authority_categories.destroy_all
     company.pp_records.create!(
       record_type: "executive_doa",
       title_en: I18n.t("doa.matrix", locale: :en),

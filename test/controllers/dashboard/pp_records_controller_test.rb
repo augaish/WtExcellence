@@ -248,3 +248,20 @@ class Dashboard::PpRecordsControllerTest < ActionDispatch::IntegrationTest
     assert_nil authority.reload.basis_record_id
   end
 end
+
+class ExecutiveMatrixNotInRecordsTest < ActionDispatch::IntegrationTest
+  test "the authority matrix does not appear in the Records list" do
+    company = Company.create!(name: "Rec Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
+    admin = User.create!(email: "rec-#{SecureRandom.hex(4)}@example.com", password: "password123",
+      password_confirmation: "password123", name: "Admin", is_active: true)
+    CompanyUser.create!(company: company, user: admin, role: CompanyUser::ROLES[:company_admin])
+    matrix = AuthorityMatrixVersionService.first_version(company, actor: admin)
+    company.pp_records.create!(record_type: "policy", title_en: "A Policy", description: "x")
+
+    sign_in admin
+    get dashboard_pp_records_path
+    assert_response :success
+    assert_select "a[href=?]", dashboard_pp_record_path(matrix), 0
+    assert_includes response.body, "A Policy"
+  end
+end
