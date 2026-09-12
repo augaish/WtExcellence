@@ -908,6 +908,33 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     end
   end
 
+  # A pending invitation sent again with a fresh link, for a person whose
+  # first email never arrived or expired.
+  def resend_invitation
+    unless current_user&.can_add_users? || current_user&.company_user&.company_admin?
+      return redirect_to dashboard_account_management_users_path, alert: t("resend_invitation.not_permitted"), status: :see_other
+    end
+
+    user = User.find_by(id: params[:id])
+    return redirect_to dashboard_account_management_users_path, alert: t("resend_invitation.not_found"), status: :see_other if user.nil? || !user.invited?
+
+    own_company = current_user&.company_user&.company
+    if !current_user&.can_add_users? && user.company_user&.company_id != own_company&.id
+      return redirect_to dashboard_account_management_users_path, alert: t("resend_invitation.not_permitted"), status: :see_other
+    end
+
+    user.update!(invitation_token: User.generate_invitation_token, invitation_sent_at: Time.current,
+      invitation_expires_at: 7.days.from_now, invited_by: current_user)
+    company = user.company_user&.company
+    mail = UserInvitationMailer.invitation_email(user, company)
+    Rails.env.development? ? mail.deliver_now : mail.deliver_later
+    AuditLogService.log_action(actor_user: current_user, company: company || current_company, action: "RESEND_USER_INVITATION",
+      entity_type: "user", entity_id: user.id, payload: { user_id: user.id, user_name: user.name, user_email: user.email })
+
+    redirect_back fallback_location: dashboard_account_management_users_path,
+      notice: t("resend_invitation.sent", email: user.email), status: :see_other
+  end
+
   # ---- Invite users from Excel (super admin and delegated admins who may add users) ----
 
   def import_users

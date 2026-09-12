@@ -156,6 +156,11 @@
                 </button>
                 <div class="hidden absolute end-0 mt-2 w-48 sm:w-40 bg-white rounded-md shadow-lg z-10 border border-gray-200" data-dropdown-target="menu">
                   <div class="py-1">
+                    <% if user.invited? && (current_user&.can_add_users? || current_user&.company_user&.company_admin?) %>
+                      <%= button_to t('resend_invitation.button'), dashboard_resend_invitation_path(user), method: :post,
+                            class: "w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#5C3984] hover:bg-[#F6EEFF] min-h-[44px] sm:min-h-auto",
+                            form: { class: "block" } %>
+                    <% end %>
                     <% if current_user&.super_admin? %>
                       <% if user.delegated_admin? %>
                         <button type="button" 

@@ -1,0 +1,6 @@
+en:
+  resend_invitation:
+    button: "Resend invitation"
+    sent: "A new invitation was sent to %{email}. The link is valid for 7 days."
+    not_found: "This user has no pending invitation."
+    not_permitted: "You don't have permission to resend invitations."

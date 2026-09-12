@@ -259,6 +259,7 @@ Rails.application.routes.draw do
       post "/companies/:id/import_users", action: :run_user_import
       get "/companies/:id/users_template", action: :users_template, as: :account_management_users_template
       post "/invitations", action: :create_invitation, as: :create_invitation
+      post "/users/:id/resend_invitation", action: :resend_invitation, as: :resend_invitation
       post "/companies", action: :create_company, as: :create_company
       patch "/companies/:id/license_seats", action: :update_license_seats, as: :update_company_license_seats
       patch "/companies/:id/status", action: :update_company_status, as: :update_company_status
