@@ -71,6 +71,10 @@ Rails.application.configure do
     authentication: :plain
   }
   ActionMailer::Base.delivery_method = :smtp
+  # A mail the server refuses must fail loudly (in the log and Sentry), not vanish.
+  config.action_mailer.raise_delivery_errors = true
+  # Queued emails go to the queue the Sidekiq worker already reads.
+  config.action_mailer.deliver_later_queue_name = :default
 
   # ROOT_URL is a full address (https://app…); links in emails need its host.
   root_uri = URI.parse(ENV.fetch("ROOT_URL", "https://app.wtexcel.com")) rescue URI.parse("https://app.wtexcel.com")

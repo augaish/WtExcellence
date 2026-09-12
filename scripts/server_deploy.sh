@@ -66,7 +66,11 @@ for n in OPENROUTER_API_KEY OPENROUTER_MODEL OLLAMA_URL SENTRY_DSN \
 done
 : "${OPENROUTER_MODEL:=anthropic/claude-sonnet-4.5}"
 export OPENROUTER_MODEL
-echo "Secrets loaded: RAILS_MASTER_KEY=${WTEXCEL_RAILS_MASTER_KEY:+ok} DATABASE_URL=${WTEXCEL_DATABASE_URL:+ok} OPENROUTER_API_KEY=${OPENROUTER_API_KEY:+ok}"
+echo "Secrets loaded: RAILS_MASTER_KEY=${WTEXCEL_RAILS_MASTER_KEY:+ok} DATABASE_URL=${WTEXCEL_DATABASE_URL:+ok} OPENROUTER_API_KEY=${OPENROUTER_API_KEY:+ok} SMTP_SERVER=${SMTP_SERVER:+ok} SMTP_LOGIN=${SMTP_LOGIN:+ok} SMTP_PASSWORD=${SMTP_PASSWORD:+ok}"
+# Emails (invitations, password resets) go through SMTP; without these they are silently lost.
+if [ -z "${SMTP_SERVER}" ] || [ -z "${SMTP_LOGIN}" ] || [ -z "${SMTP_PASSWORD}" ]; then
+  echo "WARNING: SMTP_SERVER / SMTP_LOGIN / SMTP_PASSWORD are not all set — no email will be delivered." >&2
+fi
 
 # --- 4. Registry password (from docker login on this box) -------------------
 banner "4/7 Recovering Docker registry password"
