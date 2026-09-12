@@ -4,6 +4,13 @@ class User < ApplicationRecord
 
   devise :database_authenticatable, :rememberable, :validatable, :recoverable
 
+  # Devise sends its emails (password reset) inside the request by default, so
+  # a mail server that is slow or refuses the connection turns into a 500 for
+  # the person asking. Sent through the job queue instead, and retried there.
+  def send_devise_notification(notification, *args)
+    devise_mailer.send(notification, self, *args).deliver_later
+  end
+
   has_one_attached :profile_image
   has_one :company_user, dependent: :destroy
   has_one :company, through: :company_user
