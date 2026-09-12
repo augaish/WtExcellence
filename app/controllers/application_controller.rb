@@ -44,17 +44,19 @@ class ApplicationController < ActionController::Base
   # Restrict www.<APP_DOMAIN> to only show homepage
   def restrict_www_to_homepage
     host = request.host.downcase
-    app_domain = ENV.fetch("APP_DOMAIN", "wtexcellence.com")
+    app_domain = ENV.fetch("APP_DOMAIN", "wtexcel.com")
 
     # Check if host is www.<APP_DOMAIN> or <APP_DOMAIN> (but not test or app)
     if (host == "www.#{app_domain}" || host == app_domain) &&
        !host.include?("test") && !host.include?("app")
       # Allow root path, waitlist routes, and language switching
-      allowed_paths = ["/", root_path, "/waitlist", "/waitlist/success"]
+      allowed_paths = ["/", root_path, "/waitlist", "/waitlist/success", "/en", "/ar"]
       # Also allow language switching routes (e.g., /language/en, /language/ar)
+      # and the public policy pages (/pages/privacy …)
       is_language_route = request.path.match?(%r{^/language/[a-z]{2}$})
+      is_public_page = request.path.match?(%r{^/pages/[a-z]+$})
       # If not on allowed path, redirect to homepage
-      unless allowed_paths.include?(request.path) || is_language_route
+      unless allowed_paths.include?(request.path) || is_language_route || is_public_page
         redirect_to root_path, status: :see_other
       end
     end

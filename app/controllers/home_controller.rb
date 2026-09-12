@@ -10,7 +10,7 @@ class HomeController < ApplicationController
     response.headers["Cache-Control"] = "no-store"
     response.headers["Vary"] = "Cookie, Accept-Language"
 
-    # app.wtexcellence.com and test.* → always go to dashboard/overview (login required there)
+    # app.wtexcel.com and test.* → always go to dashboard/overview (login required there)
     if host.include?("test") || host.include?("app")
       redirect_to dashboard_overview_path, status: :see_other
       return
@@ -24,7 +24,7 @@ class HomeController < ApplicationController
       return
     end
 
-    # www.wtexcellence.com (and wtexcellence.com) → presentation only, show homepage
+    # www.wtexcel.com (and wtexcel.com) → presentation only, show homepage
     # Public homepage - no authentication required
   end
 end

@@ -91,3 +91,16 @@ class HomepageReviewTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 end
+
+class PublicHostTest < ActionDispatch::IntegrationTest
+  test "on the www host the language pages and policy pages are reachable, the dashboard is not" do
+    host! "www.wtexcel.com"
+    get "/ar"
+    assert_response :success
+    assert_select "html[lang=ar]"
+    get "/pages/privacy"
+    assert_response :success
+    get "/dashboard/overview"
+    assert_redirected_to "/"
+  end
+end

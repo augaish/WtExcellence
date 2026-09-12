@@ -73,7 +73,7 @@ Rails.application.configure do
   ActionMailer::Base.delivery_method = :smtp
 
   # ROOT_URL is a full address (https://app…); links in emails need its host.
-  root_uri = URI.parse(ENV.fetch("ROOT_URL", "https://app.wtexcellence.com")) rescue URI.parse("https://app.wtexcellence.com")
+  root_uri = URI.parse(ENV.fetch("ROOT_URL", "https://app.wtexcel.com")) rescue URI.parse("https://app.wtexcel.com")
   config.action_mailer.default_url_options = { host: root_uri.host, protocol: root_uri.scheme || "https" }
 
   # Specify outgoing SMTP server. Remember to add smtp/* credentials via rails credentials:edit.

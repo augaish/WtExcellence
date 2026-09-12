@@ -80,7 +80,7 @@ Active Storage with Aliyun OSS in production, local disk in development.
 
 ## Deployment
 
-Deployed via **Kamal** (Docker-based) to `app.wtexcellence.com`. Config in `config/deploy.yml`. Docker image includes Tesseract OCR (en+ar), Poppler, and Apache Tika for PDF processing.
+Deployed via **Kamal** (Docker-based) to `app.wtexcel.com` (destination `wtexcel`, config `config/deploy.wtexcel.yml`, run by `scripts/server_deploy.sh`). `config/deploy.yml` is the old wtexcellence.com destination. Docker image includes Tesseract OCR (en+ar), Poppler, and Apache Tika for PDF processing.
 
 ## LLM Configuration
 
