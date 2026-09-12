@@ -55,6 +55,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Sign-in follows the homepage language | `61ddae6` | No migration. |
 | Password reset mail through the queue, email link host from ROOT_URL | `d44bca1` | No migration. |
 | Domain wtexcel.com aligned; www host serves /en, /ar, /pages/* | `1c9b894` | No migration. |
+| Mail diagnostics: mail:test task, SMTP check at deploy, raise delivery errors | `aea02ef` | No migration. |
 
 ## Roll the code back
 ```bash
