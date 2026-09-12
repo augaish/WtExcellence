@@ -62,7 +62,11 @@ for n in OPENROUTER_API_KEY OPENROUTER_MODEL OLLAMA_URL SENTRY_DSN \
          CAPA_ACTION_OLLAMA_MODEL CAPA_CLAUSE_OLLAMA_MODEL CAPA_QUESTIONNAIRE_OLLAMA_MODEL \
          CAPA_QUESTIONNAIRE_SINGLE_PAIR_OLLAMA_MODEL CAPA_ROOT_CAUSE_OLLAMA_MODEL \
          SMTP_PORT SMTP_SERVER SMTP_LOGIN SMTP_PASSWORD SMTP_DOMAIN; do
-  export "${n}=${CENV[$n]-}"
+  # A value given on the command line wins over the one carried forward from
+  # the running container, so a setting can be added or changed at deploy:
+  #   SMTP_SERVER=smtp.mailersend.net SMTP_LOGIN=... bash scripts/server_deploy.sh
+  # Later deploys carry it forward from the container automatically.
+  export "${n}=${!n:-${CENV[$n]-}}"
 done
 : "${OPENROUTER_MODEL:=anthropic/claude-sonnet-4.5}"
 export OPENROUTER_MODEL
