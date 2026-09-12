@@ -96,6 +96,7 @@ env:
     - SMTP_LOGIN
     - SMTP_PASSWORD
     - SMTP_DOMAIN
+    - MAIL_DOMAIN
     - SENTRY_DSN
 
 accessories:

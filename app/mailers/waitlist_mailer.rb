@@ -6,7 +6,7 @@ class WaitlistMailer < ApplicationMailer
     @is_rtl = @locale.to_s == 'ar'
     
     mail(
-      from: "info@#{ENV.fetch('APP_DOMAIN', 'wtexcel.com')}",
+      from: "info@#{ENV.fetch('MAIL_DOMAIN') { ENV.fetch('APP_DOMAIN', 'wtexcel.com') }}",
       to: @user.email,
       subject: @is_rtl ? "مرحباً بك في Way to Excellence - أنت في قائمة الانتظار!" : "Welcome to Way to Excellence - You're on the Waitlist!"
     )
