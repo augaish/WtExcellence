@@ -53,6 +53,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Activity log on every model + Activity page + record History | `be7f721` | No migration (entries go to the existing audit_logs table). |
 | Activity log: duplicate entries folded into one | `e00759f` | No migration. |
 | Sign-in follows the homepage language | `61ddae6` | No migration. |
+| Password reset mail through the queue, email link host from ROOT_URL | `d44bca1` | No migration. |
 
 ## Roll the code back
 ```bash
