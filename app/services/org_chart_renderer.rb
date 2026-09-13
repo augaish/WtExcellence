@@ -44,7 +44,7 @@ class OrgChartRenderer
     layout!
     <<~SVG.html_safe
       <svg viewBox="0 0 #{canvas_width} #{canvas_height}" width="#{canvas_width}" height="#{canvas_height}"
-           xmlns="http://www.w3.org/2000/svg" role="group" direction="#{direction}"
+           xmlns="http://www.w3.org/2000/svg" role="group" direction="ltr"
            aria-label="#{escape(I18n.t('org_structure.chart.title', locale: locale))}">
         <title>#{escape(I18n.t('org_structure.chart.title', locale: locale))}</title>
         #{connectors_svg}
@@ -152,15 +152,14 @@ class OrgChartRenderer
     BOX
   end
 
-  # Text is anchored to the side it is read from. Inside an Arabic page an SVG
-  # inherits right-to-left direction, so a start-anchored label at the left
-  # edge would run out of the box to the left — which is exactly what happened.
+  # The drawing is always laid out left-to-right: coordinates are geometry,
+  # not reading order. Inside an Arabic page an SVG would inherit right-to-left
+  # direction, under which an "end" anchor runs the label out of the box to
+  # the right — which is exactly what happened. Arabic text still shapes
+  # right-to-left within its own run; only its anchor side changes: labels
+  # hug the box's right edge, beside the accent bar.
   def rtl?
     locale.to_s.start_with?("ar")
-  end
-
-  def direction
-    rtl? ? "rtl" : "ltr"
   end
 
   def text_anchor

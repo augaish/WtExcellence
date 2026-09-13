@@ -157,6 +157,8 @@ export default class extends Controller {
     this.fit()
   }
 
+  // First click on a unit selects it and opens its children; a click on the
+  // unit already selected folds them again.
   select(event) {
     const node = event.currentTarget
     const unitId = node.dataset.orgChartUnitIdParam
@@ -168,7 +170,13 @@ export default class extends Controller {
 
     if (this.hasPlaceholderTarget) this.placeholderTarget.hidden = true
     if (this.hasDetailsTarget) this.detailsTarget.hidden = false
-    this.setBranch(unitId, true, false)
+    const childrenOpen = this.visibleChildrenOf(unitId).length > 0
+    if (this.selectedId === unitId && childrenOpen) {
+      this.setBranch(unitId, false)
+    } else {
+      this.setBranch(unitId, true, false)
+    }
+    this.selectedId = unitId
     this.relayout()
 
     this.element.querySelectorAll(".org-chart-node rect:first-of-type").forEach((rect) => {
@@ -186,6 +194,7 @@ export default class extends Controller {
   close() {
     if (this.hasDetailsTarget) this.detailsTarget.hidden = true
     this.panelTargets.forEach((panel) => { panel.hidden = true })
+    this.selectedId = null
   }
 
   // ---- Zoom: the drawing scales in steps between half and triple size.

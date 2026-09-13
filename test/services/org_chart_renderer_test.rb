@@ -74,7 +74,9 @@ class OrgChartRendererTest < ActiveSupport::TestCase
     unit = @company.org_units.create!(name_en: "Legal", name_ar: "الإدارة القانونية", level: 1)
     output = OrgChartRenderer.render([ unit ], locale: :ar)
 
-    assert_includes output, 'direction="rtl"'
+    # The drawing itself is always left-to-right; only the label's anchor side changes.
+    assert_includes output, 'direction="ltr"'
+    assert_not_includes output, 'direction="rtl"'
     assert_includes output, 'text-anchor="end"'
     assert_includes output, "الإدارة القانونية"
     # The anchor point is the inner right edge, not the left one.
