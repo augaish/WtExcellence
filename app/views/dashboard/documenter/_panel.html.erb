@@ -33,7 +33,26 @@
     <% end %>
 
   <% elsif stage == "s1_verify" %>
-    <% if verifier || is_manager %>
+    <% open_correction = record.stage_tasks.for_stage(stage).open.first %>
+    <% if my_task %>
+      <%# The owner was asked to correct something: fix it, then hand it back. %>
+      <p class="text-sm text-[#0D1120]"><%= t('documenter.correction_requested_by', name: my_task.assigned_by&.name.to_s) %></p>
+      <% if my_task.note.present? %><p class="text-sm text-[#0D1120] rounded-lg bg-[#F7F7FD] border border-[#E3E3E3] px-3 py-2">“<%= my_task.note %>”</p><% end %>
+      <div class="flex flex-wrap gap-2">
+        <%= link_to t('edit'), edit_dashboard_pp_record_path(record), class: ui_btn_neutral %>
+      </div>
+      <%= form_with url: dashboard_documenter_submit_task_path(record), method: :post, class: "flex flex-col sm:flex-row gap-2" do %>
+        <%= text_field_tag :note, nil, placeholder: t('documenter.note_optional'), class: "#{input} flex-1" %>
+        <%= submit_tag t('documenter.actions.return_to_verifier'), class: ui_btn_primary %>
+      <% end %>
+    <% elsif open_correction && !is_manager %>
+      <%# The verifier waits while the owner corrects; verifying now would be refused. %>
+      <p class="text-sm text-[#797C81]"><%= t('documenter.waiting_for_correction', name: open_correction.user.name) %></p>
+      <%= link_to t('documenter.actions.check_form'), dashboard_pp_record_path(record), class: ui_btn_neutral %>
+    <% elsif verifier || is_manager %>
+      <% if open_correction %>
+        <p class="text-sm text-amber-800 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2"><%= t('documenter.waiting_for_correction', name: open_correction.user.name) %></p>
+      <% end %>
       <p class="text-sm text-[#0D1120]"><%= t('documenter.verify_hint') %></p>
       <div class="flex flex-wrap gap-2">
         <%# The verifier reads the record; correcting it is the owner's job. %>

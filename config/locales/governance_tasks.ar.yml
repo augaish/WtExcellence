@@ -21,3 +21,8 @@ ar:
     commitment_submitted: "تم الإرسال. سيسجّل المدير قبول العميل."
     control_submitted: "تم الإرسال. سيقيّم مالك الخطر الضابط."
     not_yours: "هذه المهمة غير مسندة إليك."
+    control_report_title: "تقرير مالك الضابط"
+    control_report_by: "قدّمه %{name}، %{date}"
+    control_report_next: "قيّمه: حدّث الاحتمالية والأثر المتبقيين ومبرر الضابط."
+    control_report_pending: "لم يقدّم %{name} شيئًا بعد."
+    control_report_no_owner: "لم يُسمَّ مالك للضابط."

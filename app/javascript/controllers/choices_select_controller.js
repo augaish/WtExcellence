@@ -27,7 +27,10 @@ export default class extends Controller {
         // form populated by JavaScript could display one value and save another.
         // Anything that assigns a value fires "choices:sync" on the select and
         // the widget is re-rendered from it.
-        this._onSyncRequest = () => this.syncFromSelect()
+        // The event may carry the wanted value: once the widget is built the
+        // original <option>s are gone from the select, so "select.value = x"
+        // has nothing to select and reads back empty.
+        this._onSyncRequest = (event) => this.syncFromSelect(event?.detail?.value)
         this.element.addEventListener("choices:sync", this._onSyncRequest)
 
         // Use a reliable delay to ensure the modal is open
@@ -105,8 +108,28 @@ export default class extends Controller {
         }
     }
 
+    // The options as the page rendered them, kept so the select can be rebuilt
+    // after the widget has taken them over.
+    _rememberOptions() {
+        if (this._options) return
+        this._options = Array.from(this.selectTarget.options).map((o) => ({ value: o.value, text: o.text, disabled: o.disabled }))
+    }
+
+    _restoreOptions() {
+        if (!this._options) return
+        this.selectTarget.innerHTML = ""
+        this._options.forEach((o) => {
+            const option = document.createElement("option")
+            option.value = o.value
+            option.text = o.text
+            option.disabled = o.disabled
+            this.selectTarget.appendChild(option)
+        })
+    }
+
     _initChoices() {
         if (this.choicesInstance || !this.hasSelectTarget) return
+        this._rememberOptions()
 
         const isMultiple = this.selectTarget.multiple
         const searchEnabled = (this.hasSearchValue ? this.searchValue : false)
@@ -133,8 +156,10 @@ export default class extends Controller {
             // A sync asked for before the widget existed is applied now rather
             // than lost, since Choices initialises on a timer.
             if (this._pendingSync) {
-                this.syncFromSelect()
+                const pending = this._pendingValue
                 this._pendingSync = false
+                this._pendingValue = undefined
+                this.syncFromSelect(pending)
             }
 
             // Sync disabled state immediately
@@ -162,15 +187,16 @@ export default class extends Controller {
     }
 
     // Public: re-render the widget from the underlying <select>'s current value.
-    syncFromSelect() {
+    syncFromSelect(requested = undefined) {
         if (!this.hasSelectTarget) return
 
         if (!this.choicesInstance) {
             this._pendingSync = true
+            this._pendingValue = requested
             return
         }
 
-        const value = this.selectTarget.value
+        const value = requested !== undefined ? requested : this.selectTarget.value
 
         if (this.selectTarget.multiple) {
             const values = Array.from(this.selectTarget.selectedOptions).map((option) => option.value)
@@ -179,10 +205,16 @@ export default class extends Controller {
             return
         }
 
-        // A single select replaces its own selection; clearing it first left
-        // the widget empty, which is how a Medium CAPA came to open with no
-        // priority showing at all.
-        this.choicesInstance.setChoiceByValue(value === null ? "" : value)
+        // A single select is rebuilt from the option the page just chose. The
+        // widget keeps its own idea of what is selected, and asking it to pick
+        // a value it believed was already picked did nothing — which is how a
+        // Medium CAPA came to open showing High with an empty select behind it.
+        const wanted = value === null ? "" : String(value)
+        this._destroyChoices()
+        this._restoreOptions()
+        Array.from(this.selectTarget.options).forEach((option) => { option.selected = option.value === wanted })
+        this._initChoices()
+        if (this.floatDropdownValue) this._bindFloatDropdown()
     }
 
     // Public: enable the select

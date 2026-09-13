@@ -408,7 +408,13 @@ class UploadsController < DashboardController
       return
     end
 
-    if @upload.file.attached?
+    if @upload.file.attached? && @upload.served_by_app?
+      # Streamed straight from the disk the app can see, with the file's own
+      # name and type; inline for a browser view, attachment for a download.
+      disposition = params[:disposition] == "inline" ? "inline" : "attachment"
+      send_data @upload.file.download, filename: @upload.file.filename.to_s,
+        type: @upload.file.content_type.presence || "application/octet-stream", disposition: disposition
+    elsif @upload.file.attached?
       redirect_to helpers.signed_file_url(@upload.file, disposition: "attachment"), allow_other_host: true
     else
       redirect_to folder_uploads_upload_path(folder_id: @folder_id, id: @upload.id), alert: t("file_not_available")

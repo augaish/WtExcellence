@@ -75,10 +75,14 @@ export default class extends Controller {
   // Re-renders every Choices-backed select in a container from its current
   // value. Applied to the whole modal rather than to one field, because the
   // same mismatch would appear on any of them.
-  syncEnhancedSelects(container) {
+  // values: the wanted value per data-field, passed along because the widget
+  // has already taken the <option>s out of the select.
+  syncEnhancedSelects(container, values = {}) {
     container.querySelectorAll('[data-choices-select-target="select"]').forEach((select) => {
       const wrapper = select.closest('[data-controller~="choices-select"]');
-      (wrapper || select).dispatchEvent(new CustomEvent("choices:sync", { bubbles: true }));
+      const field = select.dataset.field;
+      const detail = field && field in values ? { value: values[field] } : {};
+      (wrapper || select).dispatchEvent(new CustomEvent("choices:sync", { bubbles: true, detail }));
     });
   }
 
@@ -112,7 +116,12 @@ export default class extends Controller {
 
     // The enhanced selects render their own widget, so assigning .value above is
     // not enough — without this the modal shows one value and saves another.
-    this.syncEnhancedSelects(modal);
+    this.syncEnhancedSelects(modal, {
+      priority: el.dataset.capaPriority || '',
+      status: statusValue,
+      source: el.dataset.capaSource || '',
+      standardId: el.dataset.capaStandardId || ''
+    });
 
     // Set assigned users in Choices
     if (this.choices) {

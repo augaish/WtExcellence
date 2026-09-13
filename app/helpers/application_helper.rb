@@ -122,6 +122,11 @@ module ApplicationHelper
   def signed_file_url(attachment, disposition: "attachment")
     return nil unless attachment&.attached?
 
+    # Disk-stored files are streamed by the app (see UploadsController#download).
+    if attachment.record.is_a?(Upload) && attachment.record.served_by_app?
+      return attachment.record.file_url(disposition: disposition)
+    end
+
     attachment.blob.service.url(
       attachment.blob.key,
       expires_in: 1.hour,

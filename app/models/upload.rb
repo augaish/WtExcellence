@@ -88,8 +88,21 @@ class Upload < ApplicationRecord
     name.presence || filename.presence || "Unknown file"
   end
 
+  # Files kept on the server's own disk are served by the app (the download
+  # route streams them), so a link never depends on a signed disk URL that a
+  # proxy or a second container cannot honour. Cloud storage keeps its own
+  # signed URLs.
+  def served_by_app?
+    file.attached? && file.blob.service.is_a?(ActiveStorage::Service::DiskService)
+  end
+
   def file_url(expires_in: 1.hour, disposition: "attachment")
     return nil unless file.attached?
+
+    if served_by_app?
+      return Rails.application.routes.url_helpers.download_folder_uploads_upload_path(
+        folder_id: folder_id || "all", id: id, disposition: disposition)
+    end
 
     file.blob.service.url(
       file.blob.key,

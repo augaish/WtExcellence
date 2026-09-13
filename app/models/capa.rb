@@ -37,7 +37,8 @@ class Capa < ApplicationRecord
   scope :not_archived, -> { where(archived: false) }
 
   before_create :assign_friendly_id
-  after_create :log_creation
+  # Creation is logged by whoever creates the CAPA (the controller writes the
+  # fuller entry; the automatic trail covers the rest), never here as well.
   after_update :log_update
 
   include PgSearch::Model

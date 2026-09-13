@@ -21,3 +21,8 @@ en:
     commitment_submitted: "Submitted. The manager will record the customer's acceptance."
     control_submitted: "Submitted. The risk owner will assess the control."
     not_yours: "This task is not assigned to you."
+    control_report_title: "Control owner's report"
+    control_report_by: "Submitted by %{name}, %{date}"
+    control_report_next: "Assess it: update the residual likelihood and impact and the control rationale."
+    control_report_pending: "Nothing submitted yet by %{name}."
+    control_report_no_owner: "No control owner named."
