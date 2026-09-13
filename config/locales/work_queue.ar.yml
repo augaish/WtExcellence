@@ -19,6 +19,8 @@ ar:
       authority_review: "مصفوفة الصلاحيات"
     reasons:
       control_evidence_due: "قدّم تقريرًا عن الضابط الذي تملكه"
+      action_changes_requested: "مطلوب تعديلات — انظر ملاحظة المراجع"
+      action_to_review: "قُدِّم لمراجعتك"
       action_open: "مُسند إليك"
       action_overdue:
         zero: "متأخر"

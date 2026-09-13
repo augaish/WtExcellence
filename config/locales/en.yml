@@ -190,6 +190,9 @@ en:
   user_notifications:
     authority_review_requested_title: "%{actor_name} asked you to review the authority matrix"
     record_task_assigned_title: "%{actor_name} handed you work on \"%{title}\" (%{stage})"
+    capa_action_submitted_title: "%{actor_name} submitted action \"%{action_title}\" on CAPA %{capa_code} for review"
+    capa_action_accepted_title: "%{actor_name} accepted action \"%{action_title}\" on CAPA %{capa_code}"
+    capa_action_changes_requested_title: "%{actor_name} requested changes on action \"%{action_title}\" on CAPA %{capa_code}"
     governance_task_assigned_title: "%{actor_name} made you responsible for \"%{title}\""
     governance_task_submitted_title: "%{actor_name} submitted work on \"%{title}\" for your review"
     record_task_submitted_title: "%{actor_name} sent \"%{title}\" back to you (%{stage})"
@@ -2422,6 +2425,8 @@ en:
     statuses:
       started: "Started"
       in_progress: "In Progress"
+      ready_for_review: "Ready for review"
+      changes_requested: "Changes requested"
       done: "Done"
       proposed: "Proposed"
     proposed:

@@ -67,6 +67,44 @@ class NotificationService
     send_notification_email_if_enabled(notification)
   end
 
+  # The assignee submitted the action for review: tell whoever manages the
+  # CAPA — its creator, and the people assigned to the CAPA itself.
+  def self.notify_capa_action_submitted(capa:, capa_action:, actor:)
+    reviewers = capa_reviewers(capa) - [ actor ]
+    reviewers.each do |recipient|
+      create_action_notification(recipient: recipient, capa: capa, capa_action: capa_action, actor: actor, kind: "capa_action_submitted")
+    end
+  end
+
+  # The reviewer accepted or sent it back: tell the assignees.
+  def self.notify_capa_action_reviewed(capa:, capa_action:, actor:, outcome:)
+    kind = outcome == "done" ? "capa_action_accepted" : "capa_action_changes_requested"
+    (capa_action.company_users.includes(:user).map(&:user) - [ actor ]).each do |recipient|
+      create_action_notification(recipient: recipient, capa: capa, capa_action: capa_action, actor: actor, kind: kind)
+    end
+  end
+
+  def self.capa_reviewers(capa)
+    people = capa.capa_assignments.includes(company_user: :user).map { |a| a.company_user&.user }
+    people << capa.created_by if capa.created_by
+    people.compact.uniq
+  end
+
+  def self.create_action_notification(recipient:, capa:, capa_action:, actor:, kind:)
+    notification = Notification.create!(
+      recipient: recipient, kind: kind, source: capa,
+      title: I18n.t("user_notifications.#{kind}_title", actor_name: actor.name,
+        capa_code: capa.friendly_code.presence || capa.title, action_title: capa_action.title,
+        locale: recipient.try(:locale).presence || I18n.default_locale),
+      link_path: Rails.application.routes.url_helpers.dashboard_capa_action_show_path(capa.id, capa_action.id),
+      payload: { actor_name: actor.name, actor_id: actor.id, capa_id: capa.id, capa_action_id: capa_action.id, capa_action_title: capa_action.title }
+    )
+    send_notification_email_if_enabled(notification)
+  rescue => e
+    Rails.logger.warn "CAPA action notification failed: #{e.class}: #{e.message}"
+    nil
+  end
+
   # Notify a user they were unassigned from a CAPA action (corrective/preventive action item).
   # @param recipient [User]
   # @param capa [Capa]

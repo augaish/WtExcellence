@@ -206,6 +206,9 @@ ar:
   user_notifications:
     authority_review_requested_title: "طلب منك %{actor_name} مراجعة مصفوفة الصلاحيات"
     record_task_assigned_title: "أسند إليك %{actor_name} عملًا على «%{title}» (%{stage})"
+    capa_action_submitted_title: "قدّم %{actor_name} الإجراء «%{action_title}» في %{capa_code} للمراجعة"
+    capa_action_accepted_title: "قبل %{actor_name} الإجراء «%{action_title}» في %{capa_code}"
+    capa_action_changes_requested_title: "طلب %{actor_name} تعديلات على الإجراء «%{action_title}» في %{capa_code}"
     governance_task_assigned_title: "جعلك %{actor_name} مسؤولًا عن «%{title}»"
     governance_task_submitted_title: "قدّم %{actor_name} عملًا على «%{title}» لمراجعتك"
     record_task_submitted_title: "أعاد إليك %{actor_name} «%{title}» (%{stage})"
@@ -2137,6 +2140,8 @@ ar:
     statuses:
       started: بدأ
       in_progress: قيد التنفيذ
+      ready_for_review: "جاهز للمراجعة"
+      changes_requested: "مطلوب تعديلات"
       done: منجز
       proposed: مقترح
     proposed:

@@ -42,15 +42,30 @@ class WorkQueue
   def capa_actions
     return [] if membership.nil? || !company.module_enabled?(:capa)
 
-    CapaAction.joins(:capa_action_assignments, :capa)
+    mine = CapaAction.joins(:capa_action_assignments, :capa)
       .where(capa_action_assignments: { company_user_id: membership.id })
       .where(capas: { company_id: company.id, archived: false })
-      .where.not(status: %w[done proposed]).includes(:capa).map do |action|
+      .where.not(status: %w[done proposed ready_for_review]).includes(:capa).map do |action|
         overdue = action.due_date.present? && action.due_date < Date.current
-        Item.new(kind: :capa_action, title: action.title,
-          reason: overdue ? I18n.t("work_queue.reasons.action_overdue", days: (Date.current - action.due_date).to_i) : I18n.t("work_queue.reasons.action_open"),
+        reason = if action.changes_requested? then I18n.t("work_queue.reasons.action_changes_requested")
+                 elsif overdue then I18n.t("work_queue.reasons.action_overdue", days: (Date.current - action.due_date).to_i)
+                 else I18n.t("work_queue.reasons.action_open")
+                 end
+        Item.new(kind: :capa_action, title: action.title, reason: reason,
           path: routes.dashboard_capa_action_show_path(action.capa_id, action.id), due_on: action.due_date)
       end
+    mine + capa_actions_to_review
+  end
+
+  # Actions submitted on CAPAs I created or am assigned to, waiting for my verdict.
+  def capa_actions_to_review
+    capa_ids = Capa.where(company_id: company.id, archived: false)
+      .where("capas.created_by_id = :uid OR capas.id IN (:assigned)", uid: user.id,
+        assigned: CapaAssignment.where(company_user_id: membership.id).select(:capa_id)).select(:id)
+    CapaAction.where(capa_id: capa_ids, status: "ready_for_review").includes(:capa).map do |action|
+      Item.new(kind: :capa_action, title: action.title, reason: I18n.t("work_queue.reasons.action_to_review"),
+        path: routes.dashboard_capa_action_show_path(action.capa_id, action.id), due_on: action.due_date)
+    end
   end
 
   # Risks I own that need a decision: acceptance above appetite, or a review.

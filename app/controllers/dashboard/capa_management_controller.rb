@@ -2346,6 +2346,48 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
     end
   end
 
+  # ---- The hand-off between the assignee and the reviewer ----------------
+
+  # The assignee says the work is ready. A note becomes a comment so the
+  # reviewer reads it where the rest of the conversation is.
+  def submit_capa_action_review
+    capa_action = find_capa_action_for_handoff or return
+    unless assignee_of_capa_action?(capa_action) && !viewer?
+      return redirect_to dashboard_capa_action_show_path(@capa, capa_action), alert: t("capa_handoff.not_assignee"), status: :see_other
+    end
+
+    note = params[:note].to_s.strip
+    capa_action.update!(status: "ready_for_review")
+    capa_action.comments.create!(body: note, user: current_user) if note.present?
+    NotificationService.notify_capa_action_submitted(capa: @capa, capa_action: capa_action, actor: current_user)
+    log_capa_action_handoff(capa_action, "SUBMIT_CAPA_ACTION_REVIEW", note)
+    redirect_to dashboard_capa_action_show_path(@capa, capa_action), notice: t("capa_handoff.submitted"), status: :see_other
+  end
+
+  # The reviewer accepts the work or sends it back with a reason.
+  def review_capa_action
+    capa_action = find_capa_action_for_handoff or return
+    unless can_manage_capa?(@capa)
+      return redirect_to dashboard_capa_action_show_path(@capa, capa_action), alert: t("capa_handoff.not_reviewer"), status: :see_other
+    end
+
+    outcome = params[:outcome].to_s
+    reason = params[:reason].to_s.strip
+    unless CapaAction::REVIEW_OUTCOMES.include?(outcome)
+      return redirect_to dashboard_capa_action_show_path(@capa, capa_action), alert: t("capa_handoff.unknown_outcome"), status: :see_other
+    end
+    if outcome == "changes_requested" && reason.blank?
+      return redirect_to dashboard_capa_action_show_path(@capa, capa_action), alert: t("capa_handoff.reason_required"), status: :see_other
+    end
+
+    capa_action.update!(status: outcome)
+    capa_action.comments.create!(body: reason, user: current_user) if reason.present?
+    NotificationService.notify_capa_action_reviewed(capa: @capa, capa_action: capa_action, actor: current_user, outcome: outcome)
+    log_capa_action_handoff(capa_action, outcome == "done" ? "ACCEPT_CAPA_ACTION" : "REQUEST_CAPA_ACTION_CHANGES", reason)
+    redirect_to dashboard_capa_action_show_path(@capa, capa_action),
+      notice: t(outcome == "done" ? "capa_handoff.accepted" : "capa_handoff.changes_requested"), status: :see_other
+  end
+
   def create_capa_action_comment
     @capa = capa_visible_scope(base: Capa.where(company_id: current_company&.id)).find_by(id: params[:capa_id])
     unless @capa
@@ -2912,6 +2954,26 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
   end
 
   # Same as can_manage_capa? on the action's CAPA — used for updating action (e.g. status) from the action page.
+  def find_capa_action_for_handoff
+    @capa = capa_visible_scope(base: Capa.where(company_id: current_company&.id)).find_by(id: params[:capa_id])
+    if @capa.nil?
+      redirect_to dashboard_capa_management_list_path, alert: "CAPA not found", status: :see_other
+      return nil
+    end
+    capa_action = @capa.capa_actions.find_by(id: params[:id])
+    if capa_action.nil?
+      redirect_to dashboard_capa_management_show_path(@capa), alert: "Action not found", status: :see_other
+      return nil
+    end
+    capa_action
+  end
+
+  def log_capa_action_handoff(capa_action, action_name, note)
+    AuditLogService.log_action(actor_user: current_user, company: current_company, action: action_name,
+      entity_type: "capa_action", entity_id: capa_action.id,
+      payload: { capa_id: @capa.id, action_title: capa_action.title, status: capa_action.status, note: note.presence })
+  end
+
   def can_update_capa_action?(capa_action)
     return false unless capa_action&.capa
     can_manage_capa?(capa_action.capa)

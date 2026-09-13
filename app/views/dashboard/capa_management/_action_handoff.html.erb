@@ -1,0 +1,29 @@
+<%# The hand-off box. The assignee submits the work; the reviewer accepts it or
+    sends it back with a reason. Locals: capa, action, assignee_here %>
+<% input = "w-full border border-[#E3E3E3] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]/30 focus:border-[#5C3984]" %>
+<% if assignee_here && !viewer? && !action.done? && !action.ready_for_review? %>
+  <div class="bg-white border border-[#E3E3E3] rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+    <h2 class="text-base font-semibold text-[#0D1120] mb-1"><%= t('capa_handoff.submit_title') %></h2>
+    <p class="text-xs text-[#797C81] mb-3"><%= t('capa_handoff.submit_hint') %></p>
+    <%= form_with url: dashboard_submit_capa_action_review_path(capa, action), method: :post, class: "space-y-3" do %>
+      <%= text_area_tag :note, nil, rows: 2, placeholder: t('capa_handoff.note_placeholder'), class: input %>
+      <%= submit_tag t('capa_handoff.submit'), class: ui_btn_primary %>
+    <% end %>
+  </div>
+<% elsif assignee_here && action.ready_for_review? %>
+  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 text-sm text-amber-900">
+    <%= t('capa_handoff.waiting_for_review') %>
+  </div>
+<% elsif can_update_capa_action?(action) && !viewer? && action.ready_for_review? %>
+  <div class="bg-[#F6EEFF] border border-[#5C3984]/30 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+    <h2 class="text-base font-semibold text-[#0D1120] mb-1"><%= t('capa_handoff.review_title') %></h2>
+    <p class="text-xs text-[#797C81] mb-3"><%= t('capa_handoff.review_hint') %></p>
+    <%= form_with url: dashboard_review_capa_action_path(capa, action), method: :post, class: "space-y-3" do %>
+      <%= text_area_tag :reason, nil, rows: 2, placeholder: t('capa_handoff.reason_placeholder'), class: input %>
+      <div class="flex flex-wrap gap-2">
+        <%= button_tag t('capa_handoff.accept'), name: "outcome", value: "done", class: ui_btn_primary %>
+        <%= button_tag t('capa_handoff.request_changes'), name: "outcome", value: "changes_requested", class: ui_btn_danger %>
+      </div>
+    <% end %>
+  </div>
+<% end %>

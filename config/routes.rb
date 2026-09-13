@@ -75,6 +75,8 @@ Rails.application.routes.draw do
       post "/:capa_id/capa_actions/:id/link_documents", action: :link_capa_action_documents, as: :link_capa_action_documents
       delete "/:capa_id/capa_actions/:id/unlink_document/:upload_id", action: :unlink_capa_action_document, as: :unlink_capa_action_document
       post "/:capa_id/capa_actions/:id/comments", action: :create_capa_action_comment, as: :create_capa_action_comment
+      post "/:capa_id/capa_actions/:id/submit_review", action: :submit_capa_action_review, as: :submit_capa_action_review
+      post "/:capa_id/capa_actions/:id/review", action: :review_capa_action, as: :review_capa_action
       delete "/:capa_id/capa_actions/:id/comments/:comment_id", action: :destroy_capa_action_comment, as: :destroy_capa_action_comment
       post "/:capa_id/link_clauses", action: :link_clauses, as: :link_capa_clauses
       delete "/:capa_id/unlink_clause/:clause_id", action: :unlink_clause, as: :unlink_capa_clause

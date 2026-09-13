@@ -9,6 +9,7 @@ class Notification < ApplicationRecord
     record_task_assigned record_task_submitted record_approval_requested record_approval_rejected record_published
     authority_review_requested
     governance_task_assigned governance_task_submitted
+    capa_action_submitted capa_action_accepted capa_action_changes_requested
   ].freeze
 
   belongs_to :recipient, class_name: "User"

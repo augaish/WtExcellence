@@ -13,6 +13,8 @@ action_type_style = action_type_styles[action.action_type] || { bg: 'bg-gray-100
   status_styles = {
   'started' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.started') },
   'in_progress' => { bg: 'bg-[#E9F0FF]', text: 'text-[#1751A7]', label: t('capa_actions.statuses.in_progress') },
+  'ready_for_review' => { bg: 'bg-amber-100', text: 'text-amber-800', label: t('capa_actions.statuses.ready_for_review') },
+  'changes_requested' => { bg: 'bg-red-100', text: 'text-red-700', label: t('capa_actions.statuses.changes_requested') },
   'done' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.done') }
   }
 status_style = status_styles[action.status] || { bg: 'bg-gray-100', text: 'text-gray-600', label: t("capa_actions.statuses.#{action.status}", default: action.status&.humanize || '-') }

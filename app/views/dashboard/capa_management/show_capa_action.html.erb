@@ -9,9 +9,12 @@
   status_styles = {
     'started' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.started') },
     'in_progress' => { bg: 'bg-[#E9F0FF]', text: 'text-[#1751A7]', label: t('capa_actions.statuses.in_progress') },
+    'ready_for_review' => { bg: 'bg-amber-100', text: 'text-amber-800', label: t('capa_actions.statuses.ready_for_review') },
+    'changes_requested' => { bg: 'bg-red-100', text: 'text-red-700', label: t('capa_actions.statuses.changes_requested') },
     'done' => { bg: 'bg-[#E0F9DE]', text: 'text-[#3F9011]', label: t('capa_actions.statuses.done') }
   }
   status_style = status_styles[action.status] || { bg: 'bg-gray-100', text: 'text-gray-600', label: action.status&.humanize || '-' }
+  assignee_here = assignee_of_capa_action?(action) && !can_update_capa_action?(action)
   due_date_formatted = action.due_date ? l(action.due_date, format: :medium) : nil
   back_url = dashboard_capa_management_show_path(capa)
 %>
@@ -45,6 +48,8 @@
         >
           <option value="started" <%= 'selected' if action.status == 'started' %>><%= t('capa_actions.statuses.started') %></option>
           <option value="in_progress" <%= 'selected' if action.status == 'in_progress' %>><%= t('capa_actions.statuses.in_progress') %></option>
+          <option value="ready_for_review" <%= 'selected' if action.status == 'ready_for_review' %>><%= t('capa_actions.statuses.ready_for_review') %></option>
+          <option value="changes_requested" <%= 'selected' if action.status == 'changes_requested' %>><%= t('capa_actions.statuses.changes_requested') %></option>
           <option value="done" <%= 'selected' if action.status == 'done' %>><%= t('capa_actions.statuses.done') %></option>
         </select>
       <% else %>
@@ -122,6 +127,8 @@
   </dialog>
 
   <!-- Comments section -->
+  <%= render "dashboard/capa_management/action_handoff", capa: capa, action: action, assignee_here: assignee_here %>
+
   <div id="capa-action-comments-section" class="bg-white border border-[#E3E3E3] rounded-xl shadow-sm p-4 sm:p-6" data-controller="capa-action-comments" data-capa-id="<%= capa.id %>" data-capa-action-id="<%= action.id %>" data-capa-action-comments-view-one-reply-value="<%= t('capa_action_show.view_replies.one') %>" data-capa-action-comments-view-n-replies-value="<%= t('capa_action_show.view_replies.other') %>" data-capa-action-comments-confirm-delete-comment-value="<%= t('capa_action_show.confirm_delete_comment') %>" data-capa-action-comments-confirm-delete-reply-value="<%= t('capa_action_show.confirm_delete_reply') %>" data-no-comments-text="<%= t('capa_action_show.no_comments') %>">
     <h2 class="text-base sm:text-lg font-semibold text-[#0D1120] mb-4"><%= t("capa_action_show.comments_section") %></h2>
     <% unless viewer? %>
