@@ -149,7 +149,7 @@
                                         Move
                                     </button>
                                 <% end %>
-                                <% unless viewer? %>
+                                <% unless library_read_only? %>
                                   <% if file[:upload].present? && (current_user&.super_admin? || current_user&.delegated_admin? || file[:upload].uploaded_by == current_user&.id || current_user&.company_user&.has_admin_privileges?) %>
                                       <% folder_id = file[:upload].folder_id || (params[:id] == 'all' || params[:id] == 'legal_documents' ? params[:id] : params[:id]) %>
                                       <% if file[:upload].public? %>

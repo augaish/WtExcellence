@@ -205,6 +205,7 @@ ar:
       copyright: "©2026 WTE Excellence. جميع الحقوق محفوظة."
   user_notifications:
     authority_review_requested_title: "طلب منك %{actor_name} مراجعة مصفوفة الصلاحيات"
+    record_correction_requested_title: "يطلب %{actor_name} تصحيحًا على «%{title}» (%{stage})"
     record_task_assigned_title: "أسند إليك %{actor_name} عملًا على «%{title}» (%{stage})"
     capa_action_submitted_title: "قدّم %{actor_name} الإجراء «%{action_title}» في %{capa_code} للمراجعة"
     capa_action_accepted_title: "قبل %{actor_name} الإجراء «%{action_title}» في %{capa_code}"
@@ -726,7 +727,8 @@ ar:
     waiting_for: "بانتظار %{name}."
     waiting_for_manager: "بانتظار مدير السياسات والإجراءات."
     waiting_for_approvals: "بانتظار رد الوحدات."
-    verify_hint: "راجع النموذج. عدّل ما يلزم ثم أرسله."
+    verify_hint: "اقرأ السجل. إن كان فيه خطأ فأرسله إلى مالكه مع ما يجب تصحيحه؛ وإن كان صحيحًا فأرسله للمرحلة التالية."
+    correction_reason: "ما يجب تصحيحه"
     prep_hint_clauses: "املأ البنود: بند رئيسي وبنود فرعية تحته عند الحاجة. عند الانتهاء أعده إلى رئيس وحدتك."
     prep_hint_steps: "املأ الخطوات واحدة تلو الأخرى. عند الانتهاء أعدها إلى رئيس وحدتك."
     hand_hint_prep: "اختر أحد مرؤوسيك لكتابة المسودة. يمكنك إسنادها لشخص آخر لاحقًا."
@@ -768,7 +770,9 @@ ar:
       assign: "إسناد النشر لناشر"
       system: "النشر في النظام فقط"
     actions:
-      check_form: "مراجعة النموذج"
+      check_form: "قراءة السجل"
+      request_correction: "اطلب من المالك تصحيح شيء"
+      send_for_correction: "إرسال للتصحيح"
       verified: "تم التحقق، إرسال"
       approve: "اعتماد"
       reject: "رفض"
@@ -863,6 +867,7 @@ ar:
       publish_via_publisher: "يتم النشر من لوحة «إرسال للنشر»."
       assignee_not_eligible: "يمكنك إسناد العمل فقط لأحد أعضاء فريقك."
       no_open_task: "ليس لديك مهمة مفتوحة على هذا السجل."
+      no_owner_to_correct: "لا مالك للسجل لإرسال التصحيح إليه."
       not_the_unit_head: "لا يمكن الرد عن الوحدة إلا رئيسها."
       not_your_turn: "لم يحن دور هذه الوحدة بعد؛ يجب أن توافق المجموعات السابقة أولًا."
       comment_required_on_reject: "اذكر السبب عند الرفض."
@@ -893,6 +898,7 @@ ar:
       holiday_removed: "تمت إزالة الإجازة."
       no_permission: "ليس لديك صلاحية تعديل الموثِّق."
       task_assigned: "أُسند إلى %{name}."
+      correction_requested: "أُرسل إلى %{name} للتصحيح."
       task_submitted: "أُعيد إلى %{name}."
       approvals_requested: "طُلب الاعتماد من الوحدات التي اخترتها."
       answered: "سُجّل ردك عن %{unit}."
@@ -1852,6 +1858,8 @@ ar:
       long: "%d %b %Y الساعة %I:%M %p"
       time: "%I:%M %p"
   time:
+    am: "ص"
+    pm: "م"
     formats:
       default: "%d %b %Y %I:%M %p"
       medium: "%d %b %Y"
@@ -2587,6 +2595,7 @@ ar:
   send: "إرسال"
   owner: "المالك"
   grc:
+    role_limited: "لا تشمل رخصتك هذا. يمكنك قراءة المكتبة دون تغييرها."
     no_permission_risks: "ليس لديك إذن لإدارة المخاطر."
     no_permission_view: "لا تشمل رخصتك وحدات الحوكمة."
     no_permission_vendors: "ليس لديك إذن لإدارة الموردين."

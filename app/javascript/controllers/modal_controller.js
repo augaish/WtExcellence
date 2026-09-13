@@ -394,6 +394,9 @@ export default class extends Controller {
       const headers = {
         "X-CSRF-Token": document.querySelector('meta[name="csrf-token"]')
           .content,
+        // The response is read as JSON below, so ask for it: a refusal then
+        // comes back as JSON too, never as a redirect to a page.
+        Accept: "application/json",
       };
 
       if (isFolderForm || isMoveFileForm) {

@@ -159,6 +159,7 @@ Rails.application.routes.draw do
       get "/", action: :index, as: :documenter
       post "/advance", action: :advance, as: :documenter_advance
       post "/return", action: :return_to, as: :documenter_return
+      post "/:id/request_correction", action: :request_correction, as: :documenter_request_correction
       get "/settings", action: :settings, as: :documenter_settings
       patch "/settings", action: :update_settings, as: :update_documenter_settings
       post "/holidays", action: :create_holiday, as: :documenter_holidays

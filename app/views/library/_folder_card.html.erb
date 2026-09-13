@@ -89,7 +89,7 @@
             <% end %>
         <% end %>
         <!-- Three-dot menu (only for dynamic folders, not static "All Uploaded Documents") -->
-        <% unless _is_static %>
+        <% unless _is_static || library_read_only? %>
         <div class="relative flex-shrink-0" data-controller="dropdown">
             <button data-action="click->dropdown#toggle" draggable="false" class="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
                 <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 20 20">
@@ -143,7 +143,7 @@
                         </div>
                     </div>
                     <button data-action="click->modal#open" 
-                            data-modal-dialog-param="create_folder_dialog" 
+                            data-modal-dialog-param="create_folder_dialog"
                             data-folder-parent-id="<%= _folder.id %>"
                             data-folder-parent-name="<%= _folder.name %>"
                             draggable="false"

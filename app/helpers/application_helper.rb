@@ -141,6 +141,12 @@ module ApplicationHelper
     !viewer?
   end
 
+  # The Library is read-only for viewers and for a risk-manager licence:
+  # they open and read files, and see no upload, folder or delete controls.
+  def library_read_only?
+    viewer? || current_user&.risk_manager_only? || false
+  end
+
   # Returns the notification title in the current locale (for in-app display).
   def notification_display_title(notification)
     notification.title_in_locale(I18n.locale)

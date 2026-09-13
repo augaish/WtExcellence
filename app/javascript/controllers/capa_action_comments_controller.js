@@ -14,7 +14,8 @@ export default class extends Controller {
     this.capaActionId = this.element.dataset.capaActionId
     this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
     this.pendingDelete = null
-    this.inputTarget?.addEventListener("input", () => this.toggleSubmit())
+    // A read-only view has no input; the controller still binds reply and delete.
+    if (this.hasInputTarget) this.inputTarget.addEventListener("input", () => this.toggleSubmit())
     this.toggleSubmit()
     this.bindReplyButtons()
     this.bindDeleteButtons()
@@ -26,8 +27,8 @@ export default class extends Controller {
   }
 
   toggleSubmit() {
-    if (!this.hasSubmitBtnTarget) return
-    const text = (this.inputTarget?.value || "").trim()
+    if (!this.hasSubmitBtnTarget || !this.hasInputTarget) return
+    const text = (this.inputTarget.value || "").trim()
     this.submitBtnTarget.disabled = !text
   }
 

@@ -31,7 +31,7 @@
             <% end %>
 
             <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <% unless viewer? %>
+                <% unless library_read_only? %>
                   <% if @folder && params[:id] != 'all' %>
                       <!-- Create Subfolder Button -->
                       <button data-controller="modal" 

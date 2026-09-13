@@ -158,9 +158,13 @@ class Dashboard::BaseController < ApplicationController
     def ensure_not_risk_manager_only
       return unless current_user&.risk_manager_only?
 
-      respond_to do |format|
-        format.html { redirect_to dashboard_risk_management_index_path, alert: "Your role is limited to Risk Management.", status: :see_other }
-        format.json { render json: { success: false, error: "Your role is limited to Risk Management." }, status: :forbidden }
+      message = I18n.t("grc.role_limited")
+      # A form posted by script expects JSON back, even when it forgot to say so.
+      if request.format.json? || request.content_mime_type&.json? || request.xhr?
+        render json: { success: false, error: message, notification_html: render_to_string(partial: "shared/notification",
+          locals: { message: message, type: :error, animated: true }, formats: [ :html ]) }, status: :forbidden
+      else
+        redirect_to dashboard_risk_management_index_path, alert: message, status: :see_other
       end
     end
 

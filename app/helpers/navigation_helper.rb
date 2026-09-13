@@ -127,7 +127,7 @@ module NavigationHelper
 
   # A risk-manager licence works Governance and reads Standards and P&P; the
   # rest of the product stays hidden from it.
-  READABLE_BY_RISK_MANAGERS = %i[pp processes standards org_structure authorities].freeze
+  READABLE_BY_RISK_MANAGERS = %i[pp processes standards org_structure authorities library].freeze
 
   def nav_module?(key)
     return false unless module_enabled_for_current?(key)

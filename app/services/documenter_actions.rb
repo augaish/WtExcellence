@@ -28,6 +28,26 @@ class DocumenterActions
     task
   end
 
+  # The verifier cannot change the record; they send it to its owner with what
+  # needs correcting. The owner gets a task at this stage and fixes the form;
+  # the verifier then verifies.
+  def request_correction(reason:)
+    raise NotPermitted, I18n.t("documenter.flash.no_permission") unless verifier? || manager?
+    raise Invalid, I18n.t("documenter.errors.reason_required") if reason.to_s.strip.blank?
+
+    owner = @record.owner_user
+    raise Invalid, I18n.t("documenter.errors.no_owner_to_correct") if owner.nil?
+
+    task = @record.stage_tasks.create!(stage_key: @record.stage_key, user: owner, assigned_by: @user,
+      assigned_at: Time.current, note: reason.to_s.strip)
+    notify(owner, "record_correction_requested")
+    task
+  end
+
+  def verifier?
+    @user.present? && @record.stage_key == "s1_verify" && @record.verifier_user_id == @user.id
+  end
+
   # The person with the task hands it back to whoever gave it.
   def submit_task(note: nil)
     task = @record.stage_tasks.for_stage(@record.stage_key).open.for_user(@user).first

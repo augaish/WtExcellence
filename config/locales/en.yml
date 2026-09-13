@@ -189,6 +189,7 @@ en:
   # In-app notification titles (for notification records)
   user_notifications:
     authority_review_requested_title: "%{actor_name} asked you to review the authority matrix"
+    record_correction_requested_title: "%{actor_name} asks for a correction on \"%{title}\" (%{stage})"
     record_task_assigned_title: "%{actor_name} handed you work on \"%{title}\" (%{stage})"
     capa_action_submitted_title: "%{actor_name} submitted action \"%{action_title}\" on CAPA %{capa_code} for review"
     capa_action_accepted_title: "%{actor_name} accepted action \"%{action_title}\" on CAPA %{capa_code}"
@@ -706,7 +707,8 @@ en:
     waiting_for: "Waiting for %{name}."
     waiting_for_manager: "Waiting for the P&P Manager."
     waiting_for_approvals: "Waiting for the units to answer."
-    verify_hint: "Check the form. Edit anything that needs it, then send it on."
+    verify_hint: "Read the record. If something is wrong, send it to its owner with what to correct; when it is right, send it on."
+    correction_reason: "What needs correcting"
     prep_hint_clauses: "Fill in the clauses: a main clause, and sub-clauses beneath it where needed. When done, send it back to your unit head."
     prep_hint_steps: "Fill in the steps one by one. When done, send them back to your unit head."
     hand_hint_prep: "Pick one of your reporters to write the draft. You can hand it to someone else later."
@@ -748,7 +750,9 @@ en:
       assign: "Assign a publisher"
       system: "Publish in the system only"
     actions:
-      check_form: "Check the form"
+      check_form: "Read the record"
+      request_correction: "Ask the owner to correct something"
+      send_for_correction: "Send for correction"
       verified: "Verified, send on"
       approve: "Approve"
       reject: "Reject"
@@ -843,6 +847,7 @@ en:
       publish_via_publisher: "Publishing is done from the Send for Publishing panel."
       assignee_not_eligible: "You can only hand work to someone on your own team."
       no_open_task: "You have no open task on this record."
+      no_owner_to_correct: "The record has no owner to send the correction to."
       not_the_unit_head: "Only the head of that unit can answer for it."
       not_your_turn: "This unit's turn has not come yet; earlier groups must approve first."
       comment_required_on_reject: "Say why when rejecting."
@@ -873,6 +878,7 @@ en:
       holiday_removed: "Holiday removed."
       no_permission: "You do not have permission to change the Documenter."
       task_assigned: "Handed to %{name}."
+      correction_requested: "Sent to %{name} for correction."
       task_submitted: "Sent back to %{name}."
       approvals_requested: "Approval requested from the units you chose."
       answered: "Your answer for %{unit} is recorded."
@@ -2599,6 +2605,7 @@ en:
   send: "Send"
   owner: "Owner"
   grc:
+    role_limited: "Your licence does not include this. You can read the Library but not change it."
     no_permission_risks: "You don't have permission to manage risks."
     no_permission_view: "Your licence does not include the Governance modules."
     no_permission_vendors: "You don't have permission to manage vendors."

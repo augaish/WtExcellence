@@ -10,6 +10,7 @@
         <li>
           <span class="text-[#797C81]"><%= l(tr.created_at, format: :short) %></span>
           <span class="text-[#0D1120]"><%= PpStage.label(tr.from_stage) if tr.from_stage %> → <%= PpStage.label(tr.to_stage) %></span>
+          <span class="text-[#797C81]">· <%= tr.actor_user&.name || t('governance_activity.unknown_actor') %></span>
           <% if tr.reason.present? %><p class="text-[#797C81] ms-2">“<%= tr.reason %>”</p><% end %>
         </li>
       <% end %>

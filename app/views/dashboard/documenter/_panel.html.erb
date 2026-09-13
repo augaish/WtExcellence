@@ -36,9 +36,17 @@
     <% if verifier || is_manager %>
       <p class="text-sm text-[#0D1120]"><%= t('documenter.verify_hint') %></p>
       <div class="flex flex-wrap gap-2">
-        <%= link_to t('documenter.actions.check_form'), edit_dashboard_pp_record_path(record), class: ui_btn_neutral %>
+        <%# The verifier reads the record; correcting it is the owner's job. %>
+        <%= link_to t('documenter.actions.check_form'), dashboard_pp_record_path(record), class: ui_btn_neutral %>
         <%= button_to t('documenter.actions.verified'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
       </div>
+      <details class="pt-2 border-t border-[#E3E3E3]">
+        <summary class="cursor-pointer text-sm font-medium text-[#797C81] hover:text-[#0D1120]"><%= t('documenter.actions.request_correction') %></summary>
+        <%= form_with url: dashboard_documenter_request_correction_path(record), method: :post, class: "mt-2 flex flex-col sm:flex-row gap-2" do %>
+          <%= text_field_tag :reason, nil, required: true, placeholder: t('documenter.correction_reason'), class: "#{input} flex-1" %>
+          <%= submit_tag t('documenter.actions.send_for_correction'), class: ui_btn_danger %>
+        <% end %>
+      </details>
     <% else %>
       <p class="text-sm text-[#797C81]"><%= t('documenter.waiting_for', name: record.verifier_user&.name || t('documenter.no_verifier')) %></p>
     <% end %>

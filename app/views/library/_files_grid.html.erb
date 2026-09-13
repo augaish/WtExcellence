@@ -66,7 +66,7 @@
                                     <%= t('download') %>
                                 </span>
                             <% end %>
-                            <% unless viewer? %>
+                            <% unless library_read_only? %>
                               <% if file[:upload].present? %>
                                   <button type="button" data-action="click->modal#open" data-modal-dialog-param="move_file_dialog" data-move-file-id="<%= file[:upload].id %>" data-move-file-name="<%= file[:name] %>" data-move-file-current-folder="<%= file[:upload].folder_id %>" class="w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 min-h-[44px] sm:min-h-auto">
                                       <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

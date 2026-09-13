@@ -11,7 +11,7 @@ class Dashboard::DocumenterController < Dashboard::BaseController
   before_action :ensure_can_manage, only: [ :settings, :update_settings, :create_holiday, :destroy_holiday, :return_to ]
   before_action :set_record, only: [
     :show, :advance_one, :assign_task, :submit_task, :request_approvals, :resend_approvals,
-    :skip_stakeholders, :publish_mode, :submit_publication, :publish, :design
+    :skip_stakeholders, :publish_mode, :submit_publication, :publish, :design, :request_correction
   ]
 
   helper_method :can_manage_documenter?, :manager?, :stage_target_for, :working_days_for
@@ -94,6 +94,13 @@ class Dashboard::DocumenterController < Dashboard::BaseController
 
     actions.assign_task(assignee, note: params[:note])
     back_to_record(notice: t("documenter.flash.task_assigned", name: assignee.name))
+  rescue DocumenterActions::NotPermitted, DocumenterActions::Invalid => e
+    back_to_record(alert: e.message)
+  end
+
+  def request_correction
+    actions.request_correction(reason: params[:reason])
+    back_to_record(notice: t("documenter.flash.correction_requested", name: @record.owner_user&.name.to_s))
   rescue DocumenterActions::NotPermitted, DocumenterActions::Invalid => e
     back_to_record(alert: e.message)
   end
