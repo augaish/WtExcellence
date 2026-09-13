@@ -57,6 +57,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Domain wtexcel.com aligned; www host serves /en, /ar, /pages/* | `1c9b894` | No migration. |
 | Mail diagnostics: mail:test task, SMTP check at deploy, raise delivery errors | `aea02ef` | No migration. |
 | Mail domain setting, deploy secrets override, resend invitation | `ec01190` | No migration. |
+| User deletion covers every reference | `92e08a0` | No migration. |
 
 ## Roll the code back
 ```bash
