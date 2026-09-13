@@ -63,6 +63,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Org chart: details below, tall frame, click toggle, Arabic labels fixed; users/resend platform-only | `ac6b871` | No migration. |
 | Deployment retest N01–N06 | `096ae05` | No migration. |
 | Diagram boxes draggable; order saved to elements, steps and arrows | `75a583b` | No migration. |
+| Diagram arrows bendable (bend_dx/bend_dy on flows) | `52fa64c` | Migration: adds bend_dx, bend_dy to pp_diagram_flows (additive). |
 
 ## Roll the code back
 ```bash
