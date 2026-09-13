@@ -32,6 +32,8 @@
         
         <!-- Action Buttons -->
         <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <%# Accounts are created by the platform side only. %>
+          <% if current_user&.can_add_users? %>
           <button type="button" 
                   class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium flex items-center justify-center gap-2 min-h-[44px] text-xs sm:text-sm"
                   data-action="click->account-management#openAddUserModal">
@@ -40,6 +42,7 @@
             </svg>
             <span><%= t('add_new_user') %></span>
           </button>
+          <% end %>
           <% if current_user&.can_manage_companies? %>
             <button type="button" 
                     class="flex-1 sm:flex-none px-3 sm:px-4 py-3 sm:py-2 bg-[#5C3984] text-white rounded-lg hover:bg-[#4A2F6B] transition-colors font-medium flex items-center justify-center gap-2 min-h-[44px] text-xs sm:text-sm"
@@ -81,7 +84,7 @@
   
   
   <!-- Add User Modal -->
-  <%= render partial: 'add_user_modal' %>
+  <%= render partial: 'add_user_modal' if current_user&.can_add_users? %>
   
   <!-- Permissions Modal (for Super Admin only) -->
   <% if current_user&.super_admin? %>

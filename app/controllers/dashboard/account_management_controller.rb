@@ -710,7 +710,10 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
   end
 
   def create_invitation
-    unless current_user&.can_add_users? || current_user&.company_user&.company_admin?
+    # Accounts are created by the platform side only: the super admin and
+    # delegated admins who may add users. A company admin manages their
+    # people's roles and designations, not their existence.
+    unless current_user&.can_add_users?
       redirect_to dashboard_account_management_users_path, alert: "You don't have permission to invite users."
       return
     end
@@ -929,7 +932,7 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
   # A pending invitation sent again with a fresh link, for a person whose
   # first email never arrived or expired.
   def resend_invitation
-    unless current_user&.can_add_users? || current_user&.company_user&.company_admin?
+    unless current_user&.can_add_users?
       return redirect_to dashboard_account_management_users_path, alert: t("resend_invitation.not_permitted"), status: :see_other
     end
 

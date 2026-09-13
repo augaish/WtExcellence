@@ -30,6 +30,20 @@ class Dashboard::ResendInvitationTest < ActionDispatch::IntegrationTest
     assert AuditLog.exists?(entity_id: @invited.id, action: "RESEND_USER_INVITATION")
   end
 
+  test "a company admin can neither resend an invitation nor add a user" do
+    admin = User.create!(email: "rs-admin-#{SecureRandom.hex(4)}@example.com", password: "password123",
+      password_confirmation: "password123", name: "Admin", is_active: true)
+    CompanyUser.create!(company: @company, user: admin, role: CompanyUser::ROLES[:company_admin])
+    sign_in admin
+    get dashboard_account_management_users_path
+    assert_select "form[action=?]", dashboard_resend_invitation_path(@invited), 0
+    assert_select "[data-action*=openAddUserModal]", 0
+    assert_no_enqueued_emails { post dashboard_resend_invitation_path(@invited) }
+    assert_no_difference "User.count" do
+      post dashboard_create_invitation_path, params: { name: "New", email: "new-#{SecureRandom.hex(3)}@example.com", company_role: "company_viewer" }
+    end
+  end
+
   test "an accepted user has nothing to resend" do
     @invited.update!(invitation_accepted_at: Time.current, is_active: true)
     sign_in @super_admin

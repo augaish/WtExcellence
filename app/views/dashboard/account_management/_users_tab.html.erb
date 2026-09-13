@@ -172,7 +172,7 @@
                             class: "w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-100 min-h-[44px] sm:min-h-auto",
                             form: { class: "block" } %>
                     <% end %>
-                    <% if user.invited? && (current_user&.can_add_users? || current_user&.company_user&.company_admin?) %>
+                    <% if user.invited? && current_user&.can_add_users? %>
                       <%= button_to t('resend_invitation.button'), dashboard_resend_invitation_path(user), method: :post,
                             class: "w-full text-start block px-4 py-3 sm:py-2 text-xs sm:text-sm text-[#5C3984] hover:bg-[#F6EEFF] min-h-[44px] sm:min-h-auto",
                             form: { class: "block" } %>
