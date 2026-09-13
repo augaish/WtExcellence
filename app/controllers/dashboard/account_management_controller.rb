@@ -872,8 +872,8 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     end
   rescue UserDeletionService::CannotDeleteUserError => e
     redirect_back fallback_location: dashboard_account_management_users_path, alert: e.message
-  rescue ActiveRecord::RecordNotDestroyed => e
-    redirect_back fallback_location: dashboard_account_management_users_path, alert: "Could not delete user: #{e.message}"
+  rescue ActiveRecord::RecordNotDestroyed, ActiveRecord::InvalidForeignKey => e
+    redirect_back fallback_location: dashboard_account_management_users_path, alert: "Could not delete user: #{e.message.lines.first.to_s.strip}"
   end
 
   def destroy_company
