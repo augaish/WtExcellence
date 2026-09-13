@@ -62,6 +62,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Six-user test round: F01 register rule, F02 scoped tasks, E01 CAPA hand-off, F04/F05/F07/E04 clean-up, E02 Access page, chart re-layout, designations for company admin | `9eb918c` | Migration: adds control_evidence_note and control_evidence_submitted_at to risks (additive). |
 | Org chart: details below, tall frame, click toggle, Arabic labels fixed; users/resend platform-only | `ac6b871` | No migration. |
 | Deployment retest N01–N06 | `096ae05` | No migration. |
+| Diagram boxes draggable; order saved to elements, steps and arrows | `75a583b` | No migration. |
 
 ## Roll the code back
 ```bash
