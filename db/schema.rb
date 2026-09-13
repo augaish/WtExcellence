@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_10_092302) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_13_083434) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1254,6 +1254,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_10_092302) do
     t.datetime "accepted_at"
     t.text "acceptance_rationale"
     t.date "acceptance_expires_on"
+    t.text "control_evidence_note"
+    t.datetime "control_evidence_submitted_at"
     t.index ["closed_by_id"], name: "index_risks_on_closed_by_id"
     t.index ["company_id", "submission_token"], name: "index_risks_on_company_id_and_submission_token", unique: true, where: "(submission_token IS NOT NULL)"
     t.index ["company_id"], name: "index_risks_on_company_id"

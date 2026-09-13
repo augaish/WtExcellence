@@ -179,6 +179,14 @@ Rails.application.routes.draw do
 
     # Records + Packages (P&P)
     # Executive Delegation of Authority
+    # Scoped task pages for people assigned governance work without the licence
+    scope :tasks, controller: :governance_tasks do
+      get "commitments/:id", action: :commitment, as: :commitment_task
+      post "commitments/:id/submit", action: :submit_commitment, as: :submit_commitment_task
+      get "controls/:id", action: :control, as: :control_task
+      post "controls/:id/submit", action: :submit_control, as: :submit_control_task
+    end
+
     scope :authorities, controller: :authorities do
       get "/", action: :index, as: :authorities
       post "categories", action: :create_category, as: :create_authority_category

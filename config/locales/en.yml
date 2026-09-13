@@ -190,6 +190,8 @@ en:
   user_notifications:
     authority_review_requested_title: "%{actor_name} asked you to review the authority matrix"
     record_task_assigned_title: "%{actor_name} handed you work on \"%{title}\" (%{stage})"
+    governance_task_assigned_title: "%{actor_name} made you responsible for \"%{title}\""
+    governance_task_submitted_title: "%{actor_name} submitted work on \"%{title}\" for your review"
     record_task_submitted_title: "%{actor_name} sent \"%{title}\" back to you (%{stage})"
     record_approval_requested_title: "Your unit's approval is requested for \"%{title}\" (%{stage})"
     record_approval_rejected_title: "%{unit} rejected \"%{title}\" (%{stage})"

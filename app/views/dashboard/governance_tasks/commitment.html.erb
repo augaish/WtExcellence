@@ -1,0 +1,45 @@
+<%= content_for :title, @commitment.title %>
+<% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
+
+<div class="p-6 max-w-3xl mx-auto space-y-6">
+  <%= render layout: "dashboard/shared/page_header", locals: { title: @commitment.title, subtitle: t('governance_tasks.commitment_subtitle') } do %>
+    <%= link_to t('back'), dashboard_overview_path, class: ui_btn_neutral %>
+  <% end %>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+    <h2 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('governance_tasks.what_was_promised') %></h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <div><dt class="text-xs font-medium text-[#797C81]"><%= t('customer') %></dt><dd class="mt-0.5 text-[#0D1120]"><%= @commitment.customer_name %></dd></div>
+      <div><dt class="text-xs font-medium text-[#797C81]"><%= t('due_date') %></dt><dd class="mt-0.5 <%= @commitment.past_due? ? 'text-red-600 font-medium' : 'text-[#0D1120]' %>"><%= @commitment.due_date ? l(@commitment.due_date, format: :document) : "—" %> · <%= @commitment.timing_label %></dd></div>
+      <% if @commitment.agreement_reference.present? %><div><dt class="text-xs font-medium text-[#797C81]"><%= t('commitment_depth.agreement_reference') %></dt><dd class="mt-0.5 text-[#0D1120]"><%= @commitment.agreement_reference %></dd></div><% end %>
+      <% if @commitment.vendor %><div><dt class="text-xs font-medium text-[#797C81]"><%= t('commitment_depth.vendor') %></dt><dd class="mt-0.5 text-[#0D1120]"><%= @commitment.vendor.name %></dd></div><% end %>
+      <% if @commitment.description.present? %><div class="sm:col-span-2"><dt class="text-xs font-medium text-[#797C81]"><%= t('description') %></dt><dd class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= @commitment.description %></dd></div><% end %>
+      <% if @commitment.acceptance_criteria.present? %><div class="sm:col-span-2"><dt class="text-xs font-medium text-[#797C81]"><%= t('commitment_depth.acceptance_criteria') %></dt><dd class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= @commitment.acceptance_criteria %></dd></div><% end %>
+    </dl>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+    <h2 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('governance_tasks.your_report') %></h2>
+    <% if @commitment.fulfilled? %>
+      <p class="text-sm text-[#0D1120] whitespace-pre-line"><%= @commitment.fulfillment_note %></p>
+      <p class="mt-2 text-xs text-[#797C81]">
+        <%= t('governance_tasks.delivered_on', date: (@commitment.delivered_on ? l(@commitment.delivered_on, format: :document) : "—")) %> ·
+        <%= t('governance_tasks.acceptance') %>: <%= @commitment.acceptance_label %>
+        <% if @commitment.acceptance_note.present? %> — <%= @commitment.acceptance_note %><% end %>
+      </p>
+    <% else %>
+      <p class="text-xs text-[#797C81] mb-3"><%= t('governance_tasks.commitment_hint') %></p>
+      <%= form_with url: dashboard_submit_commitment_task_path(@commitment), method: :post, class: "space-y-3" do %>
+        <div>
+          <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('governance_tasks.delivered_on_label') %></label>
+          <%= date_field_tag :delivered_on, Date.current, class: "#{input} sm:w-56" %>
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('governance_tasks.note_label') %></label>
+          <%= text_area_tag :fulfillment_note, nil, rows: 4, class: input, placeholder: t('governance_tasks.note_placeholder') %>
+        </div>
+        <%= submit_tag t('governance_tasks.submit_commitment'), class: ui_btn_primary %>
+      <% end %>
+    <% end %>
+  </div>
+</div>

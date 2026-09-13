@@ -18,6 +18,7 @@ ar:
       vendor: "مورد"
       authority_review: "مصفوفة الصلاحيات"
     reasons:
+      control_evidence_due: "قدّم تقريرًا عن الضابط الذي تملكه"
       action_open: "مُسند إليك"
       action_overdue:
         zero: "متأخر"

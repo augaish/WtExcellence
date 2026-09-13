@@ -51,6 +51,7 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
     sanitize_company_owner!(@commitment)
 
     if @commitment.save
+      GovernanceTaskNotifier.assigned(membership: @commitment.owner, record: @commitment, actor: current_user) if @commitment.owner
       redirect_to dashboard_customer_commitment_path(@commitment), notice: t("commitment_logged")
     else
       render :new, status: :unprocessable_entity
@@ -63,8 +64,10 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
   def update
     @commitment.assign_attributes(commitment_params)
     sanitize_company_owner!(@commitment)
+    owner_changed = @commitment.owner_id_changed?
 
     if @commitment.save
+      GovernanceTaskNotifier.assigned(membership: @commitment.owner, record: @commitment, actor: current_user) if owner_changed && @commitment.owner
       redirect_to dashboard_customer_commitment_path(@commitment), notice: t("commitment_updated")
     else
       render :edit, status: :unprocessable_entity

@@ -17,9 +17,8 @@ class Dashboard::AccountRegisterAccessTest < ActionDispatch::IntegrationTest
     user
   end
 
-  # Quality managers hold admin privileges in this product and keep the register.
-  test "viewer, contributor, auditor and risk manager are turned away from every register page" do
-    %i[company_viewer company_contributor company_auditor company_risk_manager].each do |role|
+  test "viewer, contributor, auditor, quality manager and risk manager are turned away from every register page" do
+    %i[company_viewer company_contributor company_auditor company_quality_manager company_risk_manager].each do |role|
       sign_in create_user(@company, role.to_s, CompanyUser::ROLES[role])
       [ dashboard_account_management_path, dashboard_account_management_users_path, dashboard_account_management_company_path(@company) ].each do |path|
         get path

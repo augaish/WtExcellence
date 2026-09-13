@@ -80,6 +80,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     sanitize_company_owner!(@risk)
 
     if @risk.save
+      GovernanceTaskNotifier.assigned(membership: @risk.control_owner, record: @risk, actor: current_user) if @risk.control_owner
       redirect_to dashboard_risk_management_path(@risk), notice: t("risk_logged")
     else
       load_form_collections
@@ -95,8 +96,10 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     @risk.assign_attributes(risk_params)
     reject_cross_company_workspace(@risk)
     sanitize_company_owner!(@risk)
+    control_owner_changed = @risk.control_owner_id_changed?
 
     if @risk.save
+      GovernanceTaskNotifier.assigned(membership: @risk.control_owner, record: @risk, actor: current_user) if control_owner_changed && @risk.control_owner
       redirect_to dashboard_risk_management_path(@risk), notice: t("risk_updated")
     else
       load_form_collections

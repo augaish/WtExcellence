@@ -13,7 +13,7 @@ class WorkQueue
   end
 
   def items
-    @items ||= (documenter + capa_actions + risks + commitments + vendors + authority_reviews)
+    @items ||= (documenter + capa_actions + risks + controls + commitments + vendors + authority_reviews)
       .sort_by { |i| [ i.due_on || Date.new(9999), i.title ] }
   end
 
@@ -68,15 +68,32 @@ class WorkQueue
     end
   end
 
+  # A person without the governance licence is sent to the scoped task page,
+  # never to a register they cannot open.
   def commitments
     return [] if membership.nil? || !company.module_enabled?(:commitments)
 
     CustomerCommitment.active.where(company_id: company.id, owner_id: membership.id).where.not(status: "fulfilled").filter_map do |c|
-      next unless c.past_due? || c.timing_state == "due_soon"
+      next unless c.past_due? || c.timing_state == "due_soon" || !governance_reader?
 
-      Item.new(kind: :commitment, title: c.title, reason: c.timing_label,
-        path: routes.dashboard_customer_commitment_path(c), due_on: c.due_date)
+      path = governance_reader? ? routes.dashboard_customer_commitment_path(c) : routes.dashboard_commitment_task_path(c)
+      Item.new(kind: :commitment, title: c.title, reason: c.timing_label, path: path, due_on: c.due_date)
     end
+  end
+
+  # The control owner's own item: report on the control until it is submitted.
+  def controls
+    return [] if membership.nil? || !company.module_enabled?(:risk)
+
+    Risk.active.where(company_id: company.id, control_owner_id: membership.id, control_evidence_submitted_at: nil)
+        .where.not(status: "closed").map do |risk|
+      Item.new(kind: :risk, title: risk.title, reason: I18n.t("work_queue.reasons.control_evidence_due"),
+        path: routes.dashboard_control_task_path(risk), due_on: risk.next_review_on)
+    end
+  end
+
+  def governance_reader?
+    user.can_view_governance?
   end
 
   def vendors

@@ -206,6 +206,8 @@ ar:
   user_notifications:
     authority_review_requested_title: "طلب منك %{actor_name} مراجعة مصفوفة الصلاحيات"
     record_task_assigned_title: "أسند إليك %{actor_name} عملًا على «%{title}» (%{stage})"
+    governance_task_assigned_title: "جعلك %{actor_name} مسؤولًا عن «%{title}»"
+    governance_task_submitted_title: "قدّم %{actor_name} عملًا على «%{title}» لمراجعتك"
     record_task_submitted_title: "أعاد إليك %{actor_name} «%{title}» (%{stage})"
     record_approval_requested_title: "مطلوب اعتماد وحدتك على «%{title}» (%{stage})"
     record_approval_rejected_title: "رفضت %{unit} «%{title}» (%{stage})"
