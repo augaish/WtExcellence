@@ -3,7 +3,7 @@ class Dashboard::PpDiagramsController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_company_present
   before_action :ensure_can_manage, except: [ :show ]
-  before_action :set_diagram, only: [ :generate_from_steps, :reorder_elements,
+  before_action :set_diagram, only: [ :generate_from_steps, :reorder_elements, :bend_flow,
     :show, :edit, :update, :destroy,
     :add_element, :update_element, :destroy_element, :add_flow, :destroy_flow
   ]
@@ -87,6 +87,20 @@ class Dashboard::PpDiagramsController < Dashboard::BaseController
     DiagramStepSync.reorder(@diagram, ids)
     log_action("REORDER_DIAGRAM_ELEMENTS")
     head :no_content
+  end
+
+  # An arrow dragged into a bend, or straightened again (no offsets).
+  def bend_flow
+    flow = @diagram.flows.find_by(id: params[:flow_id])
+    return head :not_found if flow.nil?
+
+    dx = params[:dx].presence && params[:dx].to_i
+    dy = params[:dy].presence && params[:dy].to_i
+    if flow.update(bend_dx: dx, bend_dy: dy)
+      head :no_content
+    else
+      head :unprocessable_entity
+    end
   end
 
   def update_element

@@ -228,3 +228,32 @@ class DiagramReorderTest < ActionDispatch::IntegrationTest
     assert_match(/Approve.*Receive.*Check/m, response.body)
   end
 end
+
+class DiagramBendTest < ActionDispatch::IntegrationTest
+  test "an arrow can be bent through a dragged point and straightened again" do
+    Rails.application.reload_routes!
+    company = Company.create!(name: "Bend Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
+    admin = User.create!(email: "bend-#{SecureRandom.hex(4)}@example.com", password: "password123",
+      password_confirmation: "password123", name: "Admin", is_active: true)
+    CompanyUser.create!(company: company, user: admin, role: CompanyUser::ROLES[:company_admin])
+    record = company.pp_records.create!(record_type: "policy", title_en: "Any", description: "x")
+    diagram = company.pp_diagrams.create!(owner: record, name: "Bend")
+    a = diagram.elements.create!(element_type: "userTask", title: "A", performer: "HR", position: 0)
+    b = diagram.elements.create!(element_type: "userTask", title: "B", performer: "HR", position: 1)
+    flow = diagram.flows.create!(from_element: a, to_element: b, kind: "sequence")
+
+    sign_in admin
+    get dashboard_pp_diagram_path(diagram)
+    assert_select "circle.diagram-bend[data-flow-id=?]", flow.id
+    assert_match(/ C /, response.body, "a straight arrow is a smooth curve between the boxes")
+
+    patch bend_flow_dashboard_pp_diagram_path(diagram, flow_id: flow.id), params: { dx: 0, dy: -60 }, as: :json
+    assert_response :no_content
+    assert_equal [ 0, -60 ], [ flow.reload.bend_dx, flow.bend_dy ]
+    get dashboard_pp_diagram_path(diagram)
+    assert_match(/ Q /, response.body, "a bent arrow passes through the dragged point")
+
+    patch bend_flow_dashboard_pp_diagram_path(diagram, flow_id: flow.id), params: { dx: nil, dy: nil }, as: :json
+    assert_not flow.reload.bent?
+  end
+end

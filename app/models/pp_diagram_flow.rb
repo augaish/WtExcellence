@@ -15,6 +15,12 @@ class PpDiagramFlow < ApplicationRecord
 
   validates :kind, presence: true, inclusion: { in: KINDS }
   validates :label, length: { maximum: 200 }
+  validates :bend_dx, :bend_dy, numericality: { only_integer: true, greater_than: -2000, less_than: 2000 }, allow_nil: true
+
+  # Bent by hand: the arrow passes through a point the user dragged.
+  def bent?
+    bend_dx.present? && bend_dy.present?
+  end
   validate :elements_belong_to_the_same_diagram
   validate :cannot_connect_an_element_to_itself
 

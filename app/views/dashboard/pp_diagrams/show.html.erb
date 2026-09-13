@@ -3,7 +3,8 @@
 <% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
 
 <div class="min-h-screen bg-gray-50" data-controller="diagram-order"
-     data-diagram-order-url-value="<%= can_manage_diagrams? ? reorder_elements_dashboard_pp_diagram_path(@diagram) : '' %>">
+     data-diagram-order-url-value="<%= can_manage_diagrams? ? reorder_elements_dashboard_pp_diagram_path(@diagram) : '' %>"
+     data-diagram-order-bend-url-value="<%= can_manage_diagrams? ? bend_flow_dashboard_pp_diagram_path(@diagram, flow_id: 'FLOW') : '' %>">
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: {
           title: @diagram.display_name, subtitle: t('architect.show_subtitle') } do %>

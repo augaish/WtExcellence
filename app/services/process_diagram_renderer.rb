@@ -189,14 +189,30 @@ class ProcessDiagramRenderer
       marker = invalid ? "arrow-bad" : (flow.kind == "message" ? "arrow-msg" : "arrow")
       dash = flow.kind == "message" ? %(stroke-dasharray="6 4") : ""
 
+      # The straight midpoint is where the bend handle rests; a bent arrow
+      # passes through that point moved by the offset the user dragged.
       mid_x = (x1 + x2) / 2
-      path = "M #{x1} #{y1} C #{mid_x} #{y1}, #{mid_x} #{y2}, #{x2} #{y2}"
+      mid_y = (y1 + y2) / 2
+      if flow.bent?
+        bx = mid_x + flow.bend_dx
+        by = mid_y + flow.bend_dy
+        # The curve passes through the dragged point itself (a quadratic curve
+        # reaches only halfway to its control point, so the control point is
+        # placed twice as far out).
+        path = "M #{x1} #{y1} Q #{2 * bx - mid_x} #{2 * by - mid_y}, #{x2} #{y2}"
+        handle_x, handle_y = bx, by
+      else
+        path = "M #{x1} #{y1} C #{mid_x} #{y1}, #{mid_x} #{y2}, #{x2} #{y2}"
+        handle_x, handle_y = mid_x, mid_y
+      end
 
       label = flow.label.presence
       <<~SVG
         <g>
           <path d="#{path}" fill="none" stroke="#{colour}" stroke-width="1.5" #{dash} marker-end="url(##{marker})"/>
-          #{label ? %(<text x="#{mid_x}" y="#{(y1 + y2) / 2 - 6}" text-anchor="middle" font-size="10" fill="#{colour}">#{escape(truncate(label, 18))}</text>) : ''}
+          #{label ? %(<text x="#{handle_x}" y="#{handle_y - 8}" text-anchor="middle" font-size="10" fill="#{colour}">#{escape(truncate(label, 18))}</text>) : ''}
+          <circle class="diagram-bend" data-flow-id="#{flow.id}" data-mid-x="#{mid_x}" data-mid-y="#{mid_y}"
+                  cx="#{handle_x}" cy="#{handle_y}" r="5" fill="#FFFFFF" stroke="#{colour}" stroke-width="1.5" opacity="0.6" style="cursor: move;"/>
         </g>
       SVG
     end.compact.join

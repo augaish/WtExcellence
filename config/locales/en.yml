@@ -545,7 +545,7 @@ en:
         action: "Move on to reviewing cycle time, SLA, risk, and the approval matrix."
         method: "Continuous Improvement"
   architect:
-    drag_hint: "Drag a box left or right in the picture, or a row in the list, to change the order. The order is saved when you drop it; linked steps are renumbered and the arrows follow."
+    drag_hint: "Drag a box left or right in the picture, or a row in the list, to change the order. Drag the small circle on an arrow to bend it around other boxes; double-click it to straighten. Everything is saved when you drop it; linked steps are renumbered and the arrows follow."
     title: "Process Architect"
     new_diagram: "New diagram"
     edit_diagram: "Edit diagram"

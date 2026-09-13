@@ -148,6 +148,7 @@ Rails.application.routes.draw do
         post :add_element
         post :generate_from_steps
         patch :reorder_elements
+        patch "flows/:flow_id/bend", action: :bend_flow, as: :bend_flow
         patch "elements/:element_id", action: :update_element, as: :update_element
         delete "elements/:element_id", action: :destroy_element, as: :destroy_element
         post :add_flow

@@ -6,11 +6,56 @@ import { Controller } from "@hotwired/stimulus"
 // reloads to show the result.
 export default class extends Controller {
   static targets = ["picture", "list"]
-  static values = { url: String }
+  static values = { url: String, bendUrl: String }
 
   connect() {
     if (!this.urlValue) return
     this.bindPicture()
+    this.bindBends()
+  }
+
+  // ---- Arrows: drag the small handle to bend an arrow; double-click to straighten.
+
+  bindBends() {
+    if (!this.hasPictureTarget || !this.bendUrlValue) return
+    this.pictureTarget.querySelectorAll(".diagram-bend").forEach((handle) => {
+      handle.setAttribute("opacity", "1")
+      handle.addEventListener("pointerdown", (event) => this.bendDown(event, handle))
+      handle.addEventListener("dblclick", () => this.saveBend(handle.dataset.flowId, null, null))
+    })
+  }
+
+  bendDown(event, handle) {
+    event.preventDefault()
+    event.stopPropagation()
+    const svg = this.pictureTarget.querySelector("svg")
+    const scale = svg.viewBox.baseVal.width / svg.getBoundingClientRect().width
+    const start = { x: event.clientX, y: event.clientY, cx: parseFloat(handle.getAttribute("cx")), cy: parseFloat(handle.getAttribute("cy")) }
+    let moved = false
+    const move = (e) => {
+      moved = true
+      handle.setAttribute("cx", start.cx + (e.clientX - start.x) * scale)
+      handle.setAttribute("cy", start.cy + (e.clientY - start.y) * scale)
+    }
+    const up = () => {
+      window.removeEventListener("pointermove", move)
+      window.removeEventListener("pointerup", up)
+      if (!moved) return
+      const dx = Math.round(parseFloat(handle.getAttribute("cx")) - parseFloat(handle.dataset.midX))
+      const dy = Math.round(parseFloat(handle.getAttribute("cy")) - parseFloat(handle.dataset.midY))
+      this.saveBend(handle.dataset.flowId, dx, dy)
+    }
+    window.addEventListener("pointermove", move)
+    window.addEventListener("pointerup", up)
+  }
+
+  saveBend(flowId, dx, dy) {
+    const token = document.querySelector("meta[name='csrf-token']")?.content
+    fetch(this.bendUrlValue.replace("FLOW", flowId), {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": token, Accept: "application/json" },
+      body: JSON.stringify({ dx, dy })
+    }).then((response) => { if (response.ok) window.location.reload() })
   }
 
   // ---- The picture: pointer drag along the row --------------------------
