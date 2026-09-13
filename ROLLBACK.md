@@ -59,6 +59,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Mail domain setting, deploy secrets override, resend invitation | `ec01190` | No migration. |
 | User deletion covers every reference | `92e08a0` | No migration. |
 | Six-user test F01 (account register closed) and F03 (due date kept) | `62c6632` | No migration. |
+| Six-user test round: F01 register rule, F02 scoped tasks, E01 CAPA hand-off, F04/F05/F07/E04 clean-up, E02 Access page, chart re-layout, designations for company admin | `9eb918c` | Migration: adds control_evidence_note and control_evidence_submitted_at to risks (additive). |
 
 ## Roll the code back
 ```bash
