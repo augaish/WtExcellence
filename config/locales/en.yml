@@ -1262,6 +1262,7 @@ en:
   account_management: "Account Management"
   account_management_description: "High-level view of companies, accounts, licenses and credits across your workspace."
   site_users: "Site Users"
+  account_management_access_denied: "Account management is for company administrators."
   add_new_user: "Add New User"
   add_new_company: "Add New Company"
   create_company_description: "Create a new company account."

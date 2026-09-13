@@ -1283,6 +1283,7 @@ ar:
   account_management_description: نظرة عامة على الشركات والحسابات والتراخيص والأرصدة
     في مساحة العمل .
   site_users: مستخدمو الموقع
+  account_management_access_denied: "إدارة الحسابات لمديري الشركة فقط."
   add_new_user: إضافة مستخدم جديد
   add_new_company: إضافة شركة جديدة
   create_company_description: إنشاء حساب شركة جديد.

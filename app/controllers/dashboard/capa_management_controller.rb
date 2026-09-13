@@ -1604,9 +1604,10 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
       render json: { error: "You do not have permission to edit this action.", notification_html: notification_html }, status: :forbidden and return
     end
 
-    # Filter permitted params
+    # Filter permitted params. A blank due date clears it only when the form
+    # sent the field; a status-only change leaves the deadline as it was.
     action_params = capa_action_params
-    action_params[:due_date] = nil if action_params[:due_date].blank?
+    action_params[:due_date] = nil if params[:capa_action].key?(:due_date) && action_params[:due_date].blank?
 
     to_add_ids = []
     to_remove_ids = []

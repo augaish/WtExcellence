@@ -1,5 +1,9 @@
 class Dashboard::AccountManagementController < Dashboard::BaseController
   before_action :authenticate_user!
+  # The account register is for people who administer accounts. Anyone else
+  # (viewer, contributor, auditor, quality or risk manager) is turned away
+  # before any account data is read, whatever URL they type.
+  before_action :ensure_can_administer_accounts, only: [ :index, :users, :company ]
   before_action :ensure_super_admin_for_companies, only: [ :companies ]
   before_action :ensure_super_admin_for_permissions, only: [ :update_permissions ]
 
@@ -986,6 +990,13 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
       return false
     end
     true
+  end
+
+  def ensure_can_administer_accounts
+    return if current_user&.super_admin? || current_user&.delegated_admin?
+    return if current_user&.company_user&.has_admin_privileges?
+
+    redirect_to dashboard_overview_path, alert: t("account_management_access_denied"), status: :see_other
   end
 
   def ensure_super_admin_for_companies
