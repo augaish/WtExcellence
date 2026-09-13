@@ -1,0 +1,96 @@
+<%= content_for :title, t('access_page.title', name: @user.name) %>
+<% level_classes = { "manage" => "bg-[#E0F9DE] text-[#3F9011]", "read" => "bg-[#E9F0FF] text-[#1751A7]", "assigned" => "bg-amber-100 text-amber-800", "none" => "bg-gray-100 text-gray-600" } %>
+
+<div class="p-6 max-w-4xl mx-auto space-y-6">
+  <%= render layout: "dashboard/shared/page_header", locals: { title: t('access_page.title', name: @user.name), subtitle: @user.email } do %>
+    <%= link_to t('back'), dashboard_account_management_users_path, class: ui_btn_neutral %>
+  <% end %>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 space-y-6">
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('access_page.what_follows') %></h2>
+        <p class="text-xs text-[#797C81] mb-4"><%= t('access_page.what_follows_hint') %></p>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-[#E3E3E3] text-sm">
+            <thead class="bg-[#F7F7FD]">
+              <tr>
+                <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase"><%= t('access_page.area') %></th>
+                <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase"><%= t('access_page.level') %></th>
+                <th class="px-3 py-2 text-start text-xs font-medium text-[#797C81] uppercase"><%= t('access_page.why') %></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E3E3E3]">
+              <% @access.rows.each do |row| %>
+                <tr>
+                  <td class="px-3 py-2 text-[#0D1120] font-medium"><%= t("access_page.areas.#{row.area}") %></td>
+                  <td class="px-3 py-2"><span class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium <%= level_classes[row.level] %>"><%= t("access_page.levels.#{row.level}") %></span></td>
+                  <td class="px-3 py-2 text-[#797C81]"><%= t("access_page.reasons.#{row.reason}") %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+        <h2 class="text-sm font-semibold text-[#0D1120] mb-3"><%= t('access_page.settings') %></h2>
+        <dl class="space-y-3 text-sm">
+          <div>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('access_page.account_role') %></dt>
+            <dd class="mt-0.5 text-[#0D1120]"><%= t("access_page.roles.#{@access.role_key}") %></dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('access_page.designations') %></dt>
+            <dd class="mt-0.5 text-[#0D1120]">
+              <% if @access.designations.any? %>
+                <%= @access.designations.map { |d| t("access_page.designation_names.#{d}") }.join(", ") %>
+              <% else %>
+                <span class="text-[#797C81]"><%= t('access_page.no_designation') %></span>
+              <% end %>
+              <% if @access.membership && (current_user&.super_admin? || current_user&.company_user&.company_admin?) %>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  <% if @access.membership.company_quality_manager? %>
+                    <%= button_to (@access.membership.pp_manager ? t('documenter.unset_pp_manager') : t('documenter.set_pp_manager')),
+                          dashboard_toggle_pp_manager_path(@user), method: :patch, class: ui_btn_secondary, form: { class: "inline" } %>
+                  <% end %>
+                  <% if @access.membership.company_risk_manager? %>
+                    <%= button_to (@access.membership.gov_manager ? t('documenter.unset_gov_manager') : t('documenter.set_gov_manager')),
+                          dashboard_toggle_gov_manager_path(@user), method: :patch, class: ui_btn_secondary, form: { class: "inline" } %>
+                  <% end %>
+                </div>
+              <% end %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('access_page.unit') %></dt>
+            <dd class="mt-0.5 text-[#0D1120]"><%= @user.org_unit&.display_name || content_tag(:span, t('access_page.no_unit'), class: "text-[#797C81]") %></dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('access_page.heads') %></dt>
+            <dd class="mt-0.5 text-[#0D1120]">
+              <% units = @access.headed_units %>
+              <%= units.any? ? units.map(&:display_name).join(", ") : content_tag(:span, t('access_page.heads_none'), class: "text-[#797C81]") %>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium text-[#797C81]"><%= t('access_page.status') %></dt>
+            <dd class="mt-0.5 text-[#0D1120]"><%= @user.is_active? ? t('active') : (@user.invited? ? t('access_page.invited') : t('inactive')) %></dd>
+          </div>
+        </dl>
+      </div>
+
+      <% warnings = @access.setup_warnings %>
+      <% if warnings.any? %>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+          <h2 class="text-sm font-semibold text-amber-900 mb-2"><%= t('access_page.setup_title') %></h2>
+          <ul class="space-y-1.5 text-sm text-amber-900 list-disc list-inside">
+            <% warnings.each do |w| %><li><%= t("access_page.setup.#{w}") %></li><% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

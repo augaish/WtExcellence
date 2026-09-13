@@ -3,7 +3,7 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
   # The account register is for the company admin (their own company) and the
   # platform side (every company). Anyone else, quality managers included, is
   # turned away before any account data is read, whatever URL they type.
-  before_action :ensure_can_administer_accounts, only: [ :index, :users, :company ]
+  before_action :ensure_can_administer_accounts, only: [ :index, :users, :company, :access ]
   before_action :ensure_super_admin_for_companies, only: [ :companies ]
   before_action :ensure_super_admin_for_permissions, only: [ :update_permissions ]
 
@@ -910,6 +910,20 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     else
       redirect_back fallback_location: fallback, alert: "Failed to remove company: #{company.errors.full_messages.join(', ')}"
     end
+  end
+
+  # Why this person can or cannot act: role, licence, designations, unit,
+  # and the permissions that follow, in one page.
+  def access
+    @user = User.find_by(id: params[:id])
+    return redirect_to dashboard_account_management_users_path, alert: t("access_page.not_found"), status: :see_other if @user.nil?
+
+    @company = current_user.platform_admin? ? (@user.company || current_company) : current_company
+    if @company.nil? || (!current_user.platform_admin? && @user.company_user&.company_id != @company.id)
+      return redirect_to dashboard_account_management_users_path, alert: t("access_page.not_found"), status: :see_other
+    end
+
+    @access = EffectiveAccess.new(@user, @company)
   end
 
   # A pending invitation sent again with a fresh link, for a person whose

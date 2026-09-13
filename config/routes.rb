@@ -271,6 +271,7 @@ Rails.application.routes.draw do
       get "/companies/:id/users_template", action: :users_template, as: :account_management_users_template
       post "/invitations", action: :create_invitation, as: :create_invitation
       post "/users/:id/resend_invitation", action: :resend_invitation, as: :resend_invitation
+      get "/users/:id/access", action: :access, as: :user_access
       post "/companies", action: :create_company, as: :create_company
       patch "/companies/:id/license_seats", action: :update_license_seats, as: :update_company_license_seats
       patch "/companies/:id/status", action: :update_company_status, as: :update_company_status
