@@ -186,3 +186,45 @@ class Dashboard::PpDiagramsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_pp_record_path(@record)
   end
 end
+
+class DiagramReorderTest < ActionDispatch::IntegrationTest
+  test "dragging boxes into a new order renumbers the linked steps and redraws the arrows" do
+    Rails.application.reload_routes!
+    company = Company.create!(name: "Order Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
+    admin = User.create!(email: "ord-#{SecureRandom.hex(4)}@example.com", password: "password123",
+      password_confirmation: "password123", name: "Admin", is_active: true)
+    CompanyUser.create!(company: company, user: admin, role: CompanyUser::ROLES[:company_admin])
+    level1 = company.pp_processes.create!(name_en: "Ops", level: 1, category: "core")
+    process = company.pp_processes.create!(name_en: "Review", level: 2, parent: level1)
+    record = company.pp_records.create!(record_type: "procedure", title_en: "Review Procedure", pp_process: process)
+    a = record.steps.create!(position: 1, activity: "Receive")
+    b = record.steps.create!(position: 2, activity: "Check")
+    c = record.steps.create!(position: 3, activity: "Approve")
+    diagram = company.pp_diagrams.create!(owner: record, name: "Review")
+    DiagramStepSync.generate(diagram, record)
+
+    sign_in admin
+    get dashboard_pp_diagram_path(diagram)
+    assert_select "g.diagram-node[data-element-id]", 5
+    assert_select "li[draggable=true][data-element-id]", 5
+
+    elements = diagram.elements.reload.to_a
+    start = elements.find { |e| e.element_type == "startEvent" }
+    finish = elements.find { |e| e.element_type == "endEvent" }
+    ea, eb, ec = [ a, b, c ].map { |s| elements.find { |e| e.pp_process_step_id == s.id } }
+
+    patch reorder_elements_dashboard_pp_diagram_path(diagram), params: { ids: [ start.id, ec.id, ea.id, eb.id, finish.id ] }, as: :json
+    assert_response :no_content
+
+    assert_equal [ "Approve", "Receive", "Check" ], record.steps.ordered.map(&:activity)
+    assert_equal [ 1, 2, 3 ], [ c, a, b ].map { |s| s.reload.position }
+    assert_equal [ start.id, ec.id, ea.id, eb.id, finish.id ], diagram.elements.reload.map(&:id)
+    arrows = diagram.flows.where(kind: "sequence").map { |f| [ f.from_element_id, f.to_element_id ] }
+    assert_includes arrows, [ start.id, ec.id ]
+    assert_includes arrows, [ ec.id, ea.id ]
+    assert_includes arrows, [ eb.id, finish.id ]
+
+    get dashboard_pp_record_path(record)
+    assert_match(/Approve.*Receive.*Check/m, response.body)
+  end
+end

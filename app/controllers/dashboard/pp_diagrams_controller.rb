@@ -3,7 +3,7 @@ class Dashboard::PpDiagramsController < Dashboard::BaseController
   before_action :authenticate_user!
   before_action :ensure_company_present
   before_action :ensure_can_manage, except: [ :show ]
-  before_action :set_diagram, only: [ :generate_from_steps,
+  before_action :set_diagram, only: [ :generate_from_steps, :reorder_elements,
     :show, :edit, :update, :destroy,
     :add_element, :update_element, :destroy_element, :add_flow, :destroy_flow
   ]
@@ -77,6 +77,16 @@ class Dashboard::PpDiagramsController < Dashboard::BaseController
     else
       redirect_to dashboard_pp_diagram_path(@diagram), alert: element.errors.full_messages.to_sentence, status: :see_other
     end
+  end
+
+  # Boxes dragged into a new order on the page: ids as they now sit.
+  def reorder_elements
+    ids = Array(params[:ids]).reject(&:blank?)
+    return head :unprocessable_entity if ids.empty?
+
+    DiagramStepSync.reorder(@diagram, ids)
+    log_action("REORDER_DIAGRAM_ELEMENTS")
+    head :no_content
   end
 
   def update_element

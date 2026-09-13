@@ -2,7 +2,8 @@
 <% input_class = "w-full px-2 py-1.5 border border-[#E3E3E3] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
 <% label_class = "block text-xs font-medium text-[#797C81] mb-1" %>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gray-50" data-controller="diagram-order"
+     data-diagram-order-url-value="<%= can_manage_diagrams? ? reorder_elements_dashboard_pp_diagram_path(@diagram) : '' %>">
   <div class="max-w-7xl mx-auto px-6 py-8">
     <%= render layout: "dashboard/shared/page_header", locals: {
           title: @diagram.display_name, subtitle: t('architect.show_subtitle') } do %>
@@ -22,9 +23,12 @@
     <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mb-6">
       <h2 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('architect.diagram') %></h2>
       <p class="mb-4 text-xs text-[#797C81]"><%= t('architect.diagram_hint') %></p>
-      <div class="overflow-x-auto border border-[#E3E3E3] rounded-lg bg-white">
+      <div class="overflow-x-auto border border-[#E3E3E3] rounded-lg bg-white" data-diagram-order-target="picture">
         <%= @svg %>
       </div>
+      <% if can_manage_diagrams? %>
+        <p class="mt-2 text-xs text-[#797C81]"><%= t('architect.drag_hint') %></p>
+      <% end %>
       <div class="mt-3 flex flex-wrap items-center gap-4 text-[11px] text-[#797C81]">
         <span class="inline-flex items-center gap-1.5"><span class="w-6 h-0.5 bg-[#797C81]"></span><%= t('architect.legend_sequence') %></span>
         <span class="inline-flex items-center gap-1.5"><span class="w-6 h-0.5 bg-[#5C3984]" style="background-image: repeating-linear-gradient(90deg,#5C3984 0 4px,transparent 4px 7px); background-color: transparent;"></span><%= t('architect.legend_message') %></span>
@@ -39,13 +43,15 @@
         <p class="mb-4 text-xs text-[#797C81]"><%= t('architect.elements_hint') %></p>
 
         <% if @elements.any? %>
-          <ol class="space-y-2 mb-5">
+          <ol class="space-y-2 mb-5" data-diagram-order-target="list">
             <% @elements.each_with_index do |element, index| %>
-              <li class="border border-[#E3E3E3] rounded-lg p-3">
+              <li class="border border-[#E3E3E3] rounded-lg p-3" data-element-id="<%= element.id %>"
+                  <%= 'draggable="true" data-action="dragstart->diagram-order#dragStart dragover->diagram-order#dragOver drop->diagram-order#drop dragend->diagram-order#dragEnd"'.html_safe if can_manage_diagrams? %>>
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                      <span class="text-xs font-mono text-[#797C81]"><%= index + 1 %></span>
+                      <% if can_manage_diagrams? %><span class="cursor-grab text-[#797C81] select-none" aria-hidden="true">⋮⋮</span><% end %>
+                      <span class="text-xs font-mono text-[#797C81]" data-order-number><%= index + 1 %></span>
                       <span class="text-sm font-medium text-[#0D1120]"><%= element.title.presence || t('architect.untitled_element') %></span>
                       <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-[#F6EEFF] text-[#5C3984]"><%= element.type_label %></span>
                       <% if element.pp_process_step %>

@@ -67,6 +67,29 @@ module DiagramStepSync
     end
   end
 
+  # The order the user gave the boxes becomes the order of everything that
+  # follows from it: element positions, the linked steps' numbers, and the
+  # sequence arrows between start, the linked tasks and end.
+  def reorder(diagram, element_ids)
+    quietly do
+      diagram.transaction do
+        elements = diagram.elements.to_a
+        ordered = element_ids.filter_map { |id| elements.find { |e| e.id == id } }
+        ordered += elements - ordered
+        ordered.each_with_index { |element, index| element.update_column(:position, index) }
+
+        linked = ordered.select(&:pp_process_step)
+        linked.each_with_index { |element, index| element.pp_process_step.update_columns(position: index + 1) }
+
+        start = elements.find { |e| e.element_type == "startEvent" }
+        finish = elements.find { |e| e.element_type == "endEvent" }
+        chain = [ start, *linked, finish ].compact
+        rebuild_sequence(diagram, chain) if chain.size >= 2
+      end
+    end
+    diagram
+  end
+
   # --- helpers --------------------------------------------------------------
 
   def ensure_event(diagram, type, title)

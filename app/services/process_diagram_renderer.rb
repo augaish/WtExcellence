@@ -161,7 +161,7 @@ class ProcessDiagramRenderer
       end
 
     <<~SVG
-      <g>
+      <g class="diagram-node" data-element-id="#{element.id}" data-x="#{x}" data-width="#{NODE_WIDTH}" style="cursor: grab;">
         #{body}
         <text x="#{cx}" y="#{element.event? || element.gateway? ? cy + NODE_HEIGHT / 2 + 14 : cy - 4}"
               text-anchor="middle" dominant-baseline="middle"
