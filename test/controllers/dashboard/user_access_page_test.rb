@@ -45,3 +45,29 @@ class Dashboard::UserAccessPageTest < ActionDispatch::IntegrationTest
     assert_redirected_to dashboard_overview_path
   end
 end
+
+class CompanyAdminDesignatesManagersTest < ActionDispatch::IntegrationTest
+  test "the company admin sees the P&P and Governance Manager toggles in the users list and can flip them" do
+    Rails.application.reload_routes!
+    company = Company.create!(name: "Desig Co #{SecureRandom.hex(4)}", license_seats: 5, credits: 10, is_active: true)
+    make = lambda do |prefix, role|
+      u = User.create!(email: "#{prefix}-#{SecureRandom.hex(4)}@example.com", password: "password123",
+        password_confirmation: "password123", name: prefix, is_active: true)
+      CompanyUser.create!(company: company, user: u, role: role)
+      u
+    end
+    admin = make.call("admin", CompanyUser::ROLES[:company_admin])
+    qm = make.call("qm", CompanyUser::ROLES[:company_quality_manager])
+    rm = make.call("rm", CompanyUser::ROLES[:company_risk_manager])
+
+    sign_in admin
+    get dashboard_account_management_users_path
+    assert_select "form[action=?]", dashboard_toggle_pp_manager_path(qm)
+    assert_select "form[action=?]", dashboard_toggle_gov_manager_path(rm)
+
+    patch dashboard_toggle_pp_manager_path(qm)
+    assert qm.company_user.reload.pp_manager
+    patch dashboard_toggle_gov_manager_path(rm)
+    assert rm.company_user.reload.gov_manager
+  end
+end

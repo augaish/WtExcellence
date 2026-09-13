@@ -6,12 +6,86 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["panel", "placeholder", "details", "canvas", "search", "noMatch"]
 
+  // The same measures the server lays the chart out with.
+  static BOX_WIDTH = 190
+  static BOX_HEIGHT = 68
+  static H_GAP = 18
+  static V_GAP = 64
+  static PADDING = 24
+
   connect() {
     this.scale = 1
     this.hidden = new Set()
+    this.rememberOrigins()
     // A large structure opens on its top two levels; the rest unfolds on demand.
     if (this.nodes().length > 24) this.collapseToTop()
+    this.relayout()
     requestAnimationFrame(() => this.fit())
+  }
+
+  // Where the server drew each box; moving a box is a translation from here.
+  rememberOrigins() {
+    this.origin = {}
+    this.nodes().forEach((node) => {
+      const rect = node.querySelector("rect")
+      this.origin[node.dataset.unitId] = { x: parseFloat(rect.getAttribute("x")), y: parseFloat(rect.getAttribute("y")) }
+    })
+  }
+
+  visible(node) { return node.style.display !== "none" }
+  visibleChildrenOf(id) { return this.childrenOf(id).filter((n) => this.visible(n)) }
+
+  // A tidy tree over the boxes that are showing: a leaf takes one column, a
+  // parent is centred over its visible children. Folded branches stop
+  // stretching the row above them.
+  relayout() {
+    const C = this.constructor
+    const svg = this.canvasTarget?.querySelector("svg")
+    if (!svg) return
+    const roots = this.nodes().filter((n) => this.visible(n) && !this.nodeFor(n.dataset.parentId))
+    const positions = {}
+    const place = (node, depth, cursor) => {
+      const id = node.dataset.unitId
+      const y = C.PADDING + depth * (C.BOX_HEIGHT + C.V_GAP)
+      const kids = this.visibleChildrenOf(id)
+      if (kids.length === 0) {
+        positions[id] = { x: cursor, y }
+        return cursor + C.BOX_WIDTH
+      }
+      const start = cursor
+      let childCursor = cursor
+      kids.forEach((kid, i) => {
+        if (i > 0) childCursor += C.H_GAP
+        childCursor = place(kid, depth + 1, childCursor)
+      })
+      const centre = start + (childCursor - start) / 2 - C.BOX_WIDTH / 2
+      positions[id] = { x: Math.max(centre, start), y }
+      return Math.max(childCursor, positions[id].x + C.BOX_WIDTH)
+    }
+    let cursor = C.PADDING
+    roots.forEach((root) => { cursor = place(root, 0, cursor) + C.H_GAP })
+
+    let maxX = 0, maxY = 0
+    Object.entries(positions).forEach(([id, pos]) => {
+      const node = this.nodeFor(id)
+      const from = this.origin[id]
+      node.setAttribute("transform", `translate(${pos.x - from.x}, ${pos.y - from.y})`)
+      maxX = Math.max(maxX, pos.x + C.BOX_WIDTH)
+      maxY = Math.max(maxY, pos.y + C.BOX_HEIGHT)
+      const line = this.element.querySelector(`path[data-child-id="${id}"]`)
+      const parent = positions[node.dataset.parentId]
+      if (line && parent) {
+        const childX = pos.x + C.BOX_WIDTH / 2
+        const parentX = parent.x + C.BOX_WIDTH / 2
+        const parentBottom = parent.y + C.BOX_HEIGHT
+        const elbow = parentBottom + C.V_GAP / 2
+        line.setAttribute("d", `M ${parentX} ${parentBottom} V ${elbow} H ${childX} V ${pos.y}`)
+      }
+    })
+    const width = maxX + C.PADDING, height = maxY + C.PADDING
+    svg.setAttribute("width", width)
+    svg.setAttribute("height", height)
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
   }
 
   nodes() { return Array.from(this.element.querySelectorAll(".org-chart-node")) }
@@ -48,6 +122,7 @@ export default class extends Controller {
       if (hit) { matches += 1; this.reveal(node.dataset.unitId) }
     })
     if (this.hasNoMatchTarget) this.noMatchTarget.hidden = !needle || matches > 0
+    this.relayout()
   }
 
   reveal(id) {
@@ -72,10 +147,14 @@ export default class extends Controller {
 
   collapseToTop() {
     this.nodes().forEach((node) => { if (this.depthOf(node) >= 1) this.setBranch(node.dataset.unitId, false) })
+    this.relayout()
+    this.fit()
   }
 
   expandAllBranches() {
     this.nodes().forEach((node) => this.setBranch(node.dataset.unitId, true, false))
+    this.relayout()
+    this.fit()
   }
 
   select(event) {
@@ -90,6 +169,7 @@ export default class extends Controller {
     if (this.hasPlaceholderTarget) this.placeholderTarget.hidden = true
     if (this.hasDetailsTarget) this.detailsTarget.hidden = false
     this.setBranch(unitId, true, false)
+    this.relayout()
 
     this.element.querySelectorAll(".org-chart-node rect:first-of-type").forEach((rect) => {
       rect.setAttribute("stroke", "#E3E3E3")
