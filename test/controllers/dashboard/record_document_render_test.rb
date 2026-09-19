@@ -67,9 +67,10 @@ class Dashboard::RecordDocumentRenderTest < ActionDispatch::IntegrationTest
     assert_includes response.body, BrandPalette::DEFAULT_PRIMARY
   end
 
-  test "the document renders right to left in Arabic" do
+  test "the document renders right to left when its language is Arabic, whatever the page language" do
     sign_in @admin
-    get document_dashboard_pp_record_path(@record, locale: "ar")
+    @record.update!(language: "ar")
+    get document_dashboard_pp_record_path(@record, locale: "en")
 
     assert_response :success
     assert_select "html[dir=?]", "rtl"
