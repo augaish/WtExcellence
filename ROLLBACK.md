@@ -64,6 +64,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Deployment retest N01–N06 | `096ae05` | No migration. |
 | Diagram boxes draggable; order saved to elements, steps and arrows | `75a583b` | No migration. |
 | Diagram arrows bendable (bend_dx/bend_dy on flows) | `52fa64c` | Migration: adds bend_dx, bend_dy to pp_diagram_flows (additive). |
+| Test round groups 1–5 (numbering, version copy, Word clauses, password rule, Excel org template, document language, PDF notice, change email, reset link, form structure, next-stage labels, leave cover, filters, glossary picker) | `aae8254` | Migrations: renumber clauses (data), pp_records.language, pp_form_fields table, users.delegate_* (all additive). |
 
 ## Roll the code back
 ```bash
