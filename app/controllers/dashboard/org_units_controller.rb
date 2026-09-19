@@ -135,8 +135,9 @@ class Dashboard::OrgUnitsController < Dashboard::BaseController
   end
 
   def template
-    send_data OrgUnitImportService.template_csv,
-      filename: "org_units_template.csv", type: "text/csv"
+    send_data OrgUnitImportTemplate.new(company).to_xlsx,
+      filename: "org_units_template.xlsx",
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   end
 
   private

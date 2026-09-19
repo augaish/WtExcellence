@@ -14,7 +14,7 @@ class Dashboard::RecordDocumentRenderTest < ActionDispatch::IntegrationTest
       objective: "Govern how policies are written")
     @record = @company.pp_records.create!(record_type: "procedure", title_en: "Policy Development Procedure",
       title_ar: "إجراء تطوير السياسات", code: "PRO-01", pp_process: @process, owner_org_unit: @unit,
-      version_label: "v1.0", classification: "secret")
+      version_label: "v1.0", classification: "secret", language: "en")
   end
 
   test "the document renders with its cover, contents and sections" do

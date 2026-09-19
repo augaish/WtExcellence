@@ -62,10 +62,11 @@ class OrgUnitImportService
 
   def read_rows
     sheet = Roo::Spreadsheet.open(@file.path, extension: extension)
-    header = sheet.row(1).map { |h| h.to_s.strip.downcase }
+    sheet = sheet.sheet("Units") if sheet.respond_to?(:sheets) && sheet.sheets.include?("Units")
+    header = sheet.row(1).map { |h| header_key(h) }
     rows = []
     (2..sheet.last_row.to_i).each do |i|
-      values = sheet.row(i)
+      values = header.each_index.map { |col| cell_text(sheet, i, col + 1) }
       next if values.all? { |v| v.to_s.strip.empty? }
 
       rows << { number: i, data: header.zip(values).to_h }
@@ -79,6 +80,26 @@ class OrgUnitImportService
   def extension
     ext = File.extname(@file.original_filename.to_s).delete(".").downcase
     ext.presence&.to_sym || :xlsx
+  end
+
+  # A code like 01/02 is turned into a date by Excel; the text as displayed in
+  # the cell is what the user typed, so that is what is read.
+  def cell_text(sheet, row, col)
+    value = sheet.cell(row, col)
+    return sheet.formatted_value(row, col).to_s if value.is_a?(Date) || value.is_a?(Time) || value.is_a?(DateTime)
+    return value.to_i.to_s if value.is_a?(Float) && value == value.to_i
+
+    value
+  rescue StandardError
+    value
+  end
+
+  # Headers may be the keys or the words of the template in either language.
+  def header_key(cell)
+    text = cell.to_s.strip.downcase
+    HEADERS.find do |key|
+      key == text || I18n.available_locales.any? { |l| I18n.t("org_structure.import.columns.#{key}", locale: l, default: key).downcase == text }
+    end || text
   end
 
   # Create/update every unit without touching parents.

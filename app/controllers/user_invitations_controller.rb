@@ -45,8 +45,8 @@ class UserInvitationsController < ApplicationController
       return
     end
 
-    if password.length < 8
-      flash.now[:alert] = "Password is too short (minimum is 8 characters)."
+    unless PasswordRule.strong?(password)
+      flash.now[:alert] = PasswordRule.message
       render :show, status: :unprocessable_entity
       return
     end

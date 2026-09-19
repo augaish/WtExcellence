@@ -107,7 +107,7 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     if bytes
       send_data bytes, filename: pdf.filename, type: "application/pdf", disposition: "attachment"
     else
-      redirect_to document_dashboard_pp_record_path(@matrix), status: :see_other
+      redirect_to document_dashboard_pp_record_path(@matrix), alert: t("record_document.pdf_engine_missing"), status: :see_other
     end
   end
 

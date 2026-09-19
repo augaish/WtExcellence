@@ -65,10 +65,10 @@
               id="password" 
               name="password" 
               required
-              minlength="8"
+              minlength="<%= PasswordRule::MIN_LENGTH %>"
               data-password-visibility-target="input"
               class="w-full pl-10 pr-12 py-3 border border-gray-300 focus:ring-[#5C3984] focus:border-transparent rounded-lg focus:outline-none focus:ring-2 transition-colors duration-200"
-              placeholder="Enter your password (minimum 8 characters)" />
+              placeholder="<%= t('password_rule.placeholder', min: PasswordRule::MIN_LENGTH) %>" />
             <button 
               type="button"
               data-action="click->password-visibility#toggle"
@@ -82,7 +82,7 @@
               </svg>
             </button>
           </div>
-          <p class="mt-1 text-xs text-gray-500">Password must be at least 8 characters long.</p>
+          <p class="mt-1 text-xs text-gray-500"><%= PasswordRule.message %></p>
         </div>
 
         <!-- Password Confirmation Field -->

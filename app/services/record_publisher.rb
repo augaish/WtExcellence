@@ -31,7 +31,13 @@ class RecordPublisher
   def file_pdf
     renderer = RecordPdfRenderer.new(@record, locale: document_locale)
     pdf = renderer.render
-    return if pdf.nil?
+    if pdf.nil?
+      # Published without its file: say so where an admin will see it.
+      Rails.logger.error "PDF engine unavailable: #{@record.code} published without a PDF"
+      AuditLogService.log_action(actor_user: @user, company: @company, action: "PDF_ENGINE_MISSING", entity_type: "pp_record",
+        entity_id: @record.id, payload: { label: @record.display_title })
+      return
+    end
 
     upload = Upload.new(
       company_id: @company.id,
@@ -50,7 +56,7 @@ class RecordPublisher
 
   # Arabic when the document has an Arabic title, otherwise English.
   def document_locale
-    @record.title_ar.present? ? :ar : :en
+    @record.document_locale
   end
 
   # The owning unit's folder, built from the org structure if it is not there

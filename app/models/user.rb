@@ -4,6 +4,9 @@ class User < ApplicationRecord
 
   devise :database_authenticatable, :rememberable, :validatable, :recoverable
 
+  # Letters and digits, ten characters or more, whenever a password is set.
+  validate :password_meets_rule, if: -> { password.present? }
+
   # Devise sends its emails (password reset) inside the request by default, so
   # a mail server that is slow or refuses the connection turns into a 500 for
   # the person asking. Sent through the job queue instead, and retried there.
@@ -267,5 +270,9 @@ class User < ApplicationRecord
 
   def active_status?
     status == "active"
+  end
+
+  def password_meets_rule
+    errors.add(:password, PasswordRule.message) unless PasswordRule.strong?(password)
   end
 end

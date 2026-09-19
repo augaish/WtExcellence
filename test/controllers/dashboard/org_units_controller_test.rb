@@ -113,12 +113,14 @@ class Dashboard::OrgUnitsControllerTest < ActionDispatch::IntegrationTest
     assert_select "button[data-action='click->org-chart#zoomOut']"
   end
 
-  test "the CSV template downloads with the documented headers" do
+  test "the Excel template downloads with the documented headers" do
     sign_in @admin
     get template_dashboard_org_units_path
 
     assert_response :success
-    assert_includes response.body, "code,name_en,name_ar,level,parent_code"
+    assert_equal "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", response.media_type
+    headers = Roo::Excelx.new(StringIO.new(response.body), file_warning: :ignore).sheet("Units").row(1)
+    assert_equal OrgUnitImportService::HEADERS.map { |k| I18n.t("org_structure.import.columns.#{k}") }, headers
   end
 
   test "admin builds the library folders from the structure" do

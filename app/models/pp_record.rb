@@ -47,6 +47,9 @@ class PpRecord < ApplicationRecord
   COMPLETED_STAGES = PpStage::TERMINAL_KEYS
 
   PUBLISH_MODES = %w[assign system].freeze
+  # The language the document is written in, chosen on the record. When not
+  # chosen, an Arabic title means Arabic.
+  LANGUAGES = %w[en ar].freeze
 
   # Raised when a record already sits in another package and the caller has not
   # explicitly asked to move it.
@@ -142,6 +145,7 @@ class PpRecord < ApplicationRecord
   validates :total_time_value, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validates :service_type, inclusion: { in: SERVICE_TYPES }, allow_blank: true
   validates :publish_mode, inclusion: { in: PUBLISH_MODES }, allow_blank: true
+  validates :language, inclusion: { in: LANGUAGES }, allow_blank: true
   validates :counterparty_kind, inclusion: { in: COUNTERPARTY_KINDS }, allow_blank: true
   validate :agreement_names_its_other_party
   validates :auto_approve_days, numericality: { only_integer: true, greater_than: 0 }, allow_nil: true
@@ -198,6 +202,10 @@ class PpRecord < ApplicationRecord
   # opens the next version.
   def editable?
     !completed? && next_version.nil?
+  end
+
+  def document_locale
+    (language.presence || (title_ar.present? ? "ar" : "en")).to_sym
   end
 
   def latest_version?

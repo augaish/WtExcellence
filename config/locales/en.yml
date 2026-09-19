@@ -353,9 +353,25 @@ en:
     import_title: "Import Org Structure"
     import_subtitle: "Bulk-create or update units from a spreadsheet."
     import:
+      columns:
+        code: "Code"
+        name_en: "Name (EN)"
+        name_ar: "Name (AR)"
+        level: "Level"
+        parent_code: "Parent code"
+        group: "Group"
+        head_email: "Head (email)"
+        cost_center: "Cost center"
+        email: "Unit email"
+        mandates: "Mandates (separate with |)"
+      help:
+        - "One row per unit. The code is text: 01/02 stays 01/02."
+        - "Parent code links a unit to its parent; leave it blank for the top level. Existing codes are offered in the dropdown; a new parent higher up the same sheet also works."
+        - "Level is a number from 1 to 9. Group and head are dropdowns of what the company already has; a new group name is created."
+        - "Rows are matched on code: an existing code updates the unit, a new code creates it. Delete the two example rows before uploading."
       step1: "1. Download the template"
       step1_hint: "Fill one row per unit. parent_code links a unit to its parent; leave it blank for top level."
-      download_template: "Download template (CSV)"
+      download_template: "Download template (.xlsx)"
       step2: "2. Upload your file"
       step2_hint: "Accepts .xlsx or .csv. Nothing is saved unless every row is valid."
       upload: "Import"
@@ -903,7 +919,16 @@ en:
       gov_manager_set: "%{name} is now a Governance Manager."
       gov_manager_unset: "%{name} is no longer a Governance Manager."
       gov_manager_needs_rm: "Only a risk manager can be a Governance Manager."
+  password_rule:
+    message: "Use at least %{min} characters with both letters and digits."
+    placeholder: "At least %{min} characters, letters and digits"
   pp_records:
+    language: "Document language"
+    language_auto: "Decide from the title (Arabic title → Arabic)"
+    language_hint: "The document, its PDF and its Word file are written and laid out in this language."
+    languages:
+      en: "English"
+      ar: "Arabic"
     title: "Records"
     subtitle: "The register of governed content: policies, procedures, forms and more."
     add_record: "Add record"

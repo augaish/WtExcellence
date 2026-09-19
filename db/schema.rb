@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_19_211741) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_19_212354) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1078,6 +1078,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_19_211741) do
     t.uuid "published_pdf_upload_id"
     t.string "counterparty_kind", limit: 20
     t.uuid "counterparty_org_unit_id"
+    t.string "language", limit: 2
     t.index ["company_id", "classification"], name: "index_pp_records_on_company_id_and_classification"
     t.index ["company_id", "code"], name: "index_pp_records_on_company_id_and_code", unique: true, where: "(code IS NOT NULL)"
     t.index ["company_id", "record_type"], name: "index_pp_records_on_company_id_and_record_type"

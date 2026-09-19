@@ -444,8 +444,8 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
       return
     end
 
-    if password.length < 8
-      render json: { success: false, message: "Password must be at least 8 characters long." }, status: :unprocessable_entity
+    unless PasswordRule.strong?(password)
+      render json: { success: false, message: PasswordRule.message }, status: :unprocessable_entity
       return
     end
 

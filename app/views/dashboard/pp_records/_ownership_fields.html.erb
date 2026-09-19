@@ -10,3 +10,9 @@
   <%= f.select :owner_user_id, company_users.map { |u| [ u.name, u.id ] },
         { include_blank: t('process_architecture.no_owner') }, class: input_class %>
 </div>
+<div>
+  <%= f.label :language, t('pp_records.language'), class: label_class %>
+  <%= f.select :language, PpRecord::LANGUAGES.map { |l| [ t("pp_records.languages.#{l}"), l ] },
+        { include_blank: t('pp_records.language_auto') }, class: input_class %>
+  <p class="<%= hint_class %>"><%= t('pp_records.language_hint') %></p>
+</div>

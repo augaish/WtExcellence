@@ -49,14 +49,18 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   # produces the file — no headless browser on the server, which this deployment
   # cannot afford to run.
   def document
-    @document = RecordDocument.new(@record, locale: I18n.locale)
-    render layout: "document"
+    # The document reads in its own language, whatever language the page is in:
+    # its text, its labels and its direction all follow the record's choice.
+    I18n.with_locale(@record.document_locale) do
+      @document = RecordDocument.new(@record, locale: @record.document_locale)
+      render layout: "document"
+    end
   end
 
   # The same document as a Word file, built from the same sections, so the two
   # cannot describe different things.
   def document_docx
-    renderer = RecordDocxRenderer.new(RecordDocument.new(@record, locale: I18n.locale))
+    renderer = RecordDocxRenderer.new(RecordDocument.new(@record, locale: @record.document_locale))
 
     send_data renderer.render,
       filename: renderer.filename,
@@ -269,7 +273,7 @@ class Dashboard::PpRecordsController < Dashboard::BaseController
   # side — so package_id is deliberately NOT permitted here.
   def record_params
     params.require(:pp_record).permit(
-      :record_type, :title_en, :title_ar, :description, :scope, :verifier_user_id,
+      :record_type, :title_en, :title_ar, :description, :scope, :verifier_user_id, :language,
       :effective_date, :review_date, :owner_user_id, :owner_org_unit_id,
       :pp_process_id, :active, :classification, :counterparty, :change_summary,
       :trigger_text, :inputs, :outputs, :predecessor_record_id, :successor_record_id,
