@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_19_212354) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_19_213217) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -883,6 +883,21 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_19_212354) do
     t.index ["owner_type", "owner_id"], name: "index_pp_diagrams_on_owner"
   end
 
+  create_table "pp_form_fields", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.integer "position", default: 0, null: false
+    t.string "label_en", limit: 250
+    t.string "label_ar", limit: 250
+    t.string "field_type", limit: 20, default: "text", null: false
+    t.boolean "required", default: false, null: false
+    t.text "options"
+    t.text "columns"
+    t.string "hint", limit: 500
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_record_id"], name: "index_pp_form_fields_on_pp_record_id"
+  end
+
   create_table "pp_packages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "company_id", null: false
     t.string "name", limit: 250, null: false
@@ -1645,6 +1660,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_19_212354) do
   add_foreign_key "pp_diagram_flows", "pp_diagram_elements", column: "to_element_id"
   add_foreign_key "pp_diagram_flows", "pp_diagrams"
   add_foreign_key "pp_diagrams", "companies"
+  add_foreign_key "pp_form_fields", "pp_records"
   add_foreign_key "pp_packages", "companies"
   add_foreign_key "pp_process_authorities", "authorities"
   add_foreign_key "pp_process_authorities", "pp_process_steps"

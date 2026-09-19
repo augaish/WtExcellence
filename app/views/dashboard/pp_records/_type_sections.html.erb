@@ -78,6 +78,7 @@
   </div>
 
 <% when "form" %>
+  <%= render "dashboard/pp_records/form_fields", record: record %>
   <div class="<%= box %>">
     <h2 class="<%= heading %>"><%= t('pp_records.show_sections.used_by') %></h2>
     <% procedures = record.company.pp_records.active.latest.joins(:links)

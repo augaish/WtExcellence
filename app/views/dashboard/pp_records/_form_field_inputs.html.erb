@@ -1,0 +1,8 @@
+<%# The inputs of one form field. Locals: f, field, input %>
+<%= f.text_field :label_en, value: field.label_en, placeholder: t('form_fields.label') + " (EN)", class: input %>
+<%= f.text_field :label_ar, value: field.label_ar, dir: "rtl", placeholder: t('form_fields.label') + " (AR)", class: input %>
+<%= f.select :field_type, PpFormField::TYPES.map { |t| [ t("form_fields.types.#{t}"), t ] }, { selected: field.field_type }, class: input %>
+<label class="flex items-center gap-2 text-sm text-[#0D1120]"><%= f.check_box :required, checked: field.required %> <%= t('form_fields.required') %></label>
+<%= f.text_field :options, value: field.options, placeholder: t('form_fields.options_placeholder'), class: input %>
+<%= f.text_field :columns, value: field.columns, placeholder: t('form_fields.columns_placeholder'), class: input %>
+<%= f.text_field :hint, value: field.hint, placeholder: t('form_fields.hint_placeholder'), class: "#{input} sm:col-span-2" %>

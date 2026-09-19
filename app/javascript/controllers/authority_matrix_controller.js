@@ -122,16 +122,17 @@ export default class extends Controller {
     this.saveAuthorities(rows)
   }
 
+  // Rows inside a category are numbered category.position; a plain list of
+  // rows (a form's fields) is numbered 1, 2, 3.
   renumberAuthorities() {
-    this.categoryTargets.forEach((section) => {
-      const rows = section.querySelector("[data-authority-matrix-target='rows']")
-      if (!rows) return
-      const empty = section.querySelector("[data-empty]")
-      const count = rows.querySelectorAll("[data-authority-matrix-target='authority']").length
-      if (empty) empty.hidden = count > 0
-      rows.querySelectorAll("[data-authority-matrix-target='authority']").forEach((row, i) => {
+    this.rowsTargets.forEach((rows) => {
+      const section = rows.closest("[data-authority-matrix-target='category']")
+      const empty = section?.querySelector("[data-empty]")
+      const items = rows.querySelectorAll("[data-authority-matrix-target='authority']")
+      if (empty) empty.hidden = items.length > 0
+      items.forEach((row, i) => {
         const number = row.querySelector("[data-number]")
-        if (number) number.textContent = `${section.dataset.categoryNumber || 0}.${i + 1}`
+        if (number) number.textContent = section ? `${section.dataset.categoryNumber || 0}.${i + 1}` : String(i + 1)
       })
     })
   }
@@ -139,7 +140,8 @@ export default class extends Controller {
   saveAuthorities(rows) {
     if (!this.reorderAuthoritiesUrlValue || !rows) return
     const ids = Array.from(rows.querySelectorAll("[data-authority-matrix-target='authority']")).map((r) => r.dataset.authorityId)
-    const categoryId = rows.closest("[data-authority-matrix-target='category']").dataset.categoryId
+    const section = rows.closest("[data-authority-matrix-target='category']")
+    const categoryId = section ? section.dataset.categoryId : (rows.dataset.categoryId || "")
     const token = document.querySelector("meta[name='csrf-token']")?.content
     fetch(this.reorderAuthoritiesUrlValue, {
       method: "PATCH",

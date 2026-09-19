@@ -104,6 +104,8 @@ class PpRecord < ApplicationRecord
 
   # What the document says: clauses for a policy, steps for a procedure.
   has_many :clauses, -> { ordered }, class_name: "PpRecordClause", foreign_key: "pp_record_id", dependent: :destroy
+  # What a form asks for: its fields and tables, in order.
+  has_many :form_fields, -> { ordered }, class_name: "PpFormField", foreign_key: "pp_record_id", dependent: :destroy
   has_many :steps, -> { ordered }, class_name: "PpProcessStep", foreign_key: "pp_record_id", dependent: :destroy
   has_many :operational_authorities, -> { ordered }, class_name: "PpProcessAuthority", foreign_key: "pp_record_id", dependent: :destroy
   has_many :matrix_reviews, class_name: "AuthorityMatrixReview", foreign_key: "matrix_id", dependent: :destroy

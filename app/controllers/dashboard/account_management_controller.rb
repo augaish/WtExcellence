@@ -915,6 +915,40 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     end
   end
 
+  # The address a person signs in with, changed by an administrator: the
+  # platform side for anyone, the company admin for their own people. The old
+  # and the new address are both told.
+  def change_email
+    user = administrable_user or return
+    old_email = user.email
+    new_email = params[:email].to_s.strip.downcase
+    if new_email.blank? || !new_email.match?(URI::MailTo::EMAIL_REGEXP)
+      return redirect_to dashboard_user_access_path(user), alert: t("account_email.invalid"), status: :see_other
+    end
+    if User.where.not(id: user.id).exists?(email: new_email)
+      return redirect_to dashboard_user_access_path(user), alert: t("account_email.taken"), status: :see_other
+    end
+
+    if user.update(email: new_email)
+      AuditLogService.log_action(actor_user: current_user, company: user.company || current_company, action: "CHANGE_USER_EMAIL",
+        entity_type: "user", entity_id: user.id, payload: { user_name: user.name, changes: { email: [ old_email, new_email ] } })
+      AccountMailer.email_changed(user, old_email).deliver_later
+      redirect_to dashboard_user_access_path(user), notice: t("account_email.changed", email: new_email), status: :see_other
+    else
+      redirect_to dashboard_user_access_path(user), alert: user.errors.full_messages.to_sentence, status: :see_other
+    end
+  end
+
+  # A reset link sent to the person, instead of an administrator choosing
+  # their password for them.
+  def send_reset_link
+    user = administrable_user or return
+    user.send_reset_password_instructions
+    AuditLogService.log_action(actor_user: current_user, company: user.company || current_company, action: "SEND_PASSWORD_RESET_LINK",
+      entity_type: "user", entity_id: user.id, payload: { user_name: user.name, user_email: user.email })
+    redirect_to dashboard_user_access_path(user), notice: t("account_email.reset_sent", email: user.email), status: :see_other
+  end
+
   # Why this person can or cannot act: role, licence, designations, unit,
   # and the permissions that follow, in one page.
   def access
@@ -995,6 +1029,18 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
 
   # The company whose users are imported. Only the platform side does this;
   # a company admin adds their people one at a time.
+  # A user this administrator may act on: anyone for the platform side, own
+  # company members for a company admin.
+  def administrable_user
+    user = User.find_by(id: params[:id])
+    allowed = user && (current_user&.can_add_users? ||
+      (current_user&.company_user&.company_admin? && user.company_user&.company_id == current_company&.id))
+    return user if allowed
+
+    redirect_to dashboard_account_management_users_path, alert: t("account_email.not_permitted"), status: :see_other
+    nil
+  end
+
   def load_import_company
     unless current_user&.can_add_users?
       redirect_to dashboard_account_management_path, alert: t("user_import.not_permitted"), status: :see_other

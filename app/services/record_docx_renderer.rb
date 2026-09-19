@@ -115,8 +115,27 @@ class RecordDocxRenderer
     when :diagram then paragraph(translate("record_document.diagram_omitted"), size: SMALL_SIZE, color: "797C81")
     when :table then section_table(section)
     when :clauses then clauses_xml(section.payload)
+    when :form_fields then form_fields_xml(section.payload)
     else ""
     end
+  end
+
+  # The form to fill in: each field as a bold label with a blank line or a
+  # table of its columns beneath.
+  def form_fields_xml(rows)
+    rows.map do |field|
+      label = field[:required] ? "#{field[:label]} *" : field[:label]
+      parts = [ paragraph(label, bold: true, spacing_after: 40) ]
+      parts << paragraph(field[:hint].to_s, size: SMALL_SIZE, color: "797C81", spacing_after: 40) if field[:hint].present?
+      parts << case field[:type]
+               when "table" then table(field[:columns], Array.new(5) { field[:columns].map { "" } })
+               when "choice" then paragraph(field[:options].map { |o| "☐ #{o}" }.join("   "))
+               when "checkbox" then paragraph("☐ #{translate('form_fields.yes')}   ☐ #{translate('form_fields.no')}")
+               when "signature" then paragraph("__________________________")
+               else paragraph("__________________________________________")
+               end
+      parts.join("\n")
+    end.join("\n")
   end
 
   # Numbered clauses: a main clause in bold, its sub-clauses beneath, each

@@ -82,6 +82,20 @@
         </dl>
       </div>
 
+      <% if current_user&.can_add_users? || (current_user&.company_user&.company_admin? && @user.company_user&.company_id == current_company&.id) %>
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 space-y-4">
+          <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('account_email.title') %></h2>
+          <%= form_with url: dashboard_change_user_email_path(@user), method: :patch, class: "space-y-2" do %>
+            <label class="block text-xs font-medium text-[#797C81]"><%= t('account_email.email') %></label>
+            <%= email_field_tag :email, @user.email, class: "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984]" %>
+            <p class="text-xs text-[#797C81]"><%= t('account_email.hint') %></p>
+            <%= submit_tag t('account_email.change'), class: ui_btn_secondary %>
+          <% end %>
+          <%= button_to t('account_email.send_reset'), dashboard_send_user_reset_link_path(@user), method: :post, class: ui_btn_neutral,
+                form: { data: { turbo_confirm: t('account_email.send_reset_confirm', email: @user.email) } } %>
+        </div>
+      <% end %>
+
       <% warnings = @access.setup_warnings %>
       <% if warnings.any? %>
         <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">

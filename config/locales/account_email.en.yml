@@ -1,0 +1,16 @@
+en:
+  account_email:
+    title: "Account"
+    email: "Sign-in email"
+    hint: "Changing it moves the account to the new address. Both addresses are told."
+    change: "Change email"
+    changed: "Email changed to %{email}."
+    invalid: "That is not a valid email address."
+    taken: "That email already belongs to another account."
+    send_reset: "Send password reset link"
+    send_reset_confirm: "Send a password reset link to %{email}?"
+    reset_sent: "A reset link was sent to %{email}. It is valid for a limited time."
+    not_permitted: "You don't have permission to change this account."
+    mail_subject: "Your WTExcel sign-in email was changed"
+    mail_body: "Hello %{name}. The sign-in email of your account was changed from %{old_email} to %{new_email} by an administrator."
+    mail_footer: "If you did not expect this, contact your company administrator."

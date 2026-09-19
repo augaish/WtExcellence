@@ -83,6 +83,9 @@ class RecordVersionService
       decision.assignments.each { |holder| copy.assignments.create!(holder.attributes.slice(*COPIED_HOLDER)) }
     end
 
+    from.form_fields.each do |field|
+      to.form_fields.create!(field.attributes.slice("position", "label_en", "label_ar", "field_type", "required", "options", "columns", "hint"))
+    end
     from.references.each { |ref| to.references.create!(ref.attributes.slice("clause_id", "name", "source", "sort_order")) }
     from.record_terms.each { |term| to.record_terms.create!(glossary_term_id: term.glossary_term_id, sort_order: term.sort_order) }
   end

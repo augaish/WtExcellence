@@ -29,6 +29,32 @@
     <% end %>
   </ol>
 
+<% when :form_fields %>
+  <%# A fillable layout: a labelled box per field, a table per table field. %>
+  <div class="space-y-4">
+    <% section.payload.each do |field| %>
+      <div class="doc-avoid-break">
+        <p class="text-sm font-semibold"><%= field[:label] %><% if field[:required] %> <span class="text-red-600">*</span><% end %></p>
+        <% if field[:hint].present? %><p class="text-xs text-[#797C81]"><%= field[:hint] %></p><% end %>
+        <% case field[:type] %>
+        <% when "table" %>
+          <table class="mt-1"><thead><tr><% field[:columns].each do |c| %><th><%= c %></th><% end %></tr></thead>
+            <tbody><% 5.times do %><tr><% field[:columns].each do %><td>&nbsp;</td><% end %></tr><% end %></tbody></table>
+        <% when "choice" %>
+          <p class="mt-1 text-sm"><% field[:options].each do |o| %><span class="inline-block me-4">☐ <%= o %></span><% end %></p>
+        <% when "checkbox" %>
+          <p class="mt-1 text-sm">☐ <%= t('form_fields.yes') %> &nbsp; ☐ <%= t('form_fields.no') %></p>
+        <% when "textarea" %>
+          <div class="mt-1 border border-[#E3E3E3] rounded" style="height: 72px;"></div>
+        <% when "signature" %>
+          <div class="mt-1 border-b border-[#0D1120]" style="height: 40px; max-width: 320px;"></div>
+          <p class="text-xs text-[#797C81]"><%= t('form_fields.signature_line') %></p>
+        <% else %>
+          <div class="mt-1 border border-[#E3E3E3] rounded" style="height: 32px; max-width: 420px;"></div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
 <% when :diagram %>
   <div class="doc-avoid-break overflow-x-auto"><%= ProcessDiagramRenderer.render(section.payload) %></div>
 

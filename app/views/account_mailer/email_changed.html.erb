@@ -1,0 +1,5 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <h2 style="color: #5C3984;"><%= t('account_email.mail_subject') %></h2>
+  <p><%= t('account_email.mail_body', name: @user.name, old_email: @old_email, new_email: @user.email) %></p>
+  <p style="color: #797C81; font-size: 12px;"><%= t('account_email.mail_footer') %></p>
+</div>

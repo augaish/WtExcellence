@@ -1,0 +1,54 @@
+<%# The structure of a form: its fields and tables, in order, with an add row
+    and a pencil per field. Locals: record %>
+<% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
+<% can_edit = can_manage_pp_records? && record.editable? %>
+<div id="form-fields" class="bg-white border border-[#E3E3E3] rounded-xl p-5" data-controller="authority-matrix"
+     data-authority-matrix-reorder-authorities-url-value="<%= can_edit ? dashboard_pp_record_reorder_form_fields_path(record) : '' %>">
+  <h2 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('form_fields.title') %></h2>
+  <p class="text-xs text-[#797C81] mb-4"><%= t('form_fields.hint') %></p>
+
+  <% fields = record.form_fields.to_a %>
+  <% if fields.empty? %>
+    <p class="text-sm text-[#797C81] mb-4"><%= t('form_fields.none') %></p>
+  <% end %>
+  <ol class="divide-y divide-[#E3E3E3] mb-4" data-authority-matrix-target="rows" data-category-id=""
+      <%= 'data-action="dragover->authority-matrix#rowsDragOver drop->authority-matrix#authorityDrop"'.html_safe if can_edit %>>
+    <% fields.each_with_index do |field, index| %>
+      <li class="py-3 flex items-start gap-3" data-authority-matrix-target="authority" data-authority-id="<%= field.id %>" data-controller="inline-edit"
+          <%= 'draggable="true" data-action="dragstart->authority-matrix#authorityDragStart dragover->authority-matrix#authorityDragOver drop->authority-matrix#authorityDrop dragend->authority-matrix#authorityDragEnd"'.html_safe if can_edit %>>
+        <% if can_edit %><span class="cursor-grab text-[#797C81] select-none" aria-hidden="true">⋮⋮</span><% end %>
+        <span class="text-xs font-mono text-[#797C81] w-5" data-number><%= index + 1 %></span>
+        <div class="min-w-0 flex-1" data-inline-edit-target="text">
+          <p class="text-sm font-medium text-[#0D1120]"><%= field.label %><% if field.required %> <span class="text-red-600">*</span><% end %>
+            <span class="ms-2 px-2 py-0.5 text-[11px] font-medium rounded-full bg-[#F6EEFF] text-[#5C3984]"><%= field.type_label %></span></p>
+          <% if field.table? && field.column_list.any? %><p class="text-xs text-[#797C81]"><%= t('form_fields.columns') %>: <%= field.column_list.join(" · ") %></p><% end %>
+          <% if field.field_type == "choice" && field.option_list.any? %><p class="text-xs text-[#797C81]"><%= t('form_fields.options') %>: <%= field.option_list.join(" · ") %></p><% end %>
+          <% if field.hint.present? %><p class="text-xs text-[#797C81]"><%= field.hint %></p><% end %>
+        </div>
+        <% if can_edit %>
+          <%= form_with url: dashboard_pp_record_form_field_path(record, field), method: :patch, scope: :pp_form_field,
+                        html: { hidden: true, class: "flex-1 grid gap-2 sm:grid-cols-2", data: { inline_edit_target: "form" } } do |f| %>
+            <%= render "dashboard/pp_records/form_field_inputs", f: f, field: field, input: input %>
+            <div class="sm:col-span-2 flex gap-2">
+              <%= f.submit t('save'), class: ui_btn_secondary %>
+              <button type="button" class="text-xs text-[#797C81] hover:underline" data-action="click->inline-edit#close"><%= t('cancel') %></button>
+            </div>
+          <% end %>
+          <button type="button" class="text-[#5C3984] hover:text-[#4A2F6B]" data-action="click->inline-edit#open" title="<%= t('edit') %>" aria-label="<%= t('edit') %>">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2 2 0 0 0 0-2.8l-1.2-1.2a2 2 0 0 0-2.8 0L4 16z"/></svg>
+          </button>
+          <%= button_to t('delete'), dashboard_pp_record_form_field_path(record, field), method: :delete,
+                form: { data: { turbo_confirm: t('are_you_sure') } }, class: "text-xs text-[#797C81] hover:text-red-600" %>
+        <% end %>
+      </li>
+    <% end %>
+  </ol>
+
+  <% if can_edit %>
+    <%= form_with url: dashboard_pp_record_form_fields_path(record), method: :post, scope: :pp_form_field,
+                  class: "grid gap-2 sm:grid-cols-2 border-t border-[#E3E3E3] pt-4" do |f| %>
+      <%= render "dashboard/pp_records/form_field_inputs", f: f, field: PpFormField.new, input: input %>
+      <div class="sm:col-span-2"><%= f.submit t('form_fields.add'), class: ui_btn_primary %></div>
+    <% end %>
+  <% end %>
+</div>

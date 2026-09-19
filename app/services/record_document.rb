@@ -67,6 +67,7 @@ class RecordDocument
       body_section,
       scope_section,
       clauses_section,
+      form_fields_section,
       process_card_section,
       service_card_section,
       diagram_section,
@@ -110,6 +111,20 @@ class RecordDocument
         clause.children.map { |sub| { number: sub.number, title: sub.title, body: sub.body, main: false } }
     end
     section("clauses", :clauses, rows)
+  end
+
+  # The form as it is to be filled in: one row per field, tables with their
+  # columns and empty rows.
+  def form_fields_section
+    return nil unless record.form?
+
+    rows = record.form_fields.map do |field|
+      { label: field.label(locale), type: field.field_type, type_label: field.type_label(locale), required: field.required,
+        options: field.option_list, columns: field.column_list, hint: field.hint }
+    end
+    return nil if rows.empty?
+
+    section("form_fields", :form_fields, rows)
   end
 
   # بطاقة الخدمة

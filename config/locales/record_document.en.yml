@@ -3,6 +3,7 @@ en:
     sections:
       definitions: "General definitions and abbreviations"
       body: "Content"
+      form_fields: "Form"
       scope: "Scope"
       clauses: "Clauses"
       service_card: "Service card"

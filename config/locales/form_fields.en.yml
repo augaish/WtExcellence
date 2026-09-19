@@ -1,0 +1,31 @@
+en:
+  form_fields:
+    title: "Form structure"
+    hint: "What the person filling this form writes: fields, choices and tables, in order. The document prints them as boxes to fill."
+    none: "No fields yet. Add the first one below."
+    add: "Add field"
+    label: "Label"
+    required: "Required"
+    options: "Options"
+    options_placeholder: "Options for a choice field, separated with | (e.g. Yes | No)"
+    columns: "Columns"
+    columns_placeholder: "Columns for a table field, separated with | (e.g. Item | Quantity | Date)"
+    hint_placeholder: "Guidance shown under the field (optional)"
+    yes: "Yes"
+    no: "No"
+    signature_line: "Name, signature and date"
+    types:
+      text: "Short text"
+      textarea: "Long text"
+      number: "Number"
+      date: "Date"
+      checkbox: "Yes / No"
+      choice: "Choice"
+      table: "Table"
+      signature: "Signature"
+    errors:
+      label_required: "Enter the field label in English or Arabic."
+    flash:
+      saved: "Field saved."
+      deleted: "Field removed."
+      not_editable: "This form cannot be changed now."

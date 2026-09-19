@@ -2,6 +2,7 @@ ar:
   record_document:
     sections:
       definitions: التعريفات العامة والاختصارات
+      form_fields: "النموذج"
       body: المحتوى
       scope: النطاق
       clauses: البنود

@@ -222,6 +222,8 @@ Rails.application.routes.draw do
     resources :pp_records do
       member { post :open_next_version }
       resources :clauses, only: [ :create, :update, :destroy ], controller: "pp_record_clauses"
+      patch "form_fields/reorder", to: "pp_form_fields#reorder", as: :reorder_form_fields
+      resources :form_fields, only: [ :create, :update, :destroy ], controller: "pp_form_fields"
       post "clauses/:clause_id/comments", to: "pp_clause_comments#create", as: :clause_comments
       patch "comments/:id/resolve", to: "pp_clause_comments#resolve", as: :resolve_comment
       resources :record_steps, only: [ :create, :update, :destroy ], controller: "pp_record_steps"
@@ -274,6 +276,8 @@ Rails.application.routes.draw do
       post "/invitations", action: :create_invitation, as: :create_invitation
       post "/users/:id/resend_invitation", action: :resend_invitation, as: :resend_invitation
       get "/users/:id/access", action: :access, as: :user_access
+      patch "/users/:id/email", action: :change_email, as: :change_user_email
+      post "/users/:id/reset_link", action: :send_reset_link, as: :send_user_reset_link
       post "/companies", action: :create_company, as: :create_company
       patch "/companies/:id/license_seats", action: :update_license_seats, as: :update_company_license_seats
       patch "/companies/:id/status", action: :update_company_status, as: :update_company_status
