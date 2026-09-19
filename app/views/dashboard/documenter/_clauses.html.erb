@@ -36,10 +36,19 @@
   </ol>
 
   <% if can_edit %>
-    <%= form_with url: dashboard_pp_record_clauses_path(record), method: :post, class: "pt-3 border-t border-[#E3E3E3] space-y-2" do %>
+    <% terms = record.company.glossary_terms.to_a %>
+    <%= form_with url: dashboard_pp_record_clauses_path(record), method: :post, class: "pt-3 border-t border-[#E3E3E3] space-y-2", data: { controller: "insert-text" } do %>
       <p class="text-sm font-medium text-[#0D1120]"><%= t('documenter.clauses.add_main') %></p>
       <%= text_field_tag "pp_record_clause[title]", nil, placeholder: t('documenter.clauses.clause_title'), class: input %>
-      <%= text_area_tag "pp_record_clause[body]", nil, rows: 3, placeholder: t('documenter.clauses.clause_body'), class: input %>
+      <%= text_area_tag "pp_record_clause[body]", nil, rows: 3, placeholder: t('documenter.clauses.clause_body'), class: input, data: { insert_text_target: "field" } %>
+      <% if terms.any? %>
+        <%# The approved definition is inserted as published, so a policy never redefines a term. %>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="text-xs text-[#797C81]"><%= t('documenter.clauses.insert_term') %></label>
+          <%= select_tag :glossary_term, options_for_select([ [ t('documenter.clauses.pick_term'), "" ] ] + terms.map { |t| [ t.display_term, "#{t.display_term}: #{t.display_definition}" ] }),
+                class: "border border-[#E3E3E3] rounded-md px-2 py-1 text-xs sm:w-72", data: { action: "change->insert-text#insert" } %>
+        </div>
+      <% end %>
       <%= submit_tag t('documenter.clauses.add_main'), class: ui_btn_primary %>
     <% end %>
   <% end %>

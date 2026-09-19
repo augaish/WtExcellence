@@ -21,11 +21,22 @@ class Dashboard::DocumenterController < Dashboard::BaseController
     @inbox = DocumenterInbox.new(user: current_user, company: company)
     @phase = params[:phase].presence
     @phase = PpStage::PHASES.first unless PpStage::PHASES.include?(@phase)
+    @inbox_items = @inbox.items
 
     return unless manager?
 
-    records = company.pp_records.active.latest.where.not(record_type: PpRecord::DOA_TYPES)
-      .includes(:owner_org_unit, :owner_user, :stage_tasks, :stage_approvals).to_a
+    scope = company.pp_records.active.latest.where.not(record_type: PpRecord::DOA_TYPES)
+    # Filters, so a whole unit's or a whole type's records move together.
+    @filter_unit_id = params[:unit_id].presence
+    @filter_type = params[:record_type].presence
+    scope = scope.where(owner_org_unit_id: @filter_unit_id) if @filter_unit_id
+    scope = scope.where(record_type: @filter_type) if PpRecord::TAB_TYPES.include?(@filter_type)
+    @filter_units = company.org_units.active.ordered.to_a
+    records = scope.includes(:owner_org_unit, :owner_user, :stage_tasks, :stage_approvals).to_a
+    if @filter_unit_id || @filter_type
+      shown = records.map(&:id).to_set
+      @inbox_items = @inbox_items.select { |item| shown.include?(item.record.id) }
+    end
     @by_stage = records.group_by(&:stage_key)
     @counts_by_phase = PpStage::PHASES.index_with do |phase|
       PpStage.in_phase(phase).sum { |d| (@by_stage[d[:key]] || []).size }
@@ -302,7 +313,7 @@ class Dashboard::DocumenterController < Dashboard::BaseController
     return true if manager?
 
     @record.stage_tasks.for_stage(@record.stage_key).open.for_user(current_user).exists? ||
-      @record.stage_approvals.for_stage(@record.stage_key).joins(:org_unit).where(org_units: { head_user_id: current_user.id }).exists?
+      @record.stage_approvals.for_stage(@record.stage_key).joins(:org_unit).where(org_units: { head_user_id: current_user.acting_ids }).exists?
   end
 
   def stage_target_for(stage_key)

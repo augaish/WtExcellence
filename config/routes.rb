@@ -307,6 +307,7 @@ Rails.application.routes.draw do
     get "general_settings", to: "general_settings#index", as: :general_settings
     get "general_settings/documenter", to: "documenter#settings", as: :general_settings_documenter
     patch "general_settings", to: "general_settings#update", as: :update_general_settings
+    patch "general_settings/delegation", to: "general_settings#update_delegation", as: :update_delegation
     get "general_settings/activity", to: "activity_logs#index", as: :activity
     get "general_settings/activity/export", to: "activity_logs#export", as: :activity_export
     get "general_settings/export_analytics", to: "general_settings#export_analytics", as: :export_analytics, defaults: { format: :csv }

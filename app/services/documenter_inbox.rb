@@ -34,9 +34,9 @@ class DocumenterInbox
     active_records.filter_map do |record|
       case PpStage.actor_of(record.stage_key)
       when :verifier
-        Item.new(record: record, reason: :verify) if record.verifier_user_id == user.id || manager
+        Item.new(record: record, reason: :verify) if user.acting_ids.include?(record.verifier_user_id) || manager
       when :unit_head
-        Item.new(record: record, reason: :prepare) if record.owning_unit_head&.id == user.id || manager
+        Item.new(record: record, reason: :prepare) if user.acting_ids.include?(record.owning_unit_head&.id) || manager
       when :pp_manager, :approvers, :publisher
         Item.new(record: record, reason: :manage) if manager
       end
@@ -49,7 +49,7 @@ class DocumenterInbox
   end
 
   def approval_items
-    unit_ids = company.org_units.where(head_user_id: user.id).pluck(:id)
+    unit_ids = company.org_units.where(head_user_id: user.acting_ids).pluck(:id)
     return [] if unit_ids.empty?
 
     PpStageApproval.pending.where(org_unit_id: unit_ids).joins(:pp_record)

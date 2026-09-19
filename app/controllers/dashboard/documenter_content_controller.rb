@@ -42,7 +42,7 @@ class Dashboard::DocumenterContentController < Dashboard::BaseController
     return true if manager?
 
     @record.stage_tasks.for_stage(@record.stage_key).open.for_user(current_user).exists? ||
-      @record.stage_approvals.for_stage(@record.stage_key).joins(:org_unit).where(org_units: { head_user_id: current_user.id }).exists?
+      @record.stage_approvals.for_stage(@record.stage_key).joins(:org_unit).where(org_units: { head_user_id: current_user.acting_ids }).exists?
   end
 
   def ensure_can_edit_content

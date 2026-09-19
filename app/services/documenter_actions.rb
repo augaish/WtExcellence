@@ -45,7 +45,7 @@ class DocumenterActions
   end
 
   def verifier?
-    @user.present? && @record.stage_key == "s1_verify" && @record.verifier_user_id == @user.id
+    @user.present? && @record.stage_key == "s1_verify" && @user.acting_ids.include?(@record.verifier_user_id)
   end
 
   # The person with the task hands it back to whoever gave it.
@@ -149,7 +149,7 @@ class DocumenterActions
   end
 
   def unit_head?
-    @user.present? && @record.owning_unit_head&.id == @user.id
+    @user.present? && @user.acting_ids.include?(@record.owning_unit_head&.id)
   end
 
   # The people a unit head may hand work to: their reporters, directly or down
@@ -166,7 +166,7 @@ class DocumenterActions
   end
 
   def can_answer?(approval)
-    @user.present? && approval.org_unit.head_user_id == @user.id && approval.pending?
+    @user.present? && @user.acting_ids.include?(approval.org_unit.head_user_id) && approval.pending?
   end
 
   private

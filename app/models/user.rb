@@ -7,6 +7,26 @@ class User < ApplicationRecord
   # Letters and digits, ten characters or more, whenever a password is set.
   validate :password_meets_rule, if: -> { password.present? }
 
+  # Leave cover: the person who acts for me between two dates.
+  belongs_to :delegate_user, class_name: "User", optional: true
+  has_many :delegators, class_name: "User", foreign_key: "delegate_user_id", dependent: :nullify
+  validate :delegation_dates_make_sense
+  validate :delegate_is_a_colleague
+
+  def delegation_in_force?(on = Date.current)
+    delegate_user_id.present? && (delegate_from.nil? || delegate_from <= on) && (delegate_until.nil? || delegate_until >= on)
+  end
+
+  # Me, plus everyone whose leave cover I am right now. Stage rules that name
+  # a person (verifier, unit head, task holder, approver) accept any of these.
+  def acting_ids(on = Date.current)
+    [ id ] + delegators.reload.select { |d| d.delegation_in_force?(on) }.map(&:id)
+  end
+
+  def acting_for(on = Date.current)
+    delegators.select { |d| d.delegation_in_force?(on) }
+  end
+
   # Devise sends its emails (password reset) inside the request by default, so
   # a mail server that is slow or refuses the connection turns into a 500 for
   # the person asking. Sent through the job queue instead, and retried there.
@@ -274,5 +294,19 @@ class User < ApplicationRecord
 
   def password_meets_rule
     errors.add(:password, PasswordRule.message) unless PasswordRule.strong?(password)
+  end
+
+  def delegation_dates_make_sense
+    return if delegate_from.blank? || delegate_until.blank? || delegate_until >= delegate_from
+
+    errors.add(:delegate_until, I18n.t("delegation_cover.errors.until_before_from"))
+  end
+
+  def delegate_is_a_colleague
+    return if delegate_user.nil?
+    return errors.add(:delegate_user_id, I18n.t("delegation_cover.errors.self")) if delegate_user_id == id
+
+    same_company = delegate_user.company_user&.company_id.present? && delegate_user.company_user.company_id == company_user&.company_id
+    errors.add(:delegate_user_id, I18n.t("delegation_cover.errors.other_company")) unless same_company
   end
 end

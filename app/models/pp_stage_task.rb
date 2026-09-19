@@ -13,7 +13,8 @@ class PpStageTask < ApplicationRecord
 
   scope :for_stage, ->(key) { where(stage_key: key) }
   scope :open, -> { where(submitted_at: nil) }
-  scope :for_user, ->(user) { where(user_id: user.id) }
+  # A task held by me, or by someone I am covering for.
+  scope :for_user, ->(user) { where(user_id: user.acting_ids) }
 
   def open?
     submitted_at.nil?

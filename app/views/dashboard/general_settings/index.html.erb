@@ -190,6 +190,36 @@
         <% end %>
 
       </div>
+
+      <% if current_user.company_user %>
+        <%# Leave cover: while away, someone else receives and acts on my Documenter work. %>
+        <div class="bg-white border border-[#E3E3E3] rounded-xl p-5 mt-6" id="leave-cover">
+          <h2 class="text-sm font-semibold text-[#0D1120] mb-1"><%= t('delegation_cover.title') %></h2>
+          <p class="text-xs text-[#797C81] mb-4"><%= t('delegation_cover.hint') %></p>
+          <% acting = current_user.acting_for %>
+          <% if acting.any? %>
+            <p class="text-sm text-[#0D1120] mb-3 rounded-lg bg-[#F6EEFF] border border-[#5C3984]/30 px-3 py-2"><%= t('delegation_cover.you_cover', names: acting.map(&:name).join(", ")) %></p>
+          <% end %>
+          <%= form_with model: current_user, url: dashboard_update_delegation_path, method: :patch, class: "grid gap-3 sm:grid-cols-3", html: { data: { turbo: false } } do |f| %>
+            <div class="sm:col-span-3">
+              <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('delegation_cover.delegate') %></label>
+              <%= f.select :delegate_user_id, current_user.company_user.company.users.where.not(id: current_user.id).order(:name).map { |u| [ u.name, u.id ] },
+                    { include_blank: t('delegation_cover.nobody') }, class: "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm" %>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('delegation_cover.from') %></label>
+              <%= f.date_field :delegate_from, class: "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm" %>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-[#797C81] mb-1"><%= t('delegation_cover.until') %></label>
+              <%= f.date_field :delegate_until, class: "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm" %>
+            </div>
+            <div class="flex items-end">
+              <%= f.submit t('save'), class: ui_btn_primary %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>

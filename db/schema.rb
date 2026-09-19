@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_19_213217) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_19_213726) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1474,6 +1474,10 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_19_213217) do
     t.datetime "deleted_at"
     t.datetime "user_manual_seen_at"
     t.uuid "org_unit_id"
+    t.uuid "delegate_user_id"
+    t.date "delegate_from"
+    t.date "delegate_until"
+    t.index ["delegate_user_id"], name: "index_users_on_delegate_user_id"
     t.index ["deleted_at"], name: "index_users_on_deleted_at"
     t.index ["email"], name: "index_users_on_email"
     t.index ["invitation_token"], name: "index_users_on_invitation_token", unique: true
@@ -1737,6 +1741,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_19_213217) do
   add_foreign_key "uploads", "companies"
   add_foreign_key "uploads", "folders"
   add_foreign_key "users", "org_units"
+  add_foreign_key "users", "users", column: "delegate_user_id"
   add_foreign_key "users", "users", column: "invited_by_id"
   add_foreign_key "vendor_assessments", "companies"
   add_foreign_key "vendor_assessments", "users", column: "assessed_by_id", on_delete: :nullify

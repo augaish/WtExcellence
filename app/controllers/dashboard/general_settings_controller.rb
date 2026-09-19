@@ -2,6 +2,27 @@ class Dashboard::GeneralSettingsController < Dashboard::BaseController
   def index
   end
 
+  # Who acts for me while I am away, and between which dates.
+  def update_delegation
+    return if prevent_viewer_action
+
+    attrs = params.require(:user).permit(:delegate_user_id, :delegate_from, :delegate_until)
+    attrs[:delegate_user_id] = nil if attrs[:delegate_user_id].blank?
+    previous = current_user.delegate_user_id
+    if current_user.update(attrs)
+      if current_user.delegate_user && current_user.delegate_user_id != previous
+        Notification.create!(recipient: current_user.delegate_user, source: current_user, kind: "delegation_cover_assigned",
+          title: t("delegation_cover.notice_title", name: current_user.name,
+            from: (current_user.delegate_from ? l(current_user.delegate_from, format: :document) : t("delegation_cover.now")),
+            until: (current_user.delegate_until ? l(current_user.delegate_until, format: :document) : t("delegation_cover.open_ended"))),
+          link_path: dashboard_overview_path, payload: { delegator_id: current_user.id })
+      end
+      redirect_to dashboard_general_settings_path, notice: t("delegation_cover.saved"), status: :see_other
+    else
+      redirect_to dashboard_general_settings_path, alert: current_user.errors.full_messages.to_sentence, status: :see_other
+    end
+  end
+
   def update
     return if prevent_viewer_action
     # Handle profile image removal
@@ -302,6 +323,6 @@ class Dashboard::GeneralSettingsController < Dashboard::BaseController
   private
 
   def user_params
-    params.require(:user).permit(:name, :profile_image, :receive_notifications_on_email)
+    params.require(:user).permit(:name, :profile_image, :receive_notifications_on_email, :delegate_user_id, :delegate_from, :delegate_until)
   end
 end

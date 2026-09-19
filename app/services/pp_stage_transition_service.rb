@@ -143,8 +143,8 @@ class PpStageTransitionService
     return false if @user.nil?
 
     case PpStage.actor_of(@record.stage_key)
-    when :verifier then @record.verifier_user_id == @user.id
-    when :unit_head then @record.owning_unit_head&.id == @user.id
+    when :verifier then @user.acting_ids.include?(@record.verifier_user_id)
+    when :unit_head then @user.acting_ids.include?(@record.owning_unit_head&.id)
     else false
     end
   end

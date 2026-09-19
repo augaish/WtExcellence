@@ -1,0 +1,26 @@
+en:
+  delegation_cover:
+    title: "While I'm away"
+    hint: "Name who acts for you and for how long. They receive your Documenter work (verification, unit-head hand-outs, approvals and handed tasks) and can act on it. Nobody needs your password."
+    delegate: "Acts for me"
+    nobody: "Nobody"
+    from: "From"
+    until: "Until"
+    saved: "Leave cover saved."
+    now: "now"
+    open_ended: "further notice"
+    you_cover: "You are currently covering for: %{names}."
+    notice_title: "%{name} named you to act for them from %{from} until %{until}"
+    errors:
+      until_before_from: "must be on or after the start date"
+      self: "cannot be yourself"
+      other_company: "must be someone in your company"
+  documenter:
+    filters:
+      unit: "Owning unit"
+      type: "Record type"
+      all: "All"
+      clear: "Clear filters"
+    clauses:
+      insert_term: "Insert an approved term"
+      pick_term: "Choose a term…"

@@ -172,6 +172,11 @@ processes; nothing to build until there is content to hang on it.
 - Every model writes create/update/delete entries (ActivityTrail). When the app writes its own richer entry for the same record in the same request, the plain entry is folded into it.
 - Entries are kept for as long as the company exists; no retention limit yet.
 
+## Test round (19 Sep) — left open
+- Items 8 (code length 15), 9 (numbering not reflected), 10 (level 3 from the chart), 11–14 (process architecture fields) and 16 (library folders per unit) wait for the test team's precise cases.
+- Notification "not working during stage moves" needs one concrete case (who moved what, who got no notice).
+- Delegated admin's 500 on the Excel user import: could not reproduce locally (200 as delegated admin with the add-users permission); needs the server log line.
+
 ## Review 03 — status
 - Q14, Q15, sections 5, 7 and 8 are built (phases 10–13). Left for later: vendor due-diligence questionnaires that vary by category (one fixed five-criteria assessment exists), customer records as their own register (commitments name the customer and agreement in text), and a full screen-reader walk of every page.
 

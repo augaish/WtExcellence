@@ -3,7 +3,7 @@
 <% stage = record.stage_key %>
 <% is_manager = manager? %>
 <% head = actions.unit_head? %>
-<% verifier = record.verifier_user_id == current_user.id %>
+<% verifier = current_user.acting_ids.include?(record.verifier_user_id) %>
 <div class="bg-white border border-[#5C3984]/30 rounded-xl p-5 space-y-5">
   <div>
     <p class="text-xs font-medium text-[#797C81] uppercase tracking-wide"><%= t('documenter.current_stage') %></p>
