@@ -13,5 +13,6 @@
     </div>
   <% end %>
 <% else %>
-  <p class="text-xs text-[#797C81]"><%= t('documenter.nobody_to_hand_to') %></p>
+  <%# No reporters: the people of the unit have no unit set, or the unit has no people. %>
+  <p class="text-xs text-[#797C81]"><%= t('documenter.nobody_to_hand_to') %> <%= t('documenter.nobody_to_hand_to_why', unit: record.owner_org_unit&.display_name.to_s) %></p>
 <% end %>

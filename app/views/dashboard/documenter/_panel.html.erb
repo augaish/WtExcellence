@@ -57,7 +57,7 @@
       <div class="flex flex-wrap gap-2">
         <%# The verifier reads the record; correcting it is the owner's job. %>
         <%= link_to t('documenter.actions.check_form'), dashboard_pp_record_path(record), class: ui_btn_neutral %>
-        <%= button_to t('documenter.actions.verified'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
+        <%= button_to t('documenter.actions.send_to_next', stage: PpStage.label(record.next_stage_key)), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
       </div>
       <details class="pt-2 border-t border-[#E3E3E3]">
         <summary class="cursor-pointer text-sm font-medium text-[#797C81] hover:text-[#0D1120]"><%= t('documenter.actions.request_correction') %></summary>
@@ -73,7 +73,7 @@
   <% elsif stage == "s1_approved" %>
     <% if is_manager %>
       <div class="flex flex-wrap gap-2">
-        <%= button_to t('documenter.actions.approve'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
+        <%= button_to t('documenter.actions.send_to_next', stage: PpStage.label(record.next_stage_key)), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
         <%= link_to t('edit'), edit_dashboard_pp_record_path(record), class: ui_btn_neutral %>
       </div>
       <%= render "dashboard/documenter/push_back", record: record, to: "s1_verify", input: input, label: label %>
@@ -96,11 +96,12 @@
             title: t('documenter.actions.hand_to_reporter'), hint: t('documenter.hand_hint_prep') %>
       <% unless task %>
         <div class="flex flex-wrap gap-2 pt-2 border-t border-[#E3E3E3]">
-          <%= button_to t('documenter.actions.approve_draft'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
+          <%= button_to t('documenter.actions.send_to_next', stage: PpStage.label(record.next_stage_key)), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
         </div>
       <% end %>
     <% else %>
       <p class="text-sm text-[#797C81]"><%= t('documenter.waiting_for', name: record.owning_unit_head&.name || t('documenter.no_unit_head')) %></p>
+      <p class="text-xs text-[#797C81]"><%= t('documenter.only_head_acts_here', unit: record.owner_org_unit&.display_name.to_s) %></p>
     <% end %>
 
   <% elsif stage == "s2_draftReview" %>
@@ -116,7 +117,7 @@
       <%= render "dashboard/documenter/hand_out", record: record, eligible: eligible, input: input, label: label,
             title: t('documenter.actions.hand_to_team'), hint: t('documenter.hand_hint_review') %>
       <div class="flex flex-wrap gap-2 pt-2 border-t border-[#E3E3E3]">
-        <%= button_to t('documenter.actions.approve'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
+        <%= button_to t('documenter.actions.send_to_next', stage: PpStage.label(record.next_stage_key)), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
       </div>
       <%= render "dashboard/documenter/push_back", record: record, to: "s2_prep", input: input, label: label %>
     <% else %>
@@ -148,7 +149,7 @@
       <%= render "dashboard/documenter/hand_out", record: record, eligible: eligible, input: input, label: label,
             title: t('documenter.actions.hand_to_designer'), hint: t('documenter.hand_hint_design') %>
       <div class="flex flex-wrap gap-2 pt-2 border-t border-[#E3E3E3]">
-        <%= button_to t('documenter.actions.design_done'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
+        <%= button_to t('documenter.actions.send_to_next', stage: PpStage.label(record.next_stage_key)), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
       </div>
     <% elsif !my_task %>
       <p class="text-sm text-[#797C81]"><%= t('documenter.waiting_for_manager') %></p>
@@ -158,7 +159,7 @@
     <% if is_manager %>
       <div class="flex flex-wrap gap-2">
         <% if diagram %><%= link_to t('documenter.actions.open_drawing'), dashboard_pp_diagram_path(diagram), class: ui_btn_neutral %><% end %>
-        <%= button_to t('documenter.actions.approve'), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
+        <%= button_to t('documenter.actions.send_to_next', stage: PpStage.label(record.next_stage_key)), dashboard_documenter_advance_record_path(record), method: :post, class: ui_btn_primary %>
       </div>
       <%= render "dashboard/documenter/push_back", record: record, to: "s3_design", input: input, label: label %>
     <% else %>
