@@ -40,6 +40,7 @@ class RecordVersionService
       successor.stage_entered_at = nil
       successor.save!(validate: false)
 
+      copy_content(record, successor)
       record.links.find_each { |link| successor.links.create!(linked_record_id: link.linked_record_id, kind: link.kind) }
       record.participants.find_each { |p| successor.participants.create!(org_unit_id: p.org_unit_id) }
       record.service_levels.find_each do |level|
@@ -53,4 +54,36 @@ class RecordVersionService
   private
 
   attr_reader :record, :actor
+
+  COPIED_CLAUSE = %w[position title body].freeze
+  COPIED_STEP = %w[position activity description responsible_title responsible_org_unit_id duration_value duration_unit system_used].freeze
+  COPIED_DECISION = %w[item decision sort_order authority_id].freeze
+  COPIED_HOLDER = %w[level holder_title org_unit_id condition sort_order].freeze
+
+  # What the document says travels with it: clauses (with their sub-clauses),
+  # steps with their decisions and holders, references and glossary terms.
+  # The next version starts as the last one and is edited from there.
+  def copy_content(from, to)
+    clause_ids = {}
+    from.clauses.main.each do |clause|
+      copy = to.clauses.create!(clause.attributes.slice(*COPIED_CLAUSE))
+      clause_ids[clause.id] = copy.id
+      clause.children.each { |sub| to.clauses.create!(sub.attributes.slice(*COPIED_CLAUSE).merge("parent_id" => copy.id)) }
+    end
+
+    step_ids = {}
+    from.steps.each do |step|
+      copy = to.steps.create!(step.attributes.slice(*COPIED_STEP))
+      step_ids[step.id] = copy.id
+    end
+
+    from.operational_authorities.each do |decision|
+      copy = to.operational_authorities.create!(decision.attributes.slice(*COPIED_DECISION)
+        .merge("pp_process_step_id" => step_ids[decision.pp_process_step_id]))
+      decision.assignments.each { |holder| copy.assignments.create!(holder.attributes.slice(*COPIED_HOLDER)) }
+    end
+
+    from.references.each { |ref| to.references.create!(ref.attributes.slice("clause_id", "name", "source", "sort_order")) }
+    from.record_terms.each { |term| to.record_terms.create!(glossary_term_id: term.glossary_term_id, sort_order: term.sort_order) }
+  end
 end

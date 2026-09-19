@@ -31,8 +31,11 @@ class PpRecordClause < ApplicationRecord
 
   private
 
+  # The column defaults to 1, so "present" says nothing; a new clause takes the
+  # next number among its siblings unless a position was chosen on purpose.
   def assign_position
-    return if position.present? && position.positive?
+    return unless new_record?
+    return if position_changed? && position.to_i.positive?
 
     siblings = PpRecordClause.where(pp_record_id: pp_record_id, parent_id: parent_id)
     self.position = siblings.maximum(:position).to_i + 1

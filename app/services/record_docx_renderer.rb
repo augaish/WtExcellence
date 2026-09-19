@@ -114,8 +114,20 @@ class RecordDocxRenderer
     when :executive_matrix then executive_matrix_table(section.payload)
     when :diagram then paragraph(translate("record_document.diagram_omitted"), size: SMALL_SIZE, color: "797C81")
     when :table then section_table(section)
+    when :clauses then clauses_xml(section.payload)
     else ""
     end
+  end
+
+  # Numbered clauses: a main clause in bold, its sub-clauses beneath, each
+  # followed by its text.
+  def clauses_xml(rows)
+    rows.map do |row|
+      title = [ row[:number], row[:title] ].compact_blank.join(" ")
+      parts = [ paragraph(title, bold: row[:main], spacing_after: row[:body].present? ? 40 : 120) ]
+      parts << paragraph(row[:body].to_s) if row[:body].present?
+      parts.join("\n")
+    end.join("\n")
   end
 
   def field_rows(payload)
