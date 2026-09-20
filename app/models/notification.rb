@@ -10,7 +10,24 @@ class Notification < ApplicationRecord
     authority_review_requested
     governance_task_assigned governance_task_submitted
     capa_action_submitted capa_action_accepted capa_action_changes_requested delegation_cover_assigned
+    record_stage_entered record_returned record_comment_added record_comment_resolved
+    authority_review_answered authority_matrix_published authority_comment_added authority_comment_answered
+    commitment_acceptance_recorded risk_accepted vendor_assessment_signed_off vendor_approval_recorded
+    capa_closed capa_action_comment_added
+    account_role_changed account_designation_changed account_status_changed
   ].freeze
+
+  # Email follows the recipient's own setting, for every kind alike. Sent
+  # after commit so a rolled-back movement never mails anyone.
+  after_create_commit :deliver_email
+
+  def deliver_email
+    return unless recipient.respond_to?(:receive_notifications_on_email) && recipient.receive_notifications_on_email == true
+
+    NotificationMailer.notification_email(self).deliver_later
+  rescue => e
+    Rails.logger.warn "Notification email failed: #{e.class}: #{e.message}"
+  end
 
   belongs_to :recipient, class_name: "User"
   belongs_to :source, polymorphic: true, optional: true

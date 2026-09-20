@@ -35,6 +35,8 @@ class Dashboard::VendorsController < Dashboard::BaseController
     end
 
     @vendor.record_approval!(status, by: current_user, note: params[:approval_note])
+    Notify.people([ @vendor.owner&.user, @vendor.created_by ], kind: "vendor_approval_recorded", source: @vendor,
+      link_path: dashboard_vendor_path(@vendor), actor: current_user, vendor: @vendor.name, status: t("vendor_assessment.approval_statuses.#{status}", default: status))
     redirect_to dashboard_vendor_path(@vendor), notice: t("vendor_assessment.flash.approval_recorded"), status: :see_other
   end
 

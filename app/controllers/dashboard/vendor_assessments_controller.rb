@@ -30,6 +30,8 @@ class Dashboard::VendorAssessmentsController < Dashboard::BaseController
     end
 
     assessment.sign_off!(by: current_user, note: params[:review_note])
+    Notify.person(assessment.assessed_by, kind: "vendor_assessment_signed_off", source: @vendor,
+      link_path: dashboard_vendor_path(@vendor), actor: current_user, vendor: @vendor.name, rating: t("risk_level_#{assessment.rating}"))
     redirect_to dashboard_vendor_path(@vendor), notice: t("vendor_assessment.flash.signed_off", rating: t("risk_level_#{assessment.rating}")), status: :see_other
   end
 

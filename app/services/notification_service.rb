@@ -401,10 +401,8 @@ class NotificationService
     end
   end
 
-  def self.send_notification_email_if_enabled(notification)
-    return unless notification.recipient.respond_to?(:receive_notifications_on_email)
-    return if notification.recipient.receive_notifications_on_email != true
-
-    NotificationMailer.notification_email(notification).deliver_later
+  # Email is sent by Notification itself after commit (see Notification#deliver_email).
+  def self.send_notification_email_if_enabled(_notification)
+    nil
   end
 end

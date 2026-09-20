@@ -174,7 +174,7 @@ processes; nothing to build until there is content to hang on it.
 
 ## Test round (19 Sep) — left open
 - Items 8–14 and 16 were clarified and built on 20 Sep (Arabic-header import, code follows the number, level rollups, KPI rows, description in the card, diagram polish, library browse by level).
-- Notifications: the team says they work but not for every movement; still needs one concrete missing case before changing anything.
+- Notifications: audited on 20 Sep; every movement now notifies (see test/controllers/notification_coverage_test.rb for the list) and every kind can go by email per the recipient's setting.
 - Delegated admin's 500 on the Excel user import: could not reproduce locally (200 as delegated admin with the add-users permission); needs the server log line.
 
 ## Review 03 — status

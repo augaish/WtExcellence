@@ -87,6 +87,9 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     return back_to_matrix(alert: t("doa.review.comment_required")) if params[:decision] == "rejected" && params[:comment].to_s.strip.blank?
 
     review.answer!(params[:decision] == "accepted" ? "accepted" : "rejected", comment: params[:comment])
+    Notify.person(review.requested_by, kind: "authority_review_answered", source: @matrix,
+      link_path: dashboard_authorities_path(matrix_id: @matrix.id), actor: current_user,
+      decision: t("doa.review.decisions.#{review.decision}"), version: @matrix.version_number)
     back_to_matrix(notice: t("doa.review.answered"))
   end
 
@@ -96,6 +99,8 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     return back_to_matrix(alert: t("doa.review.not_all_accepted")) unless @matrix.matrix_reviews.any? && @matrix.matrix_reviews.pending.none? && @matrix.matrix_reviews.rejected.none?
 
     @matrix.update!(current_stage: PpStage::TERMINAL_KEYS.first, stage_entered_at: Time.current, published_at: Time.current)
+    Notify.people(company.users.to_a, kind: "authority_matrix_published", source: @matrix,
+      link_path: dashboard_authorities_path(matrix_id: @matrix.id), actor: current_user, version: @matrix.version_number)
     back_to_matrix(notice: t("doa.review.published", version: @matrix.version_number))
   end
 
@@ -128,7 +133,14 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     return back_to_matrix(alert: t("doa.flash.not_found")) if authority.nil?
 
     comment = @matrix.review_comments.new(authority: authority, user: current_user, body: params[:body])
-    save_and_return(comment, "comment_added")
+    if comment.save
+      Notify.people(matrix_owners, kind: "authority_comment_added", source: @matrix,
+        link_path: dashboard_authorities_path(matrix_id: @matrix.id, anchor: "authority-#{authority.id}"), actor: current_user,
+        authority: authority.display_name)
+      back_to_matrix(notice: t("doa.flash.comment_added"))
+    else
+      back_to_matrix(alert: comment.errors.full_messages.to_sentence)
+    end
   end
 
   def answer_review_comment
@@ -136,7 +148,15 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     return back_to_matrix(alert: t("doa.flash.not_found")) if comment.nil?
 
     attributes = { decision: params[:decision], reply: params[:reply], replied_by: current_user, replied_at: Time.current }
-    save_and_return_updated(comment, attributes, "comment_answered")
+    comment.assign_attributes(attributes)
+    if comment.save
+      Notify.person(comment.user, kind: "authority_comment_answered", source: @matrix,
+        link_path: dashboard_authorities_path(matrix_id: @matrix.id, anchor: "authority-#{comment.authority_id}"), actor: current_user,
+        authority: comment.authority.display_name, decision: t("doa.comments.decisions.#{comment.decision}"))
+      back_to_matrix(notice: t("doa.flash.comment_answered"))
+    else
+      back_to_matrix(alert: comment.errors.full_messages.to_sentence)
+    end
   end
 
   # The page starts empty; the first category brings the matrix into being.
@@ -331,6 +351,13 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
 
   # Editing needs the newest version on screen: an older one is a statement of
   # record, whether or not it was ever published.
+  # The company admin and the Governance Managers: who answers matrix comments.
+  def matrix_owners
+    ids = company.company_users.where(gov_manager: true).pluck(:user_id) +
+      company.company_users.where(role: CompanyUser::ROLES[:company_admin]).pluck(:user_id)
+    User.where(id: ids.uniq).to_a
+  end
+
   def can_edit_matrix?
     can_manage_authorities? && @matrix.present? && @matrix.latest_version?
   end

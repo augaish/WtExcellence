@@ -30,6 +30,8 @@ class Dashboard::CustomerCommitmentsController < Dashboard::BaseController
     end
 
     @commitment.record_acceptance!(status, by: current_user, note: params[:acceptance_note])
+    Notify.people([ @commitment.owner&.user, @commitment.created_by ], kind: "commitment_acceptance_recorded", source: @commitment,
+      link_path: dashboard_customer_commitment_path(@commitment), actor: current_user, title: @commitment.title, status: @commitment.acceptance_label)
     redirect_to dashboard_customer_commitment_path(@commitment), notice: t("commitment_depth.flash.acceptance_recorded"), status: :see_other
   end
 

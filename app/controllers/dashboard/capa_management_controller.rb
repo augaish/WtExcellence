@@ -631,6 +631,10 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
       assignment_notice = handle_assigned_to_open_transition!(capa, old_status, capa.status)
     end
     capa.reload
+    if capa.status == "closed" && old_status != "closed"
+      Notify.people(capa.company_users.includes(:user).map(&:user) + [ capa.created_by ], kind: "capa_closed", source: capa,
+        link_path: dashboard_capa_management_show_path(capa), actor: current_user, capa_code: capa.friendly_code.presence || capa.title)
+    end
 
     # Log audit action
     AuditLogService.log_action(
@@ -2414,6 +2418,12 @@ class Dashboard::CapaManagementController < Dashboard::BaseController
 
     comment = @capa_action.comments.build(body: body, user: current_user, parent: parent)
     if comment.save
+      # Everyone on the action, and the CAPA's manager, hears about the comment; the reply's author too.
+      audience = @capa_action.company_users.includes(:user).map(&:user) + NotificationService.capa_reviewers(@capa)
+      audience << parent.user if parent
+      Notify.people(audience, kind: "capa_action_comment_added", source: @capa,
+        link_path: dashboard_capa_action_show_path(@capa, @capa_action), actor: current_user,
+        capa_code: @capa.friendly_code.presence || @capa.title, action_title: @capa_action.title)
       comment_json = {
         id: comment.id,
         body: comment.body,

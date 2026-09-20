@@ -165,6 +165,7 @@ class PpStageTransitionService
       entity_type: "pp_record", entity_id: @record.id,
       payload: { from: from, to: to, reason: reason }
     )
+    DocumenterNotifier.notify_stage_change(@record, from: from, to: to, direction: direction, reason: reason, actor: @user)
 
     @record
   end

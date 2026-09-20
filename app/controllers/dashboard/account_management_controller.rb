@@ -498,6 +498,9 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     end
 
     membership.update!(flag => !membership.public_send(flag))
+    Notify.person(membership.user, kind: "account_designation_changed", source: membership.company, link_path: dashboard_overview_path,
+      actor: current_user, designation: t("access_page.designation_names.#{flag}"),
+      state: (membership.public_send(flag) ? t("account_notices.granted") : t("account_notices.removed")))
     AuditLogService.log_action(actor_user: current_user, company: membership.company, action: "TOGGLE_#{flag.to_s.upcase}",
       entity_type: "user", entity_id: membership.user_id, payload: { flag => membership.public_send(flag) })
     key = membership.public_send(flag) ? "#{flag}_set" : "#{flag}_unset"
@@ -569,7 +572,8 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
     # Update company role if provided and user has company
     if new_company_role && user.company_user
       if user.company_user.update(role: new_company_role)
-        # Success - both updates completed
+        Notify.person(user, kind: "account_role_changed", source: user.company_user.company, link_path: dashboard_overview_path,
+          actor: current_user, role: t("user_import.roles.#{new_company_role}", default: new_company_role.to_s.humanize))
       else
         render json: {
           success: false,
@@ -653,6 +657,8 @@ class Dashboard::AccountManagementController < Dashboard::BaseController
 
     old_status = user.is_active?
     if user.update(is_active: new_status)
+      Notify.person(user, kind: "account_status_changed", source: user.company, link_path: dashboard_overview_path, actor: current_user,
+        state: (new_status ? t("account_notices.activated") : t("account_notices.deactivated"))) if old_status != new_status
       # Log audit action
       AuditLogService.log_action(
         actor_user: current_user,

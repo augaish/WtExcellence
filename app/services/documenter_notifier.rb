@@ -22,6 +22,34 @@ class DocumenterNotifier
     nil
   end
 
+  # A record moved: the people who act at the new stage are told, and the
+  # owner is told whenever someone else moved it. A return carries its reason.
+  def self.notify_stage_change(record, from:, to:, direction:, reason:, actor:)
+    return if PpStage.terminal?(to)
+
+    path = Rails.application.routes.url_helpers.dashboard_documenter_record_path(record)
+    kind = direction == "backward" ? "record_returned" : "record_stage_entered"
+    recipients = actors_at(record, to) + [ record.owner_user ]
+    Notify.people(recipients, kind: kind, source: record, link_path: path, actor: actor,
+      title: record.display_title, stage: PpStage.label(to), from_stage: (from ? PpStage.label(from) : ""), reason: reason.to_s)
+  rescue => e
+    Rails.logger.warn "Stage-change notification failed: #{e.class}: #{e.message}"
+  end
+
+  # Who acts at a stage: the verifier, the owning unit's head, or the P&P
+  # managers. Approval stages tell their approvers through the approval itself.
+  def self.actors_at(record, stage)
+    case PpStage.actor_of(stage)
+    when :verifier then [ record.verifier_user ]
+    when :unit_head then [ record.owning_unit_head ]
+    when :pp_manager, :publisher
+      ids = record.company.company_users.where(pp_manager: true).pluck(:user_id) +
+        record.company.company_users.where(role: CompanyUser::ROLES[:company_admin]).pluck(:user_id)
+      User.where(id: ids.uniq).to_a
+    else []
+    end.compact
+  end
+
   # Publication is for everyone in the company.
   def self.notify_published(record)
     record.company.users.find_each { |user| notify(recipient: user, record: record, kind: "record_published") }

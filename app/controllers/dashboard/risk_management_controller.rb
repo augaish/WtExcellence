@@ -55,6 +55,8 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     end
 
     @risk.accept!(by: current_user, rationale: params[:acceptance_rationale], expires_on: params[:acceptance_expires_on].presence)
+    Notify.people([ @risk.owner&.user, @risk.control_owner&.user ], kind: "risk_accepted", source: @risk,
+      link_path: dashboard_risk_management_path(@risk), actor: current_user, title: @risk.title)
     redirect_to dashboard_risk_management_path(@risk), notice: t("risk_depth.flash.accepted"), status: :see_other
   rescue ArgumentError => e
     redirect_to dashboard_risk_management_path(@risk), alert: e.message, status: :see_other
