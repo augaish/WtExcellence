@@ -101,6 +101,18 @@
             <% end %>
 
             <!-- Sort Dropdown Button -->
+            <% if @levels&.any? %>
+              <%# Browse the unit folders by organisational level or group, flat, wherever they sit in the tree. %>
+              <%= form_with url: library_path, method: :get, class: "flex items-center gap-2", data: { turbo_frame: "folders_grid" } do %>
+                <%= hidden_field_tag :company_id, params[:company_id] if params[:company_id].present? %>
+                <%= select_tag :level, options_for_select([ [ t('library_browse.all_levels'), "" ] ] + @levels.map { |l| [ t('library_browse.level', n: l), l ] }, @level),
+                      class: "border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm min-h-[44px]", onchange: "this.form.requestSubmit()", "aria-label": t('library_browse.by_level') %>
+                <% if @groups.any? %>
+                  <%= select_tag :group_id, options_for_select([ [ t('library_browse.all_groups'), "" ] ] + @groups.map { |g| [ g.display_name, g.id ] }, @group_id),
+                        class: "border border-gray-300 rounded-lg px-3 py-2 text-xs sm:text-sm min-h-[44px]", onchange: "this.form.requestSubmit()", "aria-label": t('library_browse.by_group') %>
+                <% end %>
+              <% end %>
+            <% end %>
             <div class="relative" data-controller="dropdown">
                 <button data-action="click->dropdown#toggle" class="text-[#5C3984] bg-white flex items-center <%= rtl? ? 'flex-row-reverse space-x-reverse' : '' %> space-x-2 px-3 sm:px-4 py-3 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium min-h-[44px] text-xs sm:text-sm">
                     <%= image_tag asset_path('folder-sort-icon.svg'), class: "w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 max-w-full h-auto" %>

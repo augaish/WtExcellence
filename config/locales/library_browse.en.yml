@@ -1,0 +1,7 @@
+en:
+  library_browse:
+    by_level: "Browse by organisational level"
+    by_group: "Browse by group"
+    all_levels: "All folders"
+    level: "Level %{n} units"
+    all_groups: "All groups"

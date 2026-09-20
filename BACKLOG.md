@@ -173,8 +173,8 @@ processes; nothing to build until there is content to hang on it.
 - Entries are kept for as long as the company exists; no retention limit yet.
 
 ## Test round (19 Sep) — left open
-- Items 8 (code length 15), 9 (numbering not reflected), 10 (level 3 from the chart), 11–14 (process architecture fields) and 16 (library folders per unit) wait for the test team's precise cases.
-- Notification "not working during stage moves" needs one concrete case (who moved what, who got no notice).
+- Items 8–14 and 16 were clarified and built on 20 Sep (Arabic-header import, code follows the number, level rollups, KPI rows, description in the card, diagram polish, library browse by level).
+- Notifications: the team says they work but not for every movement; still needs one concrete missing case before changing anything.
 - Delegated admin's 500 on the Excel user import: could not reproduce locally (200 as delegated admin with the add-users permission); needs the server log line.
 
 ## Review 03 — status

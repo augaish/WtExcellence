@@ -245,7 +245,7 @@ class DiagramBendTest < ActionDispatch::IntegrationTest
     sign_in admin
     get dashboard_pp_diagram_path(diagram)
     assert_select "circle.diagram-bend[data-flow-id=?]", flow.id
-    assert_match(/ C /, response.body, "a straight arrow is a smooth curve between the boxes")
+    assert_match(/ H \d+ V \d+ H /, response.body, "a straight arrow is an elbow between the boxes")
 
     patch bend_flow_dashboard_pp_diagram_path(diagram, flow_id: flow.id), params: { dx: 0, dy: -60 }, as: :json
     assert_response :no_content

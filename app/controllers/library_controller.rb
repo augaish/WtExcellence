@@ -31,6 +31,18 @@ class LibraryController < DashboardController
     if company
       @company = company
       @folders = Folder.where(company_id: company.id).where.not(company_id: nil).root_folders
+      # Browse by organisation instead of by tree: the folders of every unit at
+      # a level, or in a group, wherever they sit in the structure.
+      @level = params[:level].presence&.to_i
+      @group_id = params[:group_id].presence
+      if @level || @group_id
+        units = company.org_units.active
+        units = units.where(level: @level) if @level
+        units = units.where(org_group_id: @group_id) if @group_id
+        @folders = Folder.where(company_id: company.id, org_unit_id: units.select(:id))
+      end
+      @levels = company.org_units.active.distinct.pluck(:level).sort
+      @groups = company.org_groups.ordered.to_a
     else
       @folders = Folder.none
     end

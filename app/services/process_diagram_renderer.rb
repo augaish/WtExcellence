@@ -13,6 +13,9 @@ class ProcessDiagramRenderer
   NODE_HEIGHT = 60
   H_GAP = 60
   PADDING = 20
+  # The external participant is its own pool: a gap and its own border keep it
+  # apart from the organisation's lanes.
+  POOL_GAP = 18
 
   # House palette.
   PRIMARY = "#5C3984".freeze
@@ -79,7 +82,15 @@ class ProcessDiagramRenderer
   end
 
   def canvas_height
-    (@pools.size * LANE_HEIGHT) + (PADDING * 2)
+    (@pools.size * LANE_HEIGHT) + (PADDING * 2) + (external_index ? POOL_GAP : 0)
+  end
+
+  def external_index
+    @pools.index(PpDiagramElement::EXTERNAL_POOL)
+  end
+
+  def lane_y(index)
+    PADDING + index * LANE_HEIGHT + (external_index && index >= external_index ? POOL_GAP : 0)
   end
 
   def node_x(column)
@@ -87,7 +98,7 @@ class ProcessDiagramRenderer
   end
 
   def node_y(lane)
-    PADDING + lane * LANE_HEIGHT + (LANE_HEIGHT - NODE_HEIGHT) / 2
+    lane_y(lane) + (LANE_HEIGHT - NODE_HEIGHT) / 2
   end
 
   def defs
@@ -111,13 +122,13 @@ class ProcessDiagramRenderer
 
   def lanes_svg
     @pools.each_with_index.map do |pool, index|
-      y = PADDING + index * LANE_HEIGHT
+      y = lane_y(index)
       external = (pool == PpDiagramElement::EXTERNAL_POOL)
       label = external ? I18n.t("architect.external_pool") : pool
       <<~SVG
         <g>
           <rect x="#{PADDING}" y="#{y}" width="#{canvas_width - PADDING * 2}" height="#{LANE_HEIGHT}"
-                fill="#{index.even? ? '#FFFFFF' : '#FAFAFC'}" stroke="#{BORDER}"/>
+                fill="#{index.even? ? '#FFFFFF' : '#FAFAFC'}" stroke="#{external ? PRIMARY : BORDER}" stroke-width="#{external ? 1.5 : 1}"/>
           <rect x="#{PADDING}" y="#{y}" width="#{LANE_LABEL_WIDTH}" height="#{LANE_HEIGHT}"
                 fill="#{external ? TINT : '#F7F7FD'}" stroke="#{BORDER}"/>
           <text x="#{PADDING + LANE_LABEL_WIDTH / 2}" y="#{y + LANE_HEIGHT / 2}"
@@ -163,6 +174,7 @@ class ProcessDiagramRenderer
     <<~SVG
       <g class="diagram-node" data-element-id="#{element.id}" data-x="#{x}" data-width="#{NODE_WIDTH}" style="cursor: grab;">
         #{body}
+        #{element.task? ? task_glyph(element.element_type, x + 6, y + 6) : ''}
         <text x="#{cx}" y="#{element.event? || element.gateway? ? cy + NODE_HEIGHT / 2 + 14 : cy - 4}"
               text-anchor="middle" dominant-baseline="middle"
               font-size="11" font-weight="600" fill="#{TEXT}">#{label}</text>
@@ -171,7 +183,28 @@ class ProcessDiagramRenderer
     SVG
   end
 
+  # The BPMN task marker in the box corner: person, hand, gear, envelope,
+  # table, script. Small strokes, so they print at any size.
+  def task_glyph(type, x, y)
+    stroke = %(fill="none" stroke="#{PRIMARY}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round")
+    shape = case type
+    when "userTask" then %(<circle cx="#{x + 6}" cy="#{y + 4}" r="2.5" #{stroke}/><path d="M #{x + 1} #{y + 12} Q #{x + 6} #{y + 6} #{x + 11} #{y + 12}" #{stroke}/>)
+    when "manualTask" then %(<path d="M #{x + 2} #{y + 7} h 8 M #{x + 2} #{y + 4} h 7 M #{x + 2} #{y + 10} h 7 M #{x + 2} #{y + 4} v 6" #{stroke}/>)
+    when "serviceTask" then %(<circle cx="#{x + 6}" cy="#{y + 6}" r="3" #{stroke}/><path d="M #{x + 6} #{y} v 2 M #{x + 6} #{y + 10} v 2 M #{x} #{y + 6} h 2 M #{x + 10} #{y + 6} h 2" #{stroke}/>)
+    when "sendTask", "receiveTask" then %(<rect x="#{x + 1}" y="#{y + 2}" width="10" height="8" rx="1" #{stroke}/><path d="M #{x + 1} #{y + 2} l 5 4 l 5 -4" #{stroke}/>)
+    when "businessRuleTask" then %(<rect x="#{x + 1}" y="#{y + 2}" width="10" height="8" #{stroke}/><path d="M #{x + 1} #{y + 5} h 10 M #{x + 4} #{y + 5} v 5" #{stroke}/>)
+    when "scriptTask" then %(<path d="M #{x + 3} #{y + 2} h 7 M #{x + 2} #{y + 5} h 7 M #{x + 3} #{y + 8} h 7 M #{x + 2} #{y + 11} h 7" #{stroke}/>)
+    else ""
+    end
+    %(<g aria-hidden="true">#{shape}</g>)
+  end
+
+  # Arrows leave the right edge of a box and enter the left edge of the next,
+  # each in its own vertical channel so two arrows never share a line. A
+  # backward arrow (to an earlier column) dips below the lane instead of
+  # cutting through the boxes in between.
   def flows_svg
+    channels = Hash.new(0)
     @flows.map do |flow|
       from = @positions[flow.from_element_id]
       to = @positions[flow.to_element_id]
@@ -181,6 +214,11 @@ class ProcessDiagramRenderer
       y1 = node_y(from[:lane]) + NODE_HEIGHT / 2
       x2 = node_x(to[:column])
       y2 = node_y(to[:lane]) + NODE_HEIGHT / 2
+      backward = to[:column] <= from[:column]
+      gap_key = [ from[:column], to[:column] ].min
+      slot = channels[gap_key]
+      channels[gap_key] += 1
+      offset = ((slot + 1) / 2) * 8 * (slot.odd? ? 1 : -1)
 
       # A sequence flow that crosses pools is a modelling error — draw it red so
       # the mistake is visible, matching what the evaluator will report.
@@ -191,7 +229,7 @@ class ProcessDiagramRenderer
 
       # The straight midpoint is where the bend handle rests; a bent arrow
       # passes through that point moved by the offset the user dragged.
-      mid_x = (x1 + x2) / 2
+      mid_x = (x1 + x2) / 2 + offset
       mid_y = (y1 + y2) / 2
       if flow.bent?
         bx = mid_x + flow.bend_dx
@@ -201,8 +239,15 @@ class ProcessDiagramRenderer
         # placed twice as far out).
         path = "M #{x1} #{y1} Q #{2 * bx - mid_x} #{2 * by - mid_y}, #{x2} #{y2}"
         handle_x, handle_y = bx, by
+      elsif backward
+        # Out of the source's right edge, down under the lane, back along it,
+        # and up into the target's left edge.
+        below = [ node_y(from[:lane]), node_y(to[:lane]) ].max + NODE_HEIGHT + 14 + slot * 8
+        path = "M #{x1} #{y1} H #{x1 + 14} V #{below} H #{x2 - 14} V #{y2} H #{x2}"
+        handle_x, handle_y = (x1 + x2) / 2, below
       else
-        path = "M #{x1} #{y1} C #{mid_x} #{y1}, #{mid_x} #{y2}, #{x2} #{y2}"
+        # An elbow: straight out, a vertical run in the channel, straight in.
+        path = "M #{x1} #{y1} H #{mid_x} V #{y2} H #{x2}"
         handle_x, handle_y = mid_x, mid_y
       end
 

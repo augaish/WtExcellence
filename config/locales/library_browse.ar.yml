@@ -1,0 +1,7 @@
+ar:
+  library_browse:
+    by_level: "تصفح حسب المستوى التنظيمي"
+    by_group: "تصفح حسب المجموعة"
+    all_levels: "كل المجلدات"
+    level: "وحدات المستوى %{n}"
+    all_groups: "كل المجموعات"
