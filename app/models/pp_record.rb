@@ -472,11 +472,15 @@ class PpRecord < ApplicationRecord
     end
     if code.blank?
       self.code = RecordCodeService.build(self)
-    elsif !completed? && (sequence_number_changed? || pp_process_id_changed? || owner_org_unit_id_changed?)
-      # The number or the place in the architecture changed on an unpublished
-      # record: the code says the new number, keeping its version tail.
+    elsif persisted? && !completed? && sequence_number_changed? && generated_code?
+      # The number changed on an unpublished record: a generated code says the
+      # new number, keeping its version tail. A code typed by hand is left alone.
       self.code = RecordCodeService.build(self)
     end
+  end
+
+  def generated_code?
+    code.to_s.start_with?("#{RecordCodeService::PREFIXES.fetch(record_type.to_s, 'REC')}-")
   end
 
   public

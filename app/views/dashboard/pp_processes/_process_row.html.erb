@@ -36,11 +36,12 @@
           <span class="px-2 py-0.5 text-[11px] font-medium rounded-full bg-gray-100 text-gray-500"><%= t('org_structure.inactive') %></span>
         <% end %>
       </div>
-      <% if process.owner_org_unit || process.objective.present? %>
+      <% rollup = process.rollup_label %>
+      <% if process.owner_org_unit || process.objective.present? || rollup %>
         <p class="mt-0.5 text-xs text-[#797C81] truncate">
           <% if process.owner_org_unit %><%= t('process_architecture.owner') %>: <%= process.owner_org_unit.display_name %><% end %>
-          <% if (rollup = process.rollup_label) %> · <%= t('process_architecture.rollup_duration', duration: rollup) %><% end %>
-          <% if process.owner_org_unit && process.objective.present? %> · <% end %>
+          <% if rollup %><%= " · " if process.owner_org_unit %><%= t('process_architecture.rollup_duration', duration: rollup) %><% end %>
+          <% if (process.owner_org_unit || rollup) && process.objective.present? %> · <% end %>
           <%= truncate(process.objective, length: 90) %>
         </p>
       <% end %>
