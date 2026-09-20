@@ -47,6 +47,11 @@
     <%= render "dashboard/pp_records/ownership_fields", f: f, org_units: org_units, company_users: company_users,
           input_class: input_class, label_class: label_class, hint_class: hint_class, unit_label: t('pp_records.owner_unit') %>
     <div>
+      <%= f.label :sequence_number, t('pp_records.sequence_number'), class: label_class %>
+      <%= f.number_field :sequence_number, min: 1, step: 1, class: input_class %>
+      <p class="<%= hint_class %>"><%= t('pp_records.sequence_number_hint') %></p>
+    </div>
+    <div>
       <%= f.label :trigger_text, t('process_architecture.trigger'), class: label_class %>
       <%= f.text_field :trigger_text, class: input_class %>
       <p class="<%= hint_class %>"><%= t('process_architecture.trigger_hint') %></p>

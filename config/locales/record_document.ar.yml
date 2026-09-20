@@ -3,6 +3,7 @@ ar:
     sections:
       definitions: التعريفات العامة والاختصارات
       form_fields: "النموذج"
+      kpis: "مؤشرات الأداء الرئيسية"
       body: المحتوى
       scope: النطاق
       clauses: البنود
@@ -51,6 +52,11 @@ ar:
       forms_used: النماذج المستخدمة
       kpis: مؤشرات قياس الإجراء
     columns:
+      name: "المؤشر"
+      target: "المستهدف"
+      unit: "الوحدة"
+      method: "طريقة القياس"
+      frequency: "الدورية"
       term: المصطلح
       abbreviation: الاختصار
       definition: التعريف

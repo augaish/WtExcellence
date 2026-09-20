@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_19_213726) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_20_083503) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -997,6 +997,20 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_19_213726) do
     t.index ["pp_record_id"], name: "index_pp_record_clauses_on_pp_record_id"
   end
 
+  create_table "pp_record_kpis", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "pp_record_id", null: false
+    t.string "name_en", limit: 250
+    t.string "name_ar", limit: 250
+    t.string "target", limit: 100
+    t.string "unit", limit: 50
+    t.string "measurement_method", limit: 500
+    t.string "frequency", limit: 20
+    t.integer "sort_order", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["pp_record_id"], name: "index_pp_record_kpis_on_pp_record_id"
+  end
+
   create_table "pp_record_links", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "pp_record_id", null: false
     t.uuid "linked_record_id", null: false
@@ -1681,6 +1695,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_19_213726) do
   add_foreign_key "pp_processes", "users", column: "owner_user_id"
   add_foreign_key "pp_record_clauses", "pp_record_clauses", column: "parent_id", on_delete: :cascade
   add_foreign_key "pp_record_clauses", "pp_records"
+  add_foreign_key "pp_record_kpis", "pp_records"
   add_foreign_key "pp_record_links", "pp_records"
   add_foreign_key "pp_record_links", "pp_records", column: "linked_record_id"
   add_foreign_key "pp_record_participants", "org_units"

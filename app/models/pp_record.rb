@@ -106,6 +106,8 @@ class PpRecord < ApplicationRecord
   has_many :clauses, -> { ordered }, class_name: "PpRecordClause", foreign_key: "pp_record_id", dependent: :destroy
   # What a form asks for: its fields and tables, in order.
   has_many :form_fields, -> { ordered }, class_name: "PpFormField", foreign_key: "pp_record_id", dependent: :destroy
+  # What a procedure is measured by.
+  has_many :kpi_rows, -> { ordered }, class_name: "PpRecordKpi", foreign_key: "pp_record_id", dependent: :destroy
   has_many :steps, -> { ordered }, class_name: "PpProcessStep", foreign_key: "pp_record_id", dependent: :destroy
   has_many :operational_authorities, -> { ordered }, class_name: "PpProcessAuthority", foreign_key: "pp_record_id", dependent: :destroy
   has_many :matrix_reviews, class_name: "AuthorityMatrixReview", foreign_key: "matrix_id", dependent: :destroy
@@ -468,6 +470,26 @@ class PpRecord < ApplicationRecord
     if sequence_number.blank? && (code.blank? || new_record?)
       self.sequence_number = RecordCodeService.new(self).send(procedure? && pp_process ? :next_procedure_sequence : :next_type_sequence)
     end
-    self.code = RecordCodeService.build(self) if code.blank?
+    if code.blank?
+      self.code = RecordCodeService.build(self)
+    elsif !completed? && (sequence_number_changed? || pp_process_id_changed? || owner_org_unit_id_changed?)
+      # The number or the place in the architecture changed on an unpublished
+      # record: the code says the new number, keeping its version tail.
+      self.code = RecordCodeService.build(self)
+    end
+  end
+
+  public
+
+  # The procedure's duration in minutes: the steps' durations when they have
+  # any, otherwise the typed total.
+  def duration_minutes
+    computed_total_minutes || typed_total_minutes
+  end
+
+  def typed_total_minutes
+    return nil if total_time_value.blank?
+
+    (total_time_value.to_f * PpProcessStep::MINUTES_PER_UNIT.fetch(total_time_unit.presence || "hours", 60)).round
   end
 end

@@ -223,6 +223,8 @@ Rails.application.routes.draw do
       member { post :open_next_version }
       resources :clauses, only: [ :create, :update, :destroy ], controller: "pp_record_clauses"
       patch "form_fields/reorder", to: "pp_form_fields#reorder", as: :reorder_form_fields
+      patch "kpis/reorder", to: "pp_record_kpis#reorder", as: :reorder_kpis
+      resources :kpis, only: [ :create, :update, :destroy ], controller: "pp_record_kpis"
       resources :form_fields, only: [ :create, :update, :destroy ], controller: "pp_form_fields"
       post "clauses/:clause_id/comments", to: "pp_clause_comments#create", as: :clause_comments
       patch "comments/:id/resolve", to: "pp_clause_comments#resolve", as: :resolve_comment

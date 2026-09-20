@@ -22,7 +22,7 @@
   <% rows << [ t('process_architecture.related_policies'), record.related_policies.map { |p| "#{p.code} · #{p.display_title}" }.join(", ") ] %>
   <% rows << [ t('process_architecture.technical_systems'), record.technical_systems ] %>
   <% rows << [ t('process_architecture.forms_used'), record.forms_used.map { |p| "#{p.code} · #{p.display_title}" }.join(", ") ] %>
-  <% rows << [ t('process_architecture.kpis'), record.kpis ] %>
+  <% rows << [ t('process_architecture.kpis'), (record.kpi_rows.any? ? nil : record[:kpis]) ] %>
 <% elsif record.service? %>
   <% rows << [ t('pp_records.service_type'), record.service_type_label ] %>
   <% rows << [ t('pp_records.requirements'), record.requirements ] %>

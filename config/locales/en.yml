@@ -926,6 +926,8 @@ en:
     message: "Use at least %{min} characters with both letters and digits."
     placeholder: "At least %{min} characters, letters and digits"
   pp_records:
+    sequence_number: "Procedure number in its process"
+    sequence_number_hint: "The last part of the architecture number and of the code (Level 0.1.2.number). Changing it renumbers the code while the record is unpublished."
     language: "Document language"
     language_auto: "Decide from the title (Arabic title → Arabic)"
     language_hint: "The document, its PDF and its Word file are written and laid out in this language."
@@ -1149,6 +1151,7 @@ en:
         record_removed: "%{title} removed from this package."
         conflict: "%{title} is already in \"%{package}\". Use Re-assign to move it."
   process_architecture:
+    rollup_duration: "Duration from below: %{duration}"
     title: "Process Architecture"
     subtitle: "Your process map: categories, process areas, and processes."
     add_process: "Add process"

@@ -83,6 +83,9 @@ class RecordVersionService
       decision.assignments.each { |holder| copy.assignments.create!(holder.attributes.slice(*COPIED_HOLDER)) }
     end
 
+    from.kpi_rows.each do |kpi|
+      to.kpi_rows.create!(kpi.attributes.slice("name_en", "name_ar", "target", "unit", "measurement_method", "frequency", "sort_order"))
+    end
     from.form_fields.each do |field|
       to.form_fields.create!(field.attributes.slice("position", "label_en", "label_ar", "field_type", "required", "options", "columns", "hint"))
     end

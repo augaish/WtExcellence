@@ -1,0 +1,7 @@
+<%# Inputs of one KPI row. Locals: f, kpi, input %>
+<%= f.text_field :name_en, value: kpi.name_en, placeholder: t('kpis.name') + " (EN)", class: input %>
+<%= f.text_field :name_ar, value: kpi.name_ar, dir: "rtl", placeholder: t('kpis.name') + " (AR)", class: input %>
+<%= f.select :frequency, PpRecordKpi::FREQUENCIES.map { |fr| [ t("kpis.frequencies.#{fr}"), fr ] }, { include_blank: t('kpis.frequency'), selected: kpi.frequency }, class: input %>
+<%= f.text_field :target, value: kpi.target, placeholder: t('kpis.target'), class: input %>
+<%= f.text_field :unit, value: kpi.unit, placeholder: t('kpis.unit'), class: input %>
+<%= f.text_field :measurement_method, value: kpi.measurement_method, placeholder: t('kpis.method'), class: input %>

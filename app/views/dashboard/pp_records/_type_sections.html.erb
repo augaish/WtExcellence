@@ -36,6 +36,7 @@
 
 <% when "procedure" %>
   <%= render "dashboard/pp_records/card", record: record %>
+  <%= render "dashboard/pp_records/kpis", record: record %>
   <div class="<%= box %>">
     <h2 class="<%= heading %>"><%= t('pp_records.show_sections.steps') %></h2>
     <% steps = record.steps.to_a %>

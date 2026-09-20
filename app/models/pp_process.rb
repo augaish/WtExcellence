@@ -72,6 +72,30 @@ class PpProcess < ApplicationRecord
     durations.sum
   end
 
+  # The duration rolled up from below: a level-2 process is the sum of its
+  # procedures, a level-1 process the sum of its level-2 processes. Nil when
+  # nothing below carries a duration. The procedures' own totals come from
+  # their steps.
+  def rollup_minutes
+    minutes = if level.to_i >= 2
+      PpRecord.active.latest.where(pp_process_id: id, record_type: "procedure").filter_map(&:duration_minutes)
+    else
+      children.filter_map(&:rollup_minutes)
+    end
+    minutes.empty? ? nil : minutes.sum
+  end
+
+  # "3.5 h" / "2 d", in the largest unit that reads well.
+  def rollup_label(locale = I18n.locale)
+    minutes = rollup_minutes
+    return nil if minutes.nil?
+
+    unit = minutes >= 480 ? "days" : (minutes >= 60 ? "hours" : "minutes")
+    value = (minutes.to_f / PpProcessStep::MINUTES_PER_UNIT[unit]).round(1)
+    value = value.to_i if value == value.to_i
+    "#{value} #{I18n.t("process_architecture.time_units.#{unit}", locale: locale)}"
+  end
+
   # The computed total expressed in the unit the process card uses, so the card
   # reads the same way whether the steps were entered in minutes or days.
   def computed_total_in(unit)

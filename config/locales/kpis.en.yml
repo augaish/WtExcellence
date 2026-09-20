@@ -1,0 +1,22 @@
+en:
+  kpis:
+    title: "Key performance indicators"
+    hint: "One row per indicator: what is measured, the target and its unit, how and how often. Printed as a table in the document."
+    none: "No indicators yet. Add the first one below."
+    add: "Add indicator"
+    name: "Indicator"
+    target: "Target"
+    unit: "Unit"
+    method: "How it is measured"
+    frequency: "Frequency"
+    frequencies:
+      monthly: "Monthly"
+      quarterly: "Quarterly"
+      semiannual: "Every six months"
+      annual: "Yearly"
+    errors:
+      name_required: "Enter the indicator name in English or Arabic."
+    flash:
+      saved: "Indicator saved."
+      deleted: "Indicator removed."
+      not_editable: "This procedure cannot be changed now."

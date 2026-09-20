@@ -3,6 +3,7 @@ module RecordDocumentHelper
   # rather than in the assembler, because this is a presentation choice: the
   # assembler decides what a section contains, this decides how it is laid out.
   TABLE_COLUMNS = {
+    "kpis" => %i[name target unit method frequency],
     "definitions" => %i[term abbreviation definition],
     "steps" => %i[position activity description responsible duration system],
     "service_levels" => %i[service metric target measurement coverage remedy attainment status],

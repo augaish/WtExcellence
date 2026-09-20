@@ -69,6 +69,7 @@ class RecordDocument
       clauses_section,
       form_fields_section,
       process_card_section,
+      kpis_section,
       service_card_section,
       diagram_section,
       steps_section,
@@ -95,7 +96,11 @@ class RecordDocument
     section("definitions", :table, terms)
   end
 
+  # A procedure's description is its purpose, printed inside the procedure
+  # card rather than as a separate Content section.
   def body_section
+    return nil if record.procedure?
+
     section("body", :prose, record.description)
   end
 
@@ -194,9 +199,19 @@ class RecordDocument
       "related_policies" => record.related_policies.map { |r| r.display_title(locale) }.join(", "),
       "technical_systems" => record.technical_systems,
       "forms_used" => record.forms_used.map { |r| r.display_title(locale) }.join(", "),
-      "kpis" => record.kpis
+      "kpis" => (record.kpi_rows.any? ? nil : record[:kpis])
     }.compact_blank
     section("process_card", :fields, fields)
+  end
+
+  # KPI rows of a procedure: name, target, unit, how and how often measured.
+  def kpis_section
+    return nil unless record.procedure? && record.kpi_rows.any?
+
+    rows = record.kpi_rows.map do |kpi|
+      { name: kpi.name(locale), target: kpi.target, unit: kpi.unit, method: kpi.measurement_method, frequency: kpi.frequency_label(locale) }
+    end
+    section("kpis", :table, rows)
   end
 
   # The total the steps add up to wins over any typed value: the document must

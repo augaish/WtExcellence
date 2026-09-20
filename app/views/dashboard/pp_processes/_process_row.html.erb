@@ -39,6 +39,7 @@
       <% if process.owner_org_unit || process.objective.present? %>
         <p class="mt-0.5 text-xs text-[#797C81] truncate">
           <% if process.owner_org_unit %><%= t('process_architecture.owner') %>: <%= process.owner_org_unit.display_name %><% end %>
+          <% if (rollup = process.rollup_label) %> · <%= t('process_architecture.rollup_duration', duration: rollup) %><% end %>
           <% if process.owner_org_unit && process.objective.present? %> · <% end %>
           <%= truncate(process.objective, length: 90) %>
         </p>
