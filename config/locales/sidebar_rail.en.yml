@@ -1,0 +1,10 @@
+en:
+  sidebar_rail:
+    menu: "Main menu"
+    search: "Find in menu…"
+    no_match: "Nothing matches."
+    pin: "Keep menu open"
+    unpin: "Collapse menu"
+    waiting:
+      one: "1 item waiting for you"
+      other: "%{count} items waiting for you"

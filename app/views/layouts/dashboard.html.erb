@@ -76,17 +76,17 @@
                 --target-width: 67%;
             }
 
-            /* Sidebar collapse styles */
-            #sidebar.w-0 {
-                width: 0 !important;
-                min-width: 0 !important;
-                padding: 0 !important;
-                border: none !important;
-            }
-
-            #sidebar.w-0 * {
-                visibility: hidden;
-            }
+            /* The sidebar rail: icons only until it is hovered, focused or pinned. */
+            #sidebar { width: 4.5rem; transition: width 240ms cubic-bezier(.22, 1, .36, 1); }
+            #sidebar[data-expanded="true"] { width: 16rem; }
+            #sidebar .rail-label { opacity: 0; white-space: nowrap; transition: opacity 120ms; }
+            #sidebar[data-expanded="true"] .rail-label { opacity: 1; transition-delay: 70ms; }
+            #sidebar .rail-heading { height: 0; overflow: hidden; margin: 0; opacity: 0; transition: opacity 120ms; }
+            #sidebar[data-expanded="true"] .rail-heading { height: auto; margin-bottom: .5rem; opacity: 1; }
+            #sidebar:not([data-expanded="true"]) .rail-divider { border-top: 1px solid #E3E3E3; margin: .5rem .75rem; }
+            /* The count sits on the icon only while collapsed; expanded, it sits beside the label. */
+            #sidebar[data-expanded="true"] .rail-badge { display: none; }
+            @media (prefers-reduced-motion: reduce) { #sidebar, #sidebar .rail-label, #sidebar .rail-heading { transition: none; } }
 
             /* Dialog styling - centered for both LTR and RTL */
             dialog {
@@ -216,19 +216,10 @@
                 dropdown.classList.toggle('hidden');
             }
 
+            // The sidebar is a rail now (see sidebar_rail_controller.js); the
+            // navbar button pins or unpins it.
             function toggleSidebar() {
-                const sidebar = document.getElementById('sidebar');
-                const mainContent = document.querySelector('main');
-
-                if (sidebar.classList.contains('w-64')) { // Collapse sidebar
-                    sidebar.classList.remove('w-64');
-                    sidebar.classList.add('w-0', 'overflow-hidden', 'opacity-0');
-                    mainContent.classList.add('ml-0');
-                } else { // Expand sidebar
-                    sidebar.classList.remove('w-0', 'overflow-hidden', 'opacity-0');
-                    sidebar.classList.add('w-64');
-                    mainContent.classList.remove('ml-0');
-                }
+                document.getElementById('sidebar')?.dispatchEvent(new CustomEvent('sidebar-rail:toggle'));
             }
 
 

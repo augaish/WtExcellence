@@ -19,8 +19,24 @@ module NavigationHelper
   # Items are built with this helper so every caller produces the same shape.
   # `active` is evaluated here rather than in the views, which is what let the
   # two menus drift apart in the first place.
-  def nav_item(label:, path:, icon:, active:)
-    { label: label, path: path, icon: icon, active: active }
+  def nav_item(label:, path:, icon:, active:, queue: nil)
+    { label: label, path: path, icon: icon, active: active, badge: (queue ? nav_counts[queue].to_i : 0) }
+  end
+
+  # How many items wait for this person, per kind, from the same work queue
+  # the overview shows. Computed once per page.
+  def nav_counts
+    @nav_counts ||= begin
+      company = respond_to?(:current_company) ? current_company : nil
+      if current_user && company
+        WorkQueue.new(user: current_user, company: company).items.group_by(&:kind).transform_values(&:size)
+      else
+        {}
+      end
+    rescue StandardError => e
+      Rails.logger.warn "Navigation counts failed: #{e.class}: #{e.message}"
+      {}
+    end
   end
 
   def nav_main_items
@@ -48,7 +64,7 @@ module NavigationHelper
     end
     if nav_module?(:capa) && !(current_user&.super_admin? || current_user&.delegated_admin?)
       items << nav_item(label: t("capa_management"), path: dashboard_capa_management_path,
-        icon: "capa-management-icon.svg", active: request.path.include?("capa_management"))
+        icon: "capa-management-icon.svg", active: request.path.include?("capa_management"), queue: :capa_action)
     end
     items
   end
@@ -65,7 +81,7 @@ module NavigationHelper
       items << nav_item(label: t("pp_records.title"), path: dashboard_pp_records_path,
         icon: "library-icon.svg", active: request.path.include?("pp_records") || request.path.include?("pp_packages"))
       items << nav_item(label: t("documenter.title"), path: dashboard_documenter_path,
-        icon: "calendar-03.png", active: request.path.include?("documenter"))
+        icon: "calendar-03.png", active: request.path.include?("documenter"), queue: :documenter)
       items << nav_item(label: t("evaluation.title"), path: dashboard_process_evaluations_path,
         icon: "score-start-icon.svg", active: request.path.include?("evaluation"))
     end
@@ -76,20 +92,20 @@ module NavigationHelper
     items = []
     if nav_module?(:authorities)
       items << nav_item(label: t("doa.title"), path: dashboard_authorities_path,
-        icon: "account-management-icon.svg", active: request.path.include?("authorities"))
+        icon: "account-management-icon.svg", active: request.path.include?("authorities"), queue: :authority_review)
     end
     if current_user&.can_view_governance? && module_enabled_for_current?(:risk)
       items << nav_item(label: t("risk_management"), path: dashboard_risk_management_index_path,
         icon: "score-start-icon.svg",
-        active: request.path.include?("risk_management") || request.path.include?("risk_workspaces"))
+        active: request.path.include?("risk_management") || request.path.include?("risk_workspaces"), queue: :risk)
     end
     if current_user&.can_view_governance? && module_enabled_for_current?(:vendors)
       items << nav_item(label: t("vendor_management"), path: dashboard_vendors_path,
-        icon: "account-management-icon.svg", active: request.path.include?("vendors"))
+        icon: "account-management-icon.svg", active: request.path.include?("vendors"), queue: :vendor)
     end
     if current_user&.can_view_governance? && module_enabled_for_current?(:commitments)
       items << nav_item(label: t("customer_commitments"), path: dashboard_customer_commitments_path,
-        icon: "calendar-03.png", active: request.path.include?("customer_commitments"))
+        icon: "calendar-03.png", active: request.path.include?("customer_commitments"), queue: :commitment)
     end
     items
   end

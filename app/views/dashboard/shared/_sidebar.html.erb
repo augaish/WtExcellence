@@ -1,32 +1,73 @@
+<%# The sidebar as a rail: icons only until it is hovered, focused with the
+    keyboard, or pinned open. Labels, section headings and the search box
+    appear when it expands. Counts beside an item say how much of that work
+    waits for this person. Colours and radii are the product's own. %>
 <aside id="sidebar"
-       class="hidden sm:flex sm:flex-col w-64 bg-gray-50 border-e border-gray-200 h-full overflow-y-auto overflow-x-hidden"
-       dir="<%= text_direction %>">
-  <div class="flex-1 px-3 py-5 space-y-6">
-    <% nav_sections.each do |section| %>
-      <div>
-        <p class="px-3 mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400"
-           title="<%= section[:hint] %>"><%= section[:title] %></p>
-        <nav class="space-y-1">
+       class="hidden sm:flex sm:flex-col bg-white border-e border-[#E3E3E3] h-full overflow-y-auto overflow-x-hidden flex-shrink-0"
+       dir="<%= text_direction %>" data-controller="sidebar-rail" data-expanded="false"
+       data-action="pointerenter->sidebar-rail#enter pointerleave->sidebar-rail#leave focusin->sidebar-rail#focus focusout->sidebar-rail#blur sidebar-rail:toggle->sidebar-rail#pin"
+       aria-label="<%= t('sidebar_rail.menu') %>">
+  <%# Who is signed in: initials on the rail, name and role when expanded. %>
+  <div class="flex items-center gap-3 px-4 pt-4 pb-2 min-h-[3.5rem]">
+    <span class="w-10 h-10 rounded-full bg-[#F6EEFF] text-[#5C3984] font-semibold flex items-center justify-center flex-none" aria-hidden="true">
+      <%= current_user&.name.to_s.split.map(&:first).join.upcase.first(2) %>
+    </span>
+    <span class="rail-label min-w-0">
+      <span class="block text-sm font-semibold text-[#0D1120] truncate"><%= current_user&.name %></span>
+      <span class="block text-xs text-[#797C81] truncate">
+        <% if current_user&.super_admin? %><%= t('super_admin') %>
+        <% elsif current_user&.delegated_admin? %><%= t('delegated_admin') %>
+        <% else %><%= current_user&.company&.name %><% end %>
+      </span>
+    </span>
+  </div>
+
+  <%# Search as you type over the menu; only shown expanded. %>
+  <label class="mx-3 my-2 flex items-center gap-2 h-10 rounded-lg border border-[#E3E3E3] px-3 rail-label focus-within:ring-2 focus-within:ring-[#5C3984]">
+    <svg class="w-4 h-4 text-[#797C81] flex-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input type="search" class="min-w-0 w-full bg-transparent text-sm text-[#0D1120] placeholder-[#797C81] focus:outline-none"
+           placeholder="<%= t('sidebar_rail.search') %>" aria-label="<%= t('sidebar_rail.search') %>"
+           data-sidebar-rail-target="search" data-action="input->sidebar-rail#search">
+  </label>
+
+  <div class="flex-1 px-3 py-2">
+    <% nav_sections.each_with_index do |section, index| %>
+      <div class="<%= index.positive? ? 'mt-2' : '' %>" data-sidebar-rail-target="section">
+        <% if index.positive? %><div class="rail-divider" aria-hidden="true"></div><% end %>
+        <p class="rail-heading px-3 text-[11px] font-semibold uppercase tracking-wider text-[#797C81]" title="<%= section[:hint] %>"><%= section[:title] %></p>
+        <nav class="space-y-1" aria-label="<%= section[:title] %>">
           <% section[:items].each do |item| %>
-            <%= render "dashboard/shared/nav_item", label: item[:label], path: item[:path],
-                icon: item[:icon], active: item[:active] %>
+            <%= link_to item[:path], title: item[:label], "aria-current": (item[:active] ? "page" : nil),
+                  data: { sidebar_rail_target: "item", label: item[:label].to_s.downcase },
+                  class: "group relative flex items-center gap-3 rounded-lg px-3 h-11 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] focus-visible:ring-inset #{item[:active] ? 'bg-[#F6EEFF] text-[#5C3984]' : 'text-[#797C81] hover:bg-[#F7F7FD] hover:text-[#0D1120]'}" do %>
+              <% if item[:active] %><span class="absolute inset-block-2 inset-inline-start-0 w-1 rounded-full bg-[#5C3984]"></span><% end %>
+              <span class="relative flex-none">
+                <%= image_tag asset_path(item[:icon]), alt: "", "aria-hidden": true, class: "w-5 h-5 #{item[:active] ? '' : 'opacity-70 group-hover:opacity-100'}" %>
+                <% if item[:badge].to_i.positive? %>
+                  <%# On the rail the count sits on the icon; expanded, it moves beside the label. %>
+                  <span class="rail-badge absolute -top-1.5 -end-2 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-[#5C3984] text-white text-[10px] font-semibold flex items-center justify-center"
+                        aria-label="<%= t('sidebar_rail.waiting', count: item[:badge]) %>"><%= item[:badge] %></span>
+                <% end %>
+              </span>
+              <span class="rail-label truncate flex-1"><%= item[:label] %></span>
+              <% if item[:badge].to_i.positive? %>
+                <span class="rail-label min-w-[1.25rem] h-5 px-1.5 rounded-full bg-[#5C3984] text-white text-[11px] font-semibold flex items-center justify-center" aria-hidden="true"><%= item[:badge] %></span>
+              <% end %>
+            <% end %>
           <% end %>
         </nav>
       </div>
     <% end %>
+    <p hidden class="px-3 py-2 text-xs text-[#797C81]" data-sidebar-rail-target="empty" role="status"><%= t('sidebar_rail.no_match') %></p>
   </div>
 
-  <!-- Identity footer -->
-  <div class="mt-auto border-t border-gray-200 px-5 py-4">
-    <% if current_user&.super_admin? %>
-      <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-0.5"><%= t('role') %></p>
-      <p class="text-sm font-semibold text-[#0D1120]"><%= t('super_admin') %></p>
-    <% elsif current_user&.delegated_admin? %>
-      <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-0.5"><%= t('role') %></p>
-      <p class="text-sm font-semibold text-[#0D1120]"><%= t('delegated_admin') %></p>
-    <% elsif current_user&.company %>
-      <p class="text-[11px] text-gray-400 uppercase tracking-wider mb-0.5"><%= t('company') %></p>
-      <p class="text-sm font-semibold text-[#0D1120] truncate" title="<%= current_user.company.name %>"><%= current_user.company.name %></p>
-    <% end %>
+  <%# Pin keeps the rail open; the choice is remembered in this browser. %>
+  <div class="border-t border-[#E3E3E3] px-3 py-3">
+    <button type="button" class="w-full flex items-center gap-3 rounded-lg px-3 h-10 text-sm text-[#797C81] hover:bg-[#F7F7FD] hover:text-[#0D1120] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] focus-visible:ring-inset"
+            data-sidebar-rail-target="pin" data-action="sidebar-rail#pin" aria-pressed="false" title="<%= t('sidebar_rail.pin') %>"
+            data-pin-text="<%= t('sidebar_rail.pin') %>" data-unpin-text="<%= t('sidebar_rail.unpin') %>">
+      <svg class="w-5 h-5 flex-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" data-sidebar-rail-target="pinIcon"><path d="M9 4h6l-1 5 3 3v2H7v-2l3-3z"/><path d="M12 14v6"/></svg>
+      <span class="rail-label" data-sidebar-rail-target="pinLabel"><%= t('sidebar_rail.pin') %></span>
+    </button>
   </div>
 </aside>
