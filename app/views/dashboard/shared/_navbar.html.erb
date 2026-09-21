@@ -176,7 +176,7 @@
                             <% section[:items].each do |item| %>
                                 <% item_class = "flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-purple-100 text-gray-700 font-medium min-h-[44px] #{'bg-purple-100 text-purple-900' if item[:active]}" %>
                                 <%= link_to item[:path], class: item_class, onclick: "toggleMobileMenu();" do %>
-                                    <%= image_tag asset_path(item[:icon]), class: "w-5 h-5 flex-shrink-0", alt: "" %>
+                                    <%= nav_icon(item[:icon]) %>
                                     <span><%= item[:label] %></span>
                                 <% end %>
                             <% end %>

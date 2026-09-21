@@ -9,7 +9,6 @@
   <% if active %>
     <span class="absolute inset-block-2 inset-inline-start-0 w-1 rounded-full bg-[#5C3984]"></span>
   <% end %>
-  <%= image_tag asset_path(icon), alt: "", "aria-hidden": true,
-      class: "w-5 h-5 flex-none #{active ? '' : 'opacity-70 group-hover:opacity-100'}" %>
+  <%= nav_icon(icon) %>
   <span class="truncate"><%= label %></span>
 <% end %>

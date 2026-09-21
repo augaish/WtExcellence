@@ -43,15 +43,15 @@ module NavigationHelper
     items = []
     if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user.present?
       items << nav_item(label: t("overview"), path: dashboard_overview_path,
-        icon: "overview-icon.svg", active: request.path.include?("overview"))
+        icon: :overview, active: request.path.include?("overview"))
     end
     if nav_module?(:library)
       items << nav_item(label: t("library"), path: library_path,
-        icon: "library-icon.svg", active: request.path.start_with?("/library"))
+        icon: :library, active: request.path.start_with?("/library"))
     end
     if nav_module?(:org_structure)
       items << nav_item(label: t("org_structure.title"), path: dashboard_org_units_path,
-        icon: "account-management-icon.svg", active: request.path.include?("org_units"))
+        icon: :org, active: request.path.include?("org_units"))
     end
     items
   end
@@ -60,11 +60,11 @@ module NavigationHelper
     items = []
     if nav_module?(:standards)
       items << nav_item(label: t("standards"), path: standards_path,
-        icon: "standards-icon.svg", active: request.path.start_with?("/standards"))
+        icon: :standards, active: request.path.start_with?("/standards"))
     end
     if nav_module?(:capa) && !(current_user&.super_admin? || current_user&.delegated_admin?)
       items << nav_item(label: t("capa_management"), path: dashboard_capa_management_path,
-        icon: "capa-management-icon.svg", active: request.path.include?("capa_management"), queue: :capa_action)
+        icon: :capa, active: request.path.include?("capa_management"), queue: :capa_action)
     end
     items
   end
@@ -75,15 +75,15 @@ module NavigationHelper
     items = []
     if nav_module?(:processes)
       items << nav_item(label: t("process_architecture.title"), path: dashboard_pp_processes_path,
-        icon: "standards-icon.svg", active: request.path.include?("pp_processes"))
+        icon: :processes, active: request.path.include?("pp_processes"))
     end
     if nav_module?(:pp)
       items << nav_item(label: t("pp_records.title"), path: dashboard_pp_records_path,
-        icon: "library-icon.svg", active: request.path.include?("pp_records") || request.path.include?("pp_packages"))
+        icon: :records, active: request.path.include?("pp_records") || request.path.include?("pp_packages"))
       items << nav_item(label: t("documenter.title"), path: dashboard_documenter_path,
-        icon: "calendar-03.png", active: request.path.include?("documenter"), queue: :documenter)
+        icon: :documenter, active: request.path.include?("documenter"), queue: :documenter)
       items << nav_item(label: t("evaluation.title"), path: dashboard_process_evaluations_path,
-        icon: "score-start-icon.svg", active: request.path.include?("evaluation"))
+        icon: :evaluation, active: request.path.include?("evaluation"))
     end
     items
   end
@@ -92,20 +92,20 @@ module NavigationHelper
     items = []
     if nav_module?(:authorities)
       items << nav_item(label: t("doa.title"), path: dashboard_authorities_path,
-        icon: "account-management-icon.svg", active: request.path.include?("authorities"), queue: :authority_review)
+        icon: :authorities, active: request.path.include?("authorities"), queue: :authority_review)
     end
     if current_user&.can_view_governance? && module_enabled_for_current?(:risk)
       items << nav_item(label: t("risk_management"), path: dashboard_risk_management_index_path,
-        icon: "score-start-icon.svg",
+        icon: :risk,
         active: request.path.include?("risk_management") || request.path.include?("risk_workspaces"), queue: :risk)
     end
     if current_user&.can_view_governance? && module_enabled_for_current?(:vendors)
       items << nav_item(label: t("vendor_management"), path: dashboard_vendors_path,
-        icon: "account-management-icon.svg", active: request.path.include?("vendors"), queue: :vendor)
+        icon: :vendors, active: request.path.include?("vendors"), queue: :vendor)
     end
     if current_user&.can_view_governance? && module_enabled_for_current?(:commitments)
       items << nav_item(label: t("customer_commitments"), path: dashboard_customer_commitments_path,
-        icon: "calendar-03.png", active: request.path.include?("customer_commitments"), queue: :commitment)
+        icon: :commitments, active: request.path.include?("customer_commitments"), queue: :commitment)
     end
     items
   end
@@ -114,30 +114,30 @@ module NavigationHelper
     items = []
     if current_user&.can_manage_ai_instructions? && module_enabled_for_current?(:ai_instructions)
       items << nav_item(label: t("ai_instructions"), path: dashboard_ai_instructions_path,
-        icon: "AI_logo.png", active: request.path.include?("ai_instructions"))
+        icon: :ai_instructions, active: request.path.include?("ai_instructions"))
     end
     if current_user&.can_manage_tools? && module_enabled_for_current?(:tools)
       items << nav_item(label: t("tool_setup"), path: tools_path,
-        icon: "tool-setup-icon.svg", active: request.path.include?("tools"))
+        icon: :tools, active: request.path.include?("tools"))
     end
     if current_user&.super_admin? || current_user&.delegated_admin?
       items << nav_item(label: t("credit_changes"), path: dashboard_credit_changes_path,
-        icon: "account-management-icon.svg", active: request.path.include?("credit_changes"))
+        icon: :credits, active: request.path.include?("credit_changes"))
     end
     if current_user&.company_user&.has_admin_privileges?
       items << nav_item(label: t("branding.title"), path: dashboard_branding_path,
-        icon: "general-settings-icon.svg", active: request.path.include?("branding"))
+        icon: :branding, active: request.path.include?("branding"))
     end
     if current_user&.super_admin? || current_user&.delegated_admin? || current_user&.company_user&.company_admin?
       items << nav_item(label: t("account_management"), path: dashboard_account_management_path,
-        icon: "account-management-icon.svg", active: request.path.include?("account_management"))
+        icon: :accounts, active: request.path.include?("account_management"))
     end
     if current_user&.company_user.present? && !current_user&.company_contributor?
       items << nav_item(label: t("ai_usage"), path: dashboard_ai_insights_path,
-        icon: "overview-icon.svg", active: request.path.start_with?("/dashboard/ai_insights"))
+        icon: :ai_usage, active: request.path.start_with?("/dashboard/ai_insights"))
     end
     items << nav_item(label: t("general_settings"), path: dashboard_general_settings_path,
-      icon: "general-settings-icon.svg", active: request.path.include?("general_settings"))
+      icon: :settings, active: request.path.include?("general_settings"))
     items
   end
 

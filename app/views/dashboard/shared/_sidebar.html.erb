@@ -42,17 +42,14 @@
                   class: "group relative flex items-center gap-3 rounded-lg px-3 h-11 text-sm font-medium transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5C3984] focus-visible:ring-inset #{item[:active] ? 'bg-[#F6EEFF] text-[#5C3984]' : 'text-[#797C81] hover:bg-[#F7F7FD] hover:text-[#0D1120]'}" do %>
               <% if item[:active] %><span class="absolute inset-block-2 inset-inline-start-0 w-1 rounded-full bg-[#5C3984]"></span><% end %>
               <span class="relative flex-none">
-                <%= image_tag asset_path(item[:icon]), alt: "", "aria-hidden": true, class: "w-5 h-5 #{item[:active] ? '' : 'opacity-70 group-hover:opacity-100'}" %>
+                <%= nav_icon(item[:icon]) %>
                 <% if item[:badge].to_i.positive? %>
-                  <%# On the rail the count sits on the icon; expanded, it moves beside the label. %>
+                  <%# The count sits on the icon, collapsed or expanded, so it is shown once. %>
                   <span class="rail-badge absolute -top-1.5 -end-2 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-[#5C3984] text-white text-[10px] font-semibold flex items-center justify-center"
                         aria-label="<%= t('sidebar_rail.waiting', count: item[:badge]) %>"><%= item[:badge] %></span>
                 <% end %>
               </span>
               <span class="rail-label truncate flex-1"><%= item[:label] %></span>
-              <% if item[:badge].to_i.positive? %>
-                <span class="rail-label min-w-[1.25rem] h-5 px-1.5 rounded-full bg-[#5C3984] text-white text-[11px] font-semibold flex items-center justify-center" aria-hidden="true"><%= item[:badge] %></span>
-              <% end %>
             <% end %>
           <% end %>
         </nav>

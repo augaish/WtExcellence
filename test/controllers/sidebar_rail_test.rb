@@ -36,6 +36,8 @@ class SidebarRailTest < ActionDispatch::IntegrationTest
     assert_select "#sidebar a[href=?] .rail-badge", dashboard_documenter_path
     assert_select "#sidebar a[href=?] .rail-badge", dashboard_capa_management_path, text: "1"
     assert_select "#sidebar a[href=?] .rail-badge", dashboard_pp_records_path, 0
+    assert_select "#sidebar a[href=?] .rail-badge", dashboard_capa_management_path, 1, "the count is shown once, on the icon"
+    assert_select "#sidebar a[href=?] svg", dashboard_capa_management_path
   end
 
   test "in Arabic the rail reads right to left" do
