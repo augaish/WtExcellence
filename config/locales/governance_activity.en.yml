@@ -4,6 +4,7 @@ en:
     none: "No recorded activity yet."
     unknown_actor: "Unknown"
     not_set: "not set"
+    removed_record: "(removed)"
     change: "%{attribute}: %{from} → %{to}"
     actions:
       create_risk: "Risk created"

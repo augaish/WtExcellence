@@ -3,6 +3,7 @@ ar:
     title: النشاط
     none: لا يوجد نشاط مسجل بعد.
     unknown_actor: غير معروف
+    removed_record: "(محذوف)"
     not_set: غير محدد
     change: "%{attribute}: %{from} ← %{to}"
     actions:
