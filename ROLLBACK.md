@@ -68,6 +68,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Test round clarifications 8–14, 16 (import headers, code follows number, duration rollups, KPI rows, card description, diagram polish, library by level) | `1c093c2` | Migration: pp_record_kpis table (additive). |
 | Notifications for every movement + coverage test | `a50350c` | No migration. |
 | Sidebar rail (hover/pin, search, counts) | `f0d25f7` | No migration. |
+| Activity trail shows names and labels instead of ids and keys | `5b991a1` | No migration. |
 
 ## Roll the code back
 ```bash
