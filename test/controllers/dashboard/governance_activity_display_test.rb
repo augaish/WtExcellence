@@ -47,7 +47,7 @@ class Dashboard::GovernanceActivityDisplayTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, I18n.t("governance_activity.actions.update_vendor")
-    assert_includes response.body, "critical"
+    assert_includes response.body, I18n.t("risk_level_critical"), "the level is shown by its label, not its key"
   end
 
   test "a commitment shows its fulfilment and reads a blank as not set" do
