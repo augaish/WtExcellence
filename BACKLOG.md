@@ -180,3 +180,9 @@ processes; nothing to build until there is content to hang on it.
 ## Review 03 — status
 - Q14, Q15, sections 5, 7 and 8 are built (phases 10–13). Left for later: vendor due-diligence questionnaires that vary by category (one fixed five-criteria assessment exists), customer records as their own register (commitments name the customer and agreement in text), and a full screen-reader walk of every page.
 
+
+## Risk/DoA/Vendor round (30 Sep) — notes
+- Risk treatment: owner fills it in, a risk manager or admin accepts or returns it with a reason; no further approval. Accepting the treatment is separate from accepting exposure above appetite. Existing risks without a plan now show as awaiting treatment for their owners.
+- The quality manager reads the governance registers and cannot review or edit; covered by test/controllers/risk_treatment_workflow_test.rb.
+- AI assistant reads PDF (first 20 pages), .docx and text evidence, up to 4000 characters per file; scanned PDFs without a text layer give no text (OCR not run per question).
+- The DB password / git history security review is still parked until testing ends.

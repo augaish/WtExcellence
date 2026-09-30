@@ -69,6 +69,7 @@ of these is on `origin/claude/determined-euler-gkr9sv`.
 | Notifications for every movement + coverage test | `a50350c` | No migration. |
 | Sidebar rail (hover/pin, search, counts) | `f0d25f7` | No migration. |
 | Activity trail shows names and labels instead of ids and keys | `5b991a1` | No migration. |
+| Risk/DoA/Vendor round groups 1–4 (CAPA action status kept, empty-category drop, bulk delete, import updates, matrix PDF by category, risk page speed, assessment rework + evidence picker, risk supplier, risk treatment workflow, editable process numbers, grounded AI assistant) | `f7306b6` | Migrations: vendor_assessments.returned_at/return_reason/returned_by_id; risks.treatment_state/treatment_submitted_at/treatment_reviewed_at/treatment_return_reason/treatment_reviewed_by_id (additive; data: risks with a treatment plan set to treatment_accepted). |
 
 ## Roll the code back
 ```bash
