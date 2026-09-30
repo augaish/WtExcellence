@@ -2,7 +2,7 @@
     rationale, evidence and sign-off; then the form for a new one.
     Locals: vendor, assessments, assessment, available_uploads %>
 <% colour = { "low" => "bg-green-100 text-green-800", "medium" => "bg-yellow-100 text-yellow-800", "high" => "bg-orange-100 text-orange-800", "critical" => "bg-red-100 text-red-800" } %>
-<div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6 space-y-5">
+<div id="assessments" class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6 space-y-5">
   <div>
     <h2 class="text-base font-semibold text-[#0D1120]"><%= t('vendor_assessment.title') %></h2>
     <p class="text-xs text-[#797C81]"><%= t('vendor_assessment.hint') %></p>
@@ -13,7 +13,7 @@
   <% end %>
 
   <% assessments.each do |a| %>
-    <div class="rounded-lg border <%= a.signed_off? ? 'border-[#E3E3E3]' : 'border-amber-300 bg-amber-50/40' %> p-4 space-y-3">
+    <div class="rounded-lg border <%= a.signed_off? ? 'border-[#E3E3E3]' : (a.returned? ? 'border-red-200 bg-red-50/40' : 'border-amber-300 bg-amber-50/40') %> p-4 space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-2">
           <span class="text-xs font-mono text-[#797C81]">V<%= a.version %></span>
@@ -23,6 +23,7 @@
         <p class="text-xs text-[#797C81]">
           <%= t('vendor_assessment.assessed_by_on', name: a.assessed_by&.name.to_s, date: l(a.assessed_on, format: :document)) %>
           <% if a.signed_off? %> · <%= t('vendor_assessment.signed_by_on', name: a.reviewed_by&.name.to_s, date: l(a.reviewed_at.to_date, format: :document)) %>
+          <% elsif a.returned? %> · <span class="text-red-700 font-medium"><%= t('vendor_assessment.returned_by', name: a.returned_by&.name.to_s) %></span>
           <% else %> · <span class="text-amber-800 font-medium"><%= t('vendor_assessment.awaiting_sign_off') %></span><% end %>
         </p>
       </div>
@@ -42,21 +43,52 @@
           <% end %>
         </ul>
       <% end %>
+      <% if a.returned? && a.return_reason.present? %>
+        <p class="text-sm text-red-800 rounded bg-red-50 border border-red-200 px-3 py-2"><%= t('vendor_assessment.return_reason') %>: <%= a.return_reason %></p>
+      <% end %>
       <% if a.review_note.present? %><p class="text-xs text-[#797C81]"><%= t('vendor_assessment.review_note') %>: <%= a.review_note %></p><% end %>
       <% if a.next_review_on %><p class="text-xs text-[#797C81]"><%= t('vendor_assessment.next_review_on') %>: <%= l(a.next_review_on, format: :document) %></p><% end %>
-      <% if !a.signed_off? && current_user&.can_manage_governance? && a.assessed_by_id != current_user.id %>
-        <%= form_with url: sign_off_dashboard_vendor_assessment_path(vendor, a), method: :patch, class: "flex flex-col sm:flex-row gap-2 pt-2 border-t border-[#E3E3E3]" do %>
-          <%= text_field_tag :review_note, nil, placeholder: t('vendor_assessment.review_note'), class: "#{ui_input} flex-1" %>
-          <%= submit_tag t('vendor_assessment.sign_off'), class: ui_btn_primary %>
-        <% end %>
+      <% if !a.signed_off? && !a.returned? && current_user&.can_manage_governance? && a.assessed_by_id != current_user.id %>
+        <div class="pt-2 border-t border-[#E3E3E3] space-y-2">
+          <%= form_with url: sign_off_dashboard_vendor_assessment_path(vendor, a), method: :patch, class: "flex flex-col sm:flex-row gap-2" do %>
+            <%= text_field_tag :review_note, nil, placeholder: t('vendor_assessment.review_note'), class: "#{ui_input} flex-1" %>
+            <%= submit_tag t('vendor_assessment.sign_off'), class: ui_btn_primary %>
+          <% end %>
+          <%= form_with url: return_for_rework_dashboard_vendor_assessment_path(vendor, a), method: :patch, class: "flex flex-col sm:flex-row gap-2" do %>
+            <%= text_field_tag :return_reason, nil, required: true, placeholder: t('vendor_assessment.return_placeholder'), class: "#{ui_input} flex-1" %>
+            <%= submit_tag t('vendor_assessment.return'), class: ui_btn_danger %>
+          <% end %>
+        </div>
       <% elsif !a.signed_off? && a.assessed_by_id == current_user&.id %>
-        <p class="text-xs text-[#797C81]"><%= t('vendor_assessment.own_work_hint') %></p>
+        <% if a.returned? %>
+          <%# The assessor corrects it here and sends it back for sign-off. %>
+          <details class="pt-2 border-t border-[#E3E3E3]" open>
+            <summary class="cursor-pointer text-sm font-medium text-[#5C3984]"><%= t('vendor_assessment.rework') %></summary>
+            <%= form_with url: dashboard_vendor_assessment_path(vendor, a), method: :patch, multipart: true, class: "mt-3 space-y-3" do %>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <% VendorAssessment::CRITERIA.each do |c| %>
+                  <div>
+                    <%= label_tag "rework_#{a.id}_#{c}", t("vendor_assessment.criteria.#{c}"), class: ui_label %>
+                    <%= select_tag "vendor_assessment[scores][#{c}]", options_for_select(VendorAssessment::SCALE.map { |n| [ "#{n} · #{t("vendor_assessment.scale.#{n}")}", n ] }, a.score(c)),
+                          id: "rework_#{a.id}_#{c}", class: ui_input %>
+                  </div>
+                <% end %>
+              </div>
+              <%= text_area_tag "vendor_assessment[rationale]", a.rationale, rows: 3, class: ui_input %>
+              <%= hidden_field_tag "vendor_assessment[assessed_on]", a.assessed_on %>
+              <%= render "dashboard/shared/evidence_picker", uploads: available_uploads, input_class: ui_input %>
+              <%= submit_tag t('vendor_assessment.resubmit'), class: ui_btn_primary %>
+            <% end %>
+          </details>
+        <% else %>
+          <p class="text-xs text-[#797C81]"><%= t('vendor_assessment.own_work_hint') %></p>
+        <% end %>
       <% end %>
     </div>
   <% end %>
 
   <% if current_user&.can_manage_governance? %>
-    <%= form_with model: assessment, url: dashboard_vendor_assessments_path(vendor), method: :post, class: "pt-4 border-t border-[#E3E3E3] space-y-4" do |f| %>
+    <%= form_with model: assessment, url: dashboard_vendor_assessments_path(vendor), method: :post, multipart: true, class: "pt-4 border-t border-[#E3E3E3] space-y-4" do |f| %>
       <h3 class="text-sm font-semibold text-[#0D1120]"><%= t('vendor_assessment.new') %></h3>
       <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <% VendorAssessment::CRITERIA.each do |c| %>
@@ -80,13 +112,9 @@
           <%= f.label :next_review_on, t('vendor_assessment.next_review_on'), class: ui_label %>
           <%= f.date_field :next_review_on, value: retained(:vendor_assessment, :next_review_on), class: ui_input %>
         </div>
-        <div>
-          <%= label_tag :upload_ids, t('vendor_assessment.evidence'), class: ui_label %>
-          <select name="upload_ids[]" id="upload_ids" multiple size="3" class="<%= ui_input %>">
-            <% available_uploads.each do |u| %>
-              <option value="<%= u.id %>"><%= u.display_name %><% if u.folder %> (<%= u.folder.name %>)<% end %></option>
-            <% end %>
-          </select>
+        <div class="sm:col-span-3">
+          <p class="<%= ui_label %>"><%= t('vendor_assessment.evidence') %></p>
+          <%= render "dashboard/shared/evidence_picker", uploads: available_uploads, input_class: ui_input %>
         </div>
       </div>
       <div class="flex justify-end">

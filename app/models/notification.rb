@@ -15,6 +15,8 @@ class Notification < ApplicationRecord
     commitment_acceptance_recorded risk_accepted vendor_assessment_signed_off vendor_approval_recorded
     capa_closed capa_action_comment_added
     account_role_changed account_designation_changed account_status_changed
+    vendor_assessment_submitted vendor_assessment_returned risk_treatment_requested risk_treatment_submitted
+    risk_treatment_accepted risk_treatment_returned
   ].freeze
 
   # Email follows the recipient's own setting, for every kind alike. Sent

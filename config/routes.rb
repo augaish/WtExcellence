@@ -110,8 +110,11 @@ Rails.application.routes.draw do
         post :create_capa
         patch :approval
       end
-      resources :assessments, only: [ :create ], controller: "vendor_assessments" do
-        member { patch :sign_off }
+      resources :assessments, only: [ :create, :update ], controller: "vendor_assessments" do
+        member do
+          patch :sign_off
+          patch :return_for_rework
+        end
       end
     end
     resources :ai_instructions, only: [ :index, :new, :create, :edit, :update, :destroy ] do

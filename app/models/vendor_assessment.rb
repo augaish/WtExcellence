@@ -40,6 +40,17 @@ class VendorAssessment < ApplicationRecord
     reviewed_at.present?
   end
 
+  belongs_to :returned_by, class_name: "User", optional: true
+
+  # Sent back by the reviewer and not yet resubmitted.
+  def returned?
+    returned_at.present? && !signed_off?
+  end
+
+  def return_for_rework!(by:, reason:)
+    update!(returned_at: Time.current, returned_by: by, return_reason: reason)
+  end
+
   # The reviewer's sign-off is what makes the rating the vendor's.
   def sign_off!(by:, note: nil)
     transaction do

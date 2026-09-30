@@ -7,6 +7,12 @@ en:
   user_notifications:
     delegation_cover_assigned_title: "%{name} named you to act for them from %{from} until %{until}"
     delegation_expiring_title: "A delegation of %{authority} to %{to} expires on %{date}"
+    vendor_assessment_submitted_title: "%{actor_name} submitted an assessment of %{vendor} (%{rating}) for your sign-off"
+    vendor_assessment_returned_title: "%{actor_name} returned your assessment of %{vendor} for rework: %{reason}"
+    risk_treatment_requested_title: "%{actor_name} made you owner of the risk \"%{title}\" — fill in its treatment"
+    risk_treatment_submitted_title: "%{actor_name} submitted the treatment of \"%{title}\" for your review"
+    risk_treatment_accepted_title: "%{actor_name} accepted the treatment of \"%{title}\""
+    risk_treatment_returned_title: "%{actor_name} returned the treatment of \"%{title}\": %{reason}"
     record_stage_entered_title: "\"%{title}\" reached %{stage} — it is with you now (moved by %{actor_name})"
     record_returned_title: "%{actor_name} returned \"%{title}\" from %{from_stage} to %{stage}: %{reason}"
     record_comment_added_title: "%{actor_name} commented on clause %{clause} of \"%{title}\""

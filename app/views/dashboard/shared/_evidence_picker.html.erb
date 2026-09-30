@@ -1,0 +1,22 @@
+<%# Evidence from the Library (tick as many as needed; type to narrow the
+    list) or from this device. Locals: uploads, input_class %>
+<div class="space-y-2" data-controller="evidence-picker">
+  <input type="search" placeholder="<%= t('evidence_picker.filter') %>" aria-label="<%= t('evidence_picker.filter') %>"
+         class="<%= input_class %>" data-action="input->evidence-picker#filter">
+  <div class="max-h-40 overflow-y-auto rounded-lg border border-[#E3E3E3] divide-y divide-[#E3E3E3]">
+    <% if uploads.empty? %>
+      <p class="px-3 py-2 text-xs text-[#797C81]"><%= t('evidence_picker.library_empty') %></p>
+    <% end %>
+    <% uploads.each do |u| %>
+      <label class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-[#F7F7FD] cursor-pointer" data-evidence-picker-target="row" data-name="<%= "#{u.display_name} #{u.folder&.name}".downcase %>">
+        <input type="checkbox" name="upload_ids[]" value="<%= u.id %>" class="rounded border-[#E3E3E3] text-[#5C3984] focus:ring-[#5C3984]" data-action="change->evidence-picker#count">
+        <span class="min-w-0 truncate text-[#0D1120]"><%= u.display_name %></span>
+        <% if u.folder %><span class="text-xs text-[#797C81] truncate">· <%= u.folder.name %></span><% end %>
+      </label>
+    <% end %>
+  </div>
+  <p class="text-xs text-[#797C81]" data-evidence-picker-target="summary"></p>
+  <label class="block text-xs font-medium text-[#797C81]"><%= t('evidence_picker.from_device') %></label>
+  <input type="file" name="files[]" multiple
+         class="w-full text-sm text-[#0D1120] file:me-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-[#F6EEFF] file:text-[#5C3984] file:text-sm file:font-medium">
+</div>

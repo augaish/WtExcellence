@@ -1,0 +1,10 @@
+en:
+  evidence_picker:
+    filter: "Find a Library file…"
+    library_empty: "No files in the Library yet."
+    from_device: "Or upload from this device (several files allowed)"
+  vendor_risk:
+    supplier: "Supplier"
+    no_supplier: "Not about a supplier"
+    raise: "Raise a risk"
+    other_company: "That supplier is not in this company."

@@ -63,6 +63,11 @@
       <%= f.label :risk_workspace_id, t('risk_workspace'), class: ui_label %>
       <%= f.collection_select :risk_workspace_id, @risk_workspaces || [], :id, :name, { include_blank: t('uncategorized') }, class: ui_input %>
     </div>
+    <div>
+      <%# The supplier this risk is about; it then shows on the vendor's page. %>
+      <%= f.label :vendor_id, t('vendor_risk.supplier'), class: ui_label %>
+      <%= f.collection_select :vendor_id, @vendors || [], :id, :name, { include_blank: t('vendor_risk.no_supplier'), selected: f.object.vendor_id }, class: ui_input %>
+    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>

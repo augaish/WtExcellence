@@ -1,0 +1,10 @@
+ar:
+  evidence_picker:
+    filter: "ابحث عن ملف في المكتبة…"
+    library_empty: "لا ملفات في المكتبة بعد."
+    from_device: "أو ارفع من هذا الجهاز (يمكن اختيار عدة ملفات)"
+  vendor_risk:
+    supplier: "المورد"
+    no_supplier: "لا يتعلق بمورد"
+    raise: "تسجيل خطر"
+    other_company: "هذا المورد ليس في هذه الشركة."

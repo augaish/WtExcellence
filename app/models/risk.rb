@@ -13,6 +13,18 @@ class Risk < ApplicationRecord
   belongs_to :owner, class_name: "CompanyUser", optional: true
   belongs_to :created_by, class_name: "User", optional: true
   belongs_to :riskable, polymorphic: true, optional: true
+
+  # The supplier a risk is about, chosen on the form. Resolved inside the
+  # company before validation, since the company is set after the params.
+  before_validation :resolve_vendor
+
+  def vendor_id
+    riskable_type == "Vendor" ? riskable_id : nil
+  end
+
+  def vendor_id=(value)
+    @pending_vendor_id = value.to_s
+  end
   belongs_to :risk_workspace, optional: true
   belongs_to :closed_by, class_name: "User", optional: true
   belongs_to :control_owner, class_name: "CompanyUser", optional: true
@@ -181,4 +193,16 @@ class Risk < ApplicationRecord
   end
 
 
+
+  def resolve_vendor
+    return if @pending_vendor_id.nil?
+
+    if @pending_vendor_id.blank?
+      self.riskable = nil if riskable_type == "Vendor"
+    else
+      vendor = Vendor.active.find_by(id: @pending_vendor_id, company_id: company_id)
+      vendor ? self.riskable = vendor : errors.add(:base, I18n.t("vendor_risk.other_company"))
+    end
+    @pending_vendor_id = nil
+  end
 end

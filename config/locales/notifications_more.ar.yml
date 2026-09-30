@@ -7,6 +7,12 @@ ar:
   user_notifications:
     delegation_cover_assigned_title: "سمّاك %{name} لتنوب عنه من %{from} حتى %{until}"
     delegation_expiring_title: "ينتهي تفويض %{authority} إلى %{to} في %{date}"
+    vendor_assessment_submitted_title: "قدّم %{actor_name} تقييمًا للمورد %{vendor} (%{rating}) لاعتمادك"
+    vendor_assessment_returned_title: "أعاد %{actor_name} تقييمك للمورد %{vendor} للتعديل: %{reason}"
+    risk_treatment_requested_title: "جعلك %{actor_name} مالكًا للخطر «%{title}» — عبّئ خطة معالجته"
+    risk_treatment_submitted_title: "قدّم %{actor_name} معالجة الخطر «%{title}» لمراجعتك"
+    risk_treatment_accepted_title: "قبل %{actor_name} معالجة الخطر «%{title}»"
+    risk_treatment_returned_title: "أعاد %{actor_name} معالجة الخطر «%{title}»: %{reason}"
     record_stage_entered_title: "وصل «%{title}» إلى مرحلة %{stage} — وهو الآن لديك (نقله %{actor_name})"
     record_returned_title: "أعاد %{actor_name} «%{title}» من %{from_stage} إلى %{stage}: %{reason}"
     record_comment_added_title: "علّق %{actor_name} على البند %{clause} من «%{title}»"

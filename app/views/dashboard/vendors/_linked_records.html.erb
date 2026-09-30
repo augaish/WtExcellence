@@ -4,7 +4,12 @@
 <% commitments = vendor.respond_to?(:customer_commitments) ? vendor.customer_commitments.active.order(:due_date).to_a : CustomerCommitment.active.where(vendor_id: vendor.id).order(:due_date).to_a %>
 <div class="bg-white border border-[#E3E3E3] rounded-xl p-6 mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
   <div>
-    <h2 class="text-sm font-semibold text-[#0D1120] mb-2"><%= t('commitment_depth.linked_risks') %></h2>
+    <div class="flex items-center justify-between gap-2 mb-2">
+      <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('commitment_depth.linked_risks') %></h2>
+      <% if current_user&.can_manage_governance? %>
+        <%= link_to t('vendor_risk.raise'), dashboard_new_risk_path(vendor_id: vendor.id), class: "text-xs font-medium text-[#5C3984] hover:underline" %>
+      <% end %>
+    </div>
     <% if risks.empty? %><p class="text-xs text-[#797C81]"><%= t('commitment_depth.none_linked') %></p><% end %>
     <ul class="space-y-1 text-sm">
       <% risks.each do |r| %>

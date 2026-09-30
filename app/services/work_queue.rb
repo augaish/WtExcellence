@@ -72,7 +72,10 @@ class WorkQueue
   def risks
     return [] if membership.nil? || !company.module_enabled?(:risk)
 
-    Risk.active.where(company_id: company.id, owner_id: membership.id).where.not(status: "closed").filter_map do |risk|
+    # The company is the one we already hold: without this each risk loaded it
+    # again to read the appetite, one query per risk on every page.
+    Risk.active.where(company_id: company.id, owner_id: membership.id).where.not(status: "closed").to_a
+      .each { |risk| risk.association(:company).target = company }.filter_map do |risk|
       if risk.needs_acceptance?
         Item.new(kind: :risk, title: risk.title, reason: I18n.t("work_queue.reasons.risk_needs_acceptance"),
           path: routes.dashboard_risk_management_path(risk), due_on: risk.next_review_on)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_20_083503) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_30_082057) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1518,7 +1518,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_20_083503) do
     t.integer "version", default: 1, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "returned_at"
+    t.text "return_reason"
+    t.uuid "returned_by_id"
     t.index ["company_id"], name: "index_vendor_assessments_on_company_id"
+    t.index ["returned_by_id"], name: "index_vendor_assessments_on_returned_by_id"
     t.index ["vendor_id", "version"], name: "index_vendor_assessments_on_vendor_id_and_version", unique: true
     t.index ["vendor_id"], name: "index_vendor_assessments_on_vendor_id"
   end
@@ -1760,6 +1764,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_20_083503) do
   add_foreign_key "users", "users", column: "invited_by_id"
   add_foreign_key "vendor_assessments", "companies"
   add_foreign_key "vendor_assessments", "users", column: "assessed_by_id", on_delete: :nullify
+  add_foreign_key "vendor_assessments", "users", column: "returned_by_id"
   add_foreign_key "vendor_assessments", "users", column: "reviewed_by_id", on_delete: :nullify
   add_foreign_key "vendor_assessments", "vendors"
   add_foreign_key "vendors", "companies"

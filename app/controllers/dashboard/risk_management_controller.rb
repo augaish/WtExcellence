@@ -64,6 +64,8 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
 
   def new
     @risk = Risk.new
+    vendor = Vendor.active.find_by(company_id: current_company&.id, id: params[:vendor_id]) if params[:vendor_id].present?
+    @risk.riskable = vendor if vendor
     load_form_collections
   end
 
@@ -128,6 +130,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   # validation error cannot silently remove a choice the user already had.
   def load_form_collections
     @risk_workspaces = RiskWorkspace.active.where(company_id: current_company&.id).order(:name)
+    @vendors = Vendor.active.where(company_id: current_company&.id).order(:name)
   end
 
   def set_risk
@@ -141,7 +144,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
       :target_likelihood, :target_impact,
       :risk_workspace_id, :closure_reason,
       :cause, :event, :impact_statement, :treatment_strategy, :treatment_plan,
-      :control_owner_id, :control_rationale, :next_review_on
+      :control_owner_id, :control_rationale, :next_review_on, :vendor_id
     )
   end
 
