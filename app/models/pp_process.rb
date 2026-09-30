@@ -48,6 +48,7 @@ class PpProcess < ApplicationRecord
   validates :name_en, length: { maximum: 250 }
   validates :name_ar, length: { maximum: 250 }
   validate :must_have_a_name
+  validate :number_free_among_siblings
   validate :parent_must_be_same_company
   validate :cannot_be_own_ancestor
   validate :level_must_follow_parent
@@ -55,6 +56,9 @@ class PpProcess < ApplicationRecord
   before_validation :inherit_category_from_parent
   before_validation :assign_number
   before_validation :default_code_to_architecture_number
+  # Renumbering carries codes that were only ever the architecture number.
+  before_validation :renumber_codes, if: -> { persisted? && number_changed? }
+  after_save :save_renumbered_descendants
 
   scope :active, -> { where(active: true) }
   scope :roots, -> { where(parent_id: nil) }
@@ -167,6 +171,35 @@ class PpProcess < ApplicationRecord
     siblings = company.pp_processes.where(parent_id: parent_id)
     siblings = siblings.where(category: category) if parent_id.nil?
     self.number = siblings.maximum(:number).to_i + 1
+  end
+
+  def number_free_among_siblings
+    return if number.nil? || company_id.nil?
+
+    siblings = company.pp_processes.where(parent_id: parent_id, number: number).where.not(id: id)
+    siblings = siblings.where(category: category) if parent_id.nil?
+    errors.add(:number, I18n.t("process_architecture.errors.number_taken")) if siblings.exists?
+  end
+
+  def renumber_codes
+    new_prefix = architecture_number
+    old_prefix = [ band_number, *ancestors.map(&:number), number_was ].join(".")
+    return if new_prefix.nil?
+
+    self.code = new_prefix if code == old_prefix
+    @renumbered_descendants = descendants_with_code_prefix(old_prefix).each do |child|
+      child.code = new_prefix + child.code.delete_prefix(old_prefix)
+    end
+  end
+
+  def descendants_with_code_prefix(prefix)
+    children.flat_map { |child| [ child, *child.send(:descendants_with_code_prefix, prefix) ] }
+      .select { |node| node.code.to_s.start_with?("#{prefix}.") }
+  end
+
+  def save_renumbered_descendants
+    Array(@renumbered_descendants).each { |child| child.save!(validate: false) }
+    @renumbered_descendants = nil
   end
 
   def default_code_to_architecture_number

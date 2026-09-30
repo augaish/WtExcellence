@@ -1177,6 +1177,9 @@ en:
     band_hint: "Level 0 is fixed. A Level 2 process takes its parent's band."
     parent_hint: "Required for Level 2: the Level 1 process it belongs to."
     code_auto: "Assigned from the architecture number"
+    number: "Number"
+    number_auto: "Next free number"
+    number_hint: "The last part of the architecture number (the 3 in 1.3). Left blank, the next free number is used."
     code_hint: "Left blank, the code becomes the architecture number (for example 1.2 or 1.2.4)."
     settings: "Architecture settings"
     settings_subtitle: "Rename the Level 0 bands and set the objective shown beside the model."
@@ -1272,6 +1275,7 @@ en:
       done: "Imported successfully: %{created} created, %{updated} updated."
     errors:
       name_required: "Enter a process name in English or Arabic."
+      number_taken: "is already used by another process at this place in the architecture"
       parent_other_company: "must belong to the same company"
       parent_self: "cannot be the process itself"
       parent_cycle: "would create a loop in the process tree"

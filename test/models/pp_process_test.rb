@@ -95,4 +95,22 @@ class PpProcessTest < ActiveSupport::TestCase
 
     refute @company.pp_processes.new(name_en: "L3", level: 3, parent: l2).valid?
   end
+
+  test "a level 1 or 2 number can be changed, is unique among siblings and carries default codes" do
+    l2 = @company.pp_processes.create!(name_en: "Policy", level: 2, parent: @l1)
+    other = @company.pp_processes.create!(name_en: "Audit", level: 2, parent: @l1)
+
+    refute l2.update(number: other.number), "a sibling's number is taken"
+    assert l2.reload.update(number: 7)
+    assert_equal l2.architecture_number, l2.code
+    assert l2.code.end_with?(".7")
+
+    assert @l1.update(number: 5)
+    assert_equal @l1.architecture_number, @l1.code
+    assert_equal l2.reload.architecture_number, l2.code, "children follow the renumbered parent"
+
+    custom = @company.pp_processes.create!(name_en: "Custom", level: 2, parent: @l1, code: "GOV-X")
+    custom.update!(number: 9)
+    assert_equal "GOV-X", custom.code, "a typed code is kept"
+  end
 end

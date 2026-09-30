@@ -42,6 +42,11 @@
             <p class="<%= hint_class %>"><%= t('process_architecture.code_hint') %></p>
           </div>
           <div>
+            <%= f.label :number, t('process_architecture.number'), class: label_class %>
+            <%= f.number_field :number, min: 1, step: 1, class: input_class, placeholder: t('process_architecture.number_auto') %>
+            <p class="<%= hint_class %>"><%= t('process_architecture.number_hint') %></p>
+          </div>
+          <div>
             <%= f.label :level, t('process_architecture.level'), class: label_class %>
             <%= f.select :level, (1..PpProcess::MAX_LEVEL).map { |l| [ t("process_architecture.levels.l#{l}"), l ] }, {}, class: input_class %>
             <p class="<%= hint_class %>"><%= t('process_architecture.level_hint') %></p>

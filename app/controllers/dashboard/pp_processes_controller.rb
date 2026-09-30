@@ -194,8 +194,11 @@ class Dashboard::PpProcessesController < Dashboard::BaseController
       :predecessor_process_id, :successor_process_id, :frequency,
       :total_time_value, :total_time_unit, :automation_status,
       :related_policies, :technical_systems, :forms_used, :kpis,
-      :sort_order, :active
-    )
+      :sort_order, :active, :number
+    ).tap do |permitted|
+      # A blank number means "the next free one", assigned by the model.
+      permitted[:number] = nil if permitted.key?(:number) && permitted[:number].blank?
+    end
   end
 
   def log_action(action)

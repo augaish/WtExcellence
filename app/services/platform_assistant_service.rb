@@ -5,9 +5,14 @@ class PlatformAssistantService
   # for a query that produced no real answer.
   class AssistantError < StandardError; end
 
-  def initialize(company, user: nil)
+  # A risk or vendor page the user is looking at is always in the context,
+  # so "this supplier" and "this assessment" have something to refer to.
+  PAGE_RECORD = %r{/dashboard/(?<kind>vendors|risk_management)/(?<id>[0-9a-f-]{36})}
+
+  def initialize(company, user: nil, page_path: nil)
     @company = company
     @user = user
+    @page_path = page_path.to_s
     @provider = ENV.fetch("CAPA_QUESTIONNAIRE_PROVIDER", "openrouter").downcase
   end
 
@@ -44,15 +49,69 @@ class PlatformAssistantService
         results << { label: describe(searchable), text: summarize(searchable) }
       end
 
-    Risk.active.where(company_id: @company&.id).where("title ILIKE ?", "%#{question.split.first}%").limit(3).each do |risk|
-      results << { label: "Risk: #{risk.title}", text: "#{risk.title} — #{risk.description} (status: #{risk.status})" }
-    end
+    page_vendor, page_risk = page_records
+    risks = ([ page_risk ] + matching(Risk, :title, question)).compact.uniq.first(3)
+    vendors = ([ page_vendor ] + matching(Vendor, :name, question)).compact.uniq.first(3)
 
-    Vendor.active.where(company_id: @company&.id).where("name ILIKE ?", "%#{question.split.first}%").limit(3).each do |vendor|
-      results << { label: "Vendor: #{vendor.name}", text: "#{vendor.name} — risk level: #{vendor.risk_level}, category: #{vendor.category}" }
-    end
+    # The records being asked about come first, so they survive the cap.
+    grounded = vendors.flat_map { |vendor| vendor_context(vendor) } + risks.map { |risk| risk_context(risk) }
+    (grounded + results).first(20)
+  end
 
-    results.first(15)
+  def page_records
+    match = PAGE_RECORD.match(@page_path)
+    return [ nil, nil ] if match.nil? || @company.nil?
+
+    scope = match[:kind] == "vendors" ? Vendor : Risk
+    record = scope.active.find_by(id: match[:id], company_id: @company.id)
+    match[:kind] == "vendors" ? [ record, nil ] : [ nil, record ]
+  end
+
+  # Any word of three letters or more, not only the first, finds the record.
+  def matching(model, column, question)
+    return [] if @company.nil?
+
+    words = question.scan(/[[:alnum:]]{3,}/).first(8)
+    return [] if words.empty?
+
+    clause = words.map { "#{column} ILIKE ?" }.join(" OR ")
+    model.active.where(company_id: @company.id).where(clause, *words.map { |w| "%#{ActiveRecord::Base.sanitize_sql_like(w)}%" }).limit(3).to_a
+  end
+
+  def risk_context(risk)
+    text = [ "Risk \"#{risk.title}\": #{risk.description}", "status #{risk.status}",
+      "inherent #{risk.likelihood}x#{risk.impact}=#{risk.inherent_score}",
+      ("residual #{risk.residual_score}" if risk.residual_score),
+      ("treatment (#{risk.treatment_strategy}, #{risk.treatment_state.humanize.downcase}): #{risk.treatment_plan}" if risk.treatment_plan.present?),
+      ("control rationale: #{risk.control_rationale}" if risk.control_rationale.present?) ].compact.join("; ")
+    { label: "Risk: #{risk.title}", text: text }
+  end
+
+  # The vendor, its latest assessments with every score and the reasoning,
+  # and what the attached evidence says.
+  def vendor_context(vendor)
+    items = [ { label: "Vendor: #{vendor.name}",
+      text: "Vendor \"#{vendor.name}\": risk level #{vendor.risk_level}, category #{vendor.category}" } ]
+
+    vendor.assessments.includes(:assessed_by, :reviewed_by, :uploads).first(2).each do |assessment|
+      scores = VendorAssessment::CRITERIA.map { |c| "#{c.humanize.downcase} #{assessment.score(c)}/5" }.join(", ")
+      state = if assessment.signed_off? then "signed off by #{assessment.reviewed_by&.name}#{": #{assessment.review_note}" if assessment.review_note.present?}"
+      elsif assessment.returned? then "returned for rework: #{assessment.return_reason}"
+      else "awaiting sign-off"
+      end
+      label = "Assessment v#{assessment.version} of #{vendor.name} (#{assessment.assessed_on})"
+      items << { label: label, text: "#{label} by #{assessment.assessed_by&.name}: #{scores}; average #{assessment.average}, " \
+        "rating #{assessment.rating}; #{state}. Rationale: #{assessment.rationale.presence || "none given"}" }
+
+      assessment.uploads.first(3).each do |upload|
+        next unless upload.visible_to_user?(@user)
+
+        content = UploadText.for(upload)
+        items << { label: "Evidence: #{upload.display_name}",
+          text: "Evidence file \"#{upload.display_name}\" attached to #{label}: #{content || "(its text could not be read)"}" }
+      end
+    end
+    items
   end
 
   def belongs_to_company?(searchable)
@@ -100,8 +159,8 @@ class PlatformAssistantService
     "processes" => "Process Architecture — Level 0 bands, Level 1 and Level 2 processes, as a list or a model; procedures are level 3 and live in Records.",
     "pp" => "Policies & Procedures — Records (policies, procedures, forms, services, glossary) and Packages, the Documenter lifecycle with its approvals and publishing, and Efficiency Evaluation. Any record can be viewed as a branded printable document or PDF.",
     "authorities" => "Authorities & Delegations — the executive authority matrix by category, with holders per level, delegations, a review round and a published version.",
-    "risk" => "Risk Management — a risk register scored on a 5x5 likelihood by impact matrix, with inherent, current residual and target exposure, and a company risk appetite.",
-    "vendors" => "Vendor Management — vendors with a risk level, category and owner.",
+    "risk" => "Risk Management — a risk register scored on a 5x5 likelihood by impact matrix, with inherent, current residual and target exposure, and a company risk appetite. The risk owner fills in the treatment on their task page and a risk manager accepts it or returns it with a reason.",
+    "vendors" => "Vendor Management — vendors with a risk level, category and owner; versioned assessments scored on five criteria with evidence from the Library or the device, signed off or returned for rework by a reviewer; a risk can name its supplier and be raised from the vendor page.",
     "commitments" => "Customer Commitments — obligations with due dates, where timing is derived from the due date rather than chosen.",
     "trust_center" => "Trust Center — publishes what the company chooses to share externally.",
     "ai_instructions" => "AI Instructions — company-specific guidance applied to AI answers.",
@@ -109,7 +168,7 @@ class PlatformAssistantService
   }.freeze
 
   def call_llm(question, context)
-    context_text = context.map { |c| "- #{c[:text]}" }.join("\n")
+    context_text = context.map { |c| "- [#{c[:label]}] #{c[:text]}" }.join("\n")
     prompt = <<~PROMPT
       You are a knowledgeable assistant for Way to Excellence, a Quality
       Management System (QMS) and compliance platform. You handle two kinds of
@@ -124,6 +183,11 @@ class PlatformAssistantService
          risks, vendors, documents). Answer these using the context below. If a
          specific record isn't present, say you don't have that item in the
          company's data — never invent company-specific facts, names, or numbers.
+         Base every statement about a record on the context, including the
+         assessment scores, rationale and the text of the evidence files, and
+         cite the source in square brackets as it is labelled, e.g.
+         [Evidence: SOC 2 report]. When the evidence does not settle a point,
+         say so rather than filling the gap with general advice.
 
       3. Questions about how to DO something in this platform. Answer these
          only from the product map below. Never invent a screen, button, tab or

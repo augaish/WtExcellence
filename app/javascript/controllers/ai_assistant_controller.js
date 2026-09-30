@@ -27,7 +27,7 @@ export default class extends Controller {
           "X-CSRF-Token": csrfToken,
           "Accept": "application/json"
         },
-        body: JSON.stringify({ question })
+        body: JSON.stringify({ question, page_path: window.location.pathname })
       })
       const data = await response.json()
 

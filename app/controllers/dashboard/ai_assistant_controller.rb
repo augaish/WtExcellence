@@ -26,7 +26,7 @@ class Dashboard::AiAssistantController < Dashboard::BaseController
     # Run the query first; only charge credits once the LLM actually answers,
     # so an outage never silently bills the user.
     begin
-      result = PlatformAssistantService.new(current_company, user: current_user).ask(question)
+      result = PlatformAssistantService.new(current_company, user: current_user, page_path: params[:page_path]).ask(question)
     rescue PlatformAssistantService::AssistantError => e
       # Show the underlying provider error to platform admins so AI config
       # issues (402 / invalid model / unreachable Ollama) are diagnosable in-app;
