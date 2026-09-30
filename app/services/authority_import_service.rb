@@ -10,7 +10,7 @@ require "roo"
 # holders are added where the sheet names them and existing ones are kept.
 # Nothing is written unless the whole sheet is valid — one transaction.
 class AuthorityImportService
-  Result = Struct.new(:categories, :authorities, :errors, keyword_init: true) do
+  Result = Struct.new(:categories, :authorities, :updated, :unchanged, :errors, keyword_init: true) do
     def success? = errors.empty?
   end
 
@@ -26,6 +26,8 @@ class AuthorityImportService
     @errors = []
     @categories = 0
     @authorities = 0
+    @updated = []
+    @unchanged = []
   end
 
   def import
@@ -38,13 +40,13 @@ class AuthorityImportService
       raise ActiveRecord::Rollback if @errors.any?
     end
 
-    @errors.any? ? failure : Result.new(categories: @categories, authorities: @authorities, errors: [])
+    @errors.any? ? failure : Result.new(categories: @categories, authorities: @authorities, updated: @updated.size, unchanged: @unchanged.size, errors: [])
   end
 
   private
 
   def failure
-    Result.new(categories: 0, authorities: 0, errors: @errors)
+    Result.new(categories: 0, authorities: 0, updated: 0, unchanged: 0, errors: @errors)
   end
 
   def fail_with(row, message)
@@ -92,14 +94,56 @@ class AuthorityImportService
     category = find_or_create_category(d["category"], row[:number])
     return if category.nil? && d["category"].to_s.strip.present?
 
-    authority = find_or_create_authority(name_en, name_ar, category, row[:number])
+    existing = find_existing(name_en, name_ar)
+    authority = existing || find_or_create_authority(name_en, name_ar, category, row[:number])
     return if authority.nil?
 
+    wanted = []
     AuthorityLevel::KEYS.each do |level|
       d[level].to_s.split(AuthorityImportTemplate::SEPARATOR.strip).map(&:strip).compact_blank.each do |label|
-        add_holder(authority, level, label, row[:number])
+        attrs = resolve_holder(label)
+        if attrs.nil?
+          @errors << { row: row[:number], message: I18n.t("doa.import.holder_unknown", label: label) }
+        else
+          wanted << attrs.merge(level: level)
+        end
       end
     end
+
+    unless existing
+      wanted.each { |attrs| authority.default_band.assignments.create!(attrs) }
+      return
+    end
+
+    # The sheet is the truth for the rows it lists: wording, category and holders.
+    before = holder_signature(existing)
+    existing.name_en = name_en if name_en
+    existing.name_ar = name_ar if name_ar
+    existing.authority_category = category if category
+    changed = existing.changed?
+    unless existing.save
+      return @errors << { row: row[:number], message: existing.errors.full_messages.join(", ") }
+    end
+    if before != wanted_signature(wanted)
+      existing.default_band.assignments.destroy_all
+      wanted.each { |attrs| existing.default_band.assignments.create!(attrs) }
+      changed = true
+    end
+    (changed ? @updated : @unchanged) << existing.id
+  end
+
+  def find_existing(name_en, name_ar)
+    @matrix.authorities.reload.detect do |a|
+      (name_en && a.name_en.to_s.casecmp?(name_en)) || (name_ar && a.name_ar.to_s.casecmp?(name_ar))
+    end
+  end
+
+  def holder_signature(authority)
+    authority.default_band.assignments.reload.map { |a| [ a.level, a.org_unit_id, a.user_id, a.dynamic_role ].map(&:to_s) }.sort
+  end
+
+  def wanted_signature(wanted)
+    wanted.map { |w| [ w[:level], w[:org_unit_id], w[:user_id], w[:dynamic_role] ].map(&:to_s) }.sort
   end
 
   def find_or_create_category(name, row_number)

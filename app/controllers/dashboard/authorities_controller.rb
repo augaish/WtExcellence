@@ -107,7 +107,8 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   # The matrix as a file. Chromium prints it where it is installed; otherwise
   # the print-ready page opens for the browser's own "Save as PDF".
   def download_pdf
-    pdf = RecordPdfRenderer.new(@matrix, locale: I18n.locale)
+    category = company.authority_categories.find_by(id: params[:category_id]) if params[:category_id].present?
+    pdf = RecordPdfRenderer.new(@matrix, locale: I18n.locale, category: category)
     bytes = pdf.render
     if bytes
       send_data bytes, filename: pdf.filename, type: "application/pdf", disposition: "attachment"
@@ -205,7 +206,7 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
   def run_import
     file = params[:file]
     if file.blank?
-      @result = AuthorityImportService::Result.new(categories: 0, authorities: 0, errors: [ { row: 0, message: t("doa.import.no_file") } ])
+      @result = AuthorityImportService::Result.new(categories: 0, authorities: 0, updated: 0, unchanged: 0, errors: [ { row: 0, message: t("doa.import.no_file") } ])
       return render :import, status: :unprocessable_entity
     end
 
@@ -213,7 +214,8 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
     @result = AuthorityImportService.import(file: file, matrix: @matrix)
     if @result.success?
       redirect_to dashboard_authorities_path(matrix_id: @matrix.id),
-        notice: t("doa.import.done", categories: @result.categories, authorities: @result.authorities), status: :see_other
+        notice: t("doa.import.done", categories: @result.categories, authorities: @result.authorities,
+          updated: @result.updated, unchanged: @result.unchanged), status: :see_other
     else
       render :import, status: :unprocessable_entity
     end
@@ -257,6 +259,15 @@ class Dashboard::AuthoritiesController < Dashboard::BaseController
 
     attributes = assignment_params.to_h.merge(holder_attributes(params[:holder]))
     save_and_return(authority.default_band.assignments.new(attributes), "assignment_created")
+  end
+
+  # Several authorities at once, from the checkboxes.
+  def destroy_authorities
+    ids = Array(params[:ids]).reject(&:blank?)
+    return back_to_matrix(alert: t("doa.bulk.none_selected")) if ids.empty?
+
+    removed = @matrix.authorities.where(id: ids).destroy_all.size
+    back_to_matrix(notice: t("doa.bulk.deleted", count: removed))
   end
 
   def destroy_authority

@@ -206,6 +206,7 @@ Rails.application.routes.draw do
       delete "categories/:id", action: :destroy_category, as: :destroy_authority_category
       patch "authorities/:id", action: :update_authority, as: :update_authority
       post "authorities/:authority_id/assignments", action: :create_assignment, as: :create_authority_assignment
+      delete "authorities", action: :destroy_authorities, as: :destroy_authorities
       delete "authorities/:id", action: :destroy_authority, as: :destroy_authority
       delete "assignments/:id", action: :destroy_assignment, as: :destroy_authority_assignment
       post "versions", action: :open_next_version, as: :open_next_authority_version

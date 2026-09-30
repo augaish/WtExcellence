@@ -25,7 +25,7 @@ class Dashboard::AuthorityMatrixJourneyTest < ActionDispatch::IntegrationTest
     follow_redirect!
 
     assert_includes response.body, "Procurement thresholds"
-    assert_includes response.body, I18n.t("doa.category_empty")
+    assert_includes response.body, I18n.t("doa.category_empty_drop"), "an editor is told they can add or drag an authority in"
     assert_select "form[action=?]", dashboard_create_authority_path(m)
   end
 

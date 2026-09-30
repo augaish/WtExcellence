@@ -18,7 +18,9 @@ en:
     max_amount: "Up to"
     none: "No authorities recorded in this matrix yet."
     no_matrix: "Create a record of type Executive Delegation of Authority to start a matrix."
-    download_pdf: "Download as PDF"
+    download_pdf: "Download PDF"
+    pdf_all_categories: "All categories"
+    pdf_which: "Which categories to print"
     empty_start: "Nothing here yet. Add your first category, or press the star to pick common starting points."
     category_number_hint: "A new category takes the last number. Drag a category by its handle to change the order."
     search_placeholder: "Search categories and authorities"
@@ -62,6 +64,16 @@ en:
       roles: "Dynamic roles"
     edit_band: "Edit band"
     category_empty: "No authorities in this category yet. Add one below."
+    category_empty_drop: "Empty. Add an authority below, or drag one here from another category."
+    bulk:
+      select_all: "Select all"
+      select_one: "Select %{name}"
+      delete: "Delete selected"
+      confirm: "Delete the selected authorities? This cannot be undone."
+      none_selected: "Select at least one authority."
+      deleted:
+        one: "1 authority deleted."
+        other: "%{count} authorities deleted."
     category_delete_confirm: "Remove this category? Its authorities are kept, uncategorised."
     bands:
       unbounded: "All amounts"
@@ -123,7 +135,7 @@ en:
       failed: "The file was not imported."
       nothing_saved: "Nothing was saved. Fix the rows above and upload again."
       row: "Row %{number}"
-      done: "Imported %{authorities} authorities and %{categories} new categories."
+      done: "Import finished: %{authorities} new authorities, %{updated} updated, %{unchanged} unchanged, %{categories} new categories."
       prefixes:
         unit: "Unit"
         person: "Person"

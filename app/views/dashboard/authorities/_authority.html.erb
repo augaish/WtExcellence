@@ -11,6 +11,8 @@
     <div class="min-w-0 flex-1 flex items-start gap-2">
       <% if can_edit %>
         <span class="cursor-grab text-[#797C81] select-none mt-0.5" title="<%= t('doa.drag_to_reorder') %>" aria-hidden="true">⋮⋮</span>
+        <input type="checkbox" name="ids[]" value="<%= authority.id %>" form="bulk-delete-authorities" class="mt-1 rounded border-[#E3E3E3] text-[#5C3984] focus:ring-[#5C3984]"
+               aria-label="<%= t('doa.bulk.select_one', name: authority.display_name) %>" data-authority-matrix-target="pick" data-action="change->authority-matrix#picked">
       <% end %>
       <p class="text-sm font-semibold text-[#0D1120] flex-1 min-w-0" data-inline-edit-target="text">
         <span class="text-[#797C81] font-mono me-1" data-number><%= number %></span><%= authority.display_name %>

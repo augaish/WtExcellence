@@ -30,9 +30,10 @@ class RecordPdfRenderer
     binary.present?
   end
 
-  def initialize(record, locale: I18n.locale)
+  def initialize(record, locale: I18n.locale, category: nil)
     @record = record
     @locale = locale
+    @category = category
   end
 
   def render
@@ -60,13 +61,14 @@ class RecordPdfRenderer
       ApplicationController.render(
         template: "dashboard/pp_records/document",
         layout: "document",
-        assigns: { document: RecordDocument.new(@record, locale: @locale), record: @record, inline_css: true }
+        assigns: { document: RecordDocument.new(@record, locale: @locale, category_id: @category&.id), record: @record, inline_css: true }
       )
     end
   end
 
   def filename
     base = @record.code.presence || @record.display_title(@locale).presence || "document"
-    "#{base.to_s.gsub(/[^\w\-.]+/, '_')}-#{@locale}.pdf"
+    base = "#{base}-#{@category.number}-#{@category.display_name(@locale)}" if @category
+    "#{base.to_s.gsub(/[^\p{L}\p{N}\-.]+/, '_')}-#{@locale}.pdf"
   end
 end

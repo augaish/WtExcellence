@@ -16,7 +16,13 @@
         <%= link_to t('doa.import.title'), dashboard_import_authorities_path(matrix_id: @matrix&.id), class: ui_btn_secondary %>
       <% end %>
       <% if @matrix %>
-        <%= link_to t('doa.download_pdf'), dashboard_authority_matrix_pdf_path(matrix_id: @matrix.id), class: ui_btn_neutral %>
+        <%# One category or the whole matrix, as a PDF. %>
+        <%= form_with url: dashboard_authority_matrix_pdf_path, method: :get, class: "flex items-center gap-2", data: { turbo: false } do %>
+          <%= hidden_field_tag :matrix_id, @matrix.id %>
+          <%= select_tag :category_id, options_for_select([ [ t('doa.pdf_all_categories'), "" ] ] + @categories.map { |c| [ "#{c.number} · #{c.display_name}", c.id ] }),
+                class: "border border-[#E3E3E3] rounded-lg px-3 h-10 text-sm max-w-[14rem]", "aria-label": t('doa.pdf_which') %>
+          <%= submit_tag t('doa.download_pdf'), class: ui_btn_neutral, name: nil %>
+        <% end %>
         <% if can_edit && @has_changes && !@matrix.published? %>
           <button type="button" class="<%= ui_btn_secondary %>" data-action="click->authority-matrix#toggle" data-authority-matrix-panel-param="review">
             <%= t('doa.review.send') %>
@@ -100,6 +106,19 @@
       <p hidden data-authority-matrix-target="noMatch" class="text-xs text-[#797C81]"><%= t('doa.no_match') %></p>
     </div>
 
+    <% if can_edit && @authorities.any? %>
+      <%# Select several authorities, or all of them, and delete them in one go. %>
+      <%= form_with url: dashboard_destroy_authorities_path(matrix_id: @matrix.id), method: :delete, id: "bulk-delete-authorities",
+                    class: "flex flex-wrap items-center gap-3 text-sm", data: { turbo_confirm: t('doa.bulk.confirm') } do %>
+        <label class="inline-flex items-center gap-2 text-[#0D1120]">
+          <input type="checkbox" class="rounded border-[#E3E3E3] text-[#5C3984] focus:ring-[#5C3984]" data-authority-matrix-target="pickAll" data-action="change->authority-matrix#pickAll">
+          <%= t('doa.bulk.select_all') %>
+        </label>
+        <span class="text-[#797C81]" data-authority-matrix-target="pickCount"></span>
+        <button type="submit" class="text-sm font-medium text-red-600 hover:underline disabled:opacity-40 disabled:no-underline" data-authority-matrix-target="pickDelete" disabled><%= t('doa.bulk.delete') %></button>
+      <% end %>
+    <% end %>
+
     <% grouped = @authorities.group_by(&:authority_category) %>
     <% sections = @categories.map { |c| [ c, grouped.fetch(c, []) ] } %>
     <% sections << [ nil, grouped[nil] ] if grouped[nil].present? %>
@@ -141,10 +160,11 @@
           </div>
 
           <div data-authority-matrix-target="body">
-            <p class="px-5 py-4 text-sm text-[#797C81]" data-empty <%= 'hidden' if authorities.any? %>><%= t('doa.category_empty') %></p>
-
-            <div class="divide-y divide-[#E3E3E3]" data-authority-matrix-target="rows"
-                 <%= 'data-action="dragover->authority-matrix#rowsDragOver drop->authority-matrix#authorityDrop"'.html_safe if can_edit %>>
+            <%# The rows list is the drop area; it keeps a height even when the
+                category is empty, so an authority can be dragged into it. %>
+            <div class="divide-y divide-[#E3E3E3] <%= 'min-h-[3.5rem]' if can_edit %>" data-authority-matrix-target="rows"
+                 <%= 'data-action="dragover->authority-matrix#rowsDragOver drop->authority-matrix#authorityDrop dragleave->authority-matrix#rowsDragLeave"'.html_safe if can_edit %>>
+              <p class="px-5 py-4 text-sm text-[#797C81]" data-empty <%= 'hidden' if authorities.any? %>><%= can_edit ? t('doa.category_empty_drop') : t('doa.category_empty') %></p>
               <% authorities.each do |authority| %>
                 <%= render "dashboard/authorities/authority", authority: authority, matrix: @matrix, can_edit: can_edit,
                       number: @numbers[authority.id], comments: @review_comments.fetch(authority.id, []),

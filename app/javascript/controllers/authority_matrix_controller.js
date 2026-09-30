@@ -6,11 +6,31 @@ import { Controller } from "@hotwired/stimulus"
 // category (each new order is saved as soon as the row is dropped). A Fix
 // link in the findings opens the category and lands on the authority.
 export default class extends Controller {
-  static targets = ["panel", "search", "list", "category", "body", "chevron", "noMatch", "rows", "authority"]
+  static targets = ["panel", "search", "list", "category", "body", "chevron", "noMatch", "rows", "authority",
+    "pick", "pickAll", "pickCount", "pickDelete"]
   static values = { reorderUrl: String, reorderAuthoritiesUrl: String }
 
   connect() {
     if (window.location.hash) this.revealHash()
+  }
+
+  // ---- Select and delete several authorities --------------------------
+
+  pickAll(event) {
+    this.pickTargets.forEach((box) => {
+      if (!box.closest("[hidden]")) box.checked = event.currentTarget.checked
+    })
+    this.picked()
+  }
+
+  picked() {
+    const count = this.pickTargets.filter((box) => box.checked).length
+    if (this.hasPickCountTarget) this.pickCountTarget.textContent = count ? `(${count})` : ""
+    if (this.hasPickDeleteTarget) this.pickDeleteTarget.disabled = count === 0
+    if (this.hasPickAllTarget) {
+      this.pickAllTarget.checked = count > 0 && count === this.pickTargets.length
+      this.pickAllTarget.indeterminate = count > 0 && count < this.pickTargets.length
+    }
   }
 
   // The findings list links to #authority-<id>; open its category and mark it.
@@ -98,13 +118,21 @@ export default class extends Controller {
     over.parentNode.insertBefore(this.draggedAuthority, after ? over.nextSibling : over)
   }
 
-  // Dropping onto an empty part of a category puts the row at its end.
+  // Dropping onto an empty part of a category puts the row at its end. The
+  // list lights up while an authority is over it, empty or not.
   rowsDragOver(event) {
     if (!this.draggedAuthority) return
     event.preventDefault()
     event.stopPropagation()
     const rows = event.currentTarget
+    rows.classList.add("bg-[#F6EEFF]")
     if (!rows.contains(this.draggedAuthority)) rows.appendChild(this.draggedAuthority)
+    const section = rows.closest("[data-authority-matrix-target='category']")
+    if (section) this.setOpen(section, true)
+  }
+
+  rowsDragLeave(event) {
+    event.currentTarget.classList.remove("bg-[#F6EEFF]")
   }
 
   authorityDrop(event) {
@@ -114,6 +142,7 @@ export default class extends Controller {
   }
 
   authorityDragEnd() {
+    this.rowsTargets.forEach((rows) => rows.classList.remove("bg-[#F6EEFF]"))
     if (!this.draggedAuthority) return
     this.draggedAuthority.classList.remove("opacity-50")
     const rows = this.draggedAuthority.closest("[data-authority-matrix-target='rows']")
@@ -127,7 +156,7 @@ export default class extends Controller {
   renumberAuthorities() {
     this.rowsTargets.forEach((rows) => {
       const section = rows.closest("[data-authority-matrix-target='category']")
-      const empty = section?.querySelector("[data-empty]")
+      const empty = rows.querySelector("[data-empty]") || section?.querySelector("[data-empty]")
       const items = rows.querySelectorAll("[data-authority-matrix-target='authority']")
       if (empty) empty.hidden = items.length > 0
       items.forEach((row, i) => {

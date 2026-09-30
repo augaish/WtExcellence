@@ -20,12 +20,15 @@ class RecordDocument
   # diagram, its steps and its authority matrix. The rest do not have a process.
   PROCESS_SECTION_TYPES = %w[procedure work_instruction form operational_doa].freeze
 
-  def initialize(record, locale: I18n.locale)
+  # category_id: print only that category of an executive matrix. Numbers are
+  # those of the whole matrix, so 3.2 stays 3.2 in a single-category print.
+  def initialize(record, locale: I18n.locale, category_id: nil)
+    @category_id = category_id.presence
     @record = record
     @locale = locale
   end
 
-  attr_reader :record, :locale
+  attr_reader :record, :locale, :category_id
 
   def company
     record.company
@@ -305,12 +308,19 @@ class RecordDocument
   def executive_matrix_section
     return nil unless record.record_type == "executive_doa"
 
-    authorities = record.authorities.includes(:authority_category, bands: { assignments: [ :org_unit, :user ] }).ordered.to_a
+    authorities = record.authorities.includes(:authority_category, bands: { assignments: [ :org_unit, :user ] }).to_a
+    categories = record.company.authority_categories.to_a
+    # In matrix order: by category number, then by the order inside it.
+    authorities.sort_by! { |a| [ a.authority_category&.number || 0, a.sort_order.to_i, a.number.to_i ] }
     numbers = Authority.numbered(authorities)
+    authorities = authorities.select { |a| a.authority_category_id.to_s == @category_id.to_s } if @category_id
     rows = authorities.map do |authority|
       holders = authority.bands.flat_map(&:assignments)
+      category = authority.authority_category
       {
-        category: authority.authority_category&.display_name(locale),
+        category: category&.display_name(locale),
+        category_number: category&.number,
+        category_id: category&.id,
         number: numbers[authority.id],
         authority: authority.display_name(locale),
         assignments: AuthorityLevel::KEYS.index_with do |level|

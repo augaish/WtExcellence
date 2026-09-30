@@ -239,6 +239,16 @@ export default class extends Controller {
 
     modal.showModal();
     this.initChoices();
+
+    // The enhanced dropdowns keep their own selection; hand them the saved
+    // values, or saving sends the first option (how "Done" became "Started").
+    const sync = (select, value) => {
+      if (!select) return;
+      const wrapper = select.closest('[data-controller~="choices-select"]');
+      (wrapper || select).dispatchEvent(new CustomEvent("choices:sync", { bubbles: true, detail: { value } }));
+    };
+    sync(actionType, el.dataset.actionType || 'corrective');
+    sync(status, el.dataset.actionStatus || 'started');
   }
 
   openEditModal(event) {

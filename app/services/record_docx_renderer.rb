@@ -189,11 +189,18 @@ class RecordDocxRenderer
   end
 
   def executive_matrix_table(rows)
-    headers = %w[category number authority].map { |c| translate("record_document.columns.#{c}") } +
+    headers = %w[number authority].map { |c| translate("record_document.columns.#{c}") } +
       AuthorityLevel::KEYS.map { |level| AuthorityLevel.label(level, locale) }
 
+    rows.group_by { |row| [ row[:category_number], row[:category] ] }.map do |(number, name), group|
+      [ paragraph([ number, name.presence || translate("doa.uncategorised") ].compact.join(" "), bold: true),
+        executive_matrix_rows(headers, group) ].join("\n")
+    end.join("\n")
+  end
+
+  def executive_matrix_rows(headers, rows)
     body = rows.map do |row|
-      [ row[:category].to_s, row[:number].to_s, row[:authority].to_s ] +
+      [ row[:number].to_s, row[:authority].to_s ] +
         AuthorityLevel::KEYS.map do |level|
           holders = row[:assignments][level]
           next "-" if holders.blank?
