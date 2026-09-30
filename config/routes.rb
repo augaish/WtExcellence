@@ -91,6 +91,8 @@ Rails.application.routes.draw do
       # Before "/:id", or "appetite" is read as a risk id.
       patch "/appetite", action: :update_appetite, as: :update_risk_appetite
       patch "/:id/accept", action: :accept, as: :accept_risk
+      post "/:id/treatment/accept", action: :accept_treatment, as: :accept_risk_treatment
+      post "/:id/treatment/return", action: :return_treatment, as: :return_risk_treatment
       get "/:id", action: :show, as: :risk_management
       get "/:id/edit", action: :edit, as: :edit_risk
       patch "/:id", action: :update, as: :update_risk
@@ -193,6 +195,8 @@ Rails.application.routes.draw do
       post "commitments/:id/submit", action: :submit_commitment, as: :submit_commitment_task
       get "controls/:id", action: :control, as: :control_task
       post "controls/:id/submit", action: :submit_control, as: :submit_control_task
+      get "treatments/:id", action: :treatment, as: :treatment_task
+      post "treatments/:id/submit", action: :submit_treatment, as: :submit_treatment_task
     end
 
     scope :authorities, controller: :authorities do

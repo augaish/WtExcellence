@@ -1,0 +1,3 @@
+<% tone = { "awaiting_treatment" => "bg-[#F7F7FD] text-[#797C81]", "treatment_submitted" => "bg-[#F6EEFF] text-[#5C3984]",
+            "treatment_accepted" => "bg-green-50 text-green-700", "treatment_returned" => "bg-amber-50 text-amber-800" }[risk.treatment_state] %>
+<span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium <%= tone %>"><%= t("risk_treatment.states.#{risk.treatment_state}") %></span>

@@ -29,10 +29,21 @@ class Risk < ApplicationRecord
   belongs_to :closed_by, class_name: "User", optional: true
   belongs_to :control_owner, class_name: "CompanyUser", optional: true
   belongs_to :accepted_by, class_name: "User", optional: true
+  belongs_to :treatment_reviewed_by, class_name: "User", optional: true
 
   # What is done about the risk. Accepting it is a decision with an owner and
   # an expiry, recorded separately below.
   TREATMENT_STRATEGIES = %w[avoid reduce transfer accept].freeze
+
+  # Who holds the treatment: the owner fills it in and submits it, a risk
+  # manager accepts it or returns it with a reason. Separate from accepting
+  # the exposure above appetite, which is a different decision.
+  enum :treatment_state, {
+    awaiting_treatment: "awaiting_treatment",
+    treatment_submitted: "treatment_submitted",
+    treatment_accepted: "treatment_accepted",
+    treatment_returned: "treatment_returned"
+  }, default: "awaiting_treatment"
 
   enum :status, {
     identified: "identified",
@@ -130,6 +141,38 @@ class Risk < ApplicationRecord
 
   # Above appetite and nobody has accepted it (or the acceptance has lapsed):
   # the exception a leader must see.
+  # The owner has the pen while the treatment awaits them or came back, and
+  # again once an accepted treatment is past its review date.
+  def treatment_with_owner?(on = Date.current)
+    return false if closed?
+
+    awaiting_treatment? || treatment_returned? || (treatment_accepted? && review_overdue?(on))
+  end
+
+  # Whoever manages the company's governance, except the owner themselves.
+  def treatment_reviewers
+    company.company_users.includes(:user).select(&:can_manage_governance?)
+      .reject { |membership| membership.id == owner_id }.map(&:user)
+  end
+
+  def submit_treatment!(attributes)
+    assign_attributes(attributes)
+    self.treatment_state = "treatment_submitted"
+    self.treatment_submitted_at = Time.current
+    self.treatment_return_reason = nil
+    save
+  end
+
+  def accept_treatment!(by:)
+    update!(treatment_state: "treatment_accepted", treatment_reviewed_at: Time.current,
+      treatment_reviewed_by: by, treatment_return_reason: nil)
+  end
+
+  def return_treatment!(by:, reason:)
+    update!(treatment_state: "treatment_returned", treatment_reviewed_at: Time.current,
+      treatment_reviewed_by: by, treatment_return_reason: reason)
+  end
+
   def needs_acceptance?(on = Date.current)
     above_appetite? && !closed? && !accepted?(on)
   end

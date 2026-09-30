@@ -15,6 +15,9 @@ en:
       authority_review: "Authority matrix"
     reasons:
       control_evidence_due: "report on the control you own"
+      risk_treatment_due: "fill in the treatment of the risk you own"
+      risk_treatment_returned: "treatment returned, rework it"
+      risk_treatment_review: "treatment submitted for your review"
       action_changes_requested: "changes requested — see the reviewer's note"
       action_to_review: "submitted for your review"
       action_open: "assigned to you"

@@ -46,6 +46,41 @@ class Dashboard::GovernanceTasksController < Dashboard::BaseController
     redirect_to dashboard_control_task_path(@risk), notice: t("governance_tasks.control_submitted"), status: :see_other
   end
 
+  # The risk owner's page: fill in the treatment and hand it to a risk
+  # manager, who accepts it or returns it with a reason.
+  def treatment
+    @risk = owned_risk or return
+    @company_users = current_company.company_users.includes(:user)
+  end
+
+  def submit_treatment
+    @risk = owned_risk or return
+    unless @risk.treatment_with_owner?
+      return redirect_to dashboard_treatment_task_path(@risk), alert: t("risk_treatment.not_open"), status: :see_other
+    end
+
+    attributes = params.require(:risk).permit(:treatment_strategy, :treatment_plan, :control_owner_id,
+      :residual_likelihood, :residual_impact, :control_rationale)
+    if attributes[:control_owner_id].present? && !current_company.company_users.exists?(id: attributes[:control_owner_id])
+      attributes[:control_owner_id] = nil
+    end
+    if attributes[:treatment_plan].to_s.strip.blank?
+      return redirect_to dashboard_treatment_task_path(@risk), alert: t("risk_treatment.plan_required"), status: :see_other
+    end
+
+    control_owner_before = @risk.control_owner_id
+    if @risk.submit_treatment!(attributes)
+      if @risk.control_owner && @risk.control_owner_id != control_owner_before
+        GovernanceTaskNotifier.assigned(membership: @risk.control_owner, record: @risk, actor: current_user)
+      end
+      Notify.people(@risk.treatment_reviewers, kind: "risk_treatment_submitted", source: @risk,
+        link_path: dashboard_risk_management_path(@risk), actor: current_user, title: @risk.title)
+      redirect_to dashboard_treatment_task_path(@risk), notice: t("risk_treatment.submitted"), status: :see_other
+    else
+      redirect_to dashboard_treatment_task_path(@risk), alert: @risk.errors.full_messages.to_sentence, status: :see_other
+    end
+  end
+
   private
 
   def membership
@@ -61,6 +96,14 @@ class Dashboard::GovernanceTasksController < Dashboard::BaseController
   def assigned_commitment
     commitment = CustomerCommitment.active.find_by(id: params[:id], company_id: current_company.id, owner_id: membership.id)
     return commitment if commitment
+
+    redirect_to dashboard_overview_path, alert: t("governance_tasks.not_yours"), status: :see_other
+    nil
+  end
+
+  def owned_risk
+    risk = Risk.active.find_by(id: params[:id], company_id: current_company.id, owner_id: membership.id)
+    return risk if risk
 
     redirect_to dashboard_overview_path, alert: t("governance_tasks.not_yours"), status: :see_other
     nil

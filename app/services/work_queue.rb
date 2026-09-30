@@ -13,7 +13,7 @@ class WorkQueue
   end
 
   def items
-    @items ||= (documenter + capa_actions + risks + controls + commitments + vendors + authority_reviews)
+    @items ||= (documenter + capa_actions + risks + treatments + treatment_reviews + controls + commitments + vendors + authority_reviews)
       .sort_by { |i| [ i.due_on || Date.new(9999), i.title ] }
   end
 
@@ -79,10 +79,35 @@ class WorkQueue
       if risk.needs_acceptance?
         Item.new(kind: :risk, title: risk.title, reason: I18n.t("work_queue.reasons.risk_needs_acceptance"),
           path: routes.dashboard_risk_management_path(risk), due_on: risk.next_review_on)
-      elsif risk.review_overdue?
+      elsif risk.review_overdue? && !risk.treatment_with_owner?
+        # An overdue review hands the treatment back to the owner; that item says so.
         Item.new(kind: :risk, title: risk.title, reason: I18n.t("work_queue.reasons.review_overdue"),
           path: routes.dashboard_risk_management_path(risk), due_on: risk.next_review_on)
       end
+    end
+  end
+
+  # The owner's treatment to fill in, or to redo after a return or once its
+  # review date has passed.
+  def treatments
+    return [] if membership.nil? || !company.module_enabled?(:risk)
+
+    Risk.active.where(company_id: company.id, owner_id: membership.id).where.not(status: "closed")
+        .where.not(treatment_state: "treatment_submitted").to_a.select(&:treatment_with_owner?).map do |risk|
+      reason = risk.treatment_returned? ? "risk_treatment_returned" : "risk_treatment_due"
+      Item.new(kind: :risk, title: risk.title, reason: I18n.t("work_queue.reasons.#{reason}"),
+        path: routes.dashboard_treatment_task_path(risk), due_on: risk.next_review_on)
+    end
+  end
+
+  # Submitted treatments wait on any risk manager other than their owner.
+  def treatment_reviews
+    return [] if membership.nil? || !company.module_enabled?(:risk) || !user.can_manage_governance?
+
+    Risk.active.where(company_id: company.id, treatment_state: "treatment_submitted").where.not(status: "closed")
+        .where("risks.owner_id IS DISTINCT FROM ?", membership.id).map do |risk|
+      Item.new(kind: :risk, title: risk.title, reason: I18n.t("work_queue.reasons.risk_treatment_review"),
+        path: routes.dashboard_risk_management_path(risk), due_on: risk.next_review_on)
     end
   end
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_09_30_082057) do
+ActiveRecord::Schema[8.0].define(version: 2026_09_30_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1288,6 +1288,11 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_30_082057) do
     t.date "acceptance_expires_on"
     t.text "control_evidence_note"
     t.datetime "control_evidence_submitted_at"
+    t.string "treatment_state", default: "awaiting_treatment", null: false
+    t.datetime "treatment_submitted_at"
+    t.datetime "treatment_reviewed_at"
+    t.text "treatment_return_reason"
+    t.uuid "treatment_reviewed_by_id"
     t.index ["closed_by_id"], name: "index_risks_on_closed_by_id"
     t.index ["company_id", "submission_token"], name: "index_risks_on_company_id_and_submission_token", unique: true, where: "(submission_token IS NOT NULL)"
     t.index ["company_id"], name: "index_risks_on_company_id"
@@ -1298,6 +1303,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_30_082057) do
     t.index ["risk_workspace_id"], name: "index_risks_on_risk_workspace_id"
     t.index ["riskable_type", "riskable_id"], name: "index_risks_on_riskable"
     t.index ["status"], name: "index_risks_on_status"
+    t.index ["treatment_reviewed_by_id"], name: "index_risks_on_treatment_reviewed_by_id"
+    t.index ["treatment_state"], name: "index_risks_on_treatment_state"
   end
 
   create_table "sla_measurements", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1740,6 +1747,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_09_30_082057) do
   add_foreign_key "risks", "risk_workspaces"
   add_foreign_key "risks", "users", column: "accepted_by_id", on_delete: :nullify
   add_foreign_key "risks", "users", column: "created_by_id"
+  add_foreign_key "risks", "users", column: "treatment_reviewed_by_id", on_delete: :nullify
   add_foreign_key "sla_measurements", "pp_service_levels"
   add_foreign_key "sla_measurements", "users", column: "recorded_by_id", on_delete: :nullify
   add_foreign_key "sla_measurements", "users", column: "reviewed_by_id", on_delete: :nullify

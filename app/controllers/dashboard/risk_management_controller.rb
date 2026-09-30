@@ -3,7 +3,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   requires_module :risk
   before_action :ensure_can_view_governance, only: [ :index, :show ]
   before_action :ensure_can_manage_risks, except: [ :index, :show ]
-  before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa, :accept ]
+  before_action :set_risk, only: [ :show, :edit, :update, :destroy, :create_capa, :accept, :accept_treatment, :return_treatment ]
 
   def index
     all_risks = Risk.active.where(company_id: current_company&.id)
@@ -85,6 +85,7 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
 
     if @risk.save
       GovernanceTaskNotifier.assigned(membership: @risk.control_owner, record: @risk, actor: current_user) if @risk.control_owner
+      request_treatment(@risk)
       redirect_to dashboard_risk_management_path(@risk), notice: t("risk_logged")
     else
       load_form_collections
@@ -101,9 +102,13 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     reject_cross_company_workspace(@risk)
     sanitize_company_owner!(@risk)
     control_owner_changed = @risk.control_owner_id_changed?
+    owner_changed = @risk.owner_id_changed?
+    # A new owner takes over an unfinished treatment; an accepted one stands.
+    @risk.treatment_state = "awaiting_treatment" if owner_changed && !@risk.treatment_accepted?
 
     if @risk.save
       GovernanceTaskNotifier.assigned(membership: @risk.control_owner, record: @risk, actor: current_user) if control_owner_changed && @risk.control_owner
+      request_treatment(@risk) if owner_changed
       redirect_to dashboard_risk_management_path(@risk), notice: t("risk_updated")
     else
       load_form_collections
@@ -116,6 +121,30 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
     redirect_to dashboard_risk_management_index_path, notice: t("risk_deleted")
   end
 
+  # The reviewer's verdict on the owner's treatment. Nobody reviews their own.
+  def accept_treatment
+    return unless reviewable_treatment?
+
+    @risk.accept_treatment!(by: current_user)
+    Notify.person(@risk.owner&.user, kind: "risk_treatment_accepted", source: @risk,
+      link_path: dashboard_treatment_task_path(@risk), actor: current_user, title: @risk.title)
+    redirect_to dashboard_risk_management_path(@risk), notice: t("risk_treatment.accepted"), status: :see_other
+  end
+
+  def return_treatment
+    return unless reviewable_treatment?
+
+    reason = params[:reason].to_s.strip
+    if reason.blank?
+      return redirect_to dashboard_risk_management_path(@risk), alert: t("risk_treatment.reason_required"), status: :see_other
+    end
+
+    @risk.return_treatment!(by: current_user, reason: reason)
+    Notify.person(@risk.owner&.user, kind: "risk_treatment_returned", source: @risk,
+      link_path: dashboard_treatment_task_path(@risk), actor: current_user, title: @risk.title, reason: reason)
+    redirect_to dashboard_risk_management_path(@risk), notice: t("risk_treatment.returned"), status: :see_other
+  end
+
   # Raise a linked CAPA from this risk and hand off to the CAPA workflow.
   def create_capa
     capa = GovernanceCapaService.create_from(origin: @risk, company: current_company, user: current_user)
@@ -125,6 +154,27 @@ class Dashboard::RiskManagementController < Dashboard::BaseController
   end
 
   private
+
+  def reviewable_treatment?
+    if !@risk.treatment_submitted?
+      redirect_to dashboard_risk_management_path(@risk), alert: t("risk_treatment.not_submitted"), status: :see_other
+      false
+    elsif @risk.owner&.user == current_user
+      redirect_to dashboard_risk_management_path(@risk), alert: t("risk_treatment.own_review"), status: :see_other
+      false
+    else
+      true
+    end
+  end
+
+  # The owner is asked for the treatment, on the page they can open whatever
+  # their licence.
+  def request_treatment(risk)
+    return if risk.owner.nil? || risk.treatment_accepted?
+
+    Notify.person(risk.owner.user, kind: "risk_treatment_requested", source: risk,
+      link_path: dashboard_treatment_task_path(risk), actor: current_user, title: risk.title)
+  end
 
   # Every collection the form offers. Loaded for the failure paths too, so a
   # validation error cannot silently remove a choice the user already had.

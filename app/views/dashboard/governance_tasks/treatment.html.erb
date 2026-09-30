@@ -1,0 +1,76 @@
+<%= content_for :title, @risk.title %>
+<% input = "w-full border border-[#E3E3E3] rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#5C3984] focus:border-[#5C3984]" %>
+<% label = "block text-xs font-medium text-[#797C81] mb-1" %>
+<% open = @risk.treatment_with_owner? %>
+
+<div class="p-6 max-w-3xl mx-auto space-y-6">
+  <%= render layout: "dashboard/shared/page_header", locals: { title: @risk.title, subtitle: t('risk_treatment.subtitle') } do %>
+    <%= link_to t('back'), dashboard_overview_path, class: ui_btn_neutral %>
+  <% end %>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5">
+    <h2 class="text-sm font-semibold text-[#0D1120] mb-4"><%= t('risk_treatment.the_risk') %></h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <% if @risk.description.present? %><div class="sm:col-span-2"><dt class="text-xs font-medium text-[#797C81]"><%= t('risk_treatment.description') %></dt><dd class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= @risk.description %></dd></div><% end %>
+      <div><dt class="text-xs font-medium text-[#797C81]"><%= t('risk_treatment.inherent') %></dt><dd class="mt-0.5 text-[#0D1120]"><%= t('risk_treatment.score', likelihood: @risk.likelihood, impact: @risk.impact, score: @risk.inherent_score) %></dd></div>
+      <% if @risk.next_review_on %><div><dt class="text-xs font-medium text-[#797C81]"><%= t('risk_depth.next_review_on') %></dt><dd class="mt-0.5 text-[#0D1120]"><%= l(@risk.next_review_on, format: :document) %></dd></div><% end %>
+    </dl>
+  </div>
+
+  <div class="bg-white border border-[#E3E3E3] rounded-xl p-5" id="treatment">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+      <h2 class="text-sm font-semibold text-[#0D1120]"><%= t('risk_treatment.your_treatment') %></h2>
+      <%= render "dashboard/risk_management/treatment_state", risk: @risk %>
+    </div>
+
+    <% if @risk.treatment_returned? && @risk.treatment_return_reason.present? %>
+      <div class="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        <p class="font-medium"><%= t('risk_treatment.returned_by', name: @risk.treatment_reviewed_by&.name.to_s) %></p>
+        <p class="whitespace-pre-line mt-1"><%= @risk.treatment_return_reason %></p>
+      </div>
+    <% end %>
+
+    <% if open %>
+      <p class="text-xs text-[#797C81] mb-4"><%= t('risk_treatment.hint') %></p>
+      <%= form_with model: @risk, scope: :risk, url: dashboard_submit_treatment_task_path(@risk), method: :post, class: "space-y-4" do |f| %>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :treatment_strategy, t('risk_depth.treatment'), class: label %>
+            <%= f.select :treatment_strategy, Risk::TREATMENT_STRATEGIES.map { |s| [ t("risk_depth.treatments.#{s}"), s ] }, { include_blank: t('pp_records.pick') }, class: input %>
+          </div>
+          <div>
+            <%= f.label :control_owner_id, t('risk_depth.control_owner'), class: label %>
+            <%= f.collection_select :control_owner_id, @company_users, :id, ->(cu) { cu.user.name }, { include_blank: t('unassigned') }, class: input %>
+          </div>
+        </div>
+        <div>
+          <%= f.label :treatment_plan, t('risk_depth.treatment_plan'), class: label %>
+          <%= f.text_area :treatment_plan, rows: 4, required: true, class: input %>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <%= f.label :residual_likelihood, t('residual_likelihood_label'), class: label %>
+            <%= f.select :residual_likelihood, (1..5), { include_blank: true }, class: input %>
+          </div>
+          <div>
+            <%= f.label :residual_impact, t('residual_impact_label'), class: label %>
+            <%= f.select :residual_impact, (1..5), { include_blank: true }, class: input %>
+          </div>
+        </div>
+        <div>
+          <%= f.label :control_rationale, t('risk_depth.control_rationale'), class: label %>
+          <%= f.text_area :control_rationale, rows: 2, class: input, placeholder: t('risk_depth.control_rationale_placeholder') %>
+          <p class="mt-1 text-xs text-[#797C81]"><%= t('risk_depth.control_rationale_hint') %></p>
+        </div>
+        <%= f.submit t('risk_treatment.submit'), class: ui_btn_primary %>
+      <% end %>
+    <% else %>
+      <dl class="grid grid-cols-1 gap-3 text-sm">
+        <% if @risk.treatment_strategy.present? %><div><dt class="text-xs font-medium text-[#797C81]"><%= t('risk_depth.treatment') %></dt><dd class="mt-0.5 text-[#0D1120]"><%= t("risk_depth.treatments.#{@risk.treatment_strategy}") %></dd></div><% end %>
+        <div><dt class="text-xs font-medium text-[#797C81]"><%= t('risk_depth.treatment_plan') %></dt><dd class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= @risk.treatment_plan.presence || "—" %></dd></div>
+        <% if @risk.control_rationale.present? %><div><dt class="text-xs font-medium text-[#797C81]"><%= t('risk_depth.control_rationale') %></dt><dd class="mt-0.5 text-[#0D1120] whitespace-pre-line"><%= @risk.control_rationale %></dd></div><% end %>
+      </dl>
+      <p class="text-xs text-[#797C81] mt-4"><%= @risk.treatment_submitted? ? t('risk_treatment.waiting_review') : t('risk_treatment.accepted_until_review') %></p>
+    <% end %>
+  </div>
+</div>
